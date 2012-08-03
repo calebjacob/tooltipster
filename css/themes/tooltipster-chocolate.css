@@ -1,0 +1,21 @@
+/* Copy and paste this into your tooltipster.css file. Don't forget to refer to it in your Tooltipster settings (tooltipClass: '.tooltipster-chocolate') */
+
+.tooltipster-chocolate {
+	background-color: #7f5d3c;
+	border: 2px solid #5c3d1f;
+	color: #fafaeb;
+	font-family: Arial, sans-serif;
+	font-size: 12px; 
+	line-height: 12px; 
+	position: absolute;
+	padding: 10px;
+	border-radius: 4px; 
+	text-align: center; 
+	z-index: 9999999; 
+	pointer-events: none;
+	width: auto;
+	overflow: visible;
+}
+.tooltipster-chocolate .tooltip-arrow {
+	text-shadow: 0px 2px 0px #654728, 1px 1px 0px #654728, -1px 1px 0px #654728;
+}
