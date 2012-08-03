@@ -28,20 +28,23 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			offsetY: 0,
 			overrideText: '',
 			position: 'top',
-			speed: 200,
+			speed: 100,
 			timer: 0,
 			tooltipTheme: '.tooltip-message'
 		}, options);
 		
 		return this.hover(function() {
+			
 		
 			// Disable horizontal scrollbar to keep overflowing tooltips from creating one
 			$("body").css("overflow-x", "hidden");
 			
 			// Get tooltip text from the title attr
 			var tooltip_text = $(this).attr('title');
-			//$('body').prepend('<div id="tooltip-text-saver">'+ $(this).attr('title') +'</div>');
+			
+			// Set the title attr blank to keep the default tooltip text from popping up (removeAttr doesn't work for IE). We'll also create data to refer back to when adding the tooltip attr back later
 			$(this).attr('title', '');
+			$(this).data('title', tooltip_text);
 			
 			
 			// If a text override has been set, use that instead for the tooltip text
@@ -260,16 +263,15 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			
 	
 		}, function() {
-		
+			
 			$(settings.tooltipTheme).not('.tooltip-kill').clearQueue();
 						
-			var tooltip_text = $(settings.tooltipTheme).not('.tooltip-kill').find('.tooltip-message-content').html();
-			$(this).attr('title', tooltip_text);
-			
+			tooltip_text = $(this).data('title');
+			$(this).attr('title', tooltip_text).removeAttr('title-placeholder');
 			
 			$(settings.tooltipTheme).addClass('tooltip-kill');
 			
-			$('.tooltip-message').remove();
+			//$('.tooltip-message').remove();
 			
 			if(settings.animation == 'slide') {
 			
