@@ -13,10 +13,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 
 (function( $ ) {
+	
+	
 
 	$.fn.tooltipster = function( options ) {
 		
-		// Default settings
+		// Default settings merged with custom options
 		var settings = $.extend({
 			animation: 'fade',
 			arrow: true,
@@ -33,8 +35,34 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			tooltipTheme: '.tooltip-message'
 		}, options);
 		
+		// A function we'll use to animate out (hide) our tooltips
+		function animateOut(tooltipToKill) {
+			
+			if(settings.animation == 'slide') {
+			
+				$(tooltipToKill).slideUp(settings.speed, function() {
+					$(tooltipToKill).remove();
+					$("body").css("overflow-x", "auto");
+				});
+			}
+			
+			else {
+				
+				$(tooltipToKill).fadeOut(settings.speed, function() {
+					$(tooltipToKill).remove();
+					$("body").css("overflow-x", "auto");
+				});
+			}
+			
+		}
+		
 		return this.hover(function() {
 			
+			// If there's still a tooltip open, close it before initiating the next tooltip
+			if ($(settings.tooltipTheme).not('.tooltip-kill').length == 1) {
+				animateOut($(settings.tooltipTheme).not('.tooltip-kill'));
+				$(settings.tooltipTheme).not('.tooltip-kill').addClass('tooltip-kill');
+			}
 		
 			// Disable horizontal scrollbar to keep overflowing tooltips from creating one
 			$("body").css("overflow-x", "hidden");
@@ -67,55 +95,126 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			if (settings.followMouse == false) {
 				
 				// Find global variables to determine placement
+				var window_width = $(window).width();
 				var container_width = $(this).outerWidth(false);
 				var container_height = $(this).outerHeight(false);
 				var tooltip_width = $(settings.tooltipTheme).not('.tooltip-kill').outerWidth(false);
 				var tooltip_height = $(settings.tooltipTheme).not('.tooltip-kill').outerHeight(false);
 				var offset = $(this).offset();
-			
+				
+				// Hardcoding the width and removing the padding fixed an issue with the tooltip width collapsing when the window size is small
+				$(settings.tooltipTheme).not('.tooltip-kill').css({
+					'width': tooltip_width + 'px',
+					'padding-left': '0px',
+					'padding-right': '0px'
+				});
+				
+				
+				// A function to detect if the tooltip is going off the screen. If so, reposition the crap out of it!
+				function dont_go_off_screen() {
+				
+					var window_left = $(window).scrollLeft();
+					
+					// If the tooltip goes off the left side of the screen, line it up with the left side of the window
+					if((my_left - window_left) < 0) {
+						var arrow_reposition = my_left - window_left;
+						my_left = window_left;
+																								
+						$(settings.tooltipTheme).not('.tooltip-kill').data('arrow-reposition', arrow_reposition);
+					}
+					
+					// If the tooltip goes off the right of the screen, line it up with the right side of the window
+					if (((my_left + tooltip_width) - window_left) > window_width) {
+						var arrow_reposition = my_left - ((window_width + window_left) - tooltip_width);
+						my_left = (window_width + window_left) - tooltip_width;
+																												
+						$(settings.tooltipTheme).not('.tooltip-kill').data('arrow-reposition', arrow_reposition);
+					}
+				}
+
+							
 				if(settings.position == 'top') {
 					var left_difference = (offset.left + tooltip_width) - (offset.left + $(this).outerWidth(false));
-					var me_left =  (offset.left + settings.offsetX) - (left_difference / 2);
-					var me_top = (offset.top - tooltip_height) - settings.offsetY - 10;
+					var my_left =  (offset.left + settings.offsetX) - (left_difference / 2);
+					var my_top = (offset.top - tooltip_height) - settings.offsetY - 10;
+					dont_go_off_screen();
+					
+					if((offset.top - tooltip_height - settings.offsetY - 11) < 0) {
+						var my_top = 0;
+					}
 				}
 				
 				if(settings.position == 'top-left') {
-					var me_left = offset.left + settings.offsetX;
-					var me_top = (offset.top - tooltip_height) - settings.offsetY - 10;
+					var my_left = offset.left + settings.offsetX;
+					var my_top = (offset.top - tooltip_height) - settings.offsetY - 10;
+					dont_go_off_screen();
 				}
 				
 				if(settings.position == 'top-right') {
-					var me_left = (offset.left + container_width + settings.offsetX) - tooltip_width;
-					var me_top = (offset.top - tooltip_height) - settings.offsetY - 10;
+					var my_left = (offset.left + container_width + settings.offsetX) - tooltip_width;
+					var my_top = (offset.top - tooltip_height) - settings.offsetY - 10;
+					dont_go_off_screen();
 				}
 				
 				if(settings.position == 'bottom') {
 					var left_difference = (offset.left + tooltip_width + settings.offsetX) - (offset.left + $(this).outerWidth(false));
-					var me_left =  offset.left - (left_difference / 2);
-					var me_top = (offset.top + container_height) + settings.offsetY + 10;
+					var my_left =  offset.left - (left_difference / 2);
+					var my_top = (offset.top + container_height) + settings.offsetY + 10;
+					dont_go_off_screen();
 				}
 				
 				if(settings.position == 'bottom-left') {
-					var me_left = offset.left + settings.offsetX;
-					var me_top = (offset.top + container_height) + settings.offsetY + 10;
+					var my_left = offset.left + settings.offsetX;
+					var my_top = (offset.top + container_height) + settings.offsetY + 10;
+					dont_go_off_screen();
 				}
 				
 				if(settings.position == 'bottom-right') {
-					var me_left = (offset.left + container_width + settings.offsetX) - tooltip_width;
-					var me_top = (offset.top + container_height) + settings.offsetY + 10;
+					var my_left = (offset.left + container_width + settings.offsetX) - tooltip_width;
+					var my_top = (offset.top + container_height) + settings.offsetY + 10;
+					dont_go_off_screen();
 				}
 				
 				if(settings.position == 'left') {
-					var me_left = offset.left - settings.offsetX - tooltip_width - 10;
+					var my_left = offset.left - settings.offsetX - tooltip_width - 10;
+					var my_left_mirror = offset.left + settings.offsetX + container_width + 10;
 					var top_difference = (offset.top + tooltip_height + settings.offsetY) - (offset.top + $(this).outerHeight(false));
-					var me_top =  offset.top - (top_difference / 2);
+					var my_top =  offset.top - (top_difference / 2);					
+					
+					// If the tooltip goes off boths sides of the page
+					if((my_left < 0) && ((my_left_mirror + tooltip_width) > window_width)) {
+						my_left = my_left + tooltip_width;
+					}
+					
+					// If it only goes off one side, flip it to the other side
+					if(my_left < 0) {
+						var my_left = offset.left + settings.offsetX + container_width + 10;
+						$(settings.tooltipTheme).not('.tooltip-kill').data('arrow-reposition', 'left');
+					}
+					
+					
 				}
 				
 				if(settings.position == 'right') {
-					var me_left = offset.left + settings.offsetX + container_width + 10;
+					var my_left = offset.left + settings.offsetX + container_width + 10;
+					var my_left_mirror = offset.left - settings.offsetX - tooltip_width - 10;
 					var top_difference = (offset.top + tooltip_height + settings.offsetY) - (offset.top + $(this).outerHeight(false));
-					var me_top =  offset.top - (top_difference / 2);
+					var my_top =  offset.top - (top_difference / 2);
+					
+					// If the tooltip goes off boths sides of the page
+					if(((my_left + tooltip_width) > window_width) && (my_left_mirror < 0)) {
+						my_left = window_width - tooltip_width;
+					}
+						
+					// If it only goes off one side, flip it to the other side
+					if((my_left + tooltip_width) > window_width) {
+						my_left = offset.left - settings.offsetX - tooltip_width - 10;
+						$(settings.tooltipTheme).not('.tooltip-kill').data('arrow-reposition', 'right');
+					}
 				}
+				
+				
+				
 			}
 			
 			// Find variables to determine placement if set to mouse
@@ -173,20 +272,13 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						});
 					}
 					
-					if(settings.position == 'bottom-left') {
-						$(settings.tooltipTheme).not('.tooltip-kill').css({
-							'left': (e.pageX - tooltip_width + settings.offsetX) + 12 + 'px',
-							'top': (e.pageY + 15 + settings.offsetY + 10) + 'px'
-						});
-					}
-					
       			});
 			
 			}
 			
 			// If arrow is set true, style it and append it
 			if (settings.arrow == true){
-				
+
 				var arrow_class = 'tooltip-arrow-' + settings.position;
 				
 				if (settings.followMouse == true) {
@@ -222,8 +314,27 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				else {
 					var arrow_color = settings.arrowColor;
 				}
+				
+				// If the tooltip was going off the page and had to re-adjust, we need to update the arrow's position to stay next to the mouse
+				var arrow_reposition = $(settings.tooltipTheme).not('.tooltip-kill').data('arrow-reposition');
+				if (!arrow_reposition) {
+					arrow_reposition = '';
+				}
+				else if (arrow_reposition == 'left') {
+					arrow_class = 'tooltip-arrow-right';
+					arrow_type = '◀';
+					arrow_reposition = '';
+				}
+				else if (arrow_reposition == 'right') {
+					arrow_class = 'tooltip-arrow-left';
+					arrow_type = '▶';
+					arrow_reposition = '';
+				}
+				else {
+					arrow_reposition = 'left:'+ arrow_reposition +'px;';
+				}
 												
-				var arrow = '<div class="'+ arrow_class +' tooltip-arrow" style="color:'+ arrow_color +'; width:'+ tooltip_width +'px; display:none; '+ arrow_vertical +'">'+ arrow_type +'</div>';
+				var arrow = '<div class="'+ arrow_class +' tooltip-arrow" style="color:'+ arrow_color +'; width:'+ tooltip_width +'px; display:none; '+ arrow_reposition +' '+ arrow_vertical +'">'+ arrow_type +'</div>';
 				
 			}
 			else {
@@ -231,7 +342,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			}
 			
 			// Place tooltip
-			$(settings.tooltipTheme).not('.tooltip-kill').css({'top': me_top+'px', 'left': me_left+'px'}).append(arrow);
+			$(settings.tooltipTheme).not('.tooltip-kill').css({'top': my_top+'px', 'left': my_left+'px'}).append(arrow);
 			
 			// Determine how to animate the tooltip in
 			if(settings.animation == 'slide') {
@@ -257,41 +368,19 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					$(settings.tooltipTheme).not('.tooltip-kill').delay(settings.timer).fadeOut(settings.speed);
 				}
 				
-			}
-			
-			
-			
+			}	
 	
 		}, function() {
 			
 			$(settings.tooltipTheme).not('.tooltip-kill').clearQueue();
 						
 			tooltip_text = $(this).data('title');
-			$(this).attr('title', tooltip_text).removeAttr('title-placeholder');
+			$(this).attr('title', tooltip_text);
 			
 			$(settings.tooltipTheme).addClass('tooltip-kill');
 			
-			//$('.tooltip-message').remove();
-			
-			if(settings.animation == 'slide') {
-			
-				$('.tooltip-kill').slideUp(settings.speed, function() {
-					$('.tooltip-kill').remove();
-					$('.tooltip-kill .tooltip-arrow').remove();
-					$("body").css("overflow-x", "auto");
-				});
-			}
-			
-			else {
-				
-				$('.tooltip-kill').fadeOut(settings.speed, function() {
-					$('.tooltip-kill').remove();
-					$('.tooltip-kill .tooltip-arrow').remove();
-					$("body").css("overflow-x", "auto");
-				});
-			}
-			
-
+			// Animate out and remove the tooltip we just sentencted to death
+			animateOut('.tooltip-kill');
 			
 		});
 	
