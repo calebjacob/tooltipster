@@ -101,11 +101,13 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				var offset = $(this).offset();
 				
 				// Hardcoding the width and removing the padding fixed an issue with the tooltip width collapsing when the window size is small
-				$(settings.tooltipTheme).not('.tooltip-kill').css({
-					'width': tooltip_width + 'px',
-					'padding-left': '0px',
-					'padding-right': '0px'
-				});
+				if(settings.fixedWidth == 0) {
+					$(settings.tooltipTheme).not('.tooltip-kill').css({
+						'width': tooltip_width + 'px',
+						'padding-left': '0px',
+						'padding-right': '0px'
+					});
+				}
 				
 				
 				// A function to detect if the tooltip is going off the screen. If so, reposition the crap out of it!
