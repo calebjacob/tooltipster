@@ -1,0 +1,29 @@
+/*  
+“Smoke”  - ‘cause I’m a Tony Stewart (#14) fan!
+By Kevin Traas <kevin@tra.as> - Sep 13, 2012
+
+Copy and paste this into your tooltipster.css file. Don't forget to refer to it in your Tooltipster settings (tooltipClass: '.tooltipster-chocolate')
+*/
+.tooltipster-smoke {
+    background-color: #111;
+    border: 2px solid black;
+    border-radius: 6px;
+    box-shadow: 5px 5px 7px #444;
+    opacity: 0.7;
+    filter: progid:DXImageTransform.Microsoft.Alpha(opacity=70);
+    color: white;
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    font-size: 12px;
+    line-height: 12px;
+    position: absolute;
+    padding: 10px;
+    text-align: center;
+    z-index: 9999999;
+    pointer-events: none;
+    width: auto;
+    overflow: visible;
+}  
+.tooltipster-smoke .tooltip-arrow {
+    text-shadow: 5px 5px 7px #444;
+}
