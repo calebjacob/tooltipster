@@ -17,6 +17,12 @@
 				position: 'top',
 				fixedWidth: 0
 			});
+
+			$('.tooltip-static').tooltipster({
+				position: 'left',
+				fixedWidth: 0,
+				alwaysVisible: true
+			});
 		});
 		
 	</script>
@@ -39,7 +45,9 @@
 		
 		<a href="http://google.com" class="tooltip" title="Get your Google on">Google</a>
 		<br />
-		<a href="http://google.com" class="tooltip" title="Get your Google on and your ketchup out!">Google</a>
+		<a href="http://google.com" class="tooltip" title="Tooltip on showed on hover">Google</a>
+		<br />
+		<a href="http://google.com" class="tooltip-static" title="Tooltip showed at start">Google</a>
 		
 	</section>
 	

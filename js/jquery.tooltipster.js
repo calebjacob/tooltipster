@@ -11,6 +11,37 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 */
 
 
+// Make API for using without chaining
+var tooltipster;
+tooltipster = {
+
+	// A function we'll use to animate out (hide) our tooltips
+	animateOut : function(tooltipToKill, animation, speed) {
+		
+		// default values if for using by API
+		animation = typeof animation !== 'undefined' ? animation : 'fade';
+		speed 		= typeof speed !== 'undefined' ? speed : 100;
+
+		if(animation == 'slide') {
+		
+			$(tooltipToKill).slideUp(speed, function() {
+				$(tooltipToKill).remove();
+				$("body").css("overflow-x", "auto");
+			});
+		}
+		
+		else {
+			
+			$(tooltipToKill).fadeOut(speed, function() {
+				$(tooltipToKill).remove();
+				$("body").css("overflow-x", "auto");
+			});
+		}
+		
+	}
+
+};
+
 
 (function( $ ) {
 	
@@ -30,35 +61,20 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			position: 'top',
 			speed: 100,
 			timer: 0,
-			tooltipTheme: '.tooltip-message'
+			tooltipTheme: '.tooltip-message',
+			alwaysVisible: false
 		}, options);
 		
-		// A function we'll use to animate out (hide) our tooltips
-		function animateOut(tooltipToKill) {
-			
-			if(settings.animation == 'slide') {
-			
-				$(tooltipToKill).slideUp(settings.speed, function() {
-					$(tooltipToKill).remove();
-					$("body").css("overflow-x", "auto");
-				});
-			}
-			
-			else {
-				
-				$(tooltipToKill).fadeOut(settings.speed, function() {
-					$(tooltipToKill).remove();
-					$("body").css("overflow-x", "auto");
-				});
-			}
-			
-		}
 		
-		return this.hover(function() {
-			
+		function animateIn(tooltipToShow) {
+
 			// If there's still a tooltip open, close it before initiating the next tooltip
 			if ($(settings.tooltipTheme).not('.tooltip-kill').length == 1) {
-				animateOut($(settings.tooltipTheme).not('.tooltip-kill'));
+
+				if ( settings.alwaysVisible === false ) {
+					tooltipster.animateOut($(settings.tooltipTheme, settings.animation, settings.speed).not('.tooltip-kill'));
+				}
+
 				$(settings.tooltipTheme).not('.tooltip-kill').addClass('tooltip-kill');
 			}
 		
@@ -66,11 +82,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			$("body").css("overflow-x", "hidden");
 			
 			// Get tooltip text from the title attr
-			var tooltip_text = $(this).attr('title');
+			var tooltip_text = tooltipToShow.attr('title');
 			
 			// Set the title attr blank to keep the default tooltip text from popping up (removeAttr doesn't work for IE). We'll also create data to refer back to when adding the tooltip attr back later
-			$(this).attr('title', '');
-			$(this).data('title', tooltip_text);
+			tooltipToShow.attr('title', '');
+			tooltipToShow.data('title', tooltip_text);
 			
 			
 			// If a text override has been set, use that instead for the tooltip text
@@ -94,11 +110,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				
 				// Find global variables to determine placement
 				var window_width = $(window).width();
-				var container_width = $(this).outerWidth(false);
-				var container_height = $(this).outerHeight(false);
+				var container_width = tooltipToShow.outerWidth(false);
+				var container_height = tooltipToShow.outerHeight(false);
 				var tooltip_width = $(settings.tooltipTheme).not('.tooltip-kill').outerWidth(false);
 				var tooltip_height = $(settings.tooltipTheme).not('.tooltip-kill').outerHeight(false);
-				var offset = $(this).offset();
+				var offset = tooltipToShow.offset();
 				
 				// Hardcoding the width and removing the padding fixed an issue with the tooltip width collapsing when the window size is small
 				if(settings.fixedWidth == 0) {
@@ -134,7 +150,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 							
 				if(settings.position == 'top') {
-					var left_difference = (offset.left + tooltip_width) - (offset.left + $(this).outerWidth(false));
+					var left_difference = (offset.left + tooltip_width) - (offset.left + tooltipToShow.outerWidth(false));
 					var my_left =  (offset.left + settings.offsetX) - (left_difference / 2);
 					var my_top = (offset.top - tooltip_height) - settings.offsetY - 10;
 					dont_go_off_screen();
@@ -157,7 +173,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				}
 				
 				if(settings.position == 'bottom') {
-					var left_difference = (offset.left + tooltip_width + settings.offsetX) - (offset.left + $(this).outerWidth(false));
+					var left_difference = (offset.left + tooltip_width + settings.offsetX) - (offset.left + tooltipToShow.outerWidth(false));
 					var my_left =  offset.left - (left_difference / 2);
 					var my_top = (offset.top + container_height) + settings.offsetY + 10;
 					dont_go_off_screen();
@@ -178,7 +194,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				if(settings.position == 'left') {
 					var my_left = offset.left - settings.offsetX - tooltip_width - 10;
 					var my_left_mirror = offset.left + settings.offsetX + container_width + 10;
-					var top_difference = (offset.top + tooltip_height + settings.offsetY) - (offset.top + $(this).outerHeight(false));
+					var top_difference = (offset.top + tooltip_height + settings.offsetY) - (offset.top + tooltipToShow.outerHeight(false));
 					var my_top =  offset.top - (top_difference / 2);					
 					
 					// If the tooltip goes off boths sides of the page
@@ -198,7 +214,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				if(settings.position == 'right') {
 					var my_left = offset.left + settings.offsetX + container_width + 10;
 					var my_left_mirror = offset.left - settings.offsetX - tooltip_width - 10;
-					var top_difference = (offset.top + tooltip_height + settings.offsetY) - (offset.top + $(this).outerHeight(false));
+					var top_difference = (offset.top + tooltip_height + settings.offsetY) - (offset.top + tooltipToShow.outerHeight(false));
 					var my_top =  offset.top - (top_difference / 2);
 					
 					// If the tooltip goes off boths sides of the page
@@ -225,7 +241,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				var tooltip_content = $(settings.tooltipTheme).not('.tooltip-kill').find('.tooltip-message-content').html();
 				
 				
-				$(this).mousemove(function(e){
+				tooltipToShow.mousemove(function(e){
 					
 					$(settings.tooltipTheme).not('.tooltip-kill').find('.tooltip-message-content').html('').html(tooltip_content);
 					var tooltip_height = $(settings.tooltipTheme).not('.tooltip-kill').outerHeight(false);
@@ -368,21 +384,39 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					$(settings.tooltipTheme).not('.tooltip-kill').delay(settings.timer).fadeOut(settings.speed);
 				}
 				
-			}	
-	
-		}, function() {
-			
-			$(settings.tooltipTheme).not('.tooltip-kill').clearQueue();
-						
-			tooltip_text = $(this).data('title');
-			$(this).attr('title', tooltip_text);
-			
-			$(settings.tooltipTheme).addClass('tooltip-kill');
-			
-			// Animate out and remove the tooltip we just sentencted to death
-			animateOut('.tooltip-kill');
-			
-		});
+			}
+
+		}
+
+
+		// Showing on hover or permanently depends on value of alwaysVisible setting
+		if ( settings.alwaysVisible ) {
+
+			return animateIn(this);
+
+		} else {
+
+			return this.hover(function() {
+				
+					animateIn( $(this) );
+		
+			}, function() {
+				
+				$(settings.tooltipTheme).not('.tooltip-kill').clearQueue();
+							
+				tooltip_text = $(this).data('title');
+				$(this).attr('title', tooltip_text);
+				
+				$(settings.tooltipTheme).addClass('tooltip-kill');
+				
+				// Animate out and remove the tooltip we just sentencted to death
+				tooltipster.animateOut('.tooltip-kill', settings.animation, settings.speed);
+				
+			});
+
+		}
+
+		
 	
 	}
 	
