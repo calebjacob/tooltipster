@@ -1,13 +1,13 @@
 /* This is the default styling for all Tooltipsters: */
-.tooltip-message {
+.tooltipster {
 	background: #000; /* <- for IE */
 	background: rgba(0,0,0,0.9); 
 	color: #fff; 
 	font-family: Arial, sans-serif;
-	font-size: 12px; 
-	line-height: 12px; 
+	font-size: 0;
+	line-height: 0;
 	position: absolute;
-	padding: 10px;
+	padding: 8px 10px;
 	border-radius: 2px; 
 	text-align: center; 
 	z-index: 9999999; 
@@ -15,6 +15,11 @@
 	width: auto;
 	overflow: visible;
 }
+.tooltipster-content {
+	font-size: 12px;
+	line-height: 14px;
+}
+
 
 /* When you want to create a second class for your Tooltipster messages, copy (or modify) this template and add your style to it. Don't forget to refer to it in your Tooltipster settings (tooltipClass: '.my-custom-theme') */
 .my-custom-theme {
@@ -23,13 +28,14 @@
 	z-index: 9999999; 
 	pointer-events: none;
 	width: auto;
+	font-size: 0;
+	line-height: 0;
 	/* Start styling here... */
 }
-
-/* Add a slight border radius to all images inside the Tooltipsters */
-.tooltip-message img {
-	border-radius: 2px;
+.my-custom-theme .tooltipster-content {
+	/* Use this to set things like font-size and line-height */
 }
+
 
 /* These next classes handle the styles for the little arrow attached to the tooltip. If you need to change the color of the arrow to match a custom Tooltipster theme, set it in your Tooltipster settings (arrowColor: '#yourcolor') */
 .tooltip-arrow {
@@ -48,17 +54,17 @@
 }
 
 .tooltip-arrow-top {
-	bottom: -3px;
+	bottom: -5px;
 	margin: 0 auto;
 	text-align: center;
 }
 .tooltip-arrow-top-right {
-	bottom: -3px;
+	bottom: -5px;
 	margin-left: -10px;
 	text-align: right;
 }
 .tooltip-arrow-top-left {
-	bottom: -3px;
+	bottom: -5px;
 	margin-left: 10px;
 	text-align: left;
 }
@@ -69,17 +75,17 @@
 }
 
 .tooltip-arrow-bottom {
-	top: -10px;
+	top: -8px;
 	margin: 0 auto;
 	text-align: center;
 }
 .tooltip-arrow-bottom-right {
-	top: -10px;
+	top: -8px;
 	margin-left: -10px;
 	text-align: right;
 }
 .tooltip-arrow-bottom-left {
-	top: -10px;
+	top: -8px;
 	margin-left: 10px;
 	text-align: left;
 }
@@ -111,6 +117,7 @@
 	border-right: 8px solid;
 }
 
+
 /* Some styling to enable the slide animation */
 .tooltip-slide {
 	height: 0px;
@@ -118,39 +125,4 @@
 	width: auto;
 	z-index: 9999999;
 	overflow: hidden;
-}
-
-
-
-
-.arrow-up {
-	width: 0; 
-	height: 0; 
-	border-left: 10px solid transparent;
-	border-right: 10px solid transparent;
-	border-bottom: 10px solid #000;
-}
-
-.arrow-down {
-	width: 0; 
-	height: 0; 
-	border-left: 10px solid transparent;
-	border-right: 10px solid transparent;
-	border-top: 10px solid #000;
-}
-
-.arrow-right {
-	width: 0; 
-	height: 0; 
-	border-top: 10px solid transparent;
-	border-bottom: 10px solid transparent;
-	border-left: 10px solid #000;
-}
-
-.arrow-left {
-	width: 0; 
-	height: 0; 
-	border-top: 10px solid transparent;
-	border-bottom: 10px solid transparent; 
-	border-right:10px solid #000; 
 }

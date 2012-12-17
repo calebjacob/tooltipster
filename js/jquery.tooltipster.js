@@ -20,20 +20,20 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			arrowColor: '',
 			content: '',
 			delay: 200,
+			eventActivator: 'mouseover',
+			eventDeactivator: 'mouseout',
 			fixedWidth: 0,
 			followMouse: false,
 			interactiveTooltip: false,
 			interactiveTolerance: 500,
-			interactiveExit: 'mouseout',
+			interactiveDeactivator: 'mouseout',
 			mobileDevices: true,
 			offsetX: 0,
 			offsetY: 0,
 			position: 'top',
 			speed: 200,
 			timer: 0,
-			tooltipActivatedBy: 'mouseover',
-			tooltipDeactivatedBy: 'mouseout',
-			tooltipTheme: '.tooltip-message',
+			tooltipTheme: '.tooltipster',
 			beforeShow: function(origin, continueTooltip) {
 				continueTooltip();
 			},
@@ -66,26 +66,33 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			if (run == true) {
 										
 				var $this = $(this.element);
+				
+				// Create tooltipContent data to save for future reference and remove the title attr to keep the default tooltips from popping up
+				if ($this.attr('title') == undefined) {
+					$this.attr('title', '');
+				}
+				$this.data('tooltipContent', $this.attr('title'));
+				$this.removeAttr('title');
 							
 				// this var will help us in a situation where activation and deactivation of the tooltip are both handled by the click event. without it, the hide and show functions would both fire everytime you click - cancelling eachother and killing your innocent tooltip! :'(
 				var tooltipReadyToClose = false;
 							
 				// binding the mouseover event to show the tooltip
-				if (this.options.tooltipActivatedBy == 'mouseover') {
+				if (this.options.eventActivator == 'mouseover') {
 					$this.mouseover(function(element, options) {
 						$this.data('plugin_tooltipster').showTooltip();
 					});
 				}
 				
 				// binding the mouseout event to close the tooltip
-				if (this.options.tooltipDeactivatedBy == 'mouseout') {
+				if (this.options.eventDeactivator == 'mouseout') {
 					
 					// if we're wanting to interact with and hover onto the tooltip itself, we'll add a short delay right after hovering off the origin so they can mouse onto the tooltip and keep the tooltip alive before it hides
 					$this.mouseout(function() {									
 						var thisTooltip = $($this.data('plugin_tooltipster').options.tooltipTheme);
 						var thisObject = $this.data('plugin_tooltipster');
 						
-						if ((thisObject.options.interactiveTooltip == true) && (thisObject.options.interactiveExit == 'mouseout')) {
+						if ((thisObject.options.interactiveTooltip == true) && (thisObject.options.interactiveDeactivator == 'mouseout')) {
 							var keepAlive = false;
 							$(thisTooltip).mouseover(function() {
 								keepAlive = true;
@@ -106,7 +113,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							}, thisObject.options.interactiveTolerance);
 						}
 						// if we're still wanting to interact with the tooltip but allow for the tooltip to be closed by being clicked on itself
-						else if ((thisObject.options.interactiveTooltip == true) && (thisObject.options.interactiveExit == 'click')) {
+						else if ((thisObject.options.interactiveTooltip == true) && (thisObject.options.interactiveDeactivator == 'click')) {
 							$(thisTooltip).click(function() {
 								thisObject.hideTooltip();
 							});
@@ -119,7 +126,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				}
 				
 				// binding the click event to show the tooltip
-				if (this.options.tooltipActivatedBy == 'click') {
+				if (this.options.eventActivator == 'click') {
 					$this.click(function() {
 						var thisTooltip = $($this.data('plugin_tooltipster').options.tooltipTheme);
 						var thisObject = $this.data('plugin_tooltipster');
@@ -133,14 +140,14 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						}
 						
 						// if we wanna interact with the tooltip and have it hide when we click on the tooltip
-						if ((thisObject.options.interactiveTooltip == true) && (thisObject.options.interactiveExit == 'click') && (thisObject.options.tooltipDeactivatedBy == 'click')) {
+						if ((thisObject.options.interactiveTooltip == true) && (thisObject.options.interactiveDeactivator == 'click') && (thisObject.options.eventDeactivator == 'click')) {
 							$(thisTooltip).live('click', function() {
 								thisObject.hideTooltip();
 							});
 						}
 						
 						// if we wanna interact with the tooltip and have it hide when we hover off the tooltip
-						if ((thisObject.options.interactiveTooltip == true) && (thisObject.options.interactiveExit == 'mouseout') && (thisObject.options.tooltipDeactivatedBy == 'click')) {
+						if ((thisObject.options.interactiveTooltip == true) && (thisObject.options.interactiveDeactivator == 'mouseout') && (thisObject.options.eventDeactivator == 'click')) {
 							$(thisTooltip).live('mouseleave', function() {
 								thisObject.hideTooltip();
 							});
@@ -149,9 +156,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				}
 				
 				// binding the click event to hide the tooltip
-				if (this.options.tooltipDeactivatedBy == 'click') {
+				if (this.options.eventDeactivator == 'click') {
 					$this.click(function() {
-						if ((tooltipReadyToClose == true) || ($this.data('plugin_tooltipster').options.tooltipActivatedBy !== 'click')) {
+						if ((tooltipReadyToClose == true) || ($this.data('plugin_tooltipster').options.eventActivator !== 'click')) {
 							$this.data('plugin_tooltipster').hideTooltip();
 						}
 					});
@@ -178,13 +185,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				// Disable horizontal scrollbar to keep overflowing tooltips from creating one
 				$('body').css("overflow-x", "hidden");
 				
-				// Get tooltip text from the title attr
-				var tooltipText = $this.attr('title');
-				
-				// Set the title attr blank to keep the default tooltip text from popping up (removeAttr doesn't work for IE). We'll also create data to refer back to when adding the tooltip attr back later
-				$this.attr('title', '');
-				$this.data('title', tooltipText);
-				
+				// Get tooltip text from the data title attr
+				var tooltipText = $this.data('tooltipContent');
 				
 				// If a text override has been set, use that instead for the tooltip text
 				if($.trim(thisObject.options.content).length > 0) {
@@ -198,7 +200,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				var pointerEvents = thisObject.options.interactiveTooltip == true ? 'pointer-events: auto;' : '';
 				
 				// Remove the title attribute to keep the default tooltip from popping up and append the base HTML for the tooltip
-				$('<div class="'+ thisObject.options.tooltipTheme.replace('.','') +'" style="'+ fixedWidth +' '+ pointerEvents +'"><div class="tooltip-message-content">'+tooltipText+'</div></div>').appendTo('body').hide();
+				$('<div class="'+ thisObject.options.tooltipTheme.replace('.','') +'" style="'+ fixedWidth +' '+ pointerEvents +'"><div class="tooltipster-content">'+tooltipText+'</div></div>').appendTo('body').hide();
 				
 				// If the tooltip doesn't follow the mouse, determine the placement
 				if (thisObject.options.followMouse == false) {
@@ -334,12 +336,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				
 					var tooltipWidth = $(thisObject.options.tooltipTheme).not('.tooltip-kill').outerWidth(false);
 					var tooltipHeight = $(thisObject.options.tooltipTheme).not('.tooltip-kill').outerHeight(false);
-					var tooltipContent = $(thisObject.options.tooltipTheme).not('.tooltip-kill').find('.tooltip-message-content').html();
+					var tooltipContent = $(thisObject.options.tooltipTheme).not('.tooltip-kill').find('.tooltipster-content').html();
 					
 					
 					$this.mousemove(function(e){
 						
-						$(thisObject.options.tooltipTheme).not('.tooltip-kill').find('.tooltip-message-content').html('').html(tooltipContent);
+						$(thisObject.options.tooltipTheme).not('.tooltip-kill').find('.tooltipster-content').html('').html(tooltipContent);
 						var tooltipHeight = $(thisObject.options.tooltipTheme).not('.tooltip-kill').outerHeight(false);
 						
 						if(thisObject.options.position == 'top') {
@@ -506,10 +508,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			var tooltipToKill = explicitTooltipToKill !== undefined ? explicitTooltipToKill : $(this.options.tooltipTheme).not('.tooltip-kill');
 
 			tooltipToKill.clearQueue();
-			tooltipToKill.addClass('tooltip-kill');
-			
-			tooltipText = $this.data('title');
-			$this.attr('title', tooltipText);			
+			tooltipToKill.addClass('tooltip-kill');			
 			
 			// Animate out and remove the tooltip we just sentencted to death. In this case, we'll use a slide
 			if(this.options.animation == 'slide') {
