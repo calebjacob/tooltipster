@@ -9,10 +9,10 @@ body {
 
 .container {
 	width: 978px;
-	margin: 60px auto;
+	margin: 10px auto;
 	padding: 60px;
 	box-shadow: 0px 0px 10px rgba(0,0,0,0.2);
 	background: #fff;
-	text-align: right;
+	text-align: left;
 	display: block;
 }
