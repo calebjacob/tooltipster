@@ -1,122 +1,102 @@
 /* This is the default styling for all Tooltipsters: */
 .tooltipster {
-	background: #000; /* <- for IE */
-	background: rgba(0,0,0,0.9); 
-	color: #fff; 
-	font-family: Arial, sans-serif;
 	font-size: 0;
 	line-height: 0;
 	position: absolute;
-	padding: 8px 10px;
-	border-radius: 2px; 
-	text-align: center; 
-	z-index: 9999999; 
+	z-index: 9999999;
 	pointer-events: none;
 	width: auto;
 	overflow: visible;
+	text-align: center;
+	border-radius: 2px; 
+	border: 2px solid #000;
+	padding: 8px 10px;
+	background: #2d2d2d;
+	color: #fff; 
 }
-.tooltipster-content {
+/* Use this next selector to style things like font-size and line-height: */
+.tooltipster .tooltipster-content {
+	font-family: Arial, sans-serif;
 	font-size: 12px;
 	line-height: 14px;
 }
-
+/* This next selector defines the color of the border on the outside of the arrow. This will automatically match the color and size of the border set on the main tooltip styles. Set display: none; if you would like a border around the tooltip but no border around the arrow */
+.tooltipster .tooltip-arrow .tooltip-arrow-border {
+	/* border-color: ... */
+}
 
 /* When you want to create a second class for your Tooltipster messages, copy (or modify) this template and add your style to it. Don't forget to refer to it in your Tooltipster settings (tooltipClass: '.my-custom-theme') */
 .my-custom-theme {
-	position: absolute;
-	text-align: center; 
-	z-index: 9999999; 
-	pointer-events: none;
-	width: auto;
 	font-size: 0;
 	line-height: 0;
+	position: absolute;
+	z-index: 9999999;
+	pointer-events: none;
+	width: auto;
+	overflow: visible;
+	text-align: center;
 	/* Start styling here... */
 }
 .my-custom-theme .tooltipster-content {
 	/* Use this to set things like font-size and line-height */
 }
 
-
-/* These next classes handle the styles for the little arrow attached to the tooltip. If you need to change the color of the arrow to match a custom Tooltipster theme, set it in your Tooltipster settings (arrowColor: '#yourcolor') */
+/* These next classes handle the styles for the little arrow attached to the tooltip. By default, the arrow will inherit the same colors and border as what is set on the main tooltip itself. */
 .tooltip-arrow {
 	display: block;
 	text-align: center;
 	width: 100%;
-	height: 5px;
+	height: 100%;
 	position: absolute;
-	left: 0px;
+	top: 0;
+	left: 0;
 	z-index: -1;
 }
-.tooltip-arrow span {
-	display: inline-block;
+.tooltip-arrow span, .tooltip-arrow-border {
+	display: block;
 	width: 0; 
 	height: 0;
+	position: absolute;
 }
-
-.tooltip-arrow-top {
-	bottom: -5px;
-	margin: 0 auto;
-	text-align: center;
-}
-.tooltip-arrow-top-right {
-	bottom: -5px;
-	margin-left: -10px;
-	text-align: right;
-}
-.tooltip-arrow-top-left {
-	bottom: -5px;
-	margin-left: 10px;
-	text-align: left;
-}
-.tooltip-arrow-top span, .tooltip-arrow-top-right span, .tooltip-arrow-top-left span {
+.tooltip-arrow-top span, .tooltip-arrow-top .tooltip-arrow-border, .tooltip-arrow-top-right span, .tooltip-arrow-top-right .tooltip-arrow-border, .tooltip-arrow-top-left span, .tooltip-arrow-top-left .tooltip-arrow-border {
 	border-left: 8px solid transparent !important;
 	border-right: 8px solid transparent !important;
 	border-top: 8px solid;
+	bottom: -8px;
 }
-
-.tooltip-arrow-bottom {
-	top: -8px;
-	margin: 0 auto;
-	text-align: center;
-}
-.tooltip-arrow-bottom-right {
-	top: -8px;
-	margin-left: -10px;
-	text-align: right;
-}
-.tooltip-arrow-bottom-left {
-	top: -8px;
-	margin-left: 10px;
-	text-align: left;
-}
-.tooltip-arrow-bottom span, .tooltip-arrow-bottom-right span, .tooltip-arrow-bottom-left span {
+.tooltip-arrow-bottom span, .tooltip-arrow-bottom .tooltip-arrow-border, .tooltip-arrow-bottom-right span, .tooltip-arrow-bottom-right .tooltip-arrow-border, .tooltip-arrow-bottom-left span, .tooltip-arrow-bottom-left .tooltip-arrow-border {
 	border-left: 8px solid transparent !important;
 	border-right: 8px solid transparent !important;
 	border-bottom: 8px solid;
+	top: -8px;
 }
-
-.tooltip-arrow-left {
-	right: -16px;
+.tooltip-arrow-top span, .tooltip-arrow-top .tooltip-arrow-border, .tooltip-arrow-bottom span, .tooltip-arrow-bottom .tooltip-arrow-border {
+	left: 0;
+	right: 0;
 	margin: 0 auto;
-	text-align: right;
 }
-.tooltip-arrow-left span {
+.tooltip-arrow-top-left span, .tooltip-arrow-top-left .tooltip-arrow-border, .tooltip-arrow-bottom-left span, .tooltip-arrow-bottom-left .tooltip-arrow-border {
+	left: 6px;
+}
+.tooltip-arrow-top-right span, .tooltip-arrow-top-right .tooltip-arrow-border, .tooltip-arrow-bottom-right span, .tooltip-arrow-bottom-right .tooltip-arrow-border {
+	right: 6px;
+}
+.tooltip-arrow-left span, .tooltip-arrow-left .tooltip-arrow-border {
 	border-top: 8px solid transparent !important;
 	border-bottom: 8px solid transparent !important; 
 	border-left: 8px solid;
+	top: 50%;
+	margin-top: -7px;
+	right: -8px;
 }
-
-.tooltip-arrow-right {
-	left: -8px;
-	margin: 0 auto;
-	text-align: left;
-}
-.tooltip-arrow-right span {
+.tooltip-arrow-right span, .tooltip-arrow-right .tooltip-arrow-border {
 	border-top: 8px solid transparent !important;
 	border-bottom: 8px solid transparent !important; 
 	border-right: 8px solid;
+	top: 50%;
+	margin-top: -7px;
+	left: -8px;
 }
-
 
 /* Some styling to enable the slide animation */
 .tooltip-slide {

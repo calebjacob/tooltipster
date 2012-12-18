@@ -424,14 +424,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						}
 					}
 					
-					// do some extra vertical this.options.positioning on the arrow if it is on the far right or left
-					if(arrowClass == 'tooltip-arrow-right') {
-						var arrowVertical = 'top:' + ((tooltipHeight / 2) - 7) + 'px';
-					}
-					if(arrowClass == 'tooltip-arrow-left') {
-						var arrowVertical = 'top:' + ((tooltipHeight / 2) - 7) + 'px';
-					}
-					
 					// set color of the arrow
 					if(thisObject.options.arrowColor.length < 1) {
 						var arrowColor = $(thisObject.options.tooltipTheme).not('.tooltip-kill').css('background-color');
@@ -456,8 +448,30 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					else {
 						arrowReposition = 'left:'+ arrowReposition +'px;';
 					}
+					
+					// Building the logic to create the border around the arrow of the tooltip
+					var tooltipBorderWidth = parseInt($(thisObject.options.tooltipTheme).not('.tooltip-kill').css('border-width'));
+					var tooltipBorderColor = $(thisObject.options.tooltipTheme).not('.tooltip-kill').css('border-color');
+					
+					var arrowBorder = '';
+					if (tooltipBorderWidth !== 0) {
+						var arrowBorderSize = '';
+						if (arrowClass.indexOf('bottom') !== -1) {
+							arrowBorderSize = 'margin-top: -'+ tooltipBorderWidth +'px;';
+						}
+						else if (arrowClass.indexOf('top') !== -1) {
+							arrowBorderSize = 'margin-bottom: -'+ tooltipBorderWidth +'px;';
+						}
+						else if (arrowClass.indexOf('left') !== -1) {
+							arrowBorderSize = 'margin-right: -'+ tooltipBorderWidth +'px;';
+						}
+						else if (arrowClass.indexOf('right') !== -1) {
+							arrowBorderSize = 'margin-left: -'+ tooltipBorderWidth +'px;';
+						}
+						arrowBorder = '<span class="tooltip-arrow-border" style="'+ arrowBorderSize +'"></span>';
+					}
 													
-					var arrowConstruct = '<div class="'+ arrowClass +' tooltip-arrow" style="width:'+ tooltipWidth +'px; display:none; '+ arrowReposition +' '+ arrowVertical +'"><span style="border-color:'+ arrowColor +';"></span></div>';
+					var arrowConstruct = '<div class="'+ arrowClass +' tooltip-arrow" style="display:none; '+ arrowReposition +'">'+ arrowBorder +'<span style="border-color:'+ arrowColor +';"></span></div>';
 					
 				}
 				else {
