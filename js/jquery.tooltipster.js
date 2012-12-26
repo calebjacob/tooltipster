@@ -33,6 +33,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			tooltipTheme: '.tooltip-message'
 		}, options);
 
+    this.each(function () {
+			$(this).data('title', $(this).attr('title'));
+			$(this).removeAttr('title');
+    })
+
 		// A function we'll use to animate out (hide) our tooltips
 		function animateOut(tooltipToKill) {
 
@@ -54,7 +59,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 		}
 
-		return this.hover(function() {
+		return this.hover(function(e) {
+      e.stopPropagation()
 
 			// If there's still a tooltip open, close it before initiating the next tooltip
 			if ($(settings.tooltipTheme).not('.tooltip-kill').length == 1) {
@@ -65,13 +71,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			// Disable horizontal scrollbar to keep overflowing tooltips from creating one
 			$("body").css("overflow-x", "hidden");
 
-			// Get tooltip text from the title attr
-			var tooltip_text = $(this).attr('title');
-
-			// Set the title attr blank to keep the default tooltip text from popping up (removeAttr doesn't work for IE). We'll also create data to refer back to when adding the tooltip attr back later
-			$(this).attr('title', '');
-			$(this).data('title', tooltip_text);
-
+			var tooltip_text = $(this).data('title');
 
 			// If a text override has been set, use that instead for the tooltip text
 			if($.trim(settings.overrideText).length > 0) {
@@ -226,6 +226,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 
 				$(this).mousemove(function(e){
+          e.stopPropagation()
 
 					$(settings.tooltipTheme).not('.tooltip-kill').find('.tooltip-message-content').html('').html(tooltip_content);
 					var tooltip_height = $(settings.tooltipTheme).not('.tooltip-kill').outerHeight(false);
@@ -374,9 +375,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 			$(settings.tooltipTheme).not('.tooltip-kill').clearQueue();
 
-			tooltip_text = $(this).data('title');
-			$(this).attr('title', tooltip_text);
-
 			$(settings.tooltipTheme).addClass('tooltip-kill');
 
 			// Animate out and remove the tooltip we just sentencted to death
@@ -387,3 +385,4 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 	}
 
 })( jQuery );
+
