@@ -3,6 +3,7 @@
 <head>
 	<title></title>
 	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
 	<link rel="stylesheet" type="text/css" href="css/reset.css" />
 	<link rel="stylesheet" type="text/css" href="css/style.css" />
 	<link rel="stylesheet" type="text/css" href="css/tooltipster.css" />
@@ -11,13 +12,12 @@
 	<script type="text/javascript" src="js/jquery.tooltipster.js"></script>
 	
 	<script type="text/javascript">
-		
 		$(document).ready(function() {
 			$('.tooltip').tooltipster({
-				position: 'bottom-right'
+				animation: 'fade',
+				position: 'top'
 			});
 		});
-		
 	</script>
 	
 	<!--[if lt IE 9]>
@@ -27,19 +27,14 @@
 <body>
 
 	<section class="container tooltip" title="Parent container">
-		
 		<a href="http://google.com" class="tooltip" title="Get your Google on">Google</a>
-		
 	</section>
 	
 	<section class="container">
-	
-		<div id="hi" style="width: 100px; height: 100px; margin: 0 0 0 500px; background: #f00;" class="tooltip" title="This is a long tooltip title yo asdf asdf asdf"></div>
-		
-		<a href="http://google.com" class="tooltip" title="Get your Google on">Google</a>
+		<div id="hi" style="width: 100px; height: 100px; margin: 0 0 0 500px; background: #f00;" class="tooltip" title="This is a longer ketchup muffins long so freaking long let's talk about really yummy waffles please tooltip title yo asdf asdf asdf <a href='http://google.com'>link</a>"></div>
+		<a href="http://google.com" class="tooltip" title="Get your Google on">Hover here</a>
 		<br />
-		<a href="http://google.com" class="tooltip" title="Get your Google on and your ketchup out!">Google</a>
-		
+		<a href="http://google.com" class="tooltip" id="test" title="Get your Google on and your ketchup out!">Google</a>
 	</section>
 	
 </body>
