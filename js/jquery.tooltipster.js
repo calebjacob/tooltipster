@@ -302,7 +302,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						// hardcoding the width and removing the padding fixed an issue with the tooltip width collapsing when the window size is small
 						if(object.options.fixedWidth == 0) {
 							tooltipster.css({
-								'width': tooltipInnerWidth + 'px',
+								'width': (tooltipInnerWidth + 1) + 'px',
 								'padding-left': '0px',
 								'padding-right': '0px'
 							});
