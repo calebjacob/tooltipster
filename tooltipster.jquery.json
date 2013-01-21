@@ -1,0 +1,31 @@
+{
+  "name": "tooltipster",
+  "title": "Tooltipster",
+  "description": "A lightweight, flexible jQuery plugin enabling you to easily create semantic, modern tooltips enhanced with the power of CSS.",
+  "keywords": [
+    "tooltip"
+  ],
+  "version": "2.0.0",
+  "author": {
+    "name": "Caleb Jacob",
+    "url": "http://calebjacob.com/"
+  },
+  "maintainers": [
+    {
+      "name": "Caleb Jacob",
+      "email": "hello@calebjacob.com",
+      "url": "http://calebjacob.com/"
+    }
+  ],
+  "licenses": [
+    {
+      "type": "GPL-3.0",
+      "url": "http://opensource.org/licenses/GPL-3.0"
+    }
+  ],
+  "homepage": "http://calebjacob.com/tooltipster/",
+  "docs": "http://calebjacob.com/tooltipster/#getting-started",
+  "dependencies": {
+    "jquery": ">=1.4"
+  }
+}
