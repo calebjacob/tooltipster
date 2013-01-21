@@ -123,7 +123,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				
 					// if hover events are set to show and hide the tooltip, attach those events respectively
 					if (this.options.trigger == 'hover') {
-						$this.mouseover(function() {
+						$this.mouseenter(function() {
 							object.showTooltip();
 						});
 						
@@ -134,7 +134,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 								var keepAlive = false;
 								
 								if ((tooltipster !== undefined) && (tooltipster !== '')) {
-									tooltipster.mouseover(function() {
+									tooltipster.mouseenter(function() {
 										keepAlive = true;
 									});
 									tooltipster.mouseleave(function() {
