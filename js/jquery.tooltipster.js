@@ -20,14 +20,15 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			content: '',
 			delay: 200,
 			fixedWidth: 0,
+			maxWidth: 0,
 			functionBefore: function(origin, continueTooltip) {
 				continueTooltip();
 			},
 			functionAfter: function(origin) {},
 			icon: '(?)',
-			iconTheme: '.tooltipster-icon',
 			iconDesktop: false,
 			iconTouch: false,
+			iconTheme: '.tooltipster-icon',
 			interactive: false,
 			interactiveTolerance: 350,
 			offsetX: 0,
@@ -279,10 +280,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						var animation = 'tooltipster-'+object.options.animation;
 						var animationSpeed = '-webkit-transition-duration: '+ object.options.speed +'ms; -webkit-animation-duration: '+ object.options.speed +'ms; -moz-transition-duration: '+ object.options.speed +'ms; -moz-animation-duration: '+ object.options.speed +'ms; -o-transition-duration: '+ object.options.speed +'ms; -o-animation-duration: '+ object.options.speed +'ms; -ms-transition-duration: '+ object.options.speed +'ms; -ms-animation-duration: '+ object.options.speed +'ms; transition-duration: '+ object.options.speed +'ms; animation-duration: '+ object.options.speed +'ms;';
 						var fixedWidth = object.options.fixedWidth > 0 ? 'width:'+ object.options.fixedWidth +'px;' : '';
+						var maxWidth = object.options.maxWidth > 0 ? 'max-width:'+ object.options.maxWidth +'px;' : '';
 						var pointerEvents = object.options.interactive == true ? 'pointer-events: auto;' : '';
 											
 						// build the base of our tooltip
-						var tooltipster = $('<div class="tooltipster-base '+ themeClass +' '+ animation +'" style="'+ fixedWidth +' '+ pointerEvents +' '+ animationSpeed +'"><div class="tooltipster-content">'+content+'</div></div>');
+						var tooltipster = $('<div class="tooltipster-base '+ themeClass +' '+ animation +'" style="'+ fixedWidth +' '+ maxWidth +' '+ pointerEvents +' '+ animationSpeed +'"><div class="tooltipster-content">'+content+'</div></div>');
 						tooltipster.appendTo('body');
 						
 						// attach the tooltip to its origin
