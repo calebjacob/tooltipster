@@ -648,6 +648,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						tooltipster.mouseleave(function() {
 							object.hideTooltip();
 						});
+						
+						// if we had to change the position of the tooltip so it wouldn't go off screen, reset it
+						if (resetPosition !== undefined) {
+							object.options.position = resetPosition;
+						}
 					}
 				});
 				

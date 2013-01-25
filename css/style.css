@@ -7,7 +7,7 @@ body {
 	line-height: 22px;
 }
 
-.container {
+.container, #container {
 	width: 978px;
 	margin: 10px auto;
 	padding: 60px;
@@ -15,4 +15,14 @@ body {
 	background: #fff;
 	text-align: left;
 	display: block;
+	overflow: hidden;
+}
+
+.item {
+	width: 200px;
+	float: left;
+	padding: 10px;
+	margin: 10px;
+	background: #000;
+	color: #fff;
 }
