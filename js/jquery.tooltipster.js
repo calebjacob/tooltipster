@@ -725,13 +725,15 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 		});
 	};
 	
-	window.addEventListener("orientationchange", function() {
-		if ($('.tooltipster-base').length > 0) {
-			$('.tooltipster-base').each(function() {
-				var origin = $(this).data('origin');
-				origin.data('plugin_tooltipster').hideTooltip();
-			});
-		}
-  	}, false);
+	if (is_touch_device()) {
+		window.addEventListener("orientationchange", function() {
+			if ($('.tooltipster-base').length > 0) {
+				$('.tooltipster-base').each(function() {
+					var origin = $(this).data('origin');
+					origin.data('plugin_tooltipster').hideTooltip();
+				});
+			}
+	  	}, false);
+  	}
 
 })( jQuery, window, document );
