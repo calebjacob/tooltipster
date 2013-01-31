@@ -398,6 +398,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						// our function and global vars for positioning our tooltip
 						var myLeft = 0,
 							myTop = 0;
+						var offsetY = parseInt(object.options.offsetY);
+						var offsetX = parseInt(object.options.offsetX);
 						var arrowConstruct = '';
 						function positionTooltip() {
 						
@@ -425,7 +427,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							
 							// A function to detect if the tooltip is going off the screen vertically. If so, switch to the opposite!
 							function dontGoOffScreenY(switchTo, resetTo) {
-								if((offsetTop - $(window).scrollTop() - tooltipHeight - object.options.offsetY - 11) < 0) {
+								if((offsetTop - $(window).scrollTop() - tooltipHeight - offsetY - 11) < 0) {
 									object.options.position = switchTo;
 									resetPosition = resetTo;
 								}
@@ -433,50 +435,50 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 										
 							if(object.options.position == 'top') {
 								var leftDifference = (offsetLeft + tooltipWidth) - (offsetLeft + containerWidth);
-								myLeft =  (offsetLeft + object.options.offsetX) - (leftDifference / 2);
-								myTop = (offsetTop - tooltipHeight) - object.options.offsetY - 12;
+								myLeft =  (offsetLeft + offsetX) - (leftDifference / 2);
+								myTop = (offsetTop - tooltipHeight) - offsetY - 12;
 								dontGoOffScreen();
 								dontGoOffScreenY('bottom', 'top');
 							}
 							
 							if(object.options.position == 'top-left') {
-								myLeft = offsetLeft + object.options.offsetX;
-								myTop = (offsetTop - tooltipHeight) - object.options.offsetY - 12;
+								myLeft = offsetLeft + offsetX;
+								myTop = (offsetTop - tooltipHeight) - offsetY - 12;
 								dontGoOffScreen();
 								dontGoOffScreenY('bottom-left', 'top-left');
 							}
 							
 							if(object.options.position == 'top-right') {
-								myLeft = (offsetLeft + containerWidth + object.options.offsetX) - tooltipWidth;
-								myTop = (offsetTop - tooltipHeight) - object.options.offsetY - 12;
+								myLeft = (offsetLeft + containerWidth + offsetX) - tooltipWidth;
+								myTop = (offsetTop - tooltipHeight) - offsetY - 12;
 								dontGoOffScreen();
 								dontGoOffScreenY('bottom-right', 'top-right');
 							}
 							
 							if(object.options.position == 'bottom') {
 								var leftDifference = (offsetLeft + tooltipWidth) - (offsetLeft + containerWidth);
-								myLeft =  offsetLeft - (leftDifference / 2) + object.options.offsetX;
-								myTop = (offsetTop + containerHeight) + object.options.offsetY + 12;
+								myLeft =  offsetLeft - (leftDifference / 2) + offsetX;
+								myTop = (offsetTop + containerHeight) + offsetY + 12;
 								dontGoOffScreen();
 							}
 							
 							if(object.options.position == 'bottom-left') {
-								myLeft = offsetLeft + object.options.offsetX;
-								myTop = (offsetTop + containerHeight) + object.options.offsetY + 12;
+								myLeft = offsetLeft + offsetX;
+								myTop = (offsetTop + containerHeight) + offsetY + 12;
 								dontGoOffScreen();
 							}
 							
 							if(object.options.position == 'bottom-right') {
-								myLeft = (offsetLeft + containerWidth + object.options.offsetX) - tooltipWidth;
-								myTop = (offsetTop + containerHeight) + object.options.offsetY + 12;
+								myLeft = (offsetLeft + containerWidth + offsetX) - tooltipWidth;
+								myTop = (offsetTop + containerHeight) + offsetY + 12;
 								dontGoOffScreen();
 							}
 							
 							if(object.options.position == 'left') {
-								myLeft = offsetLeft - object.options.offsetX - tooltipWidth - 12;
-								myLeftMirror = offsetLeft + object.options.offsetX + containerWidth + 12;
+								myLeft = offsetLeft - offsetX - tooltipWidth - 12;
+								myLeftMirror = offsetLeft + offsetX + containerWidth + 12;
 								var topDifference = (offsetTop + tooltipHeight) - (offsetTop + $this.outerHeight(false));
-								myTop =  offsetTop - (topDifference / 2) - object.options.offsetY;
+								myTop =  offsetTop - (topDifference / 2) - offsetY;
 															
 								// If the tooltip goes off boths sides of the page
 								if((myLeft < 0) && ((myLeftMirror + tooltipWidth) > windowWidth)) {
@@ -485,23 +487,23 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 									tooltipster.css('width', newWidth + 'px');
 									
 									tooltipHeight = tooltipster.outerHeight(false);
-									myLeft = offsetLeft - object.options.offsetX - newWidth - 12 - borderWidth;
+									myLeft = offsetLeft - offsetX - newWidth - 12 - borderWidth;
 									topDifference = (offsetTop + tooltipHeight) - (offsetTop + $this.outerHeight(false));
-									myTop =  offsetTop - (topDifference / 2) - object.options.offsetY;
+									myTop =  offsetTop - (topDifference / 2) - offsetY;
 								}
 								
 								// If it only goes off one side, flip it to the other side
 								else if(myLeft < 0) {
-									myLeft = offsetLeft + object.options.offsetX + containerWidth + 12;
+									myLeft = offsetLeft + offsetX + containerWidth + 12;
 									tooltipster.data('arrow-reposition', 'left');
 								}
 							}
 							
 							if(object.options.position == 'right') {
-								myLeft = offsetLeft + object.options.offsetX + containerWidth + 12;
-								myLeftMirror = offsetLeft - object.options.offsetX - tooltipWidth - 12;
+								myLeft = offsetLeft + offsetX + containerWidth + 12;
+								myLeftMirror = offsetLeft - offsetX - tooltipWidth - 12;
 								var topDifference = (offsetTop + tooltipHeight) - (offsetTop + $this.outerHeight(false));
-								myTop =  offsetTop - (topDifference / 2) - object.options.offsetY;
+								myTop =  offsetTop - (topDifference / 2) - offsetY;
 								
 								// If the tooltip goes off boths sides of the page
 								if(((myLeft + tooltipWidth) > windowWidth) && (myLeftMirror < 0)) {
@@ -511,13 +513,13 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 									
 									tooltipHeight = tooltipster.outerHeight(false);
 									topDifference = (offsetTop + tooltipHeight) - (offsetTop + $this.outerHeight(false));
-									myTop =  offsetTop - (topDifference / 2) - object.options.offsetY;
+									myTop =  offsetTop - (topDifference / 2) - offsetY;
 	
 								}
 									
 								// If it only goes off one side, flip it to the other side
 								else if((myLeft + tooltipWidth) > windowWidth) {
-									myLeft = offsetLeft - object.options.offsetX - tooltipWidth - 12;
+									myLeft = offsetLeft - offsetX - tooltipWidth - 12;
 									tooltipster.data('arrow-reposition', 'right');
 								}
 							}
