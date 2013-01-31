@@ -1,6 +1,6 @@
 /*
 
-Tooltipster 2.0 | 1/17/13
+Tooltipster 2.0.2 | 1/30/13
 A rockin' custom tooltip jQuery plugin
 
 Developed by: Caleb Jacob - calebjacob.com
@@ -625,10 +625,22 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 								currentTooltipContent = newTooltipContent;
 								
 								tooltipster.find('.tooltipster-content').html(newTooltipContent);
-								tooltipster.css('width', '').addClass('tooltipster-content-changing');
+								tooltipster.css({
+									'width': '',
+									'-webkit-transition-duration': object.options.speed + 'ms',
+									'-moz-transition-duration': object.options.speed + 'ms',
+									'-o-transition-duration': object.options.speed + 'ms',
+									'-ms-transition-duration': object.options.speed + 'ms',
+									'transition-duration': object.options.speed + 'ms',
+									'-webkit-transition-property': '-webkit-transform',
+									'-moz-transition-property': '-moz-transform',
+									'-o-transition-property': '-o-transform',
+									'-ms-transition-property': '-ms-transform',
+									'transition-property': 'transform',
+								}).addClass('tooltipster-content-changing');
 								setTimeout(function() {
 									tooltipster.removeClass('tooltipster-content-changing');
-								}, 200);
+								}, object.options.speed);
 								
 								tooltipWidth = tooltipster.outerWidth(false);
 								tooltipInnerWidth = tooltipster.innerWidth();
