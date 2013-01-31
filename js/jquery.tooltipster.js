@@ -1,6 +1,6 @@
 /*
 
-Tooltipster 2.0 | 1/17/13
+Tooltipster 2.0.2 | 1/30/13
 A rockin' custom tooltip jQuery plugin
 
 Developed by: Caleb Jacob - calebjacob.com
@@ -602,11 +602,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 								arrowConstruct = '<div class="'+ arrowClass +' tooltipster-arrow" style="'+ arrowReposition +'">'+ arrowBorder +'<span style="border-color:'+ arrowColor +';"></span></div>';
 								
 								// position the tooltip
-								tooltipster.css({'top': myTop+'px', 'left': myLeft+'px'}).append(arrowConstruct);
+								tooltipster.css({'top': myTop+'px', 'left': myLeft+'px'});
 							}
 						}
 						
 						positionTooltip();
+						tooltipster.append(arrowConstruct);
 												
 						// animate in the tooltip
 						if (transitionSupport == true) {
@@ -618,28 +619,39 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						
 						// check to see if our tooltip content changes while the tooltip is alive
 						var currentTooltipContent = content;
-						var contentUpdateChecker = setInterval(function() {							
-							// if the tooltip is closed, stop this interval
-							if ($('body').find(tooltipster).length == 0) {
-								clearInterval(contentUpdateChecker);
-							}
-							
-							if (currentTooltipContent !== $this.data('tooltipsterContent')) {
-								var newTooltipContent = $this.data('tooltipsterContent');
+						var contentUpdateChecker = setInterval(function() {		
+							var newTooltipContent = $this.data('tooltipsterContent');												
+							if ((currentTooltipContent !== newTooltipContent) && (newTooltipContent !== '')) {
 								currentTooltipContent = newTooltipContent;
 								
 								tooltipster.find('.tooltipster-content').html(newTooltipContent);
 								tooltipster.css({
 									'width': '',
-									'left': '',
-									'top': ''
-								});
+									'-webkit-transition-duration': object.options.speed + 'ms',
+									'-moz-transition-duration': object.options.speed + 'ms',
+									'-o-transition-duration': object.options.speed + 'ms',
+									'-ms-transition-duration': object.options.speed + 'ms',
+									'transition-duration': object.options.speed + 'ms',
+									'-webkit-transition-property': '-webkit-transform',
+									'-moz-transition-property': '-moz-transform',
+									'-o-transition-property': '-o-transform',
+									'-ms-transition-property': '-ms-transform',
+									'transition-property': 'transform',
+								}).addClass('tooltipster-content-changing');
+								setTimeout(function() {
+									tooltipster.removeClass('tooltipster-content-changing');
+								}, object.options.speed);
 								
 								tooltipWidth = tooltipster.outerWidth(false);
 								tooltipInnerWidth = tooltipster.innerWidth();
 								tooltipHeight = tooltipster.outerHeight(false);
 								
 								positionTooltip();
+							}
+							
+							// if the tooltip is closed, stop this interval
+							if ($('body').find(tooltipster).length == 0) {
+								clearInterval(contentUpdateChecker);
 							}
 						}, 200);
 						
