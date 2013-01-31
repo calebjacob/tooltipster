@@ -9,7 +9,7 @@
 	<link rel="stylesheet" type="text/css" href="css/tooltipster.css" />
 	
 	<script type="text/javascript" src="http://code.jquery.com/jquery.min.js"></script>
-	<script type="text/javascript" src="js/jquery.tooltipster.min.js"></script>
+	<script type="text/javascript" src="js/jquery.tooltipster.js"></script>
 	<script type="text/javascript" src="https://raw.github.com/desandro/masonry/master/jquery.masonry.min.js"></script>
 	
 	<script type="text/javascript">
@@ -22,11 +22,11 @@
 			  });
 			
 			$('.tooltip').tooltipster({
-				animation: 'fade',
+				animation: 'grow',
 				position: 'top',
 				trigger: 'click',
 				onlyOne: false,
-				offsetY: '10'
+				speed: 1000
 			});
 			
 			

@@ -264,3 +264,12 @@ html {
 	left: 0px !important;
 	opacity: 0;
 }
+
+
+/* CSS transition for when contenting is changing in a tooltip that is still open */
+.tooltipster-base.tooltipster-content-changing {
+	-webkit-transition: -webkit-transform 200ms;
+}
+.tooltipster-content-changing {
+	-webkit-transform: scale(1.3, 1.3);
+}
