@@ -108,8 +108,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				}
 			
 				// first, strip the title off of the element and set it as a data attribute to prevent the default tooltips from popping up
-				var title = $this.attr('title');
-				$this.data('tooltipsterContent', title);
+				var tooltipsterContent = $.trim(object.options.content).length > 0 ? object.options.content : $this.attr('title');
+				$this.data('tooltipsterContent', tooltipsterContent);
 				$this.removeAttr('title');
 				
 				// if this is a touch device, add some touch events to launch the tooltip
@@ -270,9 +270,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						
 						// get the content for the tooltip
 						var content = $this.data('tooltipsterContent');
-						if($.trim(object.options.content).length > 0) {
-							content = object.options.content;
-						}
 						
 						// get some other settings related to building the tooltip
 						var theme = object.options.theme;
