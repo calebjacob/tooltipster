@@ -638,8 +638,20 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 									'-ms-transition-property': '-ms-transform',
 									'transition-property': 'transform',
 								}).addClass('tooltipster-content-changing');
+								
+								// reset the CSS transitions and finish the change animation
 								setTimeout(function() {
 									tooltipster.removeClass('tooltipster-content-changing');
+									// after the changing animation has completed, reset the CSS transitions
+									setTimeout(function() {
+										tooltipster.css({
+											'-webkit-transition-property': '',
+											'-moz-transition-property': '',
+											'-o-transition-property': '',
+											'-ms-transition-property': '',
+											'transition-property': ''
+										});
+									}, object.options.speed);
 								}, object.options.speed);
 								
 								tooltipWidth = tooltipster.outerWidth(false);
