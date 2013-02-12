@@ -24,6 +24,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			functionBefore: function(origin, continueTooltip) {
 				continueTooltip();
 			},
+			functionReady: function(origin, tooltipster) {
+				console.log('ready');
+			},
 			functionAfter: function(origin) {},
 			icon: '(?)',
 			iconDesktop: false,
@@ -286,7 +289,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						$this.data('tooltipster', tooltipster);
 						tooltipster.data('origin', $this);
 						
+						// do all the crazy calculations and positioning
 						object.positionTooltip();
+						
+						// call our custom callback since the content of the tooltip is now part of the DOM
+						object.options.functionReady($this, tooltipster);
 						
 						// animate in the tooltip
 						if (transitionSupport == true) {
@@ -339,7 +346,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 								
 								object.positionTooltip();
 							}
-														
+
 							// if the origin is removed, remove the tooltip
 							if ($('body').find($this).length == 0) {
 								object.hideTooltip();
