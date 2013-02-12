@@ -288,15 +288,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						
 						object.positionTooltip();
 						
-						
-						
-						
-						
-						
-						
-						
-						
-												
 						// animate in the tooltip
 						if (transitionSupport == true) {
 							tooltipster.addClass(animation + '-show');
@@ -305,7 +296,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							tooltipster.css('display', 'none').removeClass(animation).fadeIn(object.options.speed);
 						}
 						
-						// check to see if our tooltip content changes while the tooltip is alive
+						// check to see if our tooltip content changes or its origin is removed while the tooltip is alive
 						var currentTooltipContent = content;
 						var contentUpdateChecker = setInterval(function() {		
 							var newTooltipContent = $this.data('tooltipsterContent');												
@@ -324,7 +315,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 									'-moz-transition-property': '-moz-transform',
 									'-o-transition-property': '-o-transform',
 									'-ms-transition-property': '-ms-transform',
-									'transition-property': 'transform',
+									'transition-property': 'transform'
 								}).addClass('tooltipster-content-changing');
 								
 								// reset the CSS transitions and finish the change animation
@@ -348,9 +339,14 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 								
 								object.positionTooltip();
 							}
+														
+							// if the origin is removed, remove the tooltip
+							if ($('body').find($this).length == 0) {
+								object.hideTooltip();
+							}
 							
 							// if the tooltip is closed, stop this interval
-							if ($('body').find(tooltipster).length == 0) {
+							if (($('body').find(tooltipster).length == 0) || ($('body').find($this).length == 0)) {
 								clearInterval(contentUpdateChecker);
 							}
 						}, 200);
@@ -455,9 +451,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					
 			var $this = $(this.element);
 			var object = this;
-			
-			console.log('hi');
-						
+									
 			// detect if we're actually dealing with an icon or the origin itself
 			if ($this.data('tooltipsterIcon') !== undefined) {
 				$this = $this.data('tooltipsterIcon');
@@ -474,14 +468,14 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				var containerWidth = $this.outerWidth(false);
 				var containerHeight = $this.outerHeight(false);
 				var tooltipWidth = tooltipster.outerWidth(false);
-				var tooltipInnerWidth = tooltipster.innerWidth() + 1;
+				var tooltipInnerWidth = tooltipster.innerWidth() + 1; // this +1 stops FireFox from sometimes forcing an additional text line
 				var tooltipHeight = tooltipster.outerHeight(false);
 				var offset = $this.offset();
 				var offsetTop = offset.top;
 				var offsetLeft = offset.left;
 				var resetPosition = undefined;
 				
-				// if this is an <area> tag inside a <map>, we need to recalculate the positions in a funkytastical way
+				// if this is an <area> tag inside a <map>, all hell breaks loose. Recaclulate all the measurements based on coordinates
 				if ($this.is('area')) {
 					var areaShape = $this.attr('shape');
 					var mapName = $this.parent().attr('name');
@@ -827,7 +821,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						break;
 	
 					case 'update':
-						var newContent = arguments.length > 1 ? arguments[1] : $t.data('tooltipsterContent');
 						$(this).data('tooltipsterContent', arguments[1]);
 						break;
 						
