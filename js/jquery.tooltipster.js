@@ -169,7 +169,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					
 					// if click events are set to show and hide the tooltip, attach those events respectively
 					if (this.options.trigger == 'click') {
-						$this.click(function() {
+						$this.on('click.tooltipster', function() {
 							if (($this.data('tooltipster') == '') || ($this.data('tooltipster') == undefined)) {
 								object.showTooltip();
 							}
@@ -700,7 +700,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						}
 						
 						// if this is an interactive tooltip activated by a click, close the tooltip when you hover off the tooltip
-						tooltipster.mouseleave(function() {
+						tooltipster.on('mouseleave.tooltipster', function() {
 							object.hideTooltip();
 						});
 						
@@ -783,7 +783,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						.data('plugin_tooltipster', '')
 						.attr('title', $t.data('tooltipsterContent'))
 						.data('tooltipsterContent', '').data('plugin_tooltipster', '')
-						.off('mouseenter.tooltipster mouseleave.tooltipster');
+						.off('mouseenter.tooltipster mouseleave.tooltipster click.tooltipster');
 					break;
 
 				case 'update':
