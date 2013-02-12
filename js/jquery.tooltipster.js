@@ -348,6 +348,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							// if the origin is removed, remove the tooltip
 							if ($('body').find($this).length == 0) {
 								object.hideTooltip();
+								console.log(1);
 							}
 							
 							// if the tooltip is closed, stop this interval
@@ -821,6 +822,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				});
 			}
 			
+			// for each origin, run the API call
 			$t.each(function() {
 				switch (options.toLowerCase()) {
 					case 'show':
