@@ -16,9 +16,8 @@
 		$(document).ready(function() {
 			
 			$('#container').masonry({
-			    // options
-			    itemSelector : '.item',
-			    columnWidth : 240
+			    itemSelector: '.item',
+			    columnWidth: 240
 			  });
 			  			
 			/*
@@ -37,7 +36,9 @@ $('#hi').tooltipster({
 */
 			
 			$('.tooltip').tooltipster({
-				trigger: 'click'
+				trigger: 'click',
+				position: 'top-left',
+				onlyOne: false
 			});
 			
 		});

@@ -286,323 +286,16 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						$this.data('tooltipster', tooltipster);
 						tooltipster.data('origin', $this);
 						
-						// find variables to determine placement
-						var windowWidth = $(window).width();
-						var containerWidth = $this.outerWidth(false);
-						var containerHeight = $this.outerHeight(false);
-						var tooltipWidth = tooltipster.outerWidth(false);
-						var tooltipInnerWidth = tooltipster.innerWidth();
-						var tooltipHeight = tooltipster.outerHeight(false);
-						var offset = $this.offset();
-						var offsetTop = offset.top;
-						var offsetLeft = offset.left;
-						var resetPosition = undefined;
+						object.positionTooltip();
 						
-						// if this is an <area> tag inside a <map>, we need to recalculate the positions in a funkytastical way
-						if ($this.is('area')) {
-							var areaShape = $this.attr('shape');
-							var mapName = $this.parent().attr('name');
-							var map = $('img[usemap="#'+ mapName +'"]');
-							var mapOffsetLeft = map.offset().left;
-							var mapOffsetTop = map.offset().top;
-							var areaMeasurements = $this.attr('coords') !== undefined ? $this.attr('coords').split(',') : undefined;
-							
-							if (areaShape == 'circle') {
-								var areaLeft = parseInt(areaMeasurements[0]);
-								var areaTop = parseInt(areaMeasurements[1]);
-								var areaWidth = parseInt(areaMeasurements[2]);
-								containerHeight = areaWidth * 2;
-								containerWidth = areaWidth * 2;
-								offsetTop = mapOffsetTop + areaTop - areaWidth;
-								offsetLeft = mapOffsetLeft + areaLeft - areaWidth;
-							}
-							else if (areaShape == 'rect') {
-								var areaLeft = parseInt(areaMeasurements[0]);
-								var areaTop = parseInt(areaMeasurements[1]);
-								var areaRight = parseInt(areaMeasurements[2]);
-								var areaBottom = parseInt(areaMeasurements[3]);
-								containerHeight = areaBottom - areaTop;
-								containerWidth = areaRight - areaLeft;
-								offsetTop = mapOffsetTop + areaTop;
-								offsetLeft = mapOffsetLeft + areaLeft;
-							}
-							else if (areaShape == 'poly') {
-								var areaXs = [];
-								var areaYs = [];
-								var areaSmallestX = 0,
-									areaSmallestY = 0,
-									areaGreatestX = 0,
-									areaGreatestY = 0;
-								var arrayAlternate = 'even';
-								
-								for (i = 0; i < areaMeasurements.length; i++) {
-									var areaNumber = parseInt(areaMeasurements[i]);
-									
-									if (arrayAlternate == 'even') {
-										if (areaNumber > areaGreatestX) {
-											areaGreatestX = areaNumber;
-											if (i == 0) {
-												areaSmallestX = areaGreatestX;
-											}
-										}
-										
-										if (areaNumber < areaSmallestX) {
-											areaSmallestX = areaNumber;
-										}
-										
-										arrayAlternate = 'odd';
-									}
-									else {
-										if (areaNumber > areaGreatestY) {
-											areaGreatestY = areaNumber;
-											if (i == 1) {
-												areaSmallestY = areaGreatestY;
-											}
-										}
-										
-										if (areaNumber < areaSmallestY) {
-											areaSmallestY = areaNumber;
-										}
-										
-										arrayAlternate = 'even';
-									}
-								}
-							
-								containerHeight = areaGreatestY - areaSmallestY;
-								containerWidth = areaGreatestX - areaSmallestX;
-								offsetTop = mapOffsetTop + areaSmallestY;
-								offsetLeft = mapOffsetLeft + areaSmallestX;
-							}
-							else {
-								containerHeight = map.outerHeight(false);
-								containerWidth = map.outerWidth(false);
-								offsetTop = mapOffsetTop;
-								offsetLeft = mapOffsetLeft;
-							}
-						}
-																		
-						// hardcoding the width and removing the padding fixed an issue with the tooltip width collapsing when the window size is small
-						if(object.options.fixedWidth == 0) {
-							tooltipster.css({
-								'width': (tooltipInnerWidth + 1) + 'px',
-								'padding-left': '0px',
-								'padding-right': '0px'
-							});
-						}
-												
-						// our function and global vars for positioning our tooltip
-						var myLeft = 0,
-							myTop = 0;
-						var offsetY = parseInt(object.options.offsetY);
-						var offsetX = parseInt(object.options.offsetX);
-						var arrowConstruct = '';
-						function positionTooltip() {
 						
-							// A function to detect if the tooltip is going off the screen horizontally. If so, rethis.options.position the crap out of it!
-							function dontGoOffScreen() {
-							
-								var windowLeft = $(window).scrollLeft();
-								
-								// If the tooltip goes off the left side of the screen, line it up with the left side of the window
-								if((myLeft - windowLeft) < 0) {
-									var arrowReposition = myLeft - windowLeft;
-									myLeft = windowLeft;
-																											
-									tooltipster.data('arrow-reposition', arrowReposition);
-								}
-								
-								// If the tooltip goes off the right of the screen, line it up with the right side of the window
-								if (((myLeft + tooltipWidth) - windowLeft) > windowWidth) {
-									var arrowReposition = myLeft - ((windowWidth + windowLeft) - tooltipWidth);
-									myLeft = (windowWidth + windowLeft) - tooltipWidth;
-																															
-									tooltipster.data('arrow-reposition', arrowReposition);
-								}
-							}
-							
-							// A function to detect if the tooltip is going off the screen vertically. If so, switch to the opposite!
-							function dontGoOffScreenY(switchTo, resetTo) {
-								if((offsetTop - $(window).scrollTop() - tooltipHeight - offsetY - 11) < 0) {
-									object.options.position = switchTo;
-									resetPosition = resetTo;
-								}
-							}
-										
-							if(object.options.position == 'top') {
-								var leftDifference = (offsetLeft + tooltipWidth) - (offsetLeft + containerWidth);
-								myLeft =  (offsetLeft + offsetX) - (leftDifference / 2);
-								myTop = (offsetTop - tooltipHeight) - offsetY - 12;
-								dontGoOffScreen();
-								dontGoOffScreenY('bottom', 'top');
-							}
-							
-							if(object.options.position == 'top-left') {
-								myLeft = offsetLeft + offsetX;
-								myTop = (offsetTop - tooltipHeight) - offsetY - 12;
-								dontGoOffScreen();
-								dontGoOffScreenY('bottom-left', 'top-left');
-							}
-							
-							if(object.options.position == 'top-right') {
-								myLeft = (offsetLeft + containerWidth + offsetX) - tooltipWidth;
-								myTop = (offsetTop - tooltipHeight) - offsetY - 12;
-								dontGoOffScreen();
-								dontGoOffScreenY('bottom-right', 'top-right');
-							}
-							
-							if(object.options.position == 'bottom') {
-								var leftDifference = (offsetLeft + tooltipWidth) - (offsetLeft + containerWidth);
-								myLeft =  offsetLeft - (leftDifference / 2) + offsetX;
-								myTop = (offsetTop + containerHeight) + offsetY + 12;
-								dontGoOffScreen();
-							}
-							
-							if(object.options.position == 'bottom-left') {
-								myLeft = offsetLeft + offsetX;
-								myTop = (offsetTop + containerHeight) + offsetY + 12;
-								dontGoOffScreen();
-							}
-							
-							if(object.options.position == 'bottom-right') {
-								myLeft = (offsetLeft + containerWidth + offsetX) - tooltipWidth;
-								myTop = (offsetTop + containerHeight) + offsetY + 12;
-								dontGoOffScreen();
-							}
-							
-							if(object.options.position == 'left') {
-								myLeft = offsetLeft - offsetX - tooltipWidth - 12;
-								myLeftMirror = offsetLeft + offsetX + containerWidth + 12;
-								var topDifference = (offsetTop + tooltipHeight) - (offsetTop + $this.outerHeight(false));
-								myTop =  offsetTop - (topDifference / 2) - offsetY;
-															
-								// If the tooltip goes off boths sides of the page
-								if((myLeft < 0) && ((myLeftMirror + tooltipWidth) > windowWidth)) {
-									var borderWidth = parseFloat(tooltipster.css('border-width')) * 2;
-									var newWidth = (tooltipWidth + myLeft) - borderWidth;
-									tooltipster.css('width', newWidth + 'px');
-									
-									tooltipHeight = tooltipster.outerHeight(false);
-									myLeft = offsetLeft - offsetX - newWidth - 12 - borderWidth;
-									topDifference = (offsetTop + tooltipHeight) - (offsetTop + $this.outerHeight(false));
-									myTop =  offsetTop - (topDifference / 2) - offsetY;
-								}
-								
-								// If it only goes off one side, flip it to the other side
-								else if(myLeft < 0) {
-									myLeft = offsetLeft + offsetX + containerWidth + 12;
-									tooltipster.data('arrow-reposition', 'left');
-								}
-							}
-							
-							if(object.options.position == 'right') {
-								myLeft = offsetLeft + offsetX + containerWidth + 12;
-								myLeftMirror = offsetLeft - offsetX - tooltipWidth - 12;
-								var topDifference = (offsetTop + tooltipHeight) - (offsetTop + $this.outerHeight(false));
-								myTop =  offsetTop - (topDifference / 2) - offsetY;
-								
-								// If the tooltip goes off boths sides of the page
-								if(((myLeft + tooltipWidth) > windowWidth) && (myLeftMirror < 0)) {
-									var borderWidth = parseFloat(tooltipster.css('border-width')) * 2;
-									var newWidth = (windowWidth - myLeft) - borderWidth;
-									tooltipster.css('width', newWidth + 'px');
-									
-									tooltipHeight = tooltipster.outerHeight(false);
-									topDifference = (offsetTop + tooltipHeight) - (offsetTop + $this.outerHeight(false));
-									myTop =  offsetTop - (topDifference / 2) - offsetY;
-	
-								}
-									
-								// If it only goes off one side, flip it to the other side
-								else if((myLeft + tooltipWidth) > windowWidth) {
-									myLeft = offsetLeft - offsetX - tooltipWidth - 12;
-									tooltipster.data('arrow-reposition', 'right');
-								}
-							}
-							
-							// if arrow is set true, style it and append it
-							if (object.options.arrow == true){
-				
-								var arrowClass = 'tooltipster-arrow-' + object.options.position;
-								
-								// set color of the arrow
-								if(object.options.arrowColor.length < 1) {
-									var arrowColor = tooltipster.css('background-color');
-								}
-								else {
-									var arrowColor = object.options.arrowColor;
-								}
-								
-								// if the tooltip was going off the page and had to re-adjust, we need to update the arrow's this.options.position to stay next to the mouse
-								var arrowReposition = tooltipster.data('arrow-reposition');
-								if (!arrowReposition) {
-									arrowReposition = '';
-								}
-								else if (arrowReposition == 'left') {
-									arrowClass = 'tooltipster-arrow-right';
-									arrowReposition = '';
-								}
-								else if (arrowReposition == 'right') {
-									arrowClass = 'tooltipster-arrow-left';
-									arrowReposition = '';
-								}
-								else {
-									arrowReposition = 'left:'+ arrowReposition +'px;';
-								}
-								
-								// Building the logic to create the border around the arrow of the tooltip
-								if ((object.options.position == 'top') || (object.options.position == 'top-left') || (object.options.position == 'top-right')) {
-									var tooltipBorderWidth = parseFloat(tooltipster.css('border-bottom-width'));
-									var tooltipBorderColor = tooltipster.css('border-bottom-color');
-								}
-								else if ((object.options.position == 'bottom') || (object.options.position == 'bottom-left') || (object.options.position == 'bottom-right')) {
-									var tooltipBorderWidth = parseFloat(tooltipster.css('border-top-width'));
-									var tooltipBorderColor = tooltipster.css('border-top-color');
-								}
-								else if (object.options.position == 'left') {
-									var tooltipBorderWidth = parseFloat(tooltipster.css('border-right-width'));
-									var tooltipBorderColor = tooltipster.css('border-right-color');
-								}
-								else if (object.options.position == 'right') {
-									var tooltipBorderWidth = parseFloat(tooltipster.css('border-left-width'));
-									var tooltipBorderColor = tooltipster.css('border-left-color');
-								}
-								else {
-									var tooltipBorderWidth = parseFloat(tooltipster.css('border-bottom-width'));
-									var tooltipBorderColor = tooltipster.css('border-bottom-color');
-								}
-								
-								if (tooltipBorderWidth > 1) {
-									tooltipBorderWidth++;
-								}
-								
-								var arrowBorder = '';
-								if (tooltipBorderWidth !== 0) {
-									var arrowBorderSize = '';
-									var arrowBorderColor = 'border-color: '+ tooltipBorderColor +';';
-									if (arrowClass.indexOf('bottom') !== -1) {
-										arrowBorderSize = 'margin-top: -'+ tooltipBorderWidth +'px;';
-									}
-									else if (arrowClass.indexOf('top') !== -1) {
-										arrowBorderSize = 'margin-bottom: -'+ tooltipBorderWidth +'px;';
-									}
-									else if (arrowClass.indexOf('left') !== -1) {
-										arrowBorderSize = 'margin-right: -'+ tooltipBorderWidth +'px;';
-									}
-									else if (arrowClass.indexOf('right') !== -1) {
-										arrowBorderSize = 'margin-left: -'+ tooltipBorderWidth +'px;';
-									}
-									arrowBorder = '<span class="tooltipster-arrow-border" style="'+ arrowBorderSize +' '+ arrowBorderColor +';"></span>';
-								}
-																
-								arrowConstruct = '<div class="'+ arrowClass +' tooltipster-arrow" style="'+ arrowReposition +'">'+ arrowBorder +'<span style="border-color:'+ arrowColor +';"></span></div>';
-							}
-							
-							// position the tooltip
-							tooltipster.css({'top': myTop+'px', 'left': myLeft+'px'});
-						}
 						
-						positionTooltip();
-						tooltipster.append(arrowConstruct);
+						
+						
+						
+						
+						
+						
 												
 						// animate in the tooltip
 						if (transitionSupport == true) {
@@ -653,7 +346,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 								tooltipInnerWidth = tooltipster.innerWidth();
 								tooltipHeight = tooltipster.outerHeight(false);
 								
-								positionTooltip();
+								object.positionTooltip();
 							}
 							
 							// if the tooltip is closed, stop this interval
@@ -702,11 +395,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						tooltipster.mouseleave(function() {
 							object.hideTooltip();
 						});
-						
-						// if we had to change the position of the tooltip so it wouldn't go off screen, reset it
-						if (resetPosition !== undefined) {
-							object.options.position = resetPosition;
-						}
 					}
 				});
 				
@@ -761,6 +449,360 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					});
 				}
 			}
+		},
+		
+		positionTooltip: function(options) {
+					
+			var $this = $(this.element);
+			var object = this;
+			
+			console.log('hi');
+						
+			// detect if we're actually dealing with an icon or the origin itself
+			if ($this.data('tooltipsterIcon') !== undefined) {
+				$this = $this.data('tooltipsterIcon');
+			}
+			
+			if (($this.data('tooltipster') !== undefined) && ($this.data('tooltipster') !== '')) {
+						
+				// find tooltipster and reset its width
+				var tooltipster = $this.data('tooltipster');
+				tooltipster.css('width', '');
+				
+				// find variables to determine placement
+				var windowWidth = $(window).width();
+				var containerWidth = $this.outerWidth(false);
+				var containerHeight = $this.outerHeight(false);
+				var tooltipWidth = tooltipster.outerWidth(false);
+				var tooltipInnerWidth = tooltipster.innerWidth() + 1;
+				var tooltipHeight = tooltipster.outerHeight(false);
+				var offset = $this.offset();
+				var offsetTop = offset.top;
+				var offsetLeft = offset.left;
+				var resetPosition = undefined;
+				
+				// if this is an <area> tag inside a <map>, we need to recalculate the positions in a funkytastical way
+				if ($this.is('area')) {
+					var areaShape = $this.attr('shape');
+					var mapName = $this.parent().attr('name');
+					var map = $('img[usemap="#'+ mapName +'"]');
+					var mapOffsetLeft = map.offset().left;
+					var mapOffsetTop = map.offset().top;
+					var areaMeasurements = $this.attr('coords') !== undefined ? $this.attr('coords').split(',') : undefined;
+					
+					if (areaShape == 'circle') {
+						var areaLeft = parseInt(areaMeasurements[0]);
+						var areaTop = parseInt(areaMeasurements[1]);
+						var areaWidth = parseInt(areaMeasurements[2]);
+						containerHeight = areaWidth * 2;
+						containerWidth = areaWidth * 2;
+						offsetTop = mapOffsetTop + areaTop - areaWidth;
+						offsetLeft = mapOffsetLeft + areaLeft - areaWidth;
+					}
+					else if (areaShape == 'rect') {
+						var areaLeft = parseInt(areaMeasurements[0]);
+						var areaTop = parseInt(areaMeasurements[1]);
+						var areaRight = parseInt(areaMeasurements[2]);
+						var areaBottom = parseInt(areaMeasurements[3]);
+						containerHeight = areaBottom - areaTop;
+						containerWidth = areaRight - areaLeft;
+						offsetTop = mapOffsetTop + areaTop;
+						offsetLeft = mapOffsetLeft + areaLeft;
+					}
+					else if (areaShape == 'poly') {
+						var areaXs = [];
+						var areaYs = [];
+						var areaSmallestX = 0,
+							areaSmallestY = 0,
+							areaGreatestX = 0,
+							areaGreatestY = 0;
+						var arrayAlternate = 'even';
+						
+						for (i = 0; i < areaMeasurements.length; i++) {
+							var areaNumber = parseInt(areaMeasurements[i]);
+							
+							if (arrayAlternate == 'even') {
+								if (areaNumber > areaGreatestX) {
+									areaGreatestX = areaNumber;
+									if (i == 0) {
+										areaSmallestX = areaGreatestX;
+									}
+								}
+								
+								if (areaNumber < areaSmallestX) {
+									areaSmallestX = areaNumber;
+								}
+								
+								arrayAlternate = 'odd';
+							}
+							else {
+								if (areaNumber > areaGreatestY) {
+									areaGreatestY = areaNumber;
+									if (i == 1) {
+										areaSmallestY = areaGreatestY;
+									}
+								}
+								
+								if (areaNumber < areaSmallestY) {
+									areaSmallestY = areaNumber;
+								}
+								
+								arrayAlternate = 'even';
+							}
+						}
+					
+						containerHeight = areaGreatestY - areaSmallestY;
+						containerWidth = areaGreatestX - areaSmallestX;
+						offsetTop = mapOffsetTop + areaSmallestY;
+						offsetLeft = mapOffsetLeft + areaSmallestX;
+					}
+					else {
+						containerHeight = map.outerHeight(false);
+						containerWidth = map.outerWidth(false);
+						offsetTop = mapOffsetTop;
+						offsetLeft = mapOffsetLeft;
+					}
+				}
+																
+				// hardcoding the width and removing the padding fixed an issue with the tooltip width collapsing when the window size is small
+				if(object.options.fixedWidth == 0) {
+					tooltipster.css({
+						'width': tooltipInnerWidth + 'px',
+						'padding-left': '0px',
+						'padding-right': '0px'
+					});
+				}
+				
+				// our function and global vars for positioning our tooltip
+				var myLeft = 0,
+					myTop = 0;
+				var offsetY = parseInt(object.options.offsetY);
+				var offsetX = parseInt(object.options.offsetX);
+				var arrowConstruct = '';
+				
+				// A function to detect if the tooltip is going off the screen horizontally. If so, reposition the crap out of it!
+				function dontGoOffScreenX() {
+				
+					var windowLeft = $(window).scrollLeft();
+					
+					// If the tooltip goes off the left side of the screen, line it up with the left side of the window
+					if((myLeft - windowLeft) < 0) {
+						var arrowReposition = myLeft - windowLeft;
+						myLeft = windowLeft;
+																								
+						tooltipster.data('arrow-reposition', arrowReposition);
+					}
+					
+					// If the tooltip goes off the right of the screen, line it up with the right side of the window
+					if (((myLeft + tooltipWidth) - windowLeft) > windowWidth) {
+						var arrowReposition = myLeft - ((windowWidth + windowLeft) - tooltipWidth);
+						myLeft = (windowWidth + windowLeft) - tooltipWidth;
+																												
+						tooltipster.data('arrow-reposition', arrowReposition);
+					}
+				}
+				
+				// A function to detect if the tooltip is going off the screen vertically. If so, switch to the opposite!
+				function dontGoOffScreenY(switchTo, resetTo) {
+					// if it goes off the top off the page
+					if(((offsetTop - $(window).scrollTop() - tooltipHeight - offsetY - 12) < 0) && (resetTo.indexOf('top') > -1)) {
+						object.options.position = switchTo;
+						resetPosition = resetTo;
+					}
+					
+					// if it goes off the bottom of the page
+					if (((offsetTop + containerHeight + tooltipHeight + 12 + offsetY) > ($(window).scrollTop() + $(window).height())) && (resetTo.indexOf('bottom') > -1)) {
+						object.options.position = switchTo;
+						resetPosition = resetTo;
+						myTop = (offsetTop - tooltipHeight) - offsetY - 12;
+					}
+				}
+							
+				if(object.options.position == 'top') {
+					var leftDifference = (offsetLeft + tooltipWidth) - (offsetLeft + containerWidth);
+					myLeft =  (offsetLeft + offsetX) - (leftDifference / 2);
+					myTop = (offsetTop - tooltipHeight) - offsetY - 12;
+					dontGoOffScreenX();
+					dontGoOffScreenY('bottom', 'top');
+				}
+				
+				if(object.options.position == 'top-left') {
+					myLeft = offsetLeft + offsetX;
+					myTop = (offsetTop - tooltipHeight) - offsetY - 12;
+					dontGoOffScreenX();
+					dontGoOffScreenY('bottom-left', 'top-left');
+				}
+				
+				if(object.options.position == 'top-right') {
+					myLeft = (offsetLeft + containerWidth + offsetX) - tooltipWidth;
+					myTop = (offsetTop - tooltipHeight) - offsetY - 12;
+					dontGoOffScreenX();
+					dontGoOffScreenY('bottom-right', 'top-right');
+				}
+				
+				if(object.options.position == 'bottom') {
+					var leftDifference = (offsetLeft + tooltipWidth) - (offsetLeft + containerWidth);
+					myLeft =  offsetLeft - (leftDifference / 2) + offsetX;
+					myTop = (offsetTop + containerHeight) + offsetY + 12;
+					dontGoOffScreenX();
+					dontGoOffScreenY('top', 'bottom');
+				}
+				
+				if(object.options.position == 'bottom-left') {
+					myLeft = offsetLeft + offsetX;
+					myTop = (offsetTop + containerHeight) + offsetY + 12;
+					dontGoOffScreenX();
+					dontGoOffScreenY('top-left', 'bottom-left');
+				}
+				
+				if(object.options.position == 'bottom-right') {
+					myLeft = (offsetLeft + containerWidth + offsetX) - tooltipWidth;
+					myTop = (offsetTop + containerHeight) + offsetY + 12;
+					dontGoOffScreenX();
+					dontGoOffScreenY('top-right', 'bottom-right');
+				}
+				
+				if(object.options.position == 'left') {
+					myLeft = offsetLeft - offsetX - tooltipWidth - 12;
+					myLeftMirror = offsetLeft + offsetX + containerWidth + 12;
+					var topDifference = (offsetTop + tooltipHeight) - (offsetTop + $this.outerHeight(false));
+					myTop =  offsetTop - (topDifference / 2) - offsetY;
+												
+					// If the tooltip goes off boths sides of the page
+					if((myLeft < 0) && ((myLeftMirror + tooltipWidth) > windowWidth)) {
+						var borderWidth = parseFloat(tooltipster.css('border-width')) * 2;
+						var newWidth = (tooltipWidth + myLeft) - borderWidth;
+						tooltipster.css('width', newWidth + 'px');
+						
+						tooltipHeight = tooltipster.outerHeight(false);
+						myLeft = offsetLeft - offsetX - newWidth - 12 - borderWidth;
+						topDifference = (offsetTop + tooltipHeight) - (offsetTop + $this.outerHeight(false));
+						myTop =  offsetTop - (topDifference / 2) - offsetY;
+					}
+					
+					// If it only goes off one side, flip it to the other side
+					else if(myLeft < 0) {
+						myLeft = offsetLeft + offsetX + containerWidth + 12;
+						tooltipster.data('arrow-reposition', 'left');
+					}
+				}
+				
+				if(object.options.position == 'right') {
+					myLeft = offsetLeft + offsetX + containerWidth + 12;
+					myLeftMirror = offsetLeft - offsetX - tooltipWidth - 12;
+					var topDifference = (offsetTop + tooltipHeight) - (offsetTop + $this.outerHeight(false));
+					myTop =  offsetTop - (topDifference / 2) - offsetY;
+					
+					// If the tooltip goes off boths sides of the page
+					if(((myLeft + tooltipWidth) > windowWidth) && (myLeftMirror < 0)) {
+						var borderWidth = parseFloat(tooltipster.css('border-width')) * 2;
+						var newWidth = (windowWidth - myLeft) - borderWidth;
+						tooltipster.css('width', newWidth + 'px');
+						
+						tooltipHeight = tooltipster.outerHeight(false);
+						topDifference = (offsetTop + tooltipHeight) - (offsetTop + $this.outerHeight(false));
+						myTop =  offsetTop - (topDifference / 2) - offsetY;
+	
+					}
+						
+					// If it only goes off one side, flip it to the other side
+					else if((myLeft + tooltipWidth) > windowWidth) {
+						myLeft = offsetLeft - offsetX - tooltipWidth - 12;
+						tooltipster.data('arrow-reposition', 'right');
+					}
+				}
+				
+				// if arrow is set true, style it and append it
+				if (object.options.arrow == true) {
+	
+					var arrowClass = 'tooltipster-arrow-' + object.options.position;
+					
+					// set color of the arrow
+					if(object.options.arrowColor.length < 1) {
+						var arrowColor = tooltipster.css('background-color');
+					}
+					else {
+						var arrowColor = object.options.arrowColor;
+					}
+					
+					// if the tooltip was going off the page and had to re-adjust, we need to update the arrow's position
+					var arrowReposition = tooltipster.data('arrow-reposition');
+					if (!arrowReposition) {
+						arrowReposition = '';
+					}
+					else if (arrowReposition == 'left') {
+						arrowClass = 'tooltipster-arrow-right';
+						arrowReposition = '';
+					}
+					else if (arrowReposition == 'right') {
+						arrowClass = 'tooltipster-arrow-left';
+						arrowReposition = '';
+					}
+					else {
+						arrowReposition = 'left:'+ arrowReposition +'px;';
+					}
+										
+					// building the logic to create the border around the arrow of the tooltip
+					if ((object.options.position == 'top') || (object.options.position == 'top-left') || (object.options.position == 'top-right')) {
+						var tooltipBorderWidth = parseFloat(tooltipster.css('border-bottom-width'));
+						var tooltipBorderColor = tooltipster.css('border-bottom-color');
+					}
+					else if ((object.options.position == 'bottom') || (object.options.position == 'bottom-left') || (object.options.position == 'bottom-right')) {
+						var tooltipBorderWidth = parseFloat(tooltipster.css('border-top-width'));
+						var tooltipBorderColor = tooltipster.css('border-top-color');
+					}
+					else if (object.options.position == 'left') {
+						var tooltipBorderWidth = parseFloat(tooltipster.css('border-right-width'));
+						var tooltipBorderColor = tooltipster.css('border-right-color');
+					}
+					else if (object.options.position == 'right') {
+						var tooltipBorderWidth = parseFloat(tooltipster.css('border-left-width'));
+						var tooltipBorderColor = tooltipster.css('border-left-color');
+					}
+					else {
+						var tooltipBorderWidth = parseFloat(tooltipster.css('border-bottom-width'));
+						var tooltipBorderColor = tooltipster.css('border-bottom-color');
+					}
+					
+					if (tooltipBorderWidth > 1) {
+						tooltipBorderWidth++;
+					}
+					
+					var arrowBorder = '';
+					if (tooltipBorderWidth !== 0) {
+						var arrowBorderSize = '';
+						var arrowBorderColor = 'border-color: '+ tooltipBorderColor +';';
+						if (arrowClass.indexOf('bottom') !== -1) {
+							arrowBorderSize = 'margin-top: -'+ tooltipBorderWidth +'px;';
+						}
+						else if (arrowClass.indexOf('top') !== -1) {
+							arrowBorderSize = 'margin-bottom: -'+ tooltipBorderWidth +'px;';
+						}
+						else if (arrowClass.indexOf('left') !== -1) {
+							arrowBorderSize = 'margin-right: -'+ tooltipBorderWidth +'px;';
+						}
+						else if (arrowClass.indexOf('right') !== -1) {
+							arrowBorderSize = 'margin-left: -'+ tooltipBorderWidth +'px;';
+						}
+						arrowBorder = '<span class="tooltipster-arrow-border" style="'+ arrowBorderSize +' '+ arrowBorderColor +';"></span>';
+					}
+					
+					// if the arrow already exists, remove and replace it
+					tooltipster.find('.tooltipster-arrow').remove();
+					
+					// build out the arrow and append it		
+					arrowConstruct = '<div class="'+ arrowClass +' tooltipster-arrow" style="'+ arrowReposition +'">'+ arrowBorder +'<span style="border-color:'+ arrowColor +';"></span></div>';
+					tooltipster.append(arrowConstruct);
+				}
+				
+				// position the tooltip
+				tooltipster.css({'top': myTop+'px', 'left': myLeft+'px'});
+				
+				// if we had to change the position of the tooltip so it wouldn't go off screen, reset it
+				if (resetPosition !== undefined) {
+					object.options.position = resetPosition;
+				}
+			}
 		}
 	};
 		
@@ -769,26 +811,33 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 		if (typeof options === 'string') {
 			var $t = $(this);
 			
-			switch (options.toLowerCase()) {
-				case 'show':
-					$t.data('plugin_tooltipster').showTooltip();
-					break;
-
-				case 'hide':
-					$t.data('plugin_tooltipster').hideTooltip();
-					break;
-
-				case 'destroy':
-					$t.data('plugin_tooltipster').hideTooltip();
-					$t.data('plugin_tooltipster', '').attr('title', $t.data('tooltipsterContent')).data('tooltipsterContent', '').data('plugin_tooltipster', '').off('mouseenter.tooltipster mouseleave.tooltipster click.tooltipster');
-					break;
-
-				case 'update':
-					var newContent = arguments.length > 1 ? arguments[1] : $t.data('tooltipsterContent');
-					$t.data('tooltipsterContent', arguments[1]);
-					break;
-			}
-			return this;
+			$t.each(function() {
+				switch (options.toLowerCase()) {
+					case 'show':
+						$(this).data('plugin_tooltipster').showTooltip();
+						break;
+	
+					case 'hide':
+						$(this).data('plugin_tooltipster').hideTooltip();
+						break;
+	
+					case 'destroy':
+						$(this).data('plugin_tooltipster').hideTooltip();
+						$(this).data('plugin_tooltipster', '').attr('title', $t.data('tooltipsterContent')).data('tooltipsterContent', '').data('plugin_tooltipster', '').off('mouseenter.tooltipster mouseleave.tooltipster click.tooltipster');
+						break;
+	
+					case 'update':
+						var newContent = arguments.length > 1 ? arguments[1] : $t.data('tooltipsterContent');
+						$(this).data('tooltipsterContent', arguments[1]);
+						break;
+						
+					case 'reposition':
+						$(this).data('plugin_tooltipster').positionTooltip();
+						break;
+				}
+			});
+			
+			return this;			
 		}
 		
 		// attach a tooltipster object to each element if it doesn't already have one
@@ -817,5 +866,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			}
 	  	}, false);
   	}
+  	
+  	// on window resize, reposition and open tooltips
+  	$(window).on('resize.tooltipster', function() {
+	  	var origin = $('.tooltipster-base').data('origin')
+	  	origin.tooltipster('reposition');
+  	});
 
 })( jQuery, window, document );
