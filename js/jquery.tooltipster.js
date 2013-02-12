@@ -765,7 +765,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 	};
 		
 	$.fn[pluginName] = function (options) {
-		
 		// better API name spacing by glebtv
 		if (typeof options === 'string') {
 			var $t = $(this);
@@ -792,6 +791,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			return this;
 		}
 		
+		// attach a tooltipster object to each element if it doesn't already have one
 		return this.each(function () {
 			if (!$.data(this, "plugin_" + pluginName)) {
 				$.data(this, "plugin_" + pluginName, new Plugin( this, options ));
@@ -806,6 +806,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 		});
 	};
 	
+	// hide tooltips on orientation change
 	if (is_touch_device()) {
 		window.addEventListener("orientationchange", function() {
 			if ($('.tooltipster-base').length > 0) {
