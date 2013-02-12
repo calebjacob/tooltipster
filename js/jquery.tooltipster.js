@@ -124,27 +124,27 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				
 					// if hover events are set to show and hide the tooltip, attach those events respectively
 					if (this.options.trigger == 'hover') {
-						$this.mouseenter(function() {
+						$this.on('mouseenter.tooltipster', function() {
 							object.showTooltip();
 						});
 						
 						// if this is an interactive tooltip, delay getting rid of the tooltip right away so you have a chance to hover on the tooltip
 						if (this.options.interactive == true) {
-							$this.mouseleave(function() {
+							$this.on('mouseleave.tooltipster', function() {
 								var tooltipster = $this.data('tooltipster');
 								var keepAlive = false;
 								
 								if ((tooltipster !== undefined) && (tooltipster !== '')) {
-									tooltipster.mouseenter(function() {
+									tooltipster.on('mouseenter.tooltipster', function() {
 										keepAlive = true;
 									});
-									tooltipster.mouseleave(function() {
+									tooltipster.on('mouseleave.tooltipster', function() {
 										keepAlive = false;
 									});
 									
 									var tolerance = setTimeout(function() {
 										if (keepAlive == true) {
-											tooltipster.mouseleave(function() {
+											tooltipster.on('mouseleave.tooltipster', function() {
 												object.hideTooltip();
 											});
 										}
@@ -161,7 +161,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						
 						// if this is a dumb tooltip, just get rid of it on mouseleave
 						else {
-							$this.mouseleave(function() {
+							$this.on('mouseleave.tooltipster', function() {
 								object.hideTooltip();
 							});
 						}
@@ -766,6 +766,33 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 	};
 		
 	$.fn[pluginName] = function (options) {
+		if (typeof options === 'string') {
+			var $t = this.first();
+			switch (options.toLowerCase()) {
+				case 'show':
+					$t.data('plugin_tooltipster').showTooltip();
+					break;
+
+				case 'hide':
+					$t.data('plugin_tooltipster').hideTooltip();
+					break;
+
+				case 'destroy':
+					$t.data('plugin_tooltipster').hideTooltip();
+					$t
+						.data('plugin_tooltipster', '')
+						.attr('title', $t.data('tooltipsterContent'))
+						.data('tooltipsterContent', '').data('plugin_tooltipster', '')
+						.off('mouseenter.tooltipster mouseleave.tooltipster');
+					break;
+
+				case 'update':
+					$t.data('tooltipsterContent', arguments[1]);
+					break;
+			}
+			return this;
+		}
+	
 		return this.each(function () {
 			if (!$.data(this, "plugin_" + pluginName)) {
 				$.data(this, "plugin_" + pluginName, new Plugin( this, options ));
