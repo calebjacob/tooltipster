@@ -16,12 +16,12 @@
 		$(document).ready(function() {
 			
 			$('#container').masonry({
-			    // options
-			    itemSelector : '.item',
-			    columnWidth : 240
-			  });
+			    itemSelector: '.item',
+			    columnWidth: 240
+			 });
 			  			
-			$('#hi').tooltipster({
+			/*
+$('#hi').tooltipster({
 				content: '<img src="http://mediacdn.disqus.com/uploads/users/4210/450/avatar92.jpg?1359914706" width="20" height="20" />',
 				functionBefore: function(origin, continueTooltip) {
 					continueTooltip();
@@ -33,8 +33,13 @@
 					}
 				}
 			});
+*/
 			
-			$('.tooltip').tooltipster();
+			$('.tooltip').tooltipster({
+				trigger: 'click',
+				position: 'top-left',
+				onlyOne: false
+			});
 			
 		});
 	</script>
