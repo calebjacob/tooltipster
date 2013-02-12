@@ -597,10 +597,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 								}
 																
 								arrowConstruct = '<div class="'+ arrowClass +' tooltipster-arrow" style="'+ arrowReposition +'">'+ arrowBorder +'<span style="border-color:'+ arrowColor +';"></span></div>';
-								
-								// position the tooltip
-								tooltipster.css({'top': myTop+'px', 'left': myLeft+'px'});
 							}
+							
+							// position the tooltip
+							tooltipster.css({'top': myTop+'px', 'left': myLeft+'px'});
 						}
 						
 						positionTooltip();

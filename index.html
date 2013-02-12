@@ -20,8 +20,8 @@
 			    itemSelector : '.item',
 			    columnWidth : 240
 			  });
-			
-			$('.tooltip').tooltipster({
+			  			
+			$('#hi').tooltipster({
 				content: '<img src="http://mediacdn.disqus.com/uploads/users/4210/450/avatar92.jpg?1359914706" width="20" height="20" />',
 				functionBefore: function(origin, continueTooltip) {
 					continueTooltip();
@@ -33,6 +33,8 @@
 					}
 				}
 			});
+			
+			$('.tooltip').tooltipster();
 			
 		});
 	</script>
