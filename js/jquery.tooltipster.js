@@ -808,7 +808,18 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 	$.fn[pluginName] = function (options) {
 		// better API name spacing by glebtv
 		if (typeof options === 'string') {
-			var $t = $(this);
+			var $t = this;
+			
+			// if we're calling a container to interact with API's of tooltips inside it - select all those tooltip origins first
+			if ($t.data('plugin_tooltipster') == undefined) {
+				var query = $t.find('*');
+				$t = $();
+				query.each(function() {
+					if ($(this).data('plugin_tooltipster') !== undefined) {
+						$t.push($(this));
+					}
+				});
+			}
 			
 			$t.each(function() {
 				switch (options.toLowerCase()) {
