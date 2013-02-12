@@ -428,47 +428,60 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 									object.options.position = switchTo;
 									resetPosition = resetTo;
 								}
+                                
+                                if ($(window).height() + $(window).scrollTop() < offsetTop + containerHeight + tooltipHeight + offsetY + 11) {
+                                    object.options.position = switchTo;
+                                    resetPosition = resetTo;
+                                    processTopPositions(false);
+                                }
 							}
 										
-							if(object.options.position == 'top') {
-								var leftDifference = (offsetLeft + tooltipWidth) - (offsetLeft + containerWidth);
-								myLeft =  (offsetLeft + offsetX) - (leftDifference / 2);
-								myTop = (offsetTop - tooltipHeight) - offsetY - 12;
-								dontGoOffScreen();
-								dontGoOffScreenY('bottom', 'top');
-							}
+                            function processTopPositions(testOffscreen) {
+                                if(object.options.position == 'top') {
+                                    var leftDifference = (offsetLeft + tooltipWidth) - (offsetLeft + containerWidth);
+                                    myLeft =  (offsetLeft + offsetX) - (leftDifference / 2);
+                                    myTop = (offsetTop - tooltipHeight) - offsetY - 12;
+                                    dontGoOffScreen();
+                                    if (testOffscreen) dontGoOffScreenY('bottom', 'top');
+                                }
+
+                                if(object.options.position == 'top-left') {
+                                    myLeft = offsetLeft + offsetX;
+                                    myTop = (offsetTop - tooltipHeight) - offsetY - 12;
+                                    dontGoOffScreen();
+                                    if (testOffscreen) dontGoOffScreenY('bottom-left', 'top-left');
+                                }
+
+                                if(object.options.position == 'top-right') {
+                                    myLeft = (offsetLeft + containerWidth + offsetX) - tooltipWidth;
+                                    myTop = (offsetTop - tooltipHeight) - offsetY - 12;
+                                    dontGoOffScreen();
+                                    if (testOffscreen) dontGoOffScreenY('bottom-right', 'top-right');
+                                }
+                            }
+                            
+                            processTopPositions(true);
 							
-							if(object.options.position == 'top-left') {
-								myLeft = offsetLeft + offsetX;
-								myTop = (offsetTop - tooltipHeight) - offsetY - 12;
-								dontGoOffScreen();
-								dontGoOffScreenY('bottom-left', 'top-left');
-							}
-							
-							if(object.options.position == 'top-right') {
-								myLeft = (offsetLeft + containerWidth + offsetX) - tooltipWidth;
-								myTop = (offsetTop - tooltipHeight) - offsetY - 12;
-								dontGoOffScreen();
-								dontGoOffScreenY('bottom-right', 'top-right');
-							}
-							
-							if(object.options.position == 'bottom') {
+                            if(object.options.position == 'bottom') {
 								var leftDifference = (offsetLeft + tooltipWidth) - (offsetLeft + containerWidth);
 								myLeft =  offsetLeft - (leftDifference / 2) + offsetX;
 								myTop = (offsetTop + containerHeight) + offsetY + 12;
 								dontGoOffScreen();
+                                dontGoOffScreenY('top', 'bottom');
 							}
 							
 							if(object.options.position == 'bottom-left') {
 								myLeft = offsetLeft + offsetX;
 								myTop = (offsetTop + containerHeight) + offsetY + 12;
 								dontGoOffScreen();
+                                dontGoOffScreenY('top-left', 'bottom-left');
 							}
 							
 							if(object.options.position == 'bottom-right') {
 								myLeft = (offsetLeft + containerWidth + offsetX) - tooltipWidth;
 								myTop = (offsetTop + containerHeight) + offsetY + 12;
 								dontGoOffScreen();
+                                dontGoOffScreenY('top-right', 'bottom-right');
 							}
 							
 							if(object.options.position == 'left') {
