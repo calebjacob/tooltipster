@@ -203,35 +203,174 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				});
 			}
 			
-			// delay the showing of the tooltip according to the delay time
-			$this.clearQueue().delay(object.options.delay).queue(function() {
+			// continue if this tooltip is enabled
+			if (!$this.hasClass('tooltipster-disable')) {
 			
-				// call our custom function before continuing
-				object.options.functionBefore($this, function() {
-					
-					// if this origin already has its tooltip open, keep it open and do nothing else
-					if (($this.data('tooltipster') !== undefined) && ($this.data('tooltipster') !== '')) {
-						var tooltipster = $this.data('tooltipster');
+				// delay the showing of the tooltip according to the delay time
+				$this.clearQueue().delay(object.options.delay).queue(function() {
+				
+					// call our custom function before continuing
+					object.options.functionBefore($this, function() {
 						
-						if (!tooltipster.hasClass('tooltipster-kill')) {
-
-							var animation = 'tooltipster-'+ object.options.animation;
+						// if this origin already has its tooltip open, keep it open and do nothing else
+						if (($this.data('tooltipster') !== undefined) && ($this.data('tooltipster') !== '')) {
+							var tooltipster = $this.data('tooltipster');
 							
-							tooltipster.removeClass('tooltipster-dying');
+							if (!tooltipster.hasClass('tooltipster-kill')) {
+	
+								var animation = 'tooltipster-'+ object.options.animation;
+								
+								tooltipster.removeClass('tooltipster-dying');
+								
+								if (transitionSupport == true) {
+									tooltipster.clearQueue().addClass(animation +'-show');
+								}
+								
+								// if we have a timer set, we need to reset it
+								if (object.options.timer > 0) {
+									var timer = tooltipster.data('tooltipsterTimer');
+									clearTimeout(timer);
+														
+									timer = setTimeout(function() {
+										tooltipster.data('tooltipsterTimer', undefined);
+										object.hideTooltip();
+									}, object.options.timer);
+									
+									tooltipster.data('tooltipsterTimer', timer);
+								}
+								
+								// if this is a touch device, hide the tooltip on body touch
+								if ((object.options.touchDevices == true) && (is_touch_device())) {
+									$('body').bind('touchstart', function(event) {
+										if (object.options.interactive == true) {
+											var touchTarget = $(event.target);
+											var closeTooltip = true;
+											
+											touchTarget.parents().each(function() {
+												if ($(this).hasClass('tooltipster-base')) {
+													closeTooltip = false;
+												}
+											});
+											
+											if (closeTooltip == true) {
+												object.hideTooltip();
+												$('body').unbind('touchstart');
+											}
+										}
+										else {
+											object.hideTooltip();
+											$('body').unbind('touchstart');
+										}
+									});
+								}
+							}
+						}
+						
+						// if the tooltip isn't already open, open that sucker up!
+						else {
+							// disable horizontal scrollbar to keep overflowing tooltips from jacking with it
+							$('body').css('overflow-x', 'hidden');
 							
+							// get the content for the tooltip
+							var content = $this.data('tooltipsterContent');
+							
+							// get some other settings related to building the tooltip
+							var theme = object.options.theme;
+							var themeClass = theme.replace('.', '');
+							var animation = 'tooltipster-'+object.options.animation;
+							var animationSpeed = '-webkit-transition-duration: '+ object.options.speed +'ms; -webkit-animation-duration: '+ object.options.speed +'ms; -moz-transition-duration: '+ object.options.speed +'ms; -moz-animation-duration: '+ object.options.speed +'ms; -o-transition-duration: '+ object.options.speed +'ms; -o-animation-duration: '+ object.options.speed +'ms; -ms-transition-duration: '+ object.options.speed +'ms; -ms-animation-duration: '+ object.options.speed +'ms; transition-duration: '+ object.options.speed +'ms; animation-duration: '+ object.options.speed +'ms;';
+							var fixedWidth = object.options.fixedWidth > 0 ? 'width:'+ object.options.fixedWidth +'px;' : '';
+							var maxWidth = object.options.maxWidth > 0 ? 'max-width:'+ object.options.maxWidth +'px;' : '';
+							var pointerEvents = object.options.interactive == true ? 'pointer-events: auto;' : '';
+												
+							// build the base of our tooltip
+							var tooltipster = $('<div class="tooltipster-base '+ themeClass +' '+ animation +'" style="'+ fixedWidth +' '+ maxWidth +' '+ pointerEvents +' '+ animationSpeed +'"><div class="tooltipster-content">'+content+'</div></div>');
+							tooltipster.appendTo('body');
+							
+							// attach the tooltip to its origin
+							$this.data('tooltipster', tooltipster);
+							tooltipster.data('origin', $this);
+							
+							// do all the crazy calculations and positioning
+							object.positionTooltip();
+							
+							// call our custom callback since the content of the tooltip is now part of the DOM
+							object.options.functionReady($this, tooltipster);
+							
+							// animate in the tooltip
 							if (transitionSupport == true) {
-								tooltipster.clearQueue().addClass(animation +'-show');
+								tooltipster.addClass(animation + '-show');
+							}
+							else {
+								tooltipster.css('display', 'none').removeClass(animation).fadeIn(object.options.speed);
 							}
 							
-							// if we have a timer set, we need to reset it
-							if (object.options.timer > 0) {
-								var timer = tooltipster.data('tooltipsterTimer');
-								clearTimeout(timer);
-													
-								timer = setTimeout(function() {
+							// check to see if our tooltip content changes or its origin is removed while the tooltip is alive
+							var currentTooltipContent = content;
+							var contentUpdateChecker = setInterval(function() {		
+								var newTooltipContent = $this.data('tooltipsterContent');
+								
+								// if this tooltip's origin is removed, remove the tooltip
+								if ($('body').find($this).length == 0) {
+									tooltipster.addClass('tooltipster-dying');
+									object.hideTooltip();
+								}
+								
+								// if the content changed for the tooltip, update it											
+								else if ((currentTooltipContent !== newTooltipContent) && (newTooltipContent !== '')) {
+									currentTooltipContent = newTooltipContent;
+									
+									// set the new content in the tooltip
+									tooltipster.find('.tooltipster-content').html(newTooltipContent);
+									
+									// if we want to play a little animation showing the content changed
+									if (object.options.updateAnimation == true) {
+										tooltipster.css({
+											'width': '',
+											'-webkit-transition-duration': object.options.speed + 'ms',
+											'-moz-transition-duration': object.options.speed + 'ms',
+											'-o-transition-duration': object.options.speed + 'ms',
+											'-ms-transition-duration': object.options.speed + 'ms',
+											'transition-duration': object.options.speed + 'ms',
+											'-webkit-transition-property': '-webkit-transform',
+											'-moz-transition-property': '-moz-transform',
+											'-o-transition-property': '-o-transform',
+											'-ms-transition-property': '-ms-transform',
+											'transition-property': 'transform'
+										}).addClass('tooltipster-content-changing');
+										
+										// reset the CSS transitions and finish the change animation
+										setTimeout(function() {
+											tooltipster.removeClass('tooltipster-content-changing');
+											// after the changing animation has completed, reset the CSS transitions
+											setTimeout(function() {
+												tooltipster.css({
+													'-webkit-transition-property': '',
+													'-moz-transition-property': '',
+													'-o-transition-property': '',
+													'-ms-transition-property': '',
+													'transition-property': ''
+												});
+											}, object.options.speed);
+										}, object.options.speed);
+									}
+									
+									// reposition and resize the tooltip
+									object.positionTooltip();
+								}
+								
+								// if the tooltip is closed or origin is removed, clear this interval
+								if (($('body').find(tooltipster).length == 0) || ($('body').find($this).length == 0)) {
+									clearInterval(contentUpdateChecker);
+								}
+							}, 200);
+							
+							// if we have a timer set, let the countdown begin!
+							if (object.options.timer > 0) {							
+								var timer = setTimeout(function() {
 									tooltipster.data('tooltipsterTimer', undefined);
 									object.hideTooltip();
-								}, object.options.timer);
+								}, object.options.timer + object.options.speed);
 								
 								tooltipster.data('tooltipsterTimer', timer);
 							}
@@ -240,9 +379,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							if ((object.options.touchDevices == true) && (is_touch_device())) {
 								$('body').bind('touchstart', function(event) {
 									if (object.options.interactive == true) {
+										
 										var touchTarget = $(event.target);
 										var closeTooltip = true;
-										
+																			
 										touchTarget.parents().each(function() {
 											if ($(this).hasClass('tooltipster-base')) {
 												closeTooltip = false;
@@ -260,154 +400,17 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 									}
 								});
 							}
-						}
-					}
-					
-					// if the tooltip isn't already open, open that sucker up!
-					else {
-						// disable horizontal scrollbar to keep overflowing tooltips from jacking with it
-						$('body').css('overflow-x', 'hidden');
-						
-						// get the content for the tooltip
-						var content = $this.data('tooltipsterContent');
-						
-						// get some other settings related to building the tooltip
-						var theme = object.options.theme;
-						var themeClass = theme.replace('.', '');
-						var animation = 'tooltipster-'+object.options.animation;
-						var animationSpeed = '-webkit-transition-duration: '+ object.options.speed +'ms; -webkit-animation-duration: '+ object.options.speed +'ms; -moz-transition-duration: '+ object.options.speed +'ms; -moz-animation-duration: '+ object.options.speed +'ms; -o-transition-duration: '+ object.options.speed +'ms; -o-animation-duration: '+ object.options.speed +'ms; -ms-transition-duration: '+ object.options.speed +'ms; -ms-animation-duration: '+ object.options.speed +'ms; transition-duration: '+ object.options.speed +'ms; animation-duration: '+ object.options.speed +'ms;';
-						var fixedWidth = object.options.fixedWidth > 0 ? 'width:'+ object.options.fixedWidth +'px;' : '';
-						var maxWidth = object.options.maxWidth > 0 ? 'max-width:'+ object.options.maxWidth +'px;' : '';
-						var pointerEvents = object.options.interactive == true ? 'pointer-events: auto;' : '';
-											
-						// build the base of our tooltip
-						var tooltipster = $('<div class="tooltipster-base '+ themeClass +' '+ animation +'" style="'+ fixedWidth +' '+ maxWidth +' '+ pointerEvents +' '+ animationSpeed +'"><div class="tooltipster-content">'+content+'</div></div>');
-						tooltipster.appendTo('body');
-						
-						// attach the tooltip to its origin
-						$this.data('tooltipster', tooltipster);
-						tooltipster.data('origin', $this);
-						
-						// do all the crazy calculations and positioning
-						object.positionTooltip();
-						
-						// call our custom callback since the content of the tooltip is now part of the DOM
-						object.options.functionReady($this, tooltipster);
-						
-						// animate in the tooltip
-						if (transitionSupport == true) {
-							tooltipster.addClass(animation + '-show');
-						}
-						else {
-							tooltipster.css('display', 'none').removeClass(animation).fadeIn(object.options.speed);
-						}
-						
-						// check to see if our tooltip content changes or its origin is removed while the tooltip is alive
-						var currentTooltipContent = content;
-						var contentUpdateChecker = setInterval(function() {		
-							var newTooltipContent = $this.data('tooltipsterContent');
 							
-							// if this tooltip's origin is removed, remove the tooltip
-							if ($('body').find($this).length == 0) {
-								tooltipster.addClass('tooltipster-dying');
+							// if this is an interactive tooltip activated by a click, close the tooltip when you hover off the tooltip
+							tooltipster.mouseleave(function() {
 								object.hideTooltip();
-							}
-							
-							// if the content changed for the tooltip, update it											
-							else if ((currentTooltipContent !== newTooltipContent) && (newTooltipContent !== '')) {
-								currentTooltipContent = newTooltipContent;
-								
-								// set the new content in the tooltip
-								tooltipster.find('.tooltipster-content').html(newTooltipContent);
-								
-								// if we want to play a little animation showing the content changed
-								if (object.options.updateAnimation == true) {
-									tooltipster.css({
-										'width': '',
-										'-webkit-transition-duration': object.options.speed + 'ms',
-										'-moz-transition-duration': object.options.speed + 'ms',
-										'-o-transition-duration': object.options.speed + 'ms',
-										'-ms-transition-duration': object.options.speed + 'ms',
-										'transition-duration': object.options.speed + 'ms',
-										'-webkit-transition-property': '-webkit-transform',
-										'-moz-transition-property': '-moz-transform',
-										'-o-transition-property': '-o-transform',
-										'-ms-transition-property': '-ms-transform',
-										'transition-property': 'transform'
-									}).addClass('tooltipster-content-changing');
-									
-									// reset the CSS transitions and finish the change animation
-									setTimeout(function() {
-										tooltipster.removeClass('tooltipster-content-changing');
-										// after the changing animation has completed, reset the CSS transitions
-										setTimeout(function() {
-											tooltipster.css({
-												'-webkit-transition-property': '',
-												'-moz-transition-property': '',
-												'-o-transition-property': '',
-												'-ms-transition-property': '',
-												'transition-property': ''
-											});
-										}, object.options.speed);
-									}, object.options.speed);
-								}
-								
-								// reposition and resize the tooltip
-								object.positionTooltip();
-							}
-							
-							// if the tooltip is closed or origin is removed, clear this interval
-							if (($('body').find(tooltipster).length == 0) || ($('body').find($this).length == 0)) {
-								clearInterval(contentUpdateChecker);
-							}
-						}, 200);
-						
-						// if we have a timer set, let the countdown begin!
-						if (object.options.timer > 0) {							
-							var timer = setTimeout(function() {
-								tooltipster.data('tooltipsterTimer', undefined);
-								object.hideTooltip();
-							}, object.options.timer + object.options.speed);
-							
-							tooltipster.data('tooltipsterTimer', timer);
-						}
-						
-						// if this is a touch device, hide the tooltip on body touch
-						if ((object.options.touchDevices == true) && (is_touch_device())) {
-							$('body').bind('touchstart', function(event) {
-								if (object.options.interactive == true) {
-									
-									var touchTarget = $(event.target);
-									var closeTooltip = true;
-																		
-									touchTarget.parents().each(function() {
-										if ($(this).hasClass('tooltipster-base')) {
-											closeTooltip = false;
-										}
-									});
-									
-									if (closeTooltip == true) {
-										object.hideTooltip();
-										$('body').unbind('touchstart');
-									}
-								}
-								else {
-									object.hideTooltip();
-									$('body').unbind('touchstart');
-								}
 							});
 						}
-						
-						// if this is an interactive tooltip activated by a click, close the tooltip when you hover off the tooltip
-						tooltipster.mouseleave(function() {
-							object.hideTooltip();
-						});
-					}
+					});
+					
+					$this.dequeue();
 				});
-				
-				$this.dequeue();
-			});
-			
+			}
 		},
 		
 		hideTooltip: function(options) {
@@ -841,6 +844,14 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 	
 					case 'hide':
 						$(this).data('plugin_tooltipster').hideTooltip();
+						break;
+					
+					case 'disable':
+						$(this).addClass('tooltipster-disable');
+						break;
+					
+					case 'enable':
+						$(this).removeClass('tooltipster-disable');
 						break;
 	
 					case 'destroy':
