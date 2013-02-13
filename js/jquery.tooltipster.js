@@ -348,7 +348,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							// if the origin is removed, remove the tooltip
 							if ($('body').find($this).length == 0) {
 								object.hideTooltip();
-								console.log(1);
 							}
 							
 							// if the tooltip is closed, stop this interval
@@ -810,6 +809,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 		// better API name spacing by glebtv
 		if (typeof options === 'string') {
 			var $t = this;
+			var newContent = arguments[1];
 			
 			// if we're calling a container to interact with API's of tooltips inside it - select all those tooltip origins first
 			if ($t.data('plugin_tooltipster') == undefined) {
@@ -822,7 +822,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				});
 			}
 			
-			// for each origin, run the API call
 			$t.each(function() {
 				switch (options.toLowerCase()) {
 					case 'show':
@@ -839,7 +838,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						break;
 	
 					case 'update':
-						$(this).data('tooltipsterContent', arguments[1]);
+						$(this).data('tooltipsterContent', newContent);
 						break;
 						
 					case 'reposition':
