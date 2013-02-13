@@ -885,8 +885,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   	
   	// on window resize, reposition and open tooltips
   	$(window).on('resize.tooltipster', function() {
-	  	var origin = $('.tooltipster-base').data('origin')
-	  	origin.tooltipster('reposition');
+	  	var origin = $('.tooltipster-base').data('origin');
+	  		  	
+	  	if ((origin !== null) && (origin !== undefined)) {
+	  		origin.tooltipster('reposition');
+	  	}
   	});
 
 })( jQuery, window, document );
