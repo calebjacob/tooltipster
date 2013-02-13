@@ -36,9 +36,14 @@ $('#hi').tooltipster({
 */
 			
 			$('.tooltip').tooltipster({
-				trigger: 'click',
-				onlyOne: false,
-				updateAnimation: false
+			    timer: 3000,
+			    trigger: 'click',
+			    functionReady: function() {
+			        $('.tooltip').tooltipster('disable');
+			    },
+			    functionAfter: function() {
+			        $('.tooltip').tooltipster('enable');
+			    }
 			});
 			
 		});

@@ -194,18 +194,18 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				$this = $this.data('tooltipsterIcon');
 			}
 			
-			// if we only want one tooltip open at a time, close all tooltips currently open
-			if (($('.tooltipster-base').not('.tooltipster-dying').length > 0) && (object.options.onlyOne == true)) {
-				$('.tooltipster-base').not('.tooltipster-dying').not($this.data('tooltipster')).each(function() {
-					$(this).addClass('tooltipster-kill');
-					var origin = $(this).data('origin');
-					origin.data('plugin_tooltipster').hideTooltip();
-				});
-			}
-			
 			// continue if this tooltip is enabled
 			if (!$this.hasClass('tooltipster-disable')) {
 			
+				// if we only want one tooltip open at a time, close all tooltips currently open
+				if (($('.tooltipster-base').not('.tooltipster-dying').length > 0) && (object.options.onlyOne == true)) {
+					$('.tooltipster-base').not('.tooltipster-dying').not($this.data('tooltipster')).each(function() {
+						$(this).addClass('tooltipster-kill');
+						var origin = $(this).data('origin');
+						origin.data('plugin_tooltipster').hideTooltip();
+					});
+				}
+						
 				// delay the showing of the tooltip according to the delay time
 				$this.clearQueue().delay(object.options.delay).queue(function() {
 				
