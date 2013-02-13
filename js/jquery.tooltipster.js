@@ -304,8 +304,14 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						// check to see if our tooltip content changes or its origin is removed while the tooltip is alive
 						var currentTooltipContent = content;
 						var contentUpdateChecker = setInterval(function() {		
-							var newTooltipContent = $this.data('tooltipsterContent');												
-							if ((currentTooltipContent !== newTooltipContent) && (newTooltipContent !== '')) {
+							var newTooltipContent = $this.data('tooltipsterContent');
+							
+							if ($('body').find($this).length == 0) {
+								tooltipster.addClass('tooltipster-dying');
+								object.hideTooltip();
+							}
+																			
+							else if ((currentTooltipContent !== newTooltipContent) && (newTooltipContent !== '')) {
 								currentTooltipContent = newTooltipContent;
 								
 								tooltipster.find('.tooltipster-content').html(newTooltipContent);
@@ -344,13 +350,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 								
 								object.positionTooltip();
 							}
-
-							// if the origin is removed, remove the tooltip
-							if ($('body').find($this).length == 0) {
-								object.hideTooltip();
-							}
 							
-							// if the tooltip is closed, stop this interval
+							// if the tooltip is closed or origin is removed, stop this interval
 							if (($('body').find(tooltipster).length == 0) || ($('body').find($this).length == 0)) {
 								clearInterval(contentUpdateChecker);
 							}
@@ -405,7 +406,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 		},
 		
 		hideTooltip: function(options) {
-			
+						
 			var $this = $(this.element);
 			var object = this;
 			
@@ -415,6 +416,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			}
 			
 			var tooltipster = $this.data('tooltipster');
+			
+			// if the origin has been removed, find all tooltips assigned to death
+			if (tooltipster == undefined) {
+				tooltipster = $('.tooltipster-dying');
+			}
 			
 			// clear any possible queues handling delays and such
 			$this.clearQueue();
@@ -808,7 +814,19 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 	$.fn[pluginName] = function (options) {
 		// better API name spacing by glebtv
 		if (typeof options === 'string') {
-			var $t = $(this);
+			var $t = this;
+			var newContent = arguments[1];
+			
+			// if we're calling a container to interact with API's of tooltips inside it - select all those tooltip origins first
+			if ($t.data('plugin_tooltipster') == undefined) {
+				var query = $t.find('*');
+				$t = $();
+				query.each(function() {
+					if ($(this).data('plugin_tooltipster') !== undefined) {
+						$t.push($(this));
+					}
+				});
+			}
 			
 			$t.each(function() {
 				switch (options.toLowerCase()) {
@@ -826,7 +844,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						break;
 	
 					case 'update':
-						$(this).data('tooltipsterContent', arguments[1]);
+						$(this).data('tooltipsterContent', newContent);
 						break;
 						
 					case 'reposition':
