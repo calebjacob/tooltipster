@@ -24,7 +24,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			functionBefore: function(origin, continueTooltip) {
 				continueTooltip();
 			},
-			functionReady: function(origin, tooltipster) {},
+			functionReady: function(origin, tooltip) {},
 			functionAfter: function(origin) {},
 			icon: '(?)',
 			iconDesktop: false,
@@ -40,7 +40,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			timer: 0,
 			theme: '.tooltipster-default',
 			touchDevices: true,
-			trigger: 'hover'
+			trigger: 'hover',
+			updateAnimation: true
 		};
 	
 	function Plugin(element, options) {
@@ -306,52 +307,56 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						var contentUpdateChecker = setInterval(function() {		
 							var newTooltipContent = $this.data('tooltipsterContent');
 							
+							// if this tooltip's origin is removed, remove the tooltip
 							if ($('body').find($this).length == 0) {
 								tooltipster.addClass('tooltipster-dying');
 								object.hideTooltip();
 							}
-																			
+							
+							// if the content changed for the tooltip, update it											
 							else if ((currentTooltipContent !== newTooltipContent) && (newTooltipContent !== '')) {
 								currentTooltipContent = newTooltipContent;
 								
+								// set the new content in the tooltip
 								tooltipster.find('.tooltipster-content').html(newTooltipContent);
-								tooltipster.css({
-									'width': '',
-									'-webkit-transition-duration': object.options.speed + 'ms',
-									'-moz-transition-duration': object.options.speed + 'ms',
-									'-o-transition-duration': object.options.speed + 'ms',
-									'-ms-transition-duration': object.options.speed + 'ms',
-									'transition-duration': object.options.speed + 'ms',
-									'-webkit-transition-property': '-webkit-transform',
-									'-moz-transition-property': '-moz-transform',
-									'-o-transition-property': '-o-transform',
-									'-ms-transition-property': '-ms-transform',
-									'transition-property': 'transform'
-								}).addClass('tooltipster-content-changing');
 								
-								// reset the CSS transitions and finish the change animation
-								setTimeout(function() {
-									tooltipster.removeClass('tooltipster-content-changing');
-									// after the changing animation has completed, reset the CSS transitions
+								// if we want to play a little animation showing the content changed
+								if (object.options.updateAnimation == true) {
+									tooltipster.css({
+										'width': '',
+										'-webkit-transition-duration': object.options.speed + 'ms',
+										'-moz-transition-duration': object.options.speed + 'ms',
+										'-o-transition-duration': object.options.speed + 'ms',
+										'-ms-transition-duration': object.options.speed + 'ms',
+										'transition-duration': object.options.speed + 'ms',
+										'-webkit-transition-property': '-webkit-transform',
+										'-moz-transition-property': '-moz-transform',
+										'-o-transition-property': '-o-transform',
+										'-ms-transition-property': '-ms-transform',
+										'transition-property': 'transform'
+									}).addClass('tooltipster-content-changing');
+									
+									// reset the CSS transitions and finish the change animation
 									setTimeout(function() {
-										tooltipster.css({
-											'-webkit-transition-property': '',
-											'-moz-transition-property': '',
-											'-o-transition-property': '',
-											'-ms-transition-property': '',
-											'transition-property': ''
-										});
+										tooltipster.removeClass('tooltipster-content-changing');
+										// after the changing animation has completed, reset the CSS transitions
+										setTimeout(function() {
+											tooltipster.css({
+												'-webkit-transition-property': '',
+												'-moz-transition-property': '',
+												'-o-transition-property': '',
+												'-ms-transition-property': '',
+												'transition-property': ''
+											});
+										}, object.options.speed);
 									}, object.options.speed);
-								}, object.options.speed);
+								}
 								
-								tooltipWidth = tooltipster.outerWidth(false);
-								tooltipInnerWidth = tooltipster.innerWidth();
-								tooltipHeight = tooltipster.outerHeight(false);
-								
+								// reposition and resize the tooltip
 								object.positionTooltip();
 							}
 							
-							// if the tooltip is closed or origin is removed, stop this interval
+							// if the tooltip is closed or origin is removed, clear this interval
 							if (($('body').find(tooltipster).length == 0) || ($('body').find($this).length == 0)) {
 								clearInterval(contentUpdateChecker);
 							}
