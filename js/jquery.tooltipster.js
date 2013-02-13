@@ -24,7 +24,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			functionBefore: function(origin, continueTooltip) {
 				continueTooltip();
 			},
-			functionReady: function(origin, tooltipster) {},
+			functionReady: function(origin, tooltip) {},
 			functionAfter: function(origin) {},
 			icon: '(?)',
 			iconDesktop: false,
