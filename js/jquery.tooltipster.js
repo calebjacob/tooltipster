@@ -325,34 +325,36 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 									
 									// if we want to play a little animation showing the content changed
 									if (object.options.updateAnimation == true) {
-										tooltipster.css({
-											'width': '',
-											'-webkit-transition-duration': object.options.speed + 'ms',
-											'-moz-transition-duration': object.options.speed + 'ms',
-											'-o-transition-duration': object.options.speed + 'ms',
-											'-ms-transition-duration': object.options.speed + 'ms',
-											'transition-duration': object.options.speed + 'ms',
-											'-webkit-transition-property': '-webkit-transform',
-											'-moz-transition-property': '-moz-transform',
-											'-o-transition-property': '-o-transform',
-											'-ms-transition-property': '-ms-transform',
-											'transition-property': 'transform'
-										}).addClass('tooltipster-content-changing');
-										
-										// reset the CSS transitions and finish the change animation
-										setTimeout(function() {
-											tooltipster.removeClass('tooltipster-content-changing');
-											// after the changing animation has completed, reset the CSS transitions
+										if (supportsTransitions()) {
+											tooltipster.css({
+												'width': '',
+												'-webkit-transition': 'all ' + object.options.speed + 'ms, width 0ms, height 0ms, left 0ms, top 0ms',
+												'-moz-transition': 'all ' + object.options.speed + 'ms, width 0ms, height 0ms, left 0ms, top 0ms',
+												'-o-transition': 'all ' + object.options.speed + 'ms, width 0ms, height 0ms, left 0ms, top 0ms',
+												'-ms-transition': 'all ' + object.options.speed + 'ms, width 0ms, height 0ms, left 0ms, top 0ms',
+												'transition': 'all ' + object.options.speed + 'ms, width 0ms, height 0ms, left 0ms, top 0ms'
+											}).addClass('tooltipster-content-changing');
+											
+											// reset the CSS transitions and finish the change animation
 											setTimeout(function() {
-												tooltipster.css({
-													'-webkit-transition-property': '',
-													'-moz-transition-property': '',
-													'-o-transition-property': '',
-													'-ms-transition-property': '',
-													'transition-property': ''
-												});
+												tooltipster.removeClass('tooltipster-content-changing');
+												// after the changing animation has completed, reset the CSS transitions
+												setTimeout(function() {
+													tooltipster.css({
+														'-webkit-transition': object.options.speed + 'ms',
+														'-moz-transition': object.options.speed + 'ms',
+														'-o-transition': object.options.speed + 'ms',
+														'-ms-transition': object.options.speed + 'ms',
+														'transition': object.options.speed + 'ms'
+													});
+												}, object.options.speed);
 											}, object.options.speed);
-										}, object.options.speed);
+										}
+										else {
+											tooltipster.fadeTo(object.options.speed, 0.5, function() {
+												tooltipster.fadeTo(object.options.speed, 1);
+											});
+										}
 									}
 									
 									// reposition and resize the tooltip

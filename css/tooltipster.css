@@ -266,8 +266,9 @@ html {
 }
 
 
-/* CSS transition for when contenting is changing in a tooltip that is still open */
+/* CSS transition for when contenting is changing in a tooltip that is still open. The only properties that will NOT transition are: width, height, top, and left */
 .tooltipster-content-changing {
+	opacity: 0.5;
 	-webkit-transform: scale(1.1, 1.1);
 	-moz-transform: scale(1.1, 1.1);
 	-o-transform: scale(1.1, 1.1);
