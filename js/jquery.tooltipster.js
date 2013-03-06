@@ -134,26 +134,22 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						if (this.options.interactive == true) {
 							$this.on('mouseleave.tooltipster', function() {
 								var tooltipster = $this.data('tooltipster');
-								var keepAlive = false;
+								var tolerance;
 								
 								if ((tooltipster !== undefined) && (tooltipster !== '')) {
+									tolerance = setTimeout(function() {
+										object.hideTooltip();
+									}, object.options.interactiveTolerance);
+								
 									tooltipster.mouseenter(function() {
-										keepAlive = true;
-									});
-									tooltipster.mouseleave(function() {
-										keepAlive = false;
+										clearTimeout(tolerance);
 									});
 									
-									var tolerance = setTimeout(function() {
-										if (keepAlive == true) {
-											tooltipster.mouseleave(function() {
-												object.hideTooltip();
-											});
-										}
-										else {
+									tooltipster.mouseleave(function() {
+										tolerance = setTimeout(function() {
 											object.hideTooltip();
-										}
-									}, object.options.interactiveTolerance);
+										}, object.options.interactiveTolerance);
+									});
 								}
 								else {
 									object.hideTooltip();
@@ -404,9 +400,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							}
 							
 							// if this is an interactive tooltip activated by a click, close the tooltip when you hover off the tooltip
-							tooltipster.mouseleave(function() {
-								object.hideTooltip();
-							});
+							if (object.options.trigger == 'click') {
+								tooltipster.mouseleave(function() {
+									object.hideTooltip();
+								});
+							}
 						}
 					});
 					
