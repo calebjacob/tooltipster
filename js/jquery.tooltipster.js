@@ -15,6 +15,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 	var pluginName = "tooltipster",
 		defaults = {
 			animation: 'fade',
+            appendTo: 'body',
 			arrow: true,
 			arrowColor: '',
 			content: '',
@@ -285,7 +286,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 												
 							// build the base of our tooltip
 							var tooltipster = $('<div class="tooltipster-base '+ themeClass +' '+ animation +'" style="'+ fixedWidth +' '+ maxWidth +' '+ pointerEvents +' '+ animationSpeed +'"><div class="tooltipster-content">'+content+'</div></div>');
-							tooltipster.appendTo('body');
+							tooltipster.appendTo(object.options.appendTo);
 							
 							// attach the tooltip to its origin
 							$this.data('tooltipster', tooltipster);
