@@ -126,13 +126,13 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				
 					// if hover events are set to show and hide the tooltip, attach those events respectively
 					if (this.options.trigger == 'hover') {
-						$this.on('mouseenter.tooltipster', function() {
+						$this.bind('mouseenter.tooltipster', function() {
 							object.showTooltip();
 						});
 						
 						// if this is an interactive tooltip, delay getting rid of the tooltip right away so you have a chance to hover on the tooltip
 						if (this.options.interactive == true) {
-							$this.on('mouseleave.tooltipster', function() {
+							$this.bind('mouseleave.tooltipster', function() {
 								var tooltipster = $this.data('tooltipster');
 								var keepAlive = false;
 								
@@ -163,7 +163,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						
 						// if this is a dumb tooltip, just get rid of it on mouseleave
 						else {
-							$this.on('mouseleave.tooltipster', function() {
+							$this.bind('mouseleave.tooltipster', function() {
 								object.hideTooltip();
 							});
 						}
@@ -171,7 +171,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					
 					// if click events are set to show and hide the tooltip, attach those events respectively
 					if (this.options.trigger == 'click') {
-						$this.on('click.tooltipster', function() {
+						$this.bind('click.tooltipster', function() {
 							if (($this.data('tooltipster') == '') || ($this.data('tooltipster') == undefined)) {
 								object.showTooltip();
 							}
@@ -902,7 +902,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   	}
   	
   	// on window resize, reposition and open tooltips
-  	$(window).on('resize.tooltipster', function() {
+  	$(window).bind('resize.tooltipster', function() {
 	  	var origin = $('.tooltipster-base').data('origin');
 	  		  	
 	  	if ((origin !== null) && (origin !== undefined)) {
