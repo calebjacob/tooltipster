@@ -1,6 +1,6 @@
 /*
 
-Tooltipster 2.1 | 2/12/13
+Tooltipster 2.1 | 2/12/13 + Yappli's modifications line 287, 288, 289, 290 | 4/23/13 (https://github.com/Yappli)
 A rockin' custom tooltip jQuery plugin
 
 Developed by: Caleb Jacob - calebjacob.com
@@ -284,7 +284,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							var pointerEvents = object.options.interactive == true ? 'pointer-events: auto;' : '';
 												
 							// build the base of our tooltip
-							var tooltipster = $('<div class="tooltipster-base '+ themeClass +' '+ animation +'" style="'+ fixedWidth +' '+ maxWidth +' '+ pointerEvents +' '+ animationSpeed +'"><div class="tooltipster-content">'+content+'</div></div>');
+							var tooltipster = $('<div class="tooltipster-base '+ themeClass +' '+ animation +'" style="'+ fixedWidth +' '+ maxWidth +' '+ pointerEvents +' '+ animationSpeed +'"></div>');
+							var tooltipsterContent = $('<div class="tooltipster-content"></div>');
+				                        tooltipsterContent.html(content);
+				                        tooltipster.append(tooltipsterContent);
 							tooltipster.appendTo('body');
 							
 							// attach the tooltip to its origin
