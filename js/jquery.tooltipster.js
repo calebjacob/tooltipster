@@ -1,6 +1,6 @@
 /*
 
-Tooltipster 2.1 | 2/12/13
+Tooltipster 2.1.4 | 6/1/13
 A rockin' custom tooltip jQuery plugin
 
 Developed by: Caleb Jacob - calebjacob.com
@@ -78,6 +78,18 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     if (!supportsTransitions()) {
 	    transitionSupport = false;
     }
+    
+    // detect if this device is mouse driven over purely touch
+    var touchDevice = is_touch_device();
+    
+    // on mousemove, double confirm that this is a desktop - not a touch device
+  	$(window).on('mousemove.tooltipster', function() {
+	  	touchDevice = false;	  	
+	  	$(window).off('mousemove.tooltipster');
+  	});
+  	
+  	
+  	
     	
 	Plugin.prototype = {
 		
@@ -87,7 +99,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			var run = true;
 			
 			// if this is a touch device and touch devices are disabled, disable the plugin
-			if ((object.options.touchDevices == false) && (is_touch_device())) {
+			if ((object.options.touchDevices == false) && (touchDevice)) {
 				run = false;
 			}
 			
@@ -99,7 +111,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			if (run == true) {
 				
 				// detect if we're changing the tooltip origin to an icon
-				if ((this.options.iconDesktop == true) && (!is_touch_device()) || ((this.options.iconTouch == true) && (is_touch_device()))) {
+				if ((this.options.iconDesktop == true) && (!touchDevice) || ((this.options.iconTouch == true) && (touchDevice))) {
 					var transferContent = $this.attr('title');					
 					$this.removeAttr('title');
 					var theme = object.options.iconTheme;
@@ -115,7 +127,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				$this.removeAttr('title');
 				
 				// if this is a touch device, add some touch events to launch the tooltip
-				if ((this.options.touchDevices == true) && (is_touch_device())) {
+				if ((this.options.touchDevices == true) && (touchDevice) && ((this.options.trigger == 'click') || (this.options.trigger == 'hover'))) {
 					$this.bind('touchstart', function(element, options) {
 						object.showTooltip();
 					});
@@ -184,8 +196,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			}
 		},
 		
-		showTooltip: function(options) {
-			
+		showTooltip: function(options) {			
 			var $this = $(this.element);
 			var object = this;
 						
@@ -240,7 +251,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 								}
 								
 								// if this is a touch device, hide the tooltip on body touch
-								if ((object.options.touchDevices == true) && (is_touch_device())) {
+								if ((object.options.touchDevices == true) && (touchDevice)) {
 									$('body').bind('touchstart', function(event) {
 										if (object.options.interactive == true) {
 											var touchTarget = $(event.target);
@@ -284,7 +295,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							var pointerEvents = object.options.interactive == true ? 'pointer-events: auto;' : '';
 												
 							// build the base of our tooltip
-							var tooltipster = $('<div class="tooltipster-base '+ themeClass +' '+ animation +'" style="'+ fixedWidth +' '+ maxWidth +' '+ pointerEvents +' '+ animationSpeed +'"><div class="tooltipster-content">'+content+'</div></div>');
+							var tooltipster = $('<div class="tooltipster-base '+ themeClass +' '+ animation +'" style="'+ fixedWidth +' '+ maxWidth +' '+ pointerEvents +' '+ animationSpeed +'"></div>');
+							var tooltipsterHTML = $('<div class="tooltipster-content"></div>');
+							tooltipsterHTML.html(content);
+							tooltipster.append(tooltipsterHTML);
+							
+							
 							tooltipster.appendTo('body');
 							
 							// attach the tooltip to its origin
@@ -378,7 +394,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							}
 							
 							// if this is a touch device, hide the tooltip on body touch
-							if ((object.options.touchDevices == true) && (is_touch_device())) {
+							if ((object.options.touchDevices == true) && (touchDevice)) {
 								$('body').bind('touchstart', function(event) {
 									if (object.options.interactive == true) {
 										
@@ -861,8 +877,16 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						$(this).data('plugin_tooltipster', '').attr('title', $t.data('tooltipsterContent')).data('tooltipsterContent', '').data('plugin_tooltipster', '').off('mouseenter.tooltipster mouseleave.tooltipster click.tooltipster');
 						break;
 	
-					case 'update':
-						$(this).data('tooltipsterContent', newContent);
+					case 'update':						
+						if ($(this).data('tooltipsterIcon') == undefined) {
+							$(this).data('tooltipsterContent', newContent);
+						}
+						
+						else {
+							var $this = $(this).data('tooltipsterIcon');
+							$this.data('tooltipsterContent', newContent);
+						}
+						
 						break;
 						
 					case 'reposition':
@@ -882,7 +906,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			
 			var thisOptions = $(this).data('plugin_tooltipster').options;
 				
-			if ((thisOptions.iconDesktop == true) && (!is_touch_device()) || ((thisOptions.iconTouch == true) && (is_touch_device()))) {
+			if ((thisOptions.iconDesktop == true) && (!touchDevice) || ((thisOptions.iconTouch == true) && (touchDevice))) {
 				var transferObject = $(this).data('plugin_tooltipster');
 				$(this).next().data('plugin_tooltipster', transferObject);
 			}	
@@ -890,7 +914,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 	};
 	
 	// hide tooltips on orientation change
-	if (is_touch_device()) {
+	if (touchDevice) {
 		window.addEventListener("orientationchange", function() {
 			if ($('.tooltipster-base').length > 0) {
 				$('.tooltipster-base').each(function() {
@@ -909,5 +933,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 	  		origin.tooltipster('reposition');
 	  	}
   	});
+  	
 
 })( jQuery, window, document );
