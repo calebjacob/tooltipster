@@ -17,6 +17,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			animation: 'fade',
 			arrow: true,
 			arrowColor: '',
+			autoClose: true,
 			content: '',
 			delay: 200,
 			fixedWidth: 0,
@@ -421,6 +422,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							
 							// if this is an interactive tooltip activated by a click, close the tooltip when you hover off the tooltip
 							tooltipster.mouseleave(function() {
+							  if (object.options.autoClose == true)
 								object.hideTooltip();
 							});
 						}
