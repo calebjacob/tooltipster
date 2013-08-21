@@ -290,8 +290,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							var themeClass = theme.replace('.', '');
 							var animation = 'tooltipster-'+object.options.animation;
 							var animationSpeed = '-webkit-transition-duration: '+ object.options.speed +'ms; -webkit-animation-duration: '+ object.options.speed +'ms; -moz-transition-duration: '+ object.options.speed +'ms; -moz-animation-duration: '+ object.options.speed +'ms; -o-transition-duration: '+ object.options.speed +'ms; -o-animation-duration: '+ object.options.speed +'ms; -ms-transition-duration: '+ object.options.speed +'ms; -ms-animation-duration: '+ object.options.speed +'ms; transition-duration: '+ object.options.speed +'ms; animation-duration: '+ object.options.speed +'ms;';
-							var fixedWidth = object.options.fixedWidth > 0 ? 'width:'+ object.options.fixedWidth +'px;' : '';
-							var maxWidth = object.options.maxWidth > 0 ? 'max-width:'+ object.options.maxWidth +'px;' : '';
+							var fixedWidth = object.options.fixedWidth > 0 ? 'width:'+ Math.round(object.options.fixedWidth) +'px;' : '';
+							var maxWidth = object.options.maxWidth > 0 ? 'max-width:'+ Math.round(object.options.maxWidth) +'px;' : '';
 							var pointerEvents = object.options.interactive == true ? 'pointer-events: auto;' : '';
 												
 							// build the base of our tooltip
@@ -598,7 +598,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				// hardcoding the width and removing the padding fixed an issue with the tooltip width collapsing when the window size is small
 				if(object.options.fixedWidth == 0) {
 					tooltipster.css({
-						'width': tooltipInnerWidth + 'px',
+						'width': Math.round(tooltipInnerWidth) + 'px',
 						'padding-left': '0px',
 						'padding-right': '0px'
 					});
@@ -770,7 +770,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						arrowReposition = '';
 					}
 					else {
-						arrowReposition = 'left:'+ arrowReposition +'px;';
+						arrowReposition = 'left:'+ Math.round(arrowReposition) +'px;';
 					}
 										
 					// building the logic to create the border around the arrow of the tooltip
@@ -804,16 +804,16 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						var arrowBorderSize = '';
 						var arrowBorderColor = 'border-color: '+ tooltipBorderColor +';';
 						if (arrowClass.indexOf('bottom') !== -1) {
-							arrowBorderSize = 'margin-top: -'+ tooltipBorderWidth +'px;';
+							arrowBorderSize = 'margin-top: -'+ Math.round(tooltipBorderWidth) +'px;';
 						}
 						else if (arrowClass.indexOf('top') !== -1) {
-							arrowBorderSize = 'margin-bottom: -'+ tooltipBorderWidth +'px;';
+							arrowBorderSize = 'margin-bottom: -'+ Math.round(tooltipBorderWidth) +'px;';
 						}
 						else if (arrowClass.indexOf('left') !== -1) {
-							arrowBorderSize = 'margin-right: -'+ tooltipBorderWidth +'px;';
+							arrowBorderSize = 'margin-right: -'+ Math.round(tooltipBorderWidth) +'px;';
 						}
 						else if (arrowClass.indexOf('right') !== -1) {
-							arrowBorderSize = 'margin-left: -'+ tooltipBorderWidth +'px;';
+							arrowBorderSize = 'margin-left: -'+ Math.round(tooltipBorderWidth) +'px;';
 						}
 						arrowBorder = '<span class="tooltipster-arrow-border" style="'+ arrowBorderSize +' '+ arrowBorderColor +';"></span>';
 					}
@@ -827,7 +827,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				}
 				
 				// position the tooltip
-				tooltipster.css({'top': myTop+'px', 'left': myLeft+'px'});
+				tooltipster.css({'top': Math.round(myTop) + 'px', 'left': Math.round(myLeft) + 'px'});
 				
 				// if we had to change the position of the tooltip so it wouldn't go off screen, reset it
 				if (resetPosition !== undefined) {
