@@ -41,7 +41,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			theme: '.tooltipster-default',
 			touchDevices: true,
 			trigger: 'hover',
-			updateAnimation: true
+			updateAnimation: true,
+			hideOnMouseLeave: true
 		};
 	
 	function Plugin(element, options) {
@@ -421,7 +422,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							
 							// if this is an interactive tooltip activated by a click, close the tooltip when you hover off the tooltip
 							tooltipster.mouseleave(function() {
-								object.hideTooltip();
+								if (true === object.options.hideOnMouseLeave) {
+									object.hideTooltip();
+								}
 							});
 						}
 					});
