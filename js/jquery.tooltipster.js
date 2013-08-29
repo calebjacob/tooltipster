@@ -299,8 +299,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							var tooltipsterHTML = $('<div class="tooltipster-content"></div>');
 							tooltipsterHTML.html(content);
 							tooltipster.append(tooltipsterHTML);
-
-
+							
+							
 							tooltipster.appendTo('body');
 							
 							// attach the tooltip to its origin
@@ -309,7 +309,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							
 							// do all the crazy calculations and positioning
 							object.positionTooltip();
-
+							
 							// call our custom callback since the content of the tooltip is now part of the DOM
 							object.options.functionReady($this, tooltipster);
 							
@@ -877,27 +877,14 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						$(this).data('plugin_tooltipster', '').attr('title', $t.data('tooltipsterContent')).data('tooltipsterContent', '').data('plugin_tooltipster', '').off('mouseenter.tooltipster mouseleave.tooltipster click.tooltipster').unbind('touchstart');
 						break;
 	
-					case 'update':
-            // check "title" attribute if content argument isn't set
-            var content = newContent;
-						if (typeof content === 'undefined') {
-              if (!!$(this).attr('title')) {
-                content = $(this).attr('title');
-                $(this).removeAttr('title');
-              }
-              else {
-                // content argument and element title attribute are empty so nothing to change
-                break;
-              }
-            }
-
-            if ($(this).data('tooltipsterIcon') == undefined) {
-							$(this).data('tooltipsterContent', content);
+					case 'update':						
+						if ($(this).data('tooltipsterIcon') == undefined) {
+							$(this).data('tooltipsterContent', newContent);
 						}
 						
 						else {
 							var $this = $(this).data('tooltipsterIcon');
-							$this.data('tooltipsterContent', content);
+							$this.data('tooltipsterContent', newContent);
 						}
 						
 						break;
