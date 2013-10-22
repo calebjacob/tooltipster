@@ -465,7 +465,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					tooltipster.clearQueue().removeClass(animation +'-show').addClass('tooltipster-dying').delay(object.options.speed).queue(function() {
 						tooltipster.remove();
 						$this.data('tooltipster', '');
-						$('body').css('verflow-x', '');
+						$('body').css('overflow-x', '');
 						
 						// finally, call our custom callback function
 						object.options.functionAfter($this);
@@ -475,7 +475,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					tooltipster.clearQueue().addClass('tooltipster-dying').fadeOut(object.options.speed, function() {
 						tooltipster.remove();
 						$this.data('tooltipster', '');
-						$('body').css('verflow-x', '');
+						$('body').css('overflow-x', '');
 						
 						// finally, call our custom callback function
 						object.options.functionAfter($this);
