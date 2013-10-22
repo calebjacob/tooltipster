@@ -718,6 +718,18 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					}
 				}
 
+				if (object.options.position === 'left-top') {
+					myLeft = offsetLeft - offsetX - tooltipWidth - 12;
+					myLeftMirror = offsetLeft + offsetX + containerWidth + 12;
+ 					myTop =  offsetTop - 12 - offsetY;
+
+ 					// If it only goes off one side, flip it to the other side
+ 					if (myLeft < 0) {
+ 						myLeft = offsetLeft + offsetX + containerWidth + 12;
+						tooltipster.data('arrow-reposition', 'left-top');
+ 					}
+				}
+
 				if(object.options.position == 'right') {
 					myLeft = offsetLeft + offsetX + containerWidth + 12;
 					myLeftMirror = offsetLeft - offsetX - tooltipWidth - 12;
@@ -743,7 +755,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					}
 				}
 
- 				if(object.options.position == 'right-top') {
+ 				if (object.options.position === 'right-top') {
  					myLeft = offsetLeft + offsetX + containerWidth + 12;
  					myLeftMirror = offsetLeft - offsetX - tooltipWidth - 12;
  					myTop =  offsetTop - 12 - offsetY;
@@ -753,7 +765,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  						myLeft = offsetLeft - offsetX - tooltipWidth - 12;
  						tooltipster.data('arrow-reposition', 'right-top');
  					}
-         }
+        }
 
 				// if arrow is set true, style it and append it
 				if (object.options.arrow == true) {
@@ -781,6 +793,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						arrowClass = 'tooltipster-arrow-left';
 						arrowReposition = '';
 					}
+					else if (arrowReposition == 'left-top') {
+						arrowClass = 'tooltipster-arrow-right-top';
+						arrowReposition = '';
+					}
 					else if (arrowReposition == 'right-top') {
 						arrowClass = 'tooltipster-arrow-left-top';
 						arrowReposition = '';
@@ -798,7 +814,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						var tooltipBorderWidth = parseFloat(tooltipster.css('border-top-width'));
 						var tooltipBorderColor = tooltipster.css('border-top-color');
 					}
-					else if (object.options.position == 'left') {
+					else if ((object.options.position == 'left') || (object.options.position == 'left-top')) {
 						var tooltipBorderWidth = parseFloat(tooltipster.css('border-right-width'));
 						var tooltipBorderColor = tooltipster.css('border-right-color');
 					}
