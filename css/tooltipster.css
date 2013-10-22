@@ -128,6 +128,13 @@ html {
 	left: -8px;
 }
 
+.tooltipster-arrow-right .tooltipster-arrow-border {
+	border-top: 9px solid transparent !important;
+	border-bottom: 9px solid transparent !important;
+	border-right: 9px solid;
+	margin-top: -8px;
+}
+
 .tooltipster-arrow-right-top span {
 	border-top: 11px solid rgba(0, 0, 0, 0) !important;
 	border-bottom: 11px solid rgba(0, 0, 0, 0) !important;
@@ -145,13 +152,22 @@ html {
 	top: 20px;
 }
 
-.tooltipster-arrow-left-top .tooltipster-arrow-border {
-	border-top: 11px solid transparent !important;
-	border-bottom: 11px solid transparent !important;
-	border-left: 13px solid;
-	top: 20px;
+.tooltipster-arrow-right-bottom span {
+	border-top: 11px solid rgba(0, 0, 0, 0) !important;
+	border-bottom: 11px solid rgba(0, 0, 0, 0) !important;
+	border-right: 12px solid;
+	bottom: 20px;
 	margin-top: 7px;
-	right: -14px;
+	left: -12px;
+}
+
+.tooltipster-arrow-right-bottom .tooltipster-arrow-border {
+	border-top: 11px solid rgba(0, 0, 0, 0) !important;
+	border-bottom: 11px solid rgba(0, 0, 0, 0) !important;
+	border-right: 13px solid;
+	bottom: 20px;
+	margin-top: 7px;
+	left: -14px;
 }
 
 .tooltipster-arrow-left-top span {
@@ -163,11 +179,31 @@ html {
 	right: -12px;
 }
 
-.tooltipster-arrow-right .tooltipster-arrow-border {
-	border-top: 9px solid transparent !important;
-	border-bottom: 9px solid transparent !important;
-	border-right: 9px solid;
-	margin-top: -8px;
+.tooltipster-arrow-left-top .tooltipster-arrow-border {
+	border-top: 11px solid transparent !important;
+	border-bottom: 11px solid transparent !important;
+	border-left: 13px solid;
+	top: 20px;
+	margin-top: 7px;
+	right: -14px;
+}
+
+.tooltipster-arrow-left-bottom span {
+	border-top: 11px solid transparent !important;
+	border-bottom: 11px solid transparent !important;
+	border-left: 12px solid;
+	bottom: 20px;
+	margin-top: 7px;
+	right: -12px;
+}
+
+.tooltipster-arrow-left-bottom .tooltipster-arrow-border {
+	border-top: 11px solid transparent !important;
+	border-bottom: 11px solid transparent !important;
+	border-left: 13px solid;
+	bottom: 20px;
+	margin-top: 7px;
+	right: -14px;
 }
 
 

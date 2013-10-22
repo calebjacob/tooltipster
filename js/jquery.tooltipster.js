@@ -721,12 +721,24 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				if (object.options.position === 'left-top') {
 					myLeft = offsetLeft - offsetX - tooltipWidth - 12;
 					myLeftMirror = offsetLeft + offsetX + containerWidth + 12;
- 					myTop =  offsetTop - 12 - offsetY;
+ 					myTop = offsetTop - 12 - offsetY;
 
  					// If it only goes off one side, flip it to the other side
  					if (myLeft < 0) {
  						myLeft = offsetLeft + offsetX + containerWidth + 12;
 						tooltipster.data('arrow-reposition', 'left-top');
+ 					}
+				}
+
+				if (object.options.position === 'left-bottom') {
+					myLeft = offsetLeft - offsetX - tooltipWidth - 12;
+					myLeftMirror = offsetLeft + offsetX + containerWidth + 12;
+ 					myTop = offsetTop + 12 + offsetY;
+
+ 					// If it only goes off one side, flip it to the other side
+ 					if (myLeft < 0) {
+ 						myLeft = offsetLeft + offsetX + containerWidth + 12;
+						tooltipster.data('arrow-reposition', 'left-bottom');
  					}
 				}
 
@@ -767,6 +779,18 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  					}
         }
 
+        if (object.options.position === 'right-bottom') {
+ 					myLeft = offsetLeft + offsetX + containerWidth + 12;
+ 					myLeftMirror = offsetLeft - offsetX - tooltipWidth - 12;
+ 					myTop =  offsetTop + 12 + offsetY;
+
+ 					// If it only goes off one side, flip it to the other side
+ 					if((myLeft + tooltipWidth) > windowWidth) {
+ 						myLeft = offsetLeft - offsetX - tooltipWidth - 12;
+ 						tooltipster.data('arrow-reposition', 'right-bottom');
+ 					}
+        }
+
 				// if arrow is set true, style it and append it
 				if (object.options.arrow == true) {
 
@@ -801,6 +825,14 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						arrowClass = 'tooltipster-arrow-left-top';
 						arrowReposition = '';
 					}
+					else if (arrowReposition == 'left-bottom') {
+						arrowClass = 'tooltipster-arrow-right-bottom';
+						arrowReposition = '';
+					}
+					else if (arrowReposition == 'right-bottom') {
+						arrowClass = 'tooltipster-arrow-left-bottom';
+						arrowReposition = '';
+					}
 					else {
 						arrowReposition = 'left:'+ Math.round(arrowReposition) +'px;';
 					}
@@ -814,11 +846,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						var tooltipBorderWidth = parseFloat(tooltipster.css('border-top-width'));
 						var tooltipBorderColor = tooltipster.css('border-top-color');
 					}
-					else if ((object.options.position == 'left') || (object.options.position == 'left-top')) {
+					else if ((object.options.position === 'left') || (object.options.position === 'left-top') || (object.options.position === 'left-bottom')) {
 						var tooltipBorderWidth = parseFloat(tooltipster.css('border-right-width'));
 						var tooltipBorderColor = tooltipster.css('border-right-color');
 					}
-					else if ((object.options.position == 'right') || (object.options.position == 'right-top')) {
+					else if ((object.options.position === 'right') || (object.options.position === 'right-top') || (object.options.position === 'right-bottom')) {
 						var tooltipBorderWidth = parseFloat(tooltipster.css('border-left-width'));
 						var tooltipBorderColor = tooltipster.css('border-left-color');
 					}
