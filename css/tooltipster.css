@@ -2,10 +2,9 @@ html {
 	 -webkit-font-smoothing: antialiased;
 }
 
-
 /* This is the default Tooltipster theme (feel free to modify or duplicate and create multiple themes!): */
 .tooltipster-default {
-	border-radius: 5px; 
+	border-radius: 5px;
 	border: 2px solid #000;
 	background: #4c4c4c;
 	color: #fff;
@@ -25,19 +24,11 @@ html {
 	/* border-color: ... !important; */
 }
 
-
 /* If you're using the icon option, use this next selector to style them */
 .tooltipster-icon {
 	cursor: help;
 	margin-left: 4px;
 }
-
-
-
-
-
-
-
 
 /* This is the base styling required to make all Tooltipsters work */
 .tooltipster-base {
@@ -68,7 +59,7 @@ html {
 }
 .tooltipster-arrow span, .tooltipster-arrow-border {
 	display: block;
-	width: 0; 
+	width: 0;
 	height: 0;
 	position: absolute;
 }
@@ -116,7 +107,7 @@ html {
 }
 .tooltipster-arrow-left span, .tooltipster-arrow-left .tooltipster-arrow-border {
 	border-top: 8px solid transparent !important;
-	border-bottom: 8px solid transparent !important; 
+	border-bottom: 8px solid transparent !important;
 	border-left: 8px solid;
 	top: 50%;
 	margin-top: -7px;
@@ -124,23 +115,95 @@ html {
 }
 .tooltipster-arrow-left .tooltipster-arrow-border {
 	border-top: 9px solid transparent !important;
-	border-bottom: 9px solid transparent !important; 
+	border-bottom: 9px solid transparent !important;
 	border-left: 9px solid;
 	margin-top: -8px;
 }
 .tooltipster-arrow-right span, .tooltipster-arrow-right .tooltipster-arrow-border {
 	border-top: 8px solid transparent !important;
-	border-bottom: 8px solid transparent !important; 
+	border-bottom: 8px solid transparent !important;
 	border-right: 8px solid;
 	top: 50%;
 	margin-top: -7px;
 	left: -8px;
 }
+
 .tooltipster-arrow-right .tooltipster-arrow-border {
 	border-top: 9px solid transparent !important;
-	border-bottom: 9px solid transparent !important; 
+	border-bottom: 9px solid transparent !important;
 	border-right: 9px solid;
 	margin-top: -8px;
+}
+
+.tooltipster-arrow-right-top span {
+	border-top: 11px solid rgba(0, 0, 0, 0) !important;
+	border-bottom: 11px solid rgba(0, 0, 0, 0) !important;
+	border-right: 12px solid;
+	top: 20px;
+	margin-top: 7px;
+	left: -12px;
+}
+
+.tooltipster-arrow-right-top .tooltipster-arrow-border {
+	border-top: 11px solid rgba(0, 0, 0, 0) !important;
+	border-bottom: 11px solid rgba(0, 0, 0, 0) !important;
+	border-right: 13px solid;
+	left: -14px;
+	top: 20px;
+}
+
+.tooltipster-arrow-right-bottom span {
+	border-top: 11px solid rgba(0, 0, 0, 0) !important;
+	border-bottom: 11px solid rgba(0, 0, 0, 0) !important;
+	border-right: 12px solid;
+	bottom: 20px;
+	margin-top: 7px;
+	left: -12px;
+}
+
+.tooltipster-arrow-right-bottom .tooltipster-arrow-border {
+	border-top: 11px solid rgba(0, 0, 0, 0) !important;
+	border-bottom: 11px solid rgba(0, 0, 0, 0) !important;
+	border-right: 13px solid;
+	bottom: 20px;
+	margin-top: 7px;
+	left: -14px;
+}
+
+.tooltipster-arrow-left-top span {
+	border-top: 11px solid transparent !important;
+	border-bottom: 11px solid transparent !important;
+	border-left: 12px solid;
+	top: 20px;
+	margin-top: 7px;
+	right: -12px;
+}
+
+.tooltipster-arrow-left-top .tooltipster-arrow-border {
+	border-top: 11px solid transparent !important;
+	border-bottom: 11px solid transparent !important;
+	border-left: 13px solid;
+	top: 20px;
+	margin-top: 7px;
+	right: -14px;
+}
+
+.tooltipster-arrow-left-bottom span {
+	border-top: 11px solid transparent !important;
+	border-bottom: 11px solid transparent !important;
+	border-left: 12px solid;
+	bottom: 20px;
+	margin-top: 7px;
+	right: -12px;
+}
+
+.tooltipster-arrow-left-bottom .tooltipster-arrow-border {
+	border-top: 11px solid transparent !important;
+	border-bottom: 11px solid transparent !important;
+	border-left: 13px solid;
+	bottom: 20px;
+	margin-top: 7px;
+	right: -14px;
 }
 
 
@@ -178,10 +241,10 @@ html {
 	-ms-transform: scale(1,1);
 	transform: scale(1,1);
 	-webkit-transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1);
-	-webkit-transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.15); 
-	-moz-transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.15); 
-	-ms-transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.15); 
-	-o-transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.15); 
+	-webkit-transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.15);
+	-moz-transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.15);
+	-ms-transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.15);
+	-o-transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.15);
 	transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.15);
 }
 
@@ -206,10 +269,10 @@ html {
 	-ms-transform: rotateZ(0deg);
 	transform: rotateZ(0deg);
 	-webkit-transition-timing-function: cubic-bezier(0.230, 0.635, 0.495, 1);
-	-webkit-transition-timing-function: cubic-bezier(0.230, 0.635, 0.495, 2.4); 
-	-moz-transition-timing-function: cubic-bezier(0.230, 0.635, 0.495, 2.4); 
-	-ms-transition-timing-function: cubic-bezier(0.230, 0.635, 0.495, 2.4); 
-	-o-transition-timing-function: cubic-bezier(0.230, 0.635, 0.495, 2.4); 
+	-webkit-transition-timing-function: cubic-bezier(0.230, 0.635, 0.495, 2.4);
+	-moz-transition-timing-function: cubic-bezier(0.230, 0.635, 0.495, 2.4);
+	-ms-transition-timing-function: cubic-bezier(0.230, 0.635, 0.495, 2.4);
+	-o-transition-timing-function: cubic-bezier(0.230, 0.635, 0.495, 2.4);
 	transition-timing-function: cubic-bezier(0.230, 0.635, 0.495, 2.4);
 }
 
@@ -221,11 +284,11 @@ html {
 	-ms-transition-property: top;
 	transition-property: top;
 	-webkit-transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1);
-	-webkit-transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.15); 
-	-moz-transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.15); 
-	-ms-transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.15); 
-	-o-transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.15); 
-	transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.15); 
+	-webkit-transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.15);
+	-moz-transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.15);
+	-ms-transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.15);
+	-o-transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.15);
+	transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.15);
 }
 .tooltipster-fall-show {
 }
@@ -247,10 +310,10 @@ html {
 	-ms-transition-property: left;
 	transition-property: left;
 	-webkit-transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1);
-	-webkit-transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.15); 
-	-moz-transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.15); 
-	-ms-transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.15); 
-	-o-transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.15); 
+	-webkit-transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.15);
+	-moz-transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.15);
+	-ms-transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.15);
+	-o-transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.15);
 	transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.15);
 }
 .tooltipster-slide.tooltipster-slide-show {
