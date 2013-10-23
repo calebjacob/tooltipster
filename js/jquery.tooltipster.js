@@ -67,7 +67,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 		var p = 'transition';
 		if(typeof s[p] === 'string') {return true; }
 
-		v = ['Moz', 'Webkit', 'Khtml', 'O', 'ms'];
+		var v = ['Moz', 'Webkit', 'Khtml', 'O', 'ms'];
 		p = p.charAt(0).toUpperCase() + p.substr(1);
 		for(var i=0; i<v.length; i++) {
 			if(typeof s[v[i] + p] === 'string') { return true; }
@@ -196,7 +196,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			}
 		},
 
-		showTooltip: function(options) {
+		showTooltip: function() {
 			var $this = $(this.element);
 			var object = this;
       var animation, tooltipster, timer;
@@ -432,7 +432,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			}
 		},
 
-		hideTooltip: function(options) {
+		hideTooltip: function() {
 
 			var $this = $(this.element);
 			var object = this;
@@ -485,7 +485,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			}
 		},
 
-		positionTooltip: function(options) {
+		positionTooltip: function() {
 
 			var $this = $(this.element);
 			var object = this;
@@ -543,15 +543,13 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						offsetLeft = mapOffsetLeft + areaLeft;
 					}
 					else if (areaShape === 'poly') {
-						var areaXs = [];
-						var areaYs = [];
 						var areaSmallestX = 0,
 							areaSmallestY = 0,
 							areaGreatestX = 0,
 							areaGreatestY = 0;
 						var arrayAlternate = 'even';
 
-						for (i = 0; i < areaMeasurements.length; i++) {
+						for (var i = 0; i < areaMeasurements.length; i++) {
 							var areaNumber = parseInt(areaMeasurements[i]);
 
 							if (arrayAlternate === 'even') {
