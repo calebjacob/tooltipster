@@ -21,6 +21,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			delay: 200,
 			fixedWidth: 0,
 			maxWidth: 0,
+			functionInit: function(origin, content) {},
 			functionBefore: function(origin, continueTooltip) {
 				continueTooltip();
 			},
@@ -123,6 +124,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			
 				// first, strip the title off of the element and set it as a data attribute to prevent the default tooltips from popping up
 				var tooltipsterContent = $.trim(object.options.content).length > 0 ? object.options.content : $this.attr('title');
+				
+				// call our custom init function and replace the value of tooltipsterContent if the function returns something
+				var t = this.options.functionInit($this, tooltipsterContent);
+				if(t) tooltipsterContent = t;
+				
 				$this.data('tooltipsterContent', tooltipsterContent);
 				$this.removeAttr('title');
 				
