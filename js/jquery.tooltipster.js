@@ -840,8 +840,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 	$.fn[pluginName] = function (options) {
 		// better API name spacing by glebtv
 		if (typeof options === 'string') {
-			var $t = this;
-			var newContent = arguments[1];
+			var $t = this,
+				newContent = arguments[1],
+				v = null;
 			
 			// if we're calling a container to interact with API's of tooltips inside it - select all those tooltip origins first
 			if ($t.data('plugin_tooltipster') == undefined) {
@@ -892,10 +893,14 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					case 'reposition':
 						$(this).data('plugin_tooltipster').positionTooltip();
 						break;
+						
+					case 'val':
+						v = $(this).data('tooltipsterContent');
+						return false;
 				}
 			});
 			
-			return this;			
+			return (v !== null) ? v : this;		
 		}
 		
 		// attach a tooltipster object to each element if it doesn't already have one
