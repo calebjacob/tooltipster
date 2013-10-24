@@ -838,79 +838,87 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 	};
 		
 	$.fn[pluginName] = function (options) {
-		// better API name spacing by glebtv
-		if (typeof options === 'string') {
-			var $t = this;
-			var newContent = arguments[1];
-			
-			// if we're calling a container to interact with API's of tooltips inside it - select all those tooltip origins first
-			if ($t.data('plugin_tooltipster') == undefined) {
-				var query = $t.find('*');
-				$t = $();
-				query.each(function() {
-					if ($(this).data('plugin_tooltipster') !== undefined) {
-						$t.push($(this));
+		
+		//change default options for all future instances, using $.fn.tooltipster('setDefaults', myOptions)
+		if(options && options === 'setDefaults'){
+			$.extend(defaults, arguments[1]);
+		}
+		else {
+		
+			// better API name spacing by glebtv
+			if (typeof options === 'string') {
+				var $t = this;
+				var newContent = arguments[1];
+				
+				// if we're calling a container to interact with API's of tooltips inside it - select all those tooltip origins first
+				if ($t.data('plugin_tooltipster') == undefined) {
+					var query = $t.find('*');
+					$t = $();
+					query.each(function() {
+						if ($(this).data('plugin_tooltipster') !== undefined) {
+							$t.push($(this));
+						}
+					});
+				}
+				
+				$t.each(function() {
+					switch (options.toLowerCase()) {
+						case 'show':
+							$(this).data('plugin_tooltipster').showTooltip();
+							break;
+		
+						case 'hide':
+							$(this).data('plugin_tooltipster').hideTooltip();
+							break;
+						
+						case 'disable':
+							$(this).addClass('tooltipster-disable');
+							break;
+						
+						case 'enable':
+							$(this).removeClass('tooltipster-disable');
+							break;
+		
+						case 'destroy':
+							$(this).data('plugin_tooltipster').hideTooltip();
+							$(this).data('plugin_tooltipster', '').attr('title', $t.data('tooltipsterContent')).data('tooltipsterContent', '').data('plugin_tooltipster', '').off('mouseenter.tooltipster mouseleave.tooltipster click.tooltipster').unbind('touchstart');
+							break;
+		
+						case 'update':						
+							if ($(this).data('tooltipsterIcon') == undefined) {
+								$(this).data('tooltipsterContent', newContent);
+							}
+							
+							else {
+								var $this = $(this).data('tooltipsterIcon');
+								$this.data('tooltipsterContent', newContent);
+							}
+							
+							break;
+							
+						case 'reposition':
+							$(this).data('plugin_tooltipster').positionTooltip();
+							break;
 					}
 				});
-			}
-			
-			$t.each(function() {
-				switch (options.toLowerCase()) {
-					case 'show':
-						$(this).data('plugin_tooltipster').showTooltip();
-						break;
-	
-					case 'hide':
-						$(this).data('plugin_tooltipster').hideTooltip();
-						break;
-					
-					case 'disable':
-						$(this).addClass('tooltipster-disable');
-						break;
-					
-					case 'enable':
-						$(this).removeClass('tooltipster-disable');
-						break;
-	
-					case 'destroy':
-						$(this).data('plugin_tooltipster').hideTooltip();
-						$(this).data('plugin_tooltipster', '').attr('title', $t.data('tooltipsterContent')).data('tooltipsterContent', '').data('plugin_tooltipster', '').off('mouseenter.tooltipster mouseleave.tooltipster click.tooltipster').unbind('touchstart');
-						break;
-	
-					case 'update':						
-						if ($(this).data('tooltipsterIcon') == undefined) {
-							$(this).data('tooltipsterContent', newContent);
-						}
-						
-						else {
-							var $this = $(this).data('tooltipsterIcon');
-							$this.data('tooltipsterContent', newContent);
-						}
-						
-						break;
-						
-					case 'reposition':
-						$(this).data('plugin_tooltipster').positionTooltip();
-						break;
-				}
-			});
-			
-			return this;			
-		}
-		
-		// attach a tooltipster object to each element if it doesn't already have one
-		return this.each(function () {
-			if (!$.data(this, "plugin_" + pluginName)) {
-				$.data(this, "plugin_" + pluginName, new Plugin( this, options ));
-			}
-			
-			var thisOptions = $(this).data('plugin_tooltipster').options;
 				
-			if ((thisOptions.iconDesktop == true) && (!touchDevice) || ((thisOptions.iconTouch == true) && (touchDevice))) {
-				var transferObject = $(this).data('plugin_tooltipster');
-				$(this).next().data('plugin_tooltipster', transferObject);
-			}	
-		});
+				return this;			
+			}
+			
+			// attach a tooltipster object to each element if it doesn't already have one
+			return this.each(function () {
+				if (!$.data(this, "plugin_" + pluginName)) {
+					$.data(this, "plugin_" + pluginName, new Plugin( this, options ));
+				}
+				
+				var thisOptions = $(this).data('plugin_tooltipster').options;
+					
+				if ((thisOptions.iconDesktop == true) && (!touchDevice) || ((thisOptions.iconTouch == true) && (touchDevice))) {
+					var transferObject = $(this).data('plugin_tooltipster');
+					$(this).next().data('plugin_tooltipster', transferObject);
+				}	
+			});
+		}
 	};
 	
 	// hide tooltips on orientation change
