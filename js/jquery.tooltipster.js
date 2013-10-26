@@ -305,7 +305,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							$('body').css('overflow-x', 'hidden');
 							
 							// get the content for the tooltip
-							var content = $this.data('tooltipsterContent');
+							var content = object.getContent($this);
 							
 							// get some other settings related to building the tooltip
 							var theme = object.options.theme;
@@ -346,7 +346,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							// check to see if our tooltip content changes or its origin is removed while the tooltip is alive
 							var currentTooltipContent = content;
 							var contentUpdateChecker = setInterval(function() {		
-								var newTooltipContent = $this.data('tooltipsterContent');
+								var newTooltipContent = object.getContent($this);
 								
 								// if this tooltip's origin is removed, remove the tooltip
 								if ($('body').find($this).length == 0) {
@@ -357,7 +357,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 								// if the content changed for the tooltip, update it											
 								else if ((currentTooltipContent !== newTooltipContent) && (newTooltipContent !== '')) {
 									currentTooltipContent = newTooltipContent;
-									
+
 									// set the new content in the tooltip
 									tooltipster.find('.tooltipster-content').html(newTooltipContent);
 									
@@ -505,9 +505,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				}
 			}
 		},
-		
+
 		positionTooltip: function(options) {
-					
+
 			var $this = $(this.element);
 			var object = this;
 									
@@ -857,7 +857,14 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					object.options.position = resetPosition;
 				}
 			}
-		}
+		},
+    getContent: function(element) {
+      var content = element.data('tooltipsterContent');
+      // will remove <script> tags to prevent XSS (execution of JS for dynamic tooltips)
+      content = $($.parseHTML('<div>' + content + '</div>')).html();
+
+      return content;
+    }
 	};
 		
 	$.fn[pluginName] = function (options) {		
