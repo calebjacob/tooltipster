@@ -877,7 +877,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			// better API name spacing by glebtv
 			if (typeof options === 'string') {
 				var $t = this;
-				var newContent = arguments[1];
+				var arg = arguments[1];
 				var v = null;
 				
 				// if we're calling a container to interact with API's of tooltips inside it - select all those tooltip origins first
@@ -914,14 +914,16 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							$(this).data('plugin_tooltipster', '').attr('title', $t.data('tooltipsterContent')).data('tooltipsterContent', '').data('plugin_tooltipster', '').off('mouseenter.tooltipster mouseleave.tooltipster click.tooltipster').unbind('touchstart');
 							break;
 		
-						case 'update':						
+						case 'update':
+							var content = arg;
+
 							if ($(this).data('tooltipsterIcon') == undefined) {
-								$(this).data('tooltipsterContent', newContent);
+								$(this).data('tooltipsterContent', content);
 							}
 							
 							else {
 								var $this = $(this).data('tooltipsterIcon');
-								$this.data('tooltipsterContent', newContent);
+								$this.data('tooltipsterContent', content);
 							}
 							
 							break;
