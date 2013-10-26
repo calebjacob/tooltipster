@@ -628,6 +628,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				
 				// our function and global vars for positioning our tooltip
 				var myLeft = 0,
+					myLeftMirror = 0,
 					myTop = 0;
 				var offsetY = parseInt(object.options.offsetY);
 				var offsetX = parseInt(object.options.offsetX);
