@@ -961,14 +961,14 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 	  	}, false);
   	}
   	
-    	// on scroll reposition - otherwise position:fixed element's tooltips will 'scroll-away'
-    	$(window).scroll(function() {
+  	// on scroll reposition - otherwise position:fixed element's tooltips will 'scroll-away'
+  	$(window).on('scroll.tooltipster', function() {
 	  	var origin = $('.tooltipster-base').data('origin');
 
-	  	if ((origin !== null) && (origin !== undefined)) {
+	  	if (origin) {
 	  		origin.tooltipster('reposition');
 	  	}
-    	});
+  	});
   	
   	// on window resize, reposition and open tooltips
   	$(window).on('resize.tooltipster', function() {
