@@ -33,6 +33,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			iconTheme: '.tooltipster-icon',
 			interactive: false,
 			interactiveTolerance: 350,
+			interactiveAutoClose: true,
 			offsetX: 0,
 			offsetY: 0,
 			onlyOne: true,
@@ -59,61 +60,58 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 	// we'll use this to detect for mobile devices
 	function is_touch_device() {
 		return !!('ontouchstart' in window);
-  	}
-  	
-  	// detecting support for CSS transitions
-  	function supportsTransitions() {
-	    var b = document.body || document.documentElement;
-	    var s = b.style;
-	    var p = 'transition';
-	    if(typeof s[p] == 'string') {return true; }
-	
-	    v = ['Moz', 'Webkit', 'Khtml', 'O', 'ms'],
-	    p = p.charAt(0).toUpperCase() + p.substr(1);
-	    for(var i=0; i<v.length; i++) {
-	      if(typeof s[v[i] + p] == 'string') { return true; }
-	    }
-	    return false;
-    }
-    var transitionSupport = true;
-    if (!supportsTransitions()) {
-	    transitionSupport = false;
-    }
-    
-    // detect if this device is mouse driven over purely touch
-    var touchDevice = is_touch_device();
-    
-    // on mousemove, double confirm that this is a desktop - not a touch device
-  	$(window).on('mousemove.tooltipster', function() {
-	  	touchDevice = false;	  	
-	  	$(window).off('mousemove.tooltipster');
-  	});
-  	
-  	
-  	
-    	
+	}
+
+	// detecting support for CSS transitions
+	function supportsTransitions() {
+		var b = document.body || document.documentElement;
+		var s = b.style;
+		var p = 'transition';
+		if(typeof s[p] == 'string') {return true; }
+
+		v = ['Moz', 'Webkit', 'Khtml', 'O', 'ms'],
+		p = p.charAt(0).toUpperCase() + p.substr(1);
+		for(var i=0; i<v.length; i++) {
+			if(typeof s[v[i] + p] == 'string') { return true; }
+		}
+		return false;
+	}
+	var transitionSupport = true;
+	if (!supportsTransitions()) {
+		transitionSupport = false;
+	}
+
+	// detect if this device is mouse driven over purely touch
+	var touchDevice = is_touch_device();
+
+	// on mousemove, double confirm that this is a desktop - not a touch device
+	$(window).on('mousemove.tooltipster', function() {
+		touchDevice = false;
+		$(window).off('mousemove.tooltipster');
+	});
+
 	Plugin.prototype = {
 		
-		init: function() {		
+		init: function() {
 			var $this = $(this.element);
 			var object = this;
 			var run = true;
 			
 			// if this is a touch device and touch devices are disabled, disable the plugin
-			if ((object.options.touchDevices == false) && (touchDevice)) {
+			if (!object.options.touchDevices && touchDevice) {
 				run = false;
 			}
 			
 			// if IE7 or lower, disable the plugin
 			if (document.all && !document.querySelector) {
 				run = false;
-    		}
-    					
-			if (run == true) {
+			}
+
+			if (run) {
 				
 				// detect if we're changing the tooltip origin to an icon
-				if ((this.options.iconDesktop == true) && (!touchDevice) || ((this.options.iconTouch == true) && (touchDevice))) {
-					var transferContent = $this.attr('title');					
+				if ((this.options.iconDesktop) && (!touchDevice) || ((this.options.iconTouch) && (touchDevice))) {
+					var transferContent = $this.attr('title');
 					$this.removeAttr('title');
 					var theme = object.options.iconTheme;
 					var icon = $('<span class="'+ theme.replace('.', '') +'" title="'+ transferContent +'">'+ this.options.icon +'</span>');
@@ -165,23 +163,25 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 									var tolerance = setTimeout(function() {
 
 										if (keepAlive) {
-											tooltipster.find('select').on('change', function() {
-												object.hideTooltip();
-											});
-
-											tooltipster.mouseleave(function(e) {
-												var $target = $(e.target);
-
-												if ($target.parents().find('.tooltipster-base').length === 0) {
+											if (object.options.interactiveAutoClose) {
+												tooltipster.find('select').on('change', function() {
 													object.hideTooltip();
-												}
+												});
 
-												else {
-													$target.on('mouseleave', function(e) {
+												tooltipster.mouseleave(function(e) {
+													var $target = $(e.target);
+
+													if ($target.parents('.tooltipster-base').length === 0 || $target.hasClass('tooltipster-base')) {
 														object.hideTooltip();
-													});
-												}
-											});
+													}
+
+													else {
+														$target.on('mouseleave', function(e) {
+															object.hideTooltip();
+														});
+													}
+												});
+											}
 										}
 										else {
 											object.hideTooltip();
@@ -205,7 +205,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					// if click events are set to show and hide the tooltip, attach those events respectively
 					if (this.options.trigger == 'click') {
 						$this.on('click.tooltipster', function() {
-							if (($this.data('tooltipster') == '') || ($this.data('tooltipster') == undefined)) {
+							if (($this.data('tooltipster') === '') || ($this.data('tooltipster') === undefined)) {
 								object.showTooltip();
 							}
 							else {
@@ -217,7 +217,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			}
 		},
 		
-		showTooltip: function(options) {			
+		showTooltip: function(options) {
 			var $this = $(this.element);
 			var object = this;
 						
@@ -230,7 +230,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			if (!$this.hasClass('tooltipster-disable')) {
 			
 				// if we only want one tooltip open at a time, close all tooltips currently open
-				if (($('.tooltipster-base').not('.tooltipster-dying').length > 0) && (object.options.onlyOne == true)) {
+				if (($('.tooltipster-base').not('.tooltipster-dying').length > 0) && (object.options.onlyOne)) {
 					$('.tooltipster-base').not('.tooltipster-dying').not($this.data('tooltipster')).each(function() {
 						$(this).addClass('tooltipster-kill');
 						var origin = $(this).data('origin');
@@ -254,7 +254,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 								
 								tooltipster.removeClass('tooltipster-dying');
 								
-								if (transitionSupport == true) {
+								if (transitionSupport) {
 									tooltipster.clearQueue().addClass(animation +'-show');
 								}
 								
@@ -272,9 +272,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 								}
 								
 								// if this is a touch device, hide the tooltip on body touch
-								if ((object.options.touchDevices == true) && (touchDevice)) {
+								if ((object.options.touchDevices) && (touchDevice)) {
 									$('body').bind('touchstart', function(event) {
-										if (object.options.interactive == true) {
+										if (object.options.interactive) {
 											var touchTarget = $(event.target);
 											var closeTooltip = true;
 											
@@ -284,7 +284,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 												}
 											});
 											
-											if (closeTooltip == true) {
+											if (closeTooltip) {
 												object.hideTooltip();
 												$('body').unbind('touchstart');
 											}
@@ -310,11 +310,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							// get some other settings related to building the tooltip
 							var theme = object.options.theme;
 							var themeClass = theme.replace('.', '');
-							var animation = 'tooltipster-'+object.options.animation;
+							var animation = 'tooltipster-' + object.options.animation;
 							var animationSpeed = '-webkit-transition-duration: '+ object.options.speed +'ms; -webkit-animation-duration: '+ object.options.speed +'ms; -moz-transition-duration: '+ object.options.speed +'ms; -moz-animation-duration: '+ object.options.speed +'ms; -o-transition-duration: '+ object.options.speed +'ms; -o-animation-duration: '+ object.options.speed +'ms; -ms-transition-duration: '+ object.options.speed +'ms; -ms-animation-duration: '+ object.options.speed +'ms; transition-duration: '+ object.options.speed +'ms; animation-duration: '+ object.options.speed +'ms;';
 							var fixedWidth = object.options.fixedWidth > 0 ? 'width:'+ Math.round(object.options.fixedWidth) +'px;' : '';
 							var maxWidth = object.options.maxWidth > 0 ? 'max-width:'+ Math.round(object.options.maxWidth) +'px;' : '';
-							var pointerEvents = object.options.interactive == true ? 'pointer-events: auto;' : '';
+							var pointerEvents = object.options.interactive ? 'pointer-events: auto;' : '';
 												
 							// build the base of our tooltip
 							var tooltipster = $('<div class="tooltipster-base '+ themeClass +' '+ animation +'" style="'+ fixedWidth +' '+ maxWidth +' '+ pointerEvents +' '+ animationSpeed +'"></div>');
@@ -336,7 +336,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							object.options.functionReady($this, tooltipster);
 							
 							// animate in the tooltip
-							if (transitionSupport == true) {
+							if (transitionSupport) {
 								tooltipster.addClass(animation + '-show');
 							}
 							else {
@@ -345,11 +345,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							
 							// check to see if our tooltip content changes or its origin is removed while the tooltip is alive
 							var currentTooltipContent = content;
-							var contentUpdateChecker = setInterval(function() {		
+							var contentUpdateChecker = setInterval(function() {
 								var newTooltipContent = object.getContent($this);
 								
 								// if this tooltip's origin is removed, remove the tooltip
-								if ($('body').find($this).length == 0) {
+								if ($('body').find($this).length === 0) {
 									tooltipster.addClass('tooltipster-dying');
 									object.hideTooltip();
 								}
@@ -362,7 +362,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 									tooltipster.find('.tooltipster-content').html(newTooltipContent);
 									
 									// if we want to play a little animation showing the content changed
-									if (object.options.updateAnimation == true) {
+									if (object.options.updateAnimation) {
 										if (supportsTransitions()) {
 											tooltipster.css({
 												'width': '',
@@ -400,13 +400,13 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 								}
 								
 								// if the tooltip is closed or origin is removed, clear this interval
-								if (($('body').find(tooltipster).length == 0) || ($('body').find($this).length == 0)) {
+								if (($('body').find(tooltipster).length === 0) || ($('body').find($this).length === 0)) {
 									clearInterval(contentUpdateChecker);
 								}
 							}, 200);
 							
 							// if we have a timer set, let the countdown begin!
-							if (object.options.timer > 0) {							
+							if (object.options.timer > 0) {
 								var timer = setTimeout(function() {
 									tooltipster.data('tooltipsterTimer', undefined);
 									object.hideTooltip();
@@ -416,9 +416,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							}
 							
 							// if this is a touch device, hide the tooltip on body touch
-							if ((object.options.touchDevices == true) && (touchDevice)) {
+							if ((object.options.touchDevices) && (touchDevice)) {
 								$('body').bind('touchstart', function(event) {
-									if (object.options.interactive == true) {
+									if (object.options.interactive) {
 										
 										var touchTarget = $(event.target);
 										var closeTooltip = true;
@@ -429,7 +429,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 											}
 										});
 										
-										if (closeTooltip == true) {
+										if (closeTooltip) {
 											object.hideTooltip();
 											$('body').unbind('touchstart');
 										}
@@ -440,11 +440,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 									}
 								});
 							}
-							
-							// if this is an interactive tooltip activated by a click, close the tooltip when you hover off the tooltip
-							// tooltipster.mouseleave(function() {
-							// 	object.hideTooltip();
-							// });
 						}
 					});
 					
@@ -466,7 +461,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			var tooltipster = $this.data('tooltipster');
 			
 			// if the origin has been removed, find all tooltips assigned to death
-			if (tooltipster == undefined) {
+			if (tooltipster === undefined) {
 				tooltipster = $('.tooltipster-dying');
 			}
 			
@@ -483,7 +478,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 				var animation = 'tooltipster-'+ object.options.animation;
 				
-				if (transitionSupport == true) {
+				if (transitionSupport) {
 					tooltipster.clearQueue().removeClass(animation +'-show').addClass('tooltipster-dying').delay(object.options.speed).queue(function() {
 						tooltipster.remove();
 						$this.data('tooltipster', '');
@@ -577,7 +572,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							if (arrayAlternate == 'even') {
 								if (areaNumber > areaGreatestX) {
 									areaGreatestX = areaNumber;
-									if (i == 0) {
+									if (i === 0) {
 										areaSmallestX = areaGreatestX;
 									}
 								}
@@ -618,7 +613,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				}
 																
 				// hardcoding the width and removing the padding fixed an issue with the tooltip width collapsing when the window size is small
-				if(object.options.fixedWidth == 0) {
+				if(object.options.fixedWidth === 0) {
 					tooltipster.css({
 						'width': Math.round(tooltipInnerWidth) + 'px',
 						'padding-left': '0px',
@@ -767,7 +762,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				}
 				
 				// if arrow is set true, style it and append it
-				if (object.options.arrow == true) {
+				if (object.options.arrow) {
 	
 					var arrowClass = 'tooltipster-arrow-' + object.options.position;
 					

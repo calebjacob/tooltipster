@@ -13,7 +13,10 @@
 	
 	<script type="text/javascript">
 		$(document).ready(function() {
-			 $('.tooltip').tooltipster();
+			 $('.tooltip').tooltipster({
+			 	interactive: true,
+			 	interactiveAutoClose: true
+			 });
 		});
 	</script>
 </head>
@@ -24,7 +27,7 @@
 	</section>
 	
 	<section class="container">
-		<div id="hi" style="width: 100px; height: 100px; margin: 0 0 0 500px; background: #f00; position: fixed; top: 100px; right: 100px;" class="tooltip" title="This is the <a href='http://google.com'>link</a>"></div>
+		<div id="hi" style="width: 100px; height: 100px; margin: 0 0 0 500px; background: #f00; position: fixed; top: 100px; right: 100px;" class="tooltip" title="This is the <select><option>option 1</option><option>option 2</option><option>option 3</option><option>option 4</option></select>"></div>
 		<a href="http://google.com" class="tooltip" title="Get your Google on">Hover <span>here</span></a>
 		<br />
 		<a href="http://google.com" class="tooltip" title="Get your Google on and your ketchup out!">Google</a>
