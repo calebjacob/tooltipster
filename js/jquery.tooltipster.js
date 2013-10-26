@@ -285,7 +285,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						
 						// if the tooltip isn't already open, open that sucker up!
 						else {
-							// disable horizontal scrollbar to keep overflowing tooltips from jacking with it
+							// disable horizontal scrollbar to keep overflowing tooltips from jacking with it and then restore it to it's previous value
+							object.options._bodyOverflowX = $('body').css('overflow-x');
 							$('body').css('overflow-x', 'hidden');
 							
 							// get the content for the tooltip
@@ -471,7 +472,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					tooltipster.clearQueue().removeClass(animation +'-show').addClass('tooltipster-dying').delay(object.options.speed).queue(function() {
 						tooltipster.remove();
 						$this.data('tooltipster', '');
-						$('body').css('overflow-x', '');
+						$('body').css('overflow-x', object.options._bodyOverflowX);
 						
 						// finally, call our custom callback function
 						object.options.functionAfter($this);
@@ -481,7 +482,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					tooltipster.clearQueue().addClass('tooltipster-dying').fadeOut(object.options.speed, function() {
 						tooltipster.remove();
 						$this.data('tooltipster', '');
-						$('body').css('overflow-x', '');
+						$('body').css('overflow-x', object.options._bodyOverflowX);
 						
 						// finally, call our custom callback function
 						object.options.functionAfter($this);
