@@ -910,21 +910,22 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				
 				return this;			
 			}
-			
-			// attach a tooltipster object to each element if it doesn't already have one
-			return this.each(function () {
-				if (!$.data(this, "plugin_" + pluginName)) {
-					$.data(this, "plugin_" + pluginName, new Plugin( this, options ));
-				}
-				
-				var thisOptions = $(this).data('plugin_tooltipster').options;
-					
-				if ((thisOptions.iconDesktop == true) && (!touchDevice) || ((thisOptions.iconTouch == true) && (touchDevice))) {
-					var transferObject = $(this).data('plugin_tooltipster');
-					$(this).next().data('plugin_tooltipster', transferObject);
-				}	
-			});
 		}
+
+		// attach a tooltipster object to each element if it doesn't already have one
+		return this.each(function () {
+
+			if (!$.data(this, "plugin_" + pluginName)) {
+				$.data(this, "plugin_" + pluginName, new Plugin( this, options ));
+			}
+			
+			var thisOptions = $(this).data('plugin_tooltipster').options;
+				
+			if ((thisOptions.iconDesktop == true) && (!touchDevice) || ((thisOptions.iconTouch == true) && (touchDevice))) {
+				var transferObject = $(this).data('plugin_tooltipster');
+				$(this).next().data('plugin_tooltipster', transferObject);
+			}	
+		});
 	};
 	
 	// hide tooltips on orientation change
