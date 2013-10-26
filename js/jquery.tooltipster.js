@@ -1,6 +1,6 @@
 /*
 
-Tooltipster 2.1.4 | 6/1/13
+Tooltipster 2.2 | 10/26/13
 A rockin' custom tooltip jQuery plugin
 
 Developed by: Caleb Jacob - calebjacob.com
