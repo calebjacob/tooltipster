@@ -133,7 +133,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				$this.removeAttr('title');
 				
 				// if this is a touch device, add some touch events to launch the tooltip
-				if ((this.options.touchDevices == true) && (touchDevice) && ((this.options.trigger == 'click') || (this.options.trigger == 'hover'))) {
+				if ((this.options.touchDevices) && (touchDevice) && ((this.options.trigger == 'click') || (this.options.trigger == 'hover'))) {
 					$this.bind('touchstart', function(element, options) {
 						object.showTooltip();
 					});
@@ -149,7 +149,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						});
 						
 						// if this is an interactive tooltip, delay getting rid of the tooltip right away so you have a chance to hover on the tooltip
-						if (this.options.interactive == true) {
+						if (this.options.interactive) {
 							$this.on('mouseleave.tooltipster', function() {
 								var tooltipster = $this.data('tooltipster');
 								var keepAlive = false;
@@ -163,9 +163,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 									});
 									
 									var tolerance = setTimeout(function() {
-										if (keepAlive == true) {
-											tooltipster.mouseleave(function() {
-												object.hideTooltip();
+										if (keepAlive) {
+											tooltipster.mouseleave(function(e) {
+												if (e.target.tagName !== 'SELECT' && e.target.tagName !== 'OPTION') {
+													object.hideTooltip();
+												}
 											});
 										}
 										else {
