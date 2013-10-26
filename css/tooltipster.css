@@ -75,26 +75,26 @@ html {
 	border-left: 8px solid transparent !important;
 	border-right: 8px solid transparent !important;
 	border-top: 8px solid;
-	bottom: -8px;
+	bottom: -7px;
 }
 .tooltipster-arrow-top .tooltipster-arrow-border, .tooltipster-arrow-top-right .tooltipster-arrow-border, .tooltipster-arrow-top-left .tooltipster-arrow-border {
 	border-left: 9px solid transparent !important;
 	border-right: 9px solid transparent !important;
 	border-top: 9px solid;
-	bottom: -8px;
+	bottom: -7px;
 }
 
 .tooltipster-arrow-bottom span, .tooltipster-arrow-bottom-right span, .tooltipster-arrow-bottom-left span {
 	border-left: 8px solid transparent !important;
 	border-right: 8px solid transparent !important;
 	border-bottom: 8px solid;
-	top: -8px;
+	top: -7px;
 }
 .tooltipster-arrow-bottom .tooltipster-arrow-border, .tooltipster-arrow-bottom-right .tooltipster-arrow-border, .tooltipster-arrow-bottom-left .tooltipster-arrow-border {
 	border-left: 9px solid transparent !important;
 	border-right: 9px solid transparent !important;
 	border-bottom: 9px solid;
-	top: -8px;
+	top: -7px;
 }
 .tooltipster-arrow-top span, .tooltipster-arrow-top .tooltipster-arrow-border, .tooltipster-arrow-bottom span, .tooltipster-arrow-bottom .tooltipster-arrow-border {
 	left: 0;
@@ -119,7 +119,7 @@ html {
 	border-left: 8px solid;
 	top: 50%;
 	margin-top: -7px;
-	right: -8px;
+	right: -7px;
 }
 .tooltipster-arrow-left .tooltipster-arrow-border {
 	border-top: 9px solid transparent !important;
@@ -133,7 +133,7 @@ html {
 	border-right: 8px solid;
 	top: 50%;
 	margin-top: -7px;
-	left: -8px;
+	left: -7px;
 }
 .tooltipster-arrow-right .tooltipster-arrow-border {
 	border-top: 9px solid transparent !important;

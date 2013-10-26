@@ -13,10 +13,7 @@
 	
 	<script type="text/javascript">
 		$(document).ready(function() {
-			 $('.tooltip').tooltipster({
-			 	position: 'bottom',
-			 	interactive: true
-			 });
+			 $('.tooltip').tooltipster();
 		});
 	</script>
 </head>
@@ -28,6 +25,7 @@
 	
 	<section class="container">
 		<div id="hi" style="width: 100px; height: 100px; margin: 0 0 0 500px; background: #f00;" class="tooltip" title="This is the <a href='http://google.com'>link</a>"></div>
+		<div style="width: 100px; height: 100px; margin: 0 0 0 500px; background: #000;" class="tooltip" title="This is my title"></div>
 		<a href="http://google.com" class="tooltip" title="Get your Google on">Hover <span>here</span></a>
 		<br />
 		<a href="http://google.com" class="tooltip" title="Get your Google on and your ketchup out!">Google</a>

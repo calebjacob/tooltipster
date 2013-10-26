@@ -163,10 +163,23 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 									});
 									
 									var tolerance = setTimeout(function() {
+
 										if (keepAlive) {
+											tooltipster.find('select').on('change', function() {
+												object.hideTooltip();
+											});
+
 											tooltipster.mouseleave(function(e) {
-												if (e.target.tagName !== 'SELECT' && e.target.tagName !== 'OPTION') {
+												var $target = $(e.target);
+
+												if ($target.parents().find('.tooltipster-base').length === 0) {
 													object.hideTooltip();
+												}
+
+												else {
+													$target.on('mouseleave', function(e) {
+														object.hideTooltip();
+													});
 												}
 											});
 										}
@@ -429,9 +442,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							}
 							
 							// if this is an interactive tooltip activated by a click, close the tooltip when you hover off the tooltip
-							tooltipster.mouseleave(function() {
-								object.hideTooltip();
-							});
+							// tooltipster.mouseleave(function() {
+							// 	object.hideTooltip();
+							// });
 						}
 					});
 					
