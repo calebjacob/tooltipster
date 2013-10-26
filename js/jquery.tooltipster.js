@@ -924,7 +924,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 						case 'val':
 							v = $(this).data('tooltipsterContent');
-							break;
+							//return false to stop .each iteration on the first element matched by the selector. No need for a 'break;' after that.
+							return false;
 					}
 				});
 				
