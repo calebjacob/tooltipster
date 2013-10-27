@@ -21,9 +21,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			delay: 200,
 			fixedWidth: 0,
 			maxWidth: 0,
-			functionInit: function(origin, continueInit) {
-				continueInit();
-			},
+			functionInit: function(origin, content) {},
 			functionBefore: function(origin, continueTooltip) {
 				continueTooltip();
 			},
@@ -113,106 +111,108 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				// first, strip the title off of the element and set it as a data attribute to prevent the default tooltips from popping up
 				var tooltipsterContent = $.trim(object.options.content).length > 0 ? object.options.content : $this.attr('title');
 				
+				var c = object.options.functionInit($this, tooltipsterContent);
+				if(c) tooltipsterContent = c;
+				
 				$this.data('tooltipsterContent', tooltipsterContent);
 				$this.removeAttr('title');
 
-				object.options.functionInit($this, function() {
-					// detect if we're changing the tooltip origin to an icon
-					if ((object.options.iconDesktop) && (!touchDevice) || ((object.options.iconTouch) && (touchDevice))) {
-						var transferContent = $this.attr('title');
-						$this.removeAttr('title');
-						var theme = object.options.iconTheme;
-						var icon = $('<span class="'+ theme.replace('.', '') +'" title="'+ transferContent +'">'+ object.options.icon +'</span>');
-						icon.insertAfter($this);
-						$this.data('tooltipsterIcon', icon);
-						$this = icon;
-					}
-					
-					// if this is a touch device, add some touch events to launch the tooltip
-					if ((object.options.touchDevices) && (touchDevice) && ((object.options.trigger == 'click') || (object.options.trigger == 'hover'))) {
-						$this.bind('touchstart', function(element, options) {
+				// detect if we're changing the tooltip origin to an icon
+				if ((object.options.iconDesktop) && (!touchDevice) || ((object.options.iconTouch) && (touchDevice))) {
+					var theme = object.options.iconTheme;
+					var icon = $('<span class="'+ theme.replace('.', '') +'"></span>');
+					icon
+						.data('tooltipsterContent', tooltipsterContent)
+						.append(object.options.icon)
+						.insertAfter($this);
+					$this.data('tooltipsterIcon', icon);
+					$this = icon;
+				}
+				
+				// if this is a touch device, add some touch events to launch the tooltip
+				if ((object.options.touchDevices) && (touchDevice) && ((object.options.trigger == 'click') || (object.options.trigger == 'hover'))) {
+					$this.bind('touchstart', function(element, options) {
+						object.showTooltip();
+					});
+				}
+				
+				// if this is a desktop, deal with adding regular mouse events
+				else {
+				
+					// if hover events are set to show and hide the tooltip, attach those events respectively
+					if (object.options.trigger == 'hover') {
+						$this.on('mouseenter.tooltipster', function() {
 							object.showTooltip();
 						});
-					}
-					
-					// if this is a desktop, deal with adding regular mouse events
-					else {
-					
-						// if hover events are set to show and hide the tooltip, attach those events respectively
-						if (object.options.trigger == 'hover') {
-							$this.on('mouseenter.tooltipster', function() {
-								object.showTooltip();
-							});
-							
-							// if this is an interactive tooltip, delay getting rid of the tooltip right away so you have a chance to hover on the tooltip
-							if (object.options.interactive) {
-								$this.on('mouseleave.tooltipster', function() {
-									var tooltipster = $this.data('tooltipster');
-									var keepAlive = false;
-									
-									if ((tooltipster !== undefined) && (tooltipster !== '')) {
-										tooltipster.mouseenter(function() {
-											keepAlive = true;
-										});
-										tooltipster.mouseleave(function() {
-											keepAlive = false;
-										});
-										
-										var tolerance = setTimeout(function() {
-
-											if (keepAlive) {
-												if (object.options.interactiveAutoClose) {
-													tooltipster.find('select').on('change', function() {
-														object.hideTooltip();
-													});
-
-													tooltipster.mouseleave(function(e) {
-														var $target = $(e.target);
-
-														if ($target.parents('.tooltipster-base').length === 0 || $target.hasClass('tooltipster-base')) {
-															object.hideTooltip();
-														}
-
-														else {
-															$target.on('mouseleave', function(e) {
-																object.hideTooltip();
-															});
-														}
-													});
-												}
-											}
-											else {
-												object.hideTooltip();
-											}
-										}, object.options.interactiveTolerance);
-									}
-									else {
-										object.hideTooltip();
-									}
-								});
-							}
-							
-							// if this is a dumb tooltip, just get rid of it on mouseleave
-							else {
-								$this.on('mouseleave.tooltipster', function() {
-									object.hideTooltip();
-								});
-							}
-						}
 						
-						// if click events are set to show and hide the tooltip, attach those events respectively
-						if (object.options.trigger == 'click') {
-							$this.on('click.tooltipster', function() {
-								if (($this.data('tooltipster') === '') || ($this.data('tooltipster') === undefined)) {
-									object.showTooltip();
+						// if this is an interactive tooltip, delay getting rid of the tooltip right away so you have a chance to hover on the tooltip
+						if (object.options.interactive) {
+							$this.on('mouseleave.tooltipster', function() {
+								var tooltipster = $this.data('tooltipster');
+								var keepAlive = false;
+								
+								if ((tooltipster !== undefined) && (tooltipster !== '')) {
+									tooltipster.mouseenter(function() {
+										keepAlive = true;
+									});
+									tooltipster.mouseleave(function() {
+										keepAlive = false;
+									});
+									
+									var tolerance = setTimeout(function() {
+
+										if (keepAlive) {
+											if (object.options.interactiveAutoClose) {
+												tooltipster.find('select').on('change', function() {
+													object.hideTooltip();
+												});
+
+												tooltipster.mouseleave(function(e) {
+													var $target = $(e.target);
+
+													if ($target.parents('.tooltipster-base').length === 0 || $target.hasClass('tooltipster-base')) {
+														object.hideTooltip();
+													}
+
+													else {
+														$target.on('mouseleave', function(e) {
+															object.hideTooltip();
+														});
+													}
+												});
+											}
+										}
+										else {
+											object.hideTooltip();
+										}
+									}, object.options.interactiveTolerance);
 								}
 								else {
 									object.hideTooltip();
 								}
 							});
 						}
+						
+						// if this is a dumb tooltip, just get rid of it on mouseleave
+						else {
+							$this.on('mouseleave.tooltipster', function() {
+								object.hideTooltip();
+							});
+						}
 					}
-				});
+					
+					// if click events are set to show and hide the tooltip, attach those events respectively
+					if (object.options.trigger == 'click') {
+						$this.on('click.tooltipster', function() {
+							if (($this.data('tooltipster') === '') || ($this.data('tooltipster') === undefined)) {
+								object.showTooltip();
+							}
+							else {
+								object.hideTooltip();
+							}
+						});
+					}
+				}
 			}
 		},
 		
@@ -907,6 +907,13 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							$(this).data('plugin_tooltipster').hideTooltip();
 							$(this).data('plugin_tooltipster', '').attr('title', $t.data('tooltipsterContent')).data('tooltipsterContent', '').data('plugin_tooltipster', '').off('mouseenter.tooltipster mouseleave.tooltipster click.tooltipster').unbind('touchstart');
 							break;
+							
+						case 'elementicon':
+							v = $(this).data('tooltipsterIcon');
+							// we will return the raw HTML element if there is an icon, undefined otherwise
+							v = v ? v[0] : undefined;
+							//return false to stop .each iteration on the first element matched by the selector. No need for a 'break;' after that.
+							return false;
 		
 						case 'update':
 							var content = arg;
@@ -928,7 +935,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 						case 'val':
 							v = $(this).data('tooltipsterContent');
-							//return false to stop .each iteration on the first element matched by the selector. No need for a 'break;' after that.
+							//return false : same as above
 							return false;
 					}
 				});
@@ -942,13 +949,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 					if (!$.data(this, "plugin_" + pluginName)) {
 						$.data(this, "plugin_" + pluginName, new Plugin( this, options ));
-					}
-					
-					var thisOptions = $(this).data('plugin_tooltipster').options;
-						
-					if ((thisOptions.iconDesktop) && (!touchDevice) || ((thisOptions.iconTouch) && (touchDevice))) {
-						var transferObject = $(this).data('plugin_tooltipster');
-						$(this).next().data('plugin_tooltipster', transferObject);
 					}
 				});
 			}
