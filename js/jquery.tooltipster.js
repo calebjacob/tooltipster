@@ -948,8 +948,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					if (!$.data(this, "plugin_" + pluginName)) {
 						$.data(this, "plugin_" + pluginName, new Plugin( this, options ));
 					}
-					
-					var thisOptions = $(this).data('plugin_tooltipster').options;
 				});
 			}
 		}
