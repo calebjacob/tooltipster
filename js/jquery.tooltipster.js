@@ -119,11 +119,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 				// detect if we're changing the tooltip origin to an icon
 				if ((object.options.iconDesktop) && (!touchDevice) || ((object.options.iconTouch) && (touchDevice))) {
-					var transferContent = $this.attr('title');
-					$this.removeAttr('title');
 					var theme = object.options.iconTheme;
-					var icon = $('<span class="'+ theme.replace('.', '') +'" title="'+ transferContent +'">'+ object.options.icon +'</span>');
-					icon.insertAfter($this);
+					var icon = $('<span class="'+ theme.replace('.', '') +'"></span>');
+					icon
+						.data('tooltipsterContent', tooltipsterContent)
+						.append(object.options.icon)
+						.insertAfter($this);
 					$this.data('tooltipsterIcon', icon);
 					$this = icon;
 				}
@@ -944,11 +945,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					}
 					
 					var thisOptions = $(this).data('plugin_tooltipster').options;
-						
-					if ((thisOptions.iconDesktop) && (!touchDevice) || ((thisOptions.iconTouch) && (touchDevice))) {
-						var transferObject = $(this).data('plugin_tooltipster');
-						$(this).next().data('plugin_tooltipster', transferObject);
-					}
 				});
 			}
 		}
