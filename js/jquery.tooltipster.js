@@ -907,6 +907,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							$(this).data('plugin_tooltipster').hideTooltip();
 							$(this).data('plugin_tooltipster', '').attr('title', $t.data('tooltipsterContent')).data('tooltipsterContent', '').data('plugin_tooltipster', '').off('mouseenter.tooltipster mouseleave.tooltipster click.tooltipster').unbind('touchstart');
 							break;
+							
+						case 'elementicon':
+							//return false to stop .each iteration on the first element matched by the selector. No need for a 'break;' after that.
+							v = $(this).data('tooltipsterIcon')[0];
+							return false;
 		
 						case 'update':
 							var content = arg;
@@ -928,7 +933,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 						case 'val':
 							v = $(this).data('tooltipsterContent');
-							//return false to stop .each iteration on the first element matched by the selector. No need for a 'break;' after that.
+							//return false : same as above
 							return false;
 					}
 				});
