@@ -940,8 +940,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				// attach a tooltipster object to each element if it doesn't already have one
 				return this.each(function () {
 
-					if (!$.data(this, "plugin_" + pluginName)) {
-						$.data(this, "plugin_" + pluginName, new Plugin( this, options ));
+					if (!$(this).data("plugin_tooltipster")) {
+						$(this).data("plugin_tooltipster", new Plugin( this, options ));
 					}
 					
 					var thisOptions = $(this).data('plugin_tooltipster').options;
