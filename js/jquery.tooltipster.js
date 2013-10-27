@@ -909,8 +909,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							break;
 							
 						case 'elementicon':
+							v = $(this).data('tooltipsterIcon');
+							// we will return the raw HTML element if there is an icon, undefined otherwise
+							v = v ? v[0] : undefined;
 							//return false to stop .each iteration on the first element matched by the selector. No need for a 'break;' after that.
-							v = $(this).data('tooltipsterIcon')[0];
 							return false;
 		
 						case 'update':
