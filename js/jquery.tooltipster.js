@@ -861,17 +861,50 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
     }
 	};
 		
-	$.fn[pluginName] = function (options) {		
-		// change default options for all future instances, using $.fn.tooltipster('setDefaults', myOptions)
-		if(options && options === 'setDefaults'){
-			$.extend(defaults, arguments[1]);
+	$.fn[pluginName] = function () {
+		
+		// for using in closures
+		var args = arguments;
+		
+		// if we are not in the context of jQuery wrapped HTML element(s) :
+		// this happens when calling static methods in the form $.fn.tooltipster('methodName'), or when calling $(sel).tooltipster('methodName or options') where $(sel) does not match anything
+		if (this.length === 0) {
+			
+			// if the first argument is a method name
+			if (typeof args[0] === 'string') {
+				
+				var methodIsStatic = true;
+				
+				// list static methods here (usable by calling $.fn.tooltipster('methodName');)
+				switch (args[0]) {
+					
+					case 'setDefaults':
+						// change default options for all future instances
+						$.extend(defaults, args[1]);
+						break;
+					
+					default:
+						methodIsStatic = false;
+						break;
+				}
+				
+				// $.fn.tooltipster('methodName') calls will return true
+				if (methodIsStatic) return true;
+				// $(sel).tooltipster('methodName') calls will return the list of objects event though it's empty because chaining should work on empty lists
+				else return this;
+			}
+			// the first argument is undefined or an object of options : we are initalizing but there is no element matched by selector
+			else {
+				// still chainable : same as above
+				return this;
+			}
 		}
-
+		// this happens when calling $(sel).tooltipster('methodName or options') where $(sel) matches one or more elements
 		else {
-			// better API name spacing by glebtv
-			if (typeof options === 'string') {
+			
+			// method calls
+			if (typeof args[0] === 'string') {
 				var $t = this;
-				var arg = arguments[1];
 				var v = null;
 				
 				// if we're calling a container to interact with API's of tooltips inside it - select all those tooltip origins first
@@ -886,7 +919,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				}
 				
 				$t.each(function() {
-					switch (options.toLowerCase()) {
+					switch (args[0].toLowerCase()) {
 						case 'show':
 							$(this).data('plugin_tooltipster').showTooltip();
 							break;
@@ -914,9 +947,16 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							v = v ? v[0] : undefined;
 							//return false to stop .each iteration on the first element matched by the selector. No need for a 'break;' after that.
 							return false;
+							
+						case 'elementtooltip':
+							v = $(this).data('tooltipster');
+							// at this point, v may be a jQuery object, an empty string or undefined. But we will return the HTML element if the tooltip is open, or undefined otherwise
+							v = (typeof v === 'object') ? v[0] : undefined;
+							// return false : same as above
+							return false;
 		
 						case 'update':
-							var content = arg;
+							var content = args[1];
 
 							if ($(this).data('tooltipsterIcon') === undefined) {
 								$(this).data('tooltipsterContent', content);
@@ -935,20 +975,20 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 						case 'val':
 							v = $(this).data('tooltipsterContent');
-							//return false : same as above
+							// return false : same as above
 							return false;
 					}
 				});
 				
 				return (v !== null) ? v : this;
 			}
-
+			// first argument is undefined or an object : the tooltip is initializing
 			else {
 				// attach a tooltipster object to each element if it doesn't already have one
 				return this.each(function () {
 
 					if (!$.data(this, "plugin_" + pluginName)) {
-						$.data(this, "plugin_" + pluginName, new Plugin( this, options ));
+						$.data(this, "plugin_" + pluginName, new Plugin( this, args[0] ));
 					}
 				});
 			}
