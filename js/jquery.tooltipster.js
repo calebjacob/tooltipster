@@ -862,12 +862,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 	};
 		
 	$.fn[pluginName] = function (options) {		
-		//change default options for all future instances, using $.fn.tooltipster('setDefaults', myOptions)
+		// change default options for all future instances, using $.fn.tooltipster('setDefaults', myOptions)
 		if(options && options === 'setDefaults'){
 			$.extend(defaults, arguments[1]);
 		}
+
 		else {
-		
 			// better API name spacing by glebtv
 			if (typeof options === 'string') {
 				var $t = this;
@@ -875,7 +875,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				var v = null;
 				
 				// if we're calling a container to interact with API's of tooltips inside it - select all those tooltip origins first
-				if ($t.data('plugin_tooltipster') == undefined) {
+				if ($t.data('plugin_tooltipster') === undefined) {
 					var query = $t.find('*');
 					$t = $();
 					query.each(function() {
@@ -911,7 +911,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						case 'update':
 							var content = arg;
 
-							if ($(this).data('tooltipsterIcon') == undefined) {
+							if ($(this).data('tooltipsterIcon') === undefined) {
 								$(this).data('tooltipsterContent', content);
 							}
 							
@@ -935,22 +935,24 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				
 				return (v !== null) ? v : this;
 			}
-		}
 
-		// attach a tooltipster object to each element if it doesn't already have one
-		return this.each(function () {
+			else {
+				// attach a tooltipster object to each element if it doesn't already have one
+				return this.each(function () {
 
-			if (!$.data(this, "plugin_" + pluginName)) {
-				$.data(this, "plugin_" + pluginName, new Plugin( this, options ));
+					if (!$.data(this, "plugin_" + pluginName)) {
+						$.data(this, "plugin_" + pluginName, new Plugin( this, options ));
+					}
+					
+					var thisOptions = $(this).data('plugin_tooltipster').options;
+						
+					if ((thisOptions.iconDesktop) && (!touchDevice) || ((thisOptions.iconTouch) && (touchDevice))) {
+						var transferObject = $(this).data('plugin_tooltipster');
+						$(this).next().data('plugin_tooltipster', transferObject);
+					}
+				});
 			}
-			
-			var thisOptions = $(this).data('plugin_tooltipster').options;
-				
-			if ((thisOptions.iconDesktop == true) && (!touchDevice) || ((thisOptions.iconTouch == true) && (touchDevice))) {
-				var transferObject = $(this).data('plugin_tooltipster');
-				$(this).next().data('plugin_tooltipster', transferObject);
-			}	
-		});
+		}
 	};
 	
 	// hide tooltips on orientation change
@@ -962,26 +964,24 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					origin.data('plugin_tooltipster').hideTooltip();
 				});
 			}
-	  	}, false);
-  	}
-  	
-  	// on scroll reposition - otherwise position:fixed element's tooltips will 'scroll-away'
-  	$(window).on('scroll.tooltipster', function() {
-	  	var origin = $('.tooltipster-base').data('origin');
+		}, false);
+  }
 
-	  	if (origin) {
-	  		origin.tooltipster('reposition');
-	  	}
-  	});
-  	
-  	// on window resize, reposition and open tooltips
-  	$(window).on('resize.tooltipster', function() {
-	  	var origin = $('.tooltipster-base').data('origin');
-	  		  	
-	  	if ((origin !== null) && (origin !== undefined)) {
-	  		origin.tooltipster('reposition');
-	  	}
-  	});
-  	
+	// on scroll reposition - otherwise position:fixed element's tooltips will 'scroll-away'
+	$(window).on('scroll.tooltipster', function() {
+		var origin = $('.tooltipster-base').data('origin');
 
+		if (origin) {
+			origin.tooltipster('reposition');
+		}
+	});
+
+	// on window resize, reposition and open tooltips
+	$(window).on('resize.tooltipster', function() {
+		var origin = $('.tooltipster-base').data('origin');
+
+		if ((origin !== null) && (origin !== undefined)) {
+			origin.tooltipster('reposition');
+		}
+	});
 })( jQuery, window, document );
