@@ -272,7 +272,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 								
 								// if this is a touch device, hide the tooltip on body touch
 								if ((object.options.touchDevices) && (touchDevice)) {
-									$('body').bind('touchstart', function(event) {
+									$('body').on('touchstart.tooltipster', function(event) {
 										if (object.options.interactive) {
 											var touchTarget = $(event.target);
 											var closeTooltip = true;
@@ -285,12 +285,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 											
 											if (closeTooltip) {
 												object.hideTooltip();
-												$('body').unbind('touchstart');
+												$('body').off('.tooltipster');
 											}
 										}
 										else {
 											object.hideTooltip();
-											$('body').unbind('touchstart');
+											$('body').off('.tooltipster');
 										}
 									});
 								}
@@ -357,7 +357,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							
 							// if this is a touch device, hide the tooltip on body touch
 							if ((object.options.touchDevices) && (touchDevice)) {
-								$('body').bind('touchstart', function(event) {
+								$('body').on('touchstart.tooltipster', function(event) {
 									if (object.options.interactive) {
 										
 										var touchTarget = $(event.target);
@@ -371,12 +371,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 										
 										if (closeTooltip) {
 											object.hideTooltip();
-											$('body').unbind('touchstart');
+											$('body').off('.tooltipster');
 										}
 									}
 									else {
 										object.hideTooltip();
-										$('body').unbind('touchstart');
+										$('body').off('.tooltipster');
 									}
 								});
 							}
