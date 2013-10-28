@@ -47,12 +47,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 		};
 	
 	function Plugin(element, options) {
-		this.element = element;
-		
-		this.options = $.extend( {}, defaults, options );
-		
+		//list of instance variables
 		this._defaults = defaults;
 		this._name = pluginName;
+		this.checkInterval;
+		this.element = element;
+		this.options = $.extend( {}, defaults, options );
 		
 		this.init();
 	}
@@ -236,7 +236,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						origin.data('plugin_tooltipster').hideTooltip();
 					});
 				}
-						
+				
 				// delay the showing of the tooltip according to the delay time
 				$this.clearQueue().delay(object.options.delay).queue(function() {
 				
@@ -261,7 +261,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 								if (object.options.timer > 0) {
 									var timer = tooltipster.data('tooltipsterTimer');
 									clearTimeout(timer);
-														
+									
 									timer = setTimeout(function() {
 										tooltipster.data('tooltipsterTimer', undefined);
 										object.hideTooltip();
@@ -342,67 +342,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 								tooltipster.css('display', 'none').removeClass(animation).fadeIn(object.options.speed);
 							}
 							
-							// check to see if our tooltip content changes or its origin is removed while the tooltip is alive
-							var currentTooltipContent = content;
-							var contentUpdateChecker = setInterval(function() {
-								var newTooltipContent = object.getContent($this);
-								
-								// if this tooltip's origin is removed, remove the tooltip
-								if ($('body').find($this).length === 0) {
-									tooltipster.addClass('tooltipster-dying');
-									object.hideTooltip();
-								}
-								
-								// if the content changed for the tooltip, update it											
-								else if ((currentTooltipContent !== newTooltipContent) && (newTooltipContent !== '')) {
-									currentTooltipContent = newTooltipContent;
-
-									// set the new content in the tooltip
-									tooltipster.find('.tooltipster-content').html(newTooltipContent);
-									
-									// if we want to play a little animation showing the content changed
-									if (object.options.updateAnimation) {
-										if (supportsTransitions()) {
-											tooltipster.css({
-												'width': '',
-												'-webkit-transition': 'all ' + object.options.speed + 'ms, width 0ms, height 0ms, left 0ms, top 0ms',
-												'-moz-transition': 'all ' + object.options.speed + 'ms, width 0ms, height 0ms, left 0ms, top 0ms',
-												'-o-transition': 'all ' + object.options.speed + 'ms, width 0ms, height 0ms, left 0ms, top 0ms',
-												'-ms-transition': 'all ' + object.options.speed + 'ms, width 0ms, height 0ms, left 0ms, top 0ms',
-												'transition': 'all ' + object.options.speed + 'ms, width 0ms, height 0ms, left 0ms, top 0ms'
-											}).addClass('tooltipster-content-changing');
-											
-											// reset the CSS transitions and finish the change animation
-											setTimeout(function() {
-												tooltipster.removeClass('tooltipster-content-changing');
-												// after the changing animation has completed, reset the CSS transitions
-												setTimeout(function() {
-													tooltipster.css({
-														'-webkit-transition': object.options.speed + 'ms',
-														'-moz-transition': object.options.speed + 'ms',
-														'-o-transition': object.options.speed + 'ms',
-														'-ms-transition': object.options.speed + 'ms',
-														'transition': object.options.speed + 'ms'
-													});
-												}, object.options.speed);
-											}, object.options.speed);
-										}
-										else {
-											tooltipster.fadeTo(object.options.speed, 0.5, function() {
-												tooltipster.fadeTo(object.options.speed, 1);
-											});
-										}
-									}
-									
-									// reposition and resize the tooltip
-									object.positionTooltip();
-								}
-								
-								// if the tooltip is closed or origin is removed, clear this interval
-								if (($('body').find(tooltipster).length === 0) || ($('body').find($this).length === 0)) {
-									clearInterval(contentUpdateChecker);
-								}
-							}, 200);
+							// check to see if our tooltip origin is removed while the tooltip is alive
+							object.setCheckInterval();
 							
 							// if we have a timer set, let the countdown begin!
 							if (object.options.timer > 0) {
@@ -447,8 +388,93 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			}
 		},
 		
-		hideTooltip: function(options) {
+		setCheckInterval: function(){
+			
+			var self = this;
+			
+			this.checkInterval = setInterval(function() {
+				
+				var origin = $(self.element).data('tooltipsterIcon') ? $(self.element).data('tooltipsterIcon') : $(self.element);
+				var tooltipster = origin.data('tooltipster');
+				
+				// if this tooltip's origin is removed, remove the tooltip if it's still here
+				if ($('body').find(origin).length === 0 && tooltipster) {
+					tooltipster.addClass('tooltipster-dying');
+					self.hideTooltip();
+				}
+				
+				// if the tooltip is closed or origin is removed, clear this interval
+				if (($('body').find(origin).length === 0) || !tooltipster || ($('body').find(tooltipster).length === 0)) {
+					self.cancelCheckInterval();
+				}
+			}, 8000);
+		},
+		
+		cancelCheckInterval: function(){
+			clearInterval(this.checkInterval);
+			// clean delete
+			this.checkInterval = null;
+		},
+		
+		updateTooltip: function(data){
+			
+			var self = this;
+			
+			if(data){
+				
+				var origin = $(self.element).data('tooltipsterIcon') ? $(self.element).data('tooltipsterIcon') : $(self.element);
+				var tooltipster = origin.data('tooltipster');
+				
+				origin.data('tooltipsterContent', data);
+				
+				// set the new content in the tooltip
+				tooltipster.find('.tooltipster-content').html(data);
+				
+				// if we want to play a little animation showing the content changed
+				if (self.options.updateAnimation) {
+					if (supportsTransitions()) {
+						tooltipster.css({
+							'width': '',
+							'-webkit-transition': 'all ' + self.options.speed + 'ms, width 0ms, height 0ms, left 0ms, top 0ms',
+							'-moz-transition': 'all ' + self.options.speed + 'ms, width 0ms, height 0ms, left 0ms, top 0ms',
+							'-o-transition': 'all ' + self.options.speed + 'ms, width 0ms, height 0ms, left 0ms, top 0ms',
+							'-ms-transition': 'all ' + self.options.speed + 'ms, width 0ms, height 0ms, left 0ms, top 0ms',
+							'transition': 'all ' + self.options.speed + 'ms, width 0ms, height 0ms, left 0ms, top 0ms'
+						}).addClass('tooltipster-content-changing');
 						
+						// reset the CSS transitions and finish the change animation
+						setTimeout(function() {
+							tooltipster.removeClass('tooltipster-content-changing');
+							// after the changing animation has completed, reset the CSS transitions
+							setTimeout(function() {
+								tooltipster.css({
+									'-webkit-transition': self.options.speed + 'ms',
+									'-moz-transition': self.options.speed + 'ms',
+									'-o-transition': self.options.speed + 'ms',
+									'-ms-transition': self.options.speed + 'ms',
+									'transition': self.options.speed + 'ms'
+								});
+							}, self.options.speed);
+						}, self.options.speed);
+					}
+					else {
+						tooltipster.fadeTo(self.options.speed, 0.5, function() {
+							tooltipster.fadeTo(self.options.speed, 1);
+						});
+					}
+				}
+				
+				// reposition and resize the tooltip
+				self.positionTooltip();
+				
+				// stop the check interval ans start a new one immediately to apply the update now
+				this.cancelCheckInterval();
+				this.setCheckInterval();
+			}
+		},
+		
+		hideTooltip: function(options) {
+			
 			var $this = $(this.element);
 			var object = this;
 			
@@ -511,7 +537,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			}
 			
 			if (($this.data('tooltipster') !== undefined) && ($this.data('tooltipster') !== '')) {
-						
+				
 				// find tooltipster and reset its width
 				var tooltipster = $this.data('tooltipster');
 				tooltipster.css('width', '');
@@ -919,13 +945,17 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				}
 				
 				$t.each(function() {
+					
+					// self represent the instance of the tooltipster plugin associated to the current HTML object of the loop
+					var self = $(this).data('plugin_tooltipster');
+					
 					switch (args[0].toLowerCase()) {
 						case 'show':
-							$(this).data('plugin_tooltipster').showTooltip();
+							self.showTooltip();
 							break;
 		
 						case 'hide':
-							$(this).data('plugin_tooltipster').hideTooltip();
+							self.hideTooltip();
 							break;
 						
 						case 'disable':
@@ -937,7 +967,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							break;
 		
 						case 'destroy':
-							$(this).data('plugin_tooltipster').hideTooltip();
+							self.hideTooltip();
 							
 							var icon = $(this).data('tooltipsterIcon');
 							if(icon) icon.remove();
@@ -967,17 +997,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							return false;
 		
 						case 'update':
-							var content = args[1];
-
-							if ($(this).data('tooltipsterIcon') === undefined) {
-								$(this).data('tooltipsterContent', content);
-							}
-							
-							else {
-								var $this = $(this).data('tooltipsterIcon');
-								$this.data('tooltipsterContent', content);
-							}
-							
+							self.updateTooltip(args[1]);
 							break;
 							
 						case 'reposition':
