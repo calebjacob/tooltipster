@@ -949,9 +949,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							return false;
 							
 						case 'elementtooltip':
-							v = $(this).data('tooltipster');
-							// at this point, v may be a jQuery object, an empty string or undefined. But we will return the HTML element if the tooltip is open, or undefined otherwise
-							v = (typeof v === 'object') ? v[0] : undefined;
+							// looking for which element holds the tooltipster element in data
+							var icon = $(this).data('tooltipsterIcon');
+							var tooltipped = icon ? icon : $(this);
+							// at this point, tooltipped may be a jQuery object, an empty string or undefined. But we will return the HTML element if the tooltip is open, or undefined otherwise
+							v = (typeof tooltipped === 'object') ? tooltipped.data('tooltipster')[0] : undefined;
 							// return false : same as above
 							return false;
 		
