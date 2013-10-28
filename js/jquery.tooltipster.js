@@ -130,7 +130,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					
 					// if this is a touch device, add some touch events to launch the tooltip
 					if ((object.options.touchDevices) && (touchDevice) && ((object.options.trigger == 'click') || (object.options.trigger == 'hover'))) {
-						$this.bind('touchstart', function(element, options) {
+						$this.on('touchstart.tooltipster', function(element, options) {
 							object.showTooltip();
 						});
 					}
@@ -904,8 +904,18 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							break;
 		
 						case 'destroy':
+							
 							$(this).data('plugin_tooltipster').hideTooltip();
-							$(this).data('plugin_tooltipster', '').attr('title', $t.data('tooltipsterContent')).data('tooltipsterContent', '').data('plugin_tooltipster', '').off('mouseenter.tooltipster mouseleave.tooltipster click.tooltipster').unbind('touchstart');
+							
+							var icon = $(this).data('tooltipsterIcon');
+							if(icon) icon.remove();
+							
+							$(this)
+								.attr('title', $t.data('tooltipsterContent'))
+								.removeData('plugin_tooltipster')
+								.removeData('tooltipsterContent')
+								.removeData('tooltipsterIcon')
+								.off('.tooltipster');
 							break;
 		
 						case 'update':
