@@ -990,16 +990,14 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 	//TODO : repair the functions below by looking for tooltipstered elements, not for tooltips
 	
 	// hide tooltips on orientation change
-	if (touchDevice) {
-		window.addEventListener("orientationchange", function() {
-			if ($('.tooltipster-base').length > 0) {
-				$('.tooltipster-base').each(function() {
-					$(this).data('tooltipster').tooltipster('hide');
-				});
-			}
-		}, false);
-	}
-
+	$(window).on('orientationchange', function() {
+		if ($('.tooltipster-base').length > 0) {
+			$('.tooltipster-base').each(function() {
+				$(this).data('tooltipster').tooltipster('hide');
+			});
+		}
+	});
+	
 	// on scroll reposition - otherwise position:fixed element's tooltips will 'scroll-away'
 	$(window).on('scroll.tooltipster', function() {
 		
