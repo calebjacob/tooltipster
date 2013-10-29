@@ -88,8 +88,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 			if (run) {
 				
-				// TODO : add an option to filter HTML entities
-				
 				// first, strip the title off of the element and set it as a data attribute to prevent the default tooltips from popping up
 				var content = $.trim(self.options.content).length > 0 ? self.options.content : self.$el.attr('title');
 				
@@ -103,14 +101,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				// detect if we're changing the tooltip origin to an icon
 				if ((self.options.iconDesktop) && (!touchDevice) || ((self.options.iconTouch) && (touchDevice))) {
 					
-					var theme = self.options.iconTheme,
-						icon = $('<span class="'+ theme.replace('.', '') +'"></span>');
-					
-					icon
+					self.$elProxy = $('<span class="'+ self.options.iconTheme.replace('.', '') +'"></span>');
+					self.$elProxy
 						.append(self.options.icon)
 						.insertAfter(self.$el);
-					
-					self.$elProxy = icon;
 				}
 				else {
 					self.$elProxy = self.$el;
@@ -298,16 +292,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 									pointerEvents = self.options.interactive ? 'pointer-events: auto;' : '';
 								
 								// build the base of our tooltip
-								var tooltipster = $('<div class="tooltipster-base '+ themeClass +' '+ animation +'" style="'+ fixedWidth +' '+ maxWidth +' '+ pointerEvents +' '+ animationSpeed +'"></div>'),
-									tooltipsterHTML = $('<div class="tooltipster-content"></div>');
-								
-								tooltipsterHTML.html(self.content);
-								tooltipster.append(tooltipsterHTML);
-								
-								
-								tooltipster.appendTo('body');
-								
-								self.$tooltip = tooltipster;
+								self.$tooltip = $('<div class="tooltipster-base '+ themeClass +' '+ animation +'" style="'+ fixedWidth +' '+ maxWidth +' '+ pointerEvents +' '+ animationSpeed +'"><div class="tooltipster-content"></div></div>');
+								self.$tooltip
+									.children()
+										.append(self.content)
+										.end()
+									.appendTo('body');
 								
 								// do all the crazy calculations and positioning
 								self.positionTooltip();
@@ -916,15 +906,18 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							
 							if(self.$el[0] !== self.$elProxy[0]) self.$elProxy.remove();
 							
+							// old school technique when outerHTML is not supported
+							var stringifiedContent = $('<div></div>').append(self.content).html();
+							
 							self.$el
-								.attr('title', self.content)
+								.attr('title', stringifiedContent)
 								.removeData('tooltipster')
 								.off('.tooltipster');
 							break;
 							
 						case 'elementIcon':
 							v = (self.$el[0] !== self.$elProxy[0]) ? self.$elProxy[0] : undefined;
-							//return false to stop .each iteration on the first element matched by the selector
+							// return false to stop .each iteration on the first element matched by the selector
 							return false;
 							
 						case 'elementTooltip':
