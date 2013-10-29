@@ -88,7 +88,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 			if (run) {
 				
-				// first, strip the title off of the element and set it as a data attribute to prevent the default tooltips from popping up
+				// first, strip the title off of the element to prevent the default tooltips from popping up
 				var content = $.trim(self.options.content).length > 0 ? self.options.content : self.$el.attr('title');
 				
 				var c = self.options.functionInit(self.$el, content);
@@ -98,7 +98,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				
 				self.$el
 					.removeAttr('title')
-					//to be able to find all instances on the page later (upon window events in particular)
+					// to be able to find all instances on the page later (upon window events in particular)
 					.addClass('tooltipstered');
 
 				// detect if we're changing the tooltip origin to an icon
@@ -183,7 +183,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					}
 					
 					// if click events are set to show and hide the tooltip, attach those events respectively
-					if (self.options.trigger == 'click') {
+					else if (self.options.trigger == 'click') {
 						self.$elProxy.on('click.tooltipster', function() {
 							if (!self.$tooltip) {
 								self.showTooltip();
@@ -278,7 +278,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							
 							// if the tooltip isn't already open, open that sucker up!
 							else {
-								// disable horizontal scrollbar to keep overflowing tooltips from jacking with it and then restore it to it's previous value
+								// disable horizontal scrollbar to keep overflowing tooltips from jacking with it and then restore it to its previous value
 								self.options._bodyOverflowX = $('body').css('overflow-x');
 								$('body').css('overflow-x', 'hidden');
 								
@@ -366,13 +366,22 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			
 			self.checkInterval = setInterval(function() {
 				
-				// if this tooltip's elProxy is removed, remove the tooltip if it's still here
-				if ($('body').find(self.$elProxy).length === 0 && self.$tooltip) {
+				// if this tooltip's origin is removed, remove the tooltip if it's still here
+				if ($('body').find(self.$el).length === 0 && self.$tooltip) {
 					self.hideTooltip();
 				}
 				
-				// if the tooltip is closed or origin is removed, clear this interval
-				if (($('body').find(self.$elProxy).length === 0) || !self.$tooltip || ($('body').find(self.$tooltip).length === 0)) {
+				// clear this interval if it is no longer necessary
+				if (
+						// if the origin has been removed
+						($('body').find(self.$el).length === 0)
+						// if the elProxy has been removed
+					||	($('body').find(self.$elProxy).length === 0)
+						// if the tooltip has been closed
+					||	!self.$tooltip
+						// if the tooltip has been somehow removed
+					||	($('body').find(self.$tooltip).length === 0)
+				) {
 					self.cancelCheckInterval();
 				}
 			}, 8000);
@@ -611,16 +620,15 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					myTop = 0,
 					offsetY = parseInt(self.options.offsetY),
 					offsetX = parseInt(self.options.offsetX),
-					arrowConstruct = '',
 					// this is the arrow position that will eventually be used. It may differ from the position option if the tooltip cannot be displayed in this position
 					practicalPosition = self.options.position;
 				
-				// A function to detect if the tooltip is going off the screen horizontally. If so, reposition the crap out of it!
+				// a function to detect if the tooltip is going off the screen horizontally. If so, reposition the crap out of it!
 				function dontGoOffScreenX() {
 				
 					var windowLeft = $(window).scrollLeft();
 					
-					// If the tooltip goes off the left side of the screen, line it up with the left side of the window
+					// if the tooltip goes off the left side of the screen, line it up with the left side of the window
 					if((myLeft - windowLeft) < 0) {
 						var arrowReposition = myLeft - windowLeft;
 						myLeft = windowLeft;
@@ -628,7 +636,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						self.tooltipArrowReposition = arrowReposition;
 					}
 					
-					// If the tooltip goes off the right of the screen, line it up with the right side of the window
+					// if the tooltip goes off the right of the screen, line it up with the right side of the window
 					if (((myLeft + tooltipWidth) - windowLeft) > windowWidth) {
 						var arrowReposition = myLeft - ((windowWidth + windowLeft) - tooltipWidth);
 						myLeft = (windowWidth + windowLeft) - tooltipWidth;
@@ -637,7 +645,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					}
 				}
 				
-				// A function to detect if the tooltip is going off the screen vertically. If so, switch to the opposite!
+				// a function to detect if the tooltip is going off the screen vertically. If so, switch to the opposite!
 				function dontGoOffScreenY(switchTo, switchFrom) {
 					// if it goes off the top off the page
 					if(((offsetTop - $(window).scrollTop() - tooltipHeight - offsetY - 12) < 0) && (switchFrom.indexOf('top') > -1)) {
@@ -701,7 +709,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					var topDifference = (offsetTop + tooltipHeight) - (offsetTop + self.$elProxy.outerHeight(false));
 					myTop =  offsetTop - (topDifference / 2) - offsetY;
 					
-					// If the tooltip goes off boths sides of the page
+					// if the tooltip goes off boths sides of the page
 					if((myLeft < 0) && ((myLeftMirror + tooltipWidth) > windowWidth)) {
 						var borderWidth = parseFloat(self.$tooltip.css('border-width')) * 2,
 							newWidth = (tooltipWidth + myLeft) - borderWidth;
@@ -713,7 +721,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						myTop =  offsetTop - (topDifference / 2) - offsetY;
 					}
 					
-					// If it only goes off one side, flip it to the other side
+					// if it only goes off one side, flip it to the other side
 					else if(myLeft < 0) {
 						myLeft = offsetLeft + offsetX + containerWidth + 12;
 						self.tooltipArrowReposition = 'left';
@@ -726,7 +734,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					var topDifference = (offsetTop + tooltipHeight) - (offsetTop + self.$elProxy.outerHeight(false));
 					myTop =  offsetTop - (topDifference / 2) - offsetY;
 					
-					// If the tooltip goes off boths sides of the page
+					// if the tooltip goes off boths sides of the page
 					if(((myLeft + tooltipWidth) > windowWidth) && (myLeftMirror < 0)) {
 						var borderWidth = parseFloat(self.$tooltip.css('border-width')) * 2,
 							newWidth = (windowWidth - myLeft) - borderWidth;
@@ -737,7 +745,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						myTop =  offsetTop - (topDifference / 2) - offsetY;
 					}
 						
-					// If it only goes off one side, flip it to the other side
+					// if it only goes off one side, flip it to the other side
 					else if((myLeft + tooltipWidth) > windowWidth) {
 						myLeft = offsetLeft - offsetX - tooltipWidth - 12;
 						self.tooltipArrowReposition = 'right';
@@ -823,7 +831,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					self.$tooltip.find('.tooltipster-arrow').remove();
 					
 					// build out the arrow and append it		
-					arrowConstruct = '<div class="'+ arrowClass +' tooltipster-arrow" style="'+ arrowReposition +'">'+ arrowBorder +'<span style="border-color:'+ arrowColor +';"></span></div>';
+					var arrowConstruct = '<div class="'+ arrowClass +' tooltipster-arrow" style="'+ arrowReposition +'">'+ arrowBorder +'<span style="border-color:'+ arrowColor +';"></span></div>';
 					self.$tooltip.append(arrowConstruct);
 				}
 				
@@ -951,7 +959,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			}
 			// first argument is undefined or an object : the tooltip is initializing
 			else {
-				// attach a tooltipster object to each element if it doesn't already have one
+				// initialize a tooltipster instance for each element if it doesn't already have one, and attach the object to it
 				return this.each(function () {
 
 					if (!$(this).data('tooltipster')) {
