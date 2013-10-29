@@ -69,40 +69,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 		this.init();
 	}
 	
-	// we'll use this to detect for mobile devices
-	function is_touch_device() {
-		return !!('ontouchstart' in window);
-	}
-
-	// detecting support for CSS transitions
-	function supportsTransitions() {
-		var b = document.body || document.documentElement,
-			s = b.style,
-			p = 'transition';
-		
-		if(typeof s[p] == 'string') {return true; }
-
-		v = ['Moz', 'Webkit', 'Khtml', 'O', 'ms'],
-		p = p.charAt(0).toUpperCase() + p.substr(1);
-		for(var i=0; i<v.length; i++) {
-			if(typeof s[v[i] + p] == 'string') { return true; }
-		}
-		return false;
-	}
-	var transitionSupport = true;
-	if (!supportsTransitions()) {
-		transitionSupport = false;
-	}
-
-	// detect if this device is mouse driven over purely touch
-	var touchDevice = is_touch_device();
-
-	// on mousemove, double confirm that this is a desktop - not a touch device
-	$(window).on('mousemove.tooltipster', function() {
-		touchDevice = false;
-		$(window).off('mousemove.tooltipster');
-	});
-
 	Plugin.prototype = {
 		
 		init: function() {
@@ -270,7 +236,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 									
 									self.$tooltip.removeClass('tooltipster-dying');
 									
-									if (transitionSupport) {
+									if (supportsTransitions()) {
 										self.$tooltip.clearQueue().addClass(animation +'-show');
 									}
 									
@@ -350,7 +316,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 								self.options.functionReady(self.$el, self.$tooltip);
 								
 								// animate in the tooltip
-								if (transitionSupport) {
+								if (supportsTransitions()) {
 									self.$tooltip.addClass(animation + '-show');
 								}
 								else {
@@ -449,7 +415,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 				var animation = 'tooltipster-'+ self.options.animation;
 				
-				if (transitionSupport) {
+				if (supportsTransitions()) {
 					self.$tooltip
 						.clearQueue()
 						.removeClass(animation +'-show')
@@ -995,6 +961,31 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			}
 		}
 	};
+	
+	
+	// detect if this device is mouse driven over purely touch
+	var touchDevice = !!('ontouchstart' in window);
+	// on mousemove, double confirm that this is a desktop - not a touch device
+	$(window).on('mousemove.tooltipster', function() {
+		touchDevice = false;
+		$(window).off('mousemove.tooltipster');
+	});
+	
+	// detecting support for CSS transitions
+	function supportsTransitions() {
+		var b = document.body || document.documentElement,
+			s = b.style,
+			p = 'transition';
+		
+		if(typeof s[p] == 'string') {return true; }
+
+		v = ['Moz', 'Webkit', 'Khtml', 'O', 'ms'],
+		p = p.charAt(0).toUpperCase() + p.substr(1);
+		for(var i=0; i<v.length; i++) {
+			if(typeof s[v[i] + p] == 'string') { return true; }
+		}
+		return false;
+	}
 	
 	//TODO : repair the functions below by looking for tooltipstered elements, not for tooltips
 	
