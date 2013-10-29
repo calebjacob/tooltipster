@@ -884,60 +884,66 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					// self represent the instance of the tooltipster plugin associated to the current HTML object of the loop
 					var self = $(this).data('tooltipster');
 					
-					switch (args[0]) {
-						case 'show':
-							self.showTooltip();
-							break;
-		
-						case 'hide':
-							self.hideTooltip();
-							break;
-						
-						case 'disable':
-							self.$elProxy.addClass('tooltipster-disable');
-							break;
-						
-						case 'enable':
-							self.$elProxy.removeClass('tooltipster-disable');
-							break;
-		
-						case 'destroy':
-							self.hideTooltip();
+					//if the current element is a tooltipster instance
+					if(self){
+						switch (args[0]) {
+							case 'show':
+								self.showTooltip();
+								break;
+			
+							case 'hide':
+								self.hideTooltip();
+								break;
 							
-							if(self.$el[0] !== self.$elProxy[0]) self.$elProxy.remove();
+							case 'disable':
+								self.$elProxy.addClass('tooltipster-disable');
+								break;
 							
-							// old school technique when outerHTML is not supported
-							var stringifiedContent = $('<div></div>').append(self.content).html();
-							
-							self.$el
-								.removeClass('tooltipstered')
-								.attr('title', stringifiedContent)
-								.removeData('tooltipster')
-								.off('.tooltipster');
-							break;
-							
-						case 'elementIcon':
-							v = (self.$el[0] !== self.$elProxy[0]) ? self.$elProxy[0] : undefined;
-							// return false to stop .each iteration on the first element matched by the selector
-							return false;
-							
-						case 'elementTooltip':
-							v = self.$tooltip ? self.$tooltip[0] : undefined;
-							// return false : same as above
-							return false;
-		
-						case 'update':
-							self.updateTooltip(args[1]);
-							break;
-							
-						case 'reposition':
-							self.positionTooltip();
-							break;
+							case 'enable':
+								self.$elProxy.removeClass('tooltipster-disable');
+								break;
+			
+							case 'destroy':
+								self.hideTooltip();
+								
+								if(self.$el[0] !== self.$elProxy[0]) self.$elProxy.remove();
+								
+								// old school technique when outerHTML is not supported
+								var stringifiedContent = $('<div></div>').append(self.content).html();
+								
+								self.$el
+									.removeClass('tooltipstered')
+									.attr('title', stringifiedContent)
+									.removeData('tooltipster')
+									.off('.tooltipster');
+								break;
+								
+							case 'elementIcon':
+								v = (self.$el[0] !== self.$elProxy[0]) ? self.$elProxy[0] : undefined;
+								// return false to stop .each iteration on the first element matched by the selector
+								return false;
+								
+							case 'elementTooltip':
+								v = self.$tooltip ? self.$tooltip[0] : undefined;
+								// return false : same as above
+								return false;
+			
+							case 'update':
+								self.updateTooltip(args[1]);
+								break;
+								
+							case 'reposition':
+								self.positionTooltip();
+								break;
 
-						case 'val':
-							v = self.content;
-							// return false : same as above
-							return false;
+							case 'val':
+								v = self.content;
+								// return false : same as above
+								return false;
+						}
+					}
+					else {
+						throw 'You called a tooltipster method on an unitialized element';
 					}
 				});
 				
