@@ -204,12 +204,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			// continue if this tooltip is enabled
 			if (!self.$elProxy.hasClass('tooltipster-disable')) {
 			
-				// if we only want one tooltip open at a time, close all tooltips currently open
-				if (($('.tooltipster-base').not('.tooltipster-dying').length > 0) && (self.options.onlyOne)) {
-					$('.tooltipster-base').not('.tooltipster-dying').not(self.$tooltip).each(function() {
-						self.$elProxy.addClass('tooltipster-kill');
-						self.hideTooltip();
-					});
+				// if we only want one tooltip open at a time, close all tooltips currently open and not already dying
+				if(self.options.onlyOne){
+					$('.tooltipstered').not(self.$el).not('.tooltipster-dying')
+						.addClass('tooltipster-kill')
+						// hide using the object public method
+						[pluginName]('hide');
 				}
 				
 				// delay the showing of the tooltip according to the delay time
