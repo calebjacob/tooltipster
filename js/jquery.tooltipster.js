@@ -36,7 +36,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			interactiveAutoClose: true,
 			offsetX: 0,
 			offsetY: 0,
-			onlyOne: true,
+			onlyOne: false,
 			position: 'top',
 			speed: 350,
 			timer: 0,
