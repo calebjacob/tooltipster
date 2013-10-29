@@ -147,9 +147,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 										if (keepAlive) {
 											if (self.options.interactiveAutoClose) {
-												self.$tooltip.find('select').on('change', function() {
-													self.hideTooltip();
-												});
 
 												self.$tooltip.mouseleave(function(e) {
 													var $target = $(e.target);
