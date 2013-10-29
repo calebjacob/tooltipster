@@ -96,7 +96,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				
 				self.content = content;
 				
-				self.$el.removeAttr('title');
+				self.$el
+					.removeAttr('title')
+					//to be able to find all instances on the page later (upon window events in particular)
+					.addClass('tooltipstered');
 
 				// detect if we're changing the tooltip origin to an icon
 				if ((self.options.iconDesktop) && (!touchDevice) || ((self.options.iconTouch) && (touchDevice))) {
@@ -910,6 +913,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							var stringifiedContent = $('<div></div>').append(self.content).html();
 							
 							self.$el
+								.removeClass('tooltipstered')
 								.attr('title', stringifiedContent)
 								.removeData('tooltipster')
 								.off('.tooltipster');
@@ -980,30 +984,17 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 		return false;
 	}
 	
-	//TODO : repair the functions below by looking for tooltipstered elements, not for tooltips
-	
 	// hide tooltips on orientation change
 	$(window).on('orientationchange', function() {
-		if ($('.tooltipster-base').length > 0) {
-			$('.tooltipster-base').each(function() {
-				$(this).data('tooltipster').tooltipster('hide');
-			});
-		}
+		$('.tooltipstered').each(function(){
+			$(this).data('tooltipster').tooltipster('hide');
+		})
 	});
 	
-	// on scroll reposition - otherwise position:fixed element's tooltips will 'scroll-away'
-	$(window).on('scroll.tooltipster', function() {
-		
-		$('.tooltipster-base').each(function() {
+	// reposition on scroll (otherwise position:fixed element's tooltips will move away form their origin) and on resize (in case position can/has to be changed)
+	$(window).on('scroll resize', function() {
+		$('.tooltipstered').each(function(){
 			$(this).data('tooltipster').tooltipster('reposition');
-		});
-	});
-
-	// on window resize, reposition and open tooltips
-	$(window).on('resize.tooltipster', function() {
-		
-		$('.tooltipster-base').each(function() {
-			origin.tooltipster('reposition');
-		});
+		})
 	});
 })( jQuery, window, document );
