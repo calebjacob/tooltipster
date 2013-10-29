@@ -990,14 +990,14 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 	// hide tooltips on orientation change
 	$(window).on('orientationchange', function() {
 		$('.tooltipstered').each(function(){
-			$(this).tooltipster('hide');
+			$(this)[pluginName]('hide');
 		})
 	});
 	
 	// reposition on scroll (otherwise position:fixed element's tooltips will move away form their origin) and on resize (in case position can/has to be changed)
 	$(window).on('scroll resize', function() {
 		$('.tooltipstered').each(function(){
-			$(this).tooltipster('reposition');
+			$(this)[pluginName]('reposition');
 		})
 	});
 })( jQuery, window, document );
