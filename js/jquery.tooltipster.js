@@ -287,7 +287,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 									
 									// if this is a touch device, hide the tooltip on body touch
 									if ((self.options.touchDevices) && (touchDevice)) {
-										$('body').on('touchstart.tooltipster', function(event) {
+										
+										//reference the anonymous function for specific unbinding
+										var f = function(event) {
 											if (self.options.interactive) {
 												var touchTarget = $(event.target),
 													closeTooltip = true;
@@ -300,14 +302,16 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 												
 												if (closeTooltip) {
 													self.hideTooltip();
-													$('body').off('.tooltipster');
+													$('body').off(f);
 												}
 											}
 											else {
 												self.hideTooltip();
-												$('body').off('.tooltipster');
+												$('body').off(f);
 											}
-										});
+										};
+										
+										$('body').on('touchstart.tooltipster', f);
 									}
 								}
 							}
@@ -366,7 +370,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 								
 								// if this is a touch device, hide the tooltip on body touch
 								if ((self.options.touchDevices) && (touchDevice)) {
-									$('body').on('touchstart.tooltipster', function(event) {
+									
+									var f = function(event) {
 										if (self.options.interactive) {
 											
 											var touchTarget = $(event.target),
@@ -380,14 +385,16 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 											
 											if (closeTooltip) {
 												self.hideTooltip();
-												$('body').off('.tooltipster');
+												$('body').off(f);
 											}
 										}
 										else {
 											self.hideTooltip();
-											$('body').off('.tooltipster');
+											$('body').off(f);
 										}
-									});
+									};
+									
+									$('body').on('touchstart.tooltipster', f);
 								}
 							}
 						});
