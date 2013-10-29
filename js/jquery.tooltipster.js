@@ -876,7 +876,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			}
 		}
 	};
-		
+	
 	$.fn[pluginName] = function () {
 		
 		// for using in closures
@@ -920,21 +920,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			
 			// method calls
 			if (typeof args[0] === 'string') {
-				var $elList = this,
-					v = null;
 				
-				// if we're calling a container to interact with API's of tooltips inside it - select all those tooltip origins first
-				if (!$elList.data('tooltipster')) {
-					var query = $elList.find('*');
-					$elList = $();
-					query.each(function() {
-						if ($(this).data('tooltipster')) {
-							$elList.push($(this));
-						}
-					});
-				}
+				var v = null;
 				
-				$elList.each(function() {
+				this.each(function() {
 					
 					// self represent the instance of the tooltipster plugin associated to the current HTML object of the loop
 					var self = $(this).data('tooltipster');
