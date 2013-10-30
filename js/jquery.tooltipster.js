@@ -453,51 +453,55 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				
 				self.content = data;
 				
-				// set the new content in the tooltip
-				self.$tooltip.find('.tooltipster-content')
-					.empty()
-					.append(self.content);
+				// update the tooltip if it is open
+				if(self.$tooltip){
 				
-				// if we want to play a little animation showing the content changed
-				if (self.options.updateAnimation) {
-					if (supportsTransitions()) {
-						self.$tooltip.css({
-							'width': '',
-							'-webkit-transition': 'all ' + self.options.speed + 'ms, width 0ms, height 0ms, left 0ms, top 0ms',
-							'-moz-transition': 'all ' + self.options.speed + 'ms, width 0ms, height 0ms, left 0ms, top 0ms',
-							'-o-transition': 'all ' + self.options.speed + 'ms, width 0ms, height 0ms, left 0ms, top 0ms',
-							'-ms-transition': 'all ' + self.options.speed + 'ms, width 0ms, height 0ms, left 0ms, top 0ms',
-							'transition': 'all ' + self.options.speed + 'ms, width 0ms, height 0ms, left 0ms, top 0ms'
-						}).addClass('tooltipster-content-changing');
-						
-						// reset the CSS transitions and finish the change animation
-						setTimeout(function() {
-							self.$tooltip.removeClass('tooltipster-content-changing');
-							// after the changing animation has completed, reset the CSS transitions
+					// set the new content in the tooltip
+					self.$tooltip.find('.tooltipster-content')
+						.empty()
+						.append(self.content);
+					
+					// if we want to play a little animation showing the content changed
+					if (self.options.updateAnimation) {
+						if (supportsTransitions()) {
+							self.$tooltip.css({
+								'width': '',
+								'-webkit-transition': 'all ' + self.options.speed + 'ms, width 0ms, height 0ms, left 0ms, top 0ms',
+								'-moz-transition': 'all ' + self.options.speed + 'ms, width 0ms, height 0ms, left 0ms, top 0ms',
+								'-o-transition': 'all ' + self.options.speed + 'ms, width 0ms, height 0ms, left 0ms, top 0ms',
+								'-ms-transition': 'all ' + self.options.speed + 'ms, width 0ms, height 0ms, left 0ms, top 0ms',
+								'transition': 'all ' + self.options.speed + 'ms, width 0ms, height 0ms, left 0ms, top 0ms'
+							}).addClass('tooltipster-content-changing');
+							
+							// reset the CSS transitions and finish the change animation
 							setTimeout(function() {
-								self.$tooltip.css({
-									'-webkit-transition': self.options.speed + 'ms',
-									'-moz-transition': self.options.speed + 'ms',
-									'-o-transition': self.options.speed + 'ms',
-									'-ms-transition': self.options.speed + 'ms',
-									'transition': self.options.speed + 'ms'
-								});
+								self.$tooltip.removeClass('tooltipster-content-changing');
+								// after the changing animation has completed, reset the CSS transitions
+								setTimeout(function() {
+									self.$tooltip.css({
+										'-webkit-transition': self.options.speed + 'ms',
+										'-moz-transition': self.options.speed + 'ms',
+										'-o-transition': self.options.speed + 'ms',
+										'-ms-transition': self.options.speed + 'ms',
+										'transition': self.options.speed + 'ms'
+									});
+								}, self.options.speed);
 							}, self.options.speed);
-						}, self.options.speed);
+						}
+						else {
+							self.$tooltip.fadeTo(self.options.speed, 0.5, function() {
+								self.$tooltip.fadeTo(self.options.speed, 1);
+							});
+						}
 					}
-					else {
-						self.$tooltip.fadeTo(self.options.speed, 0.5, function() {
-							self.$tooltip.fadeTo(self.options.speed, 1);
-						});
-					}
+					
+					// reposition and resize the tooltip
+					self.positionTooltip();
+					
+					// stop the check interval ans start a new one immediately to apply the update now
+					self.cancelCheckInterval();
+					self.setCheckInterval();
 				}
-				
-				// reposition and resize the tooltip
-				self.positionTooltip();
-				
-				// stop the check interval ans start a new one immediately to apply the update now
-				self.cancelCheckInterval();
-				self.setCheckInterval();
 			}
 		},
 
