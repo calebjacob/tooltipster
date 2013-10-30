@@ -959,6 +959,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							case 'show':
 								self.showTooltip();
 								break;
+							
+							default:
+								throw "Unknown method .tooltipster('" + args[0] + "')";
+								break;
 						}
 					}
 					else {
