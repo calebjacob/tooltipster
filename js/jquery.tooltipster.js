@@ -895,21 +895,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					//if the current element is a tooltipster instance
 					if(self){
 						switch (args[0]) {
-							case 'show':
-								self.showTooltip();
-								break;
-			
-							case 'hide':
-								self.hideTooltip();
-								break;
-							
-							case 'disable':
-								self.$elProxy.addClass('tooltipster-disable');
-								break;
-							
-							case 'enable':
-								self.$elProxy.removeClass('tooltipster-disable');
-								break;
+
+							case 'content':
+								v = self.content;
+								// return false to stop .each iteration on the first element matched by the selector
+								return false;
 			
 							case 'destroy':
 								self.hideTooltip();
@@ -925,29 +915,40 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 									.removeData('tooltipster')
 									.off('.tooltipster');
 								break;
+							
+							case 'disable':
+								self.$elProxy.addClass('tooltipster-disable');
+								break;
 								
 							case 'elementIcon':
 								v = (self.$el[0] !== self.$elProxy[0]) ? self.$elProxy[0] : undefined;
-								// return false to stop .each iteration on the first element matched by the selector
+								// return false : same as above
 								return false;
 								
 							case 'elementTooltip':
 								v = self.$tooltip ? self.$tooltip[0] : undefined;
 								// return false : same as above
 								return false;
+							
+							case 'enable':
+								self.$elProxy.removeClass('tooltipster-disable');
+								break;
 			
-							case 'update':
-								self.updateTooltip(args[1]);
+							case 'hide':
+								self.hideTooltip();
 								break;
 								
 							case 'reposition':
 								self.positionTooltip();
 								break;
-
-							case 'val':
-								v = self.content;
-								// return false : same as above
-								return false;
+							
+							case 'show':
+								self.showTooltip();
+								break;
+			
+							case 'update':
+								self.updateTooltip(args[1]);
+								break;
 						}
 					}
 					else {
