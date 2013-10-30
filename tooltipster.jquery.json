@@ -1,11 +1,11 @@
 {
   "name": "tooltipster",
   "title": "Tooltipster",
-  "description": "A lightweight, flexible jQuery plugin enabling you to easily create semantic, modern tooltips enhanced with the power of CSS.",
+  "description": "A powerful, flexible jQuery plugin enabling you to easily create semantic, modern tooltips enhanced with the power of CSS.",
   "keywords": [
     "tooltip"
   ],
-  "version": "2.2.1",
+  "version": "2.2.2",
   "author": {
     "name": "Caleb Jacob",
     "url": "http://calebjacob.com/"
