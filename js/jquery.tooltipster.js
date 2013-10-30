@@ -892,14 +892,24 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					// self represent the instance of the tooltipster plugin associated to the current HTML object of the loop
 					var self = $(this).data('tooltipster');
 					
-					//if the current element is a tooltipster instance
+					// if the current element is a tooltipster instance
 					if(self){
 						switch (args[0]) {
 
 							case 'content':
-								v = self.content;
-								// return false to stop .each iteration on the first element matched by the selector
-								return false;
+							// 'update' is deprecated but kept for retrocompatibility
+							case 'update':
+								// getter method
+								if(typeof args[1] === 'undefined'){
+									v = self.content;
+									// return false to stop .each iteration on the first element matched by the selector
+									return false;
+								}
+								// setter method
+								else {
+									self.updateTooltip(args[1]);
+									break;
+								}
 			
 							case 'destroy':
 								self.hideTooltip();
@@ -944,10 +954,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							
 							case 'show':
 								self.showTooltip();
-								break;
-			
-							case 'update':
-								self.updateTooltip(args[1]);
 								break;
 						}
 					}
