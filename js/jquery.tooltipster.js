@@ -385,7 +385,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				) {
 					self.cancelCheckInterval();
 				}
-			}, 8000);
+			}, 200);
 		},
 		
 		cancelCheckInterval: function(){
@@ -501,10 +501,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					
 					// reposition and resize the tooltip
 					self.positionTooltip();
-					
-					// stop the check interval ans start a new one immediately to apply the update now
-					self.cancelCheckInterval();
-					self.setCheckInterval();
 				}
 			}
 		},
