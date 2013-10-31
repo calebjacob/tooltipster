@@ -17,7 +17,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			animation: 'fade',
 			arrow: true,
 			arrowColor: '',
-			content: '',
+			content: null,
 			delay: 200,
 			fixedWidth: 0,
 			maxWidth: 0,
@@ -88,8 +88,15 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 			if (run) {
 				
-				// first, strip the title off of the element to prevent the default tooltips from popping up
-				var content = $.trim(self.options.content).length > 0 ? self.options.content : self.$el.attr('title');
+				// the content is null (empty) by default and can stay that way if the plugin remains initialized but not fed any content. The tooltip will just not appear.
+				var content = null;
+				// if content is provided in the options, its has precedence over the title attribute. Remark : an empty string is considered content, only 'null' represents the absence of content.
+				if (self.options.content !== null) content = self.options.content;
+				else {
+					// the same remark as above applies : empty strings (like title="") are considered content and will be shown. Do not define any attribute at all if you want to initialize the plugin without content at start.
+					var t = self.$el.attr('title');
+					if(typeof t !== 'undefined') content = t;
+				}
 				
 				var c = self.options.functionInit(self.$el, content);
 				if(c) content = c;
@@ -97,6 +104,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				self.content = content;
 				
 				self.$el
+					// strip the title off of the element to prevent the default tooltips from popping up
 					.removeAttr('title')
 					// to be able to find all instances on the page later (upon window events in particular)
 					.addClass('tooltipstered');
@@ -201,8 +209,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			
 			var self = this;
 			
-			// continue if this tooltip is enabled
-			if (!self.$elProxy.hasClass('tooltipster-disable')) {
+			// continue if this tooltip is enabled and has any content, otherwise just ignore it completely
+			if (!self.$elProxy.hasClass('tooltipster-disable') && self.content !== null) {
 			
 				// if we only want one tooltip open at a time, close all tooltips currently open and not already dying
 				if(self.options.onlyOne){
@@ -453,9 +461,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			
 			var self = this;
 			
-			if(data){
-				
-				self.content = data;
+			self.content = data;
+			
+			if(self.content !== null){
 				
 				// update the tooltip if it is open
 				if(self.$tooltip){
@@ -502,6 +510,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					// reposition and resize the tooltip
 					self.positionTooltip();
 				}
+			}
+			else {
+				self.hideTooltip();
 			}
 		},
 
