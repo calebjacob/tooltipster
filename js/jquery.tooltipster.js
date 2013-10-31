@@ -91,7 +91,16 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				// the content is null (empty) by default and can stay that way if the plugin remains initialized but not fed any content. The tooltip will just not appear.
 				var content = null;
 				// if content is provided in the options, its has precedence over the title attribute. Remark : an empty string is considered content, only 'null' represents the absence of content.
-				if (self.options.content !== null) content = self.options.content;
+				if (self.options.content !== null){
+					if(typeof self.options.content === 'object'){
+						// clone the object as each instance needs its own version of the content (if a same object was provided for several instances)
+						content = self.options.content.clone(true);
+					}
+					else {
+						// other types need no cloning (not passed by reference)
+						content = self.options.content;
+					}
+				}
 				else {
 					// the same remark as above applies : empty strings (like title="") are considered content and will be shown. Do not define any attribute at all if you want to initialize the plugin without content at start.
 					var t = self.$el.attr('title');
@@ -112,10 +121,22 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				// detect if we're changing the tooltip origin to an icon
 				if ((self.options.iconDesktop) && (!touchDevice) || ((self.options.iconTouch) && (touchDevice))) {
 					
-					self.$elProxy = $('<span class="'+ self.options.iconTheme.replace('.', '') +'"></span>');
-					self.$elProxy
-						.append(self.options.icon)
-						.insertAfter(self.$el);
+					// TODO : the tooltip should be automatically be given an absolute position to be near the origin. Otherwise, when the origin is floating or what, it's going to be nowhere near it and disturb the position flow of the page elements. It will imply that the icon also detects when its origin moves, to follow it : not trivial.
+					// Until it's done, the icon feature does not really make sense since the user still has most of the work to do by himself
+					
+					// if the icon provided is in the form of a string
+					if(typeof self.options.icon === 'string'){
+						// wrap it in a span with the icon class
+						self.$elProxy = $('<span class="'+ self.options.iconTheme.replace('.', '') +'"></span>');
+						self.$elProxy.append(self.options.icon);
+					}
+					// if it is an object (sensible choice)
+					else {
+						// (deep) clone the object, as every instance needs its own proxy. We use the icon without wrapping, no need to. We do not give it a class either, as the user will undoubtedly style the object on his own and since our css properties may conflict with his own
+						self.$elProxy = self.options.icon.clone(true);
+					}
+					
+					self.$elProxy.insertAfter(self.$el);
 				}
 				else {
 					self.$elProxy = self.$el;
