@@ -962,6 +962,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 								break;
 							
 							case 'disable':
+								// hide first, in case the tooltip would not disappear on its own (interactiveAutoClose false)
+								self.hideTooltip();
 								self.$elProxy.addClass('tooltipster-disable');
 								break;
 								
