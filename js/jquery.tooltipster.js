@@ -264,30 +264,16 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 								// if this is a touch device, hide the tooltip on body touch
 								if (self.options.touchDevices && hasTouchCapability) {
 									
-									//reference the anonymous function for specific unbinding
-									var f = function(event) {
-										if (self.options.interactive) {
-											var touchTarget = $(event.target),
-												closeTooltip = true;
-											
-											touchTarget.parents().each(function() {
-												if ($(this).hasClass('tooltipster-base')) {
-													closeTooltip = false;
-												}
-											});
-											
-											if (closeTooltip) {
-												self.hideTooltip();
-												$('body').off(f);
-											}
-										}
-										else {
-											self.hideTooltip();
-											$('body').off(f);
-										}
-									};
+									// if interactive, we'll stop the events that were emitted from inside the tooltip
+									if (self.options.interactive) {
+										self.$tooltip.on('touchstart', function(event){
+											event.stopPropagation();
+										});
+									}
 									
-									$('body').on('touchstart.tooltipster', f);
+									$('body').one('touchstart', function(event) {
+										self.hideTooltip();
+									});
 								}
 							}
 						}
@@ -342,30 +328,16 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							// if this is a touch device, hide the tooltip on body touch
 							if (self.options.touchDevices && hasTouchCapability) {
 								
-								var f = function(event) {
-									if (self.options.interactive) {
-										
-										var touchTarget = $(event.target),
-											closeTooltip = true;
-										
-										touchTarget.parents().each(function() {
-											if ($(this).hasClass('tooltipster-base')) {
-												closeTooltip = false;
-											}
-										});
-										
-										if (closeTooltip) {
-											self.hideTooltip();
-											$('body').off(f);
-										}
-									}
-									else {
-										self.hideTooltip();
-										$('body').off(f);
-									}
-								};
+								// if interactive, we'll stop the events that were emitted from inside the tooltip
+								if (self.options.interactive) {
+									self.$tooltip.on('touchstart', function(event){
+										event.stopPropagation();
+									});
+								}
 								
-								$('body').on('touchstart.tooltipster', f);
+								$('body').one('touchstart', function(event) {
+									self.hideTooltip();
+								});
 							}
 						}
 					});
