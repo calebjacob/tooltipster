@@ -237,48 +237,28 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					// call our custom function before continuing
 					self.options.functionBefore(self.$elProxy, function() {
 						
-						// if this origin already has its tooltip open, keep it open and do nothing else
+						// if this origin already has its tooltip open
 						if (self.$tooltip) {
 							
+							// the timer (if any) will start right now
+							var extraTime = 0;
+							
 							if (!self.$tooltip.hasClass('tooltipster-kill')) {
-	
-								var animation = 'tooltipster-'+ self.options.animation;
 								
+								// if it was dying, cancel that
 								self.$tooltip.removeClass('tooltipster-dying');
 								
 								if (supportsTransitions()) {
-									self.$tooltip.clearQueue().addClass(animation +'-show');
-								}
-								
-								if (self.options.timer > 0) {
-									
-									// if we have a timer set, we need to reset it
-									clearTimeout(self.timer);
-									
-									self.timer = setTimeout(function() {
-										self.timer = null;
-										self.hideTooltip();
-									}, self.options.timer);
-								}
-								
-								// if this is a touch device, hide the tooltip on body touch
-								if (self.options.touchDevices && hasTouchCapability) {
-									
-									// if interactive, we'll stop the events that were emitted from inside the tooltip
-									if (self.options.interactive) {
-										self.$tooltip.on('touchstart', function(event){
-											event.stopPropagation();
-										});
-									}
-									
-									$('body').one('touchstart', function(event) {
-										self.hideTooltip();
-									});
+									self.$tooltip.clearQueue().addClass('tooltipster-'+ self.options.animation +'-show');
 								}
 							}
 						}
 						// if the tooltip isn't already open, open that sucker up!
 						else {
+							
+							// the timer (if any) will start when the tooltip has fully appeared after its transition
+							var extraTime = self.options.speed;
+							
 							// disable horizontal scrollbar to keep overflowing tooltips from jacking with it and then restore it to its previous value
 							self.options._bodyOverflowX = $('body').css('overflow-x');
 							$('body').css('overflow-x', 'hidden');
@@ -317,14 +297,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							// check to see if our tooltip origin is removed while the tooltip is alive
 							self.setCheckInterval();
 							
-							// if we have a timer set, let the countdown begin!
-							if (self.options.timer > 0) {
-								self.timer = setTimeout(function() {
-									self.timer = null;
-									self.hideTooltip();
-								}, self.options.timer + self.options.speed);
-							}
-							
 							// if this is a touch device, hide the tooltip on body touch
 							if (self.options.touchDevices && hasTouchCapability) {
 								
@@ -335,10 +307,23 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 									});
 								}
 								
-								$('body').one('touchstart', function(event) {
+								$('body').one('touchstart.tooltipster', function(event) {
 									self.hideTooltip();
 								});
 							}
+						}
+						
+						// if we have a timer set, let the countdown begin
+						if (self.options.timer > 0) {
+							
+							// in case we have a timer already set, reset it
+							clearTimeout(self.timer);
+							
+							self.timer = setTimeout(function() {
+								// clean delete
+								self.timer = null;
+								self.hideTooltip();
+							}, self.options.timer + extraTime);
 						}
 					});
 					
