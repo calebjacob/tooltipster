@@ -49,6 +49,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 		
 		// list of instance variables
 		
+		this.bodyOverflowX;
 		this.checkInterval = null;
 		// this will be the user content shown in the tooltip
 		this.content;
@@ -251,6 +252,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 								if (supportsTransitions()) {
 									self.$tooltip.clearQueue().addClass('tooltipster-'+ self.options.animation +'-show');
 								}
+								else {
+									// in case the tooltip was currently fading out, bring it back to life
+									self.$tooltip.stop().fadeIn();
+								}
 							}
 						}
 						// if the tooltip isn't already open, open that sucker up!
@@ -260,7 +265,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							var extraTime = self.options.speed;
 							
 							// disable horizontal scrollbar to keep overflowing tooltips from jacking with it and then restore it to its previous value
-							self.options._bodyOverflowX = $('body').css('overflow-x');
+							self.bodyOverflowX = $('body').css('overflow-x');
 							$('body').css('overflow-x', 'hidden');
 							
 							// get some other settings related to building the tooltip
@@ -273,7 +278,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 								pointerEvents = self.options.interactive ? 'pointer-events: auto;' : '';
 							
 							// build the base of our tooltip
-							self.$tooltip = $('<div class="tooltipster-base '+ themeClass +' '+ animation +'" style="'+ fixedWidth +' '+ maxWidth +' '+ pointerEvents +' '+ animationSpeed +'"><div class="tooltipster-content"></div></div>');
+							self.$tooltip = $('<div class="tooltipster-base '+ themeClass +'" style="'+ fixedWidth +' '+ maxWidth +' '+ pointerEvents +' '+ animationSpeed +'"><div class="tooltipster-content"></div></div>');
 							self.$tooltip
 								.children()
 									.append(self.content)
@@ -288,10 +293,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							
 							// animate in the tooltip
 							if (supportsTransitions()) {
-								self.$tooltip.addClass(animation + '-show');
+								self.$tooltip.addClass(animation + ' ' + animation + '-show');
 							}
 							else {
-								self.$tooltip.css('display', 'none').removeClass(animation).fadeIn(self.options.speed);
+								self.$tooltip.css('display', 'none').fadeIn(self.options.speed);
 							}
 							
 							// check to see if our tooltip origin is removed while the tooltip is alive
@@ -398,7 +403,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					self.$tooltip.queue(function() {
 						self.$tooltip.remove();
 						self.$tooltip = null;
-						$('body').css('overflow-x', self.options._bodyOverflowX);
+						$('body').css('overflow-x', self.bodyOverflowX);
 						
 						// finally, call our custom callback function
 						self.options.functionAfter(self.$elProxy);
@@ -411,7 +416,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						.fadeOut(self.options.speed, function() {
 							self.$tooltip.remove();
 							self.$tooltip = null;
-							$('body').css('overflow-x', self.options._bodyOverflowX);
+							$('body').css('overflow-x', self.bodyOverflowX);
 							
 							// finally, call our custom callback function
 							self.options.functionAfter(self.$elProxy);
