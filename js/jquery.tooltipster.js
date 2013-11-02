@@ -347,7 +347,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				
 				// reposition the tooltip if the origin element has moved
 				if(self.options.positionDynamic){
-					var o = self.$el.offset();
+					var o = self.$elProxy.offset();
 					if(o.left !== self.elOffset.left || o.top !== self.elOffset.top){
 						self.positionTooltip();
 						self.elOffset = o;
@@ -833,7 +833,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				self.$tooltip.css({'top': Math.round(myTop) + 'px', 'left': Math.round(myLeft) + 'px'});
 				
 				// remember the new position (relatively to document) of the origin element : if it is moved, we'll move the tooltip as well
-				if(self.options.positionDynamic) self.elOffset = self.$el.offset();
+				if(self.options.positionDynamic) self.elOffset = self.$elProxy.offset();
 			}
 		}
 	};
