@@ -37,6 +37,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			offsetY: 0,
 			onlyOne: false,
 			position: 'top',
+			positionDynamic: false,
 			speed: 350,
 			timer: 0,
 			theme: '.tooltipster-default',
@@ -55,6 +56,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 		this.content;
 		// this is the original element which is being applied the tooltipster plugin
 		this.$el = $(element);
+		this.elOffset;
 		// this will be the element which triggers the appearance of the tooltip on hover/click/custom events.
 		// it will be the same as this.$el if icons are not used (see in the options), otherwise it will correspond to the created icon
 		this.$elProxy;
@@ -342,6 +344,15 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			var self = this;
 			
 			self.checkInterval = setInterval(function() {
+				
+				// reposition the tooltip if the origin element has moved
+				if(self.options.positionDynamic){
+					var o = self.$el.offset();
+					if(o.left !== self.elOffset.left || o.top !== self.elOffset.top){
+						self.positionTooltip();
+						self.elOffset = o;
+					}
+				}
 				
 				// if this tooltip's origin is removed, remove the tooltip if it's still here
 				if ($('body').find(self.$el).length === 0 && self.$tooltip) {
@@ -820,6 +831,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				
 				// position the tooltip
 				self.$tooltip.css({'top': Math.round(myTop) + 'px', 'left': Math.round(myLeft) + 'px'});
+				
+				// remember the new position (relatively to document) of the origin element : if it is moved, we'll move the tooltip as well
+				if(self.options.positionDynamic) self.elOffset = self.$el.offset();
 			}
 		}
 	};
