@@ -37,7 +37,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			offsetY: 0,
 			onlyOne: false,
 			position: 'top',
-			positionDynamic: false,
+			positionTracker: false,
 			speed: 350,
 			timer: 0,
 			theme: '.tooltipster-default',
@@ -346,8 +346,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			self.checkInterval = setInterval(function() {
 				
 				// reposition the tooltip if the origin element has moved
-				if(self.options.positionDynamic){
-					var o = self.$elProxy.offset();
+				if(self.options.positionTracker){
+					
+					var o = (self.$elProxy.css('position') === 'fixed') ? { left: parseInt(self.$elProxy.css('left')), top: parseInt(self.$elProxy.css('top')) } : self.$elProxy.offset();
+					
 					if(o.left !== self.elOffset.left || o.top !== self.elOffset.top){
 						self.positionTooltip();
 						self.elOffset = o;
@@ -832,8 +834,13 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				// position the tooltip
 				self.$tooltip.css({'top': Math.round(myTop) + 'px', 'left': Math.round(myLeft) + 'px'});
 				
-				// remember the new position (relatively to document) of the origin element : if it is moved, we'll move the tooltip as well
-				if(self.options.positionDynamic) self.elOffset = self.$elProxy.offset();
+				// remember the new position of the origin element : if it is moved, we'll move the tooltip as well
+				if(self.options.positionTracker){
+					// for elements with a fixed position, we track the top and left properties (relative to window)
+					if(self.$elProxy.css('position') === 'fixed') self.elOffset = { left: parseInt(self.$elProxy.css('left')), top: parseInt(self.$elProxy.css('top')) };
+					// otherwise, track total offset (relative to document)
+					else self.elOffset = self.$elProxy.offset();
+				}
 			}
 		}
 	};
