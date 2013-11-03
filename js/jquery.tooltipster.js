@@ -32,7 +32,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			iconTheme: '.tooltipster-icon',
 			interactive: false,
 			interactiveTolerance: 350,
-			interactiveAutoClose: true,
+			interactiveAutoClose: true, // only makes sense if trigger is 'click'
 			offsetX: 0,
 			offsetY: 0,
 			onlyOne: true,
@@ -438,6 +438,17 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 									}
 								});
 							}
+							
+							// The following behavior controls closing the dialog if the user clicks outside the dialog
+              $('html').one('click',function() {
+                object.hideTooltip(); // hide the tooltip if the user clicks outside the dialog.
+              });
+							if (object.options.trigger == 'click') {
+                  $('.tooltipster-dialog').click(function(event) {
+                    return false; // don't propogate events that might close the dialog
+                  })
+							}
+							
 						}
 					});
 					
