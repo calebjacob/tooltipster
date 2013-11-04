@@ -28,6 +28,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			functionReady: function(origin, tooltip) {},
 			functionAfter: function(origin) {},
 			icon: '(?)',
+			iconCloning: true,
 			iconDesktop: false,
 			iconTouch: false,
 			iconTheme: '.tooltipster-icon',
@@ -87,7 +88,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				// if content is provided in the options, its has precedence over the title attribute. Remark : an empty string is considered content, only 'null' represents the absence of content.
 				if (self.options.content !== null){
 					if(typeof self.options.content === 'object' && self.options.contentCloning){
-						// clone the object as each instance needs its own version of the content (if a same object was provided for several instances)
+						// cloning the object makes sure that each instance has its own version of the content (in case a same object were provided for several instances)
 						content = self.options.content.clone(true);
 					}
 					else {
@@ -127,8 +128,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					}
 					// if it is an object (sensible choice)
 					else {
-						// (deep) clone the object, as every instance needs its own proxy. We use the icon without wrapping, no need to. We do not give it a class either, as the user will undoubtedly style the object on his own and since our css properties may conflict with his own
-						self.$elProxy = self.options.icon.clone(true);
+						// (deep) clone the object if iconCloning == true, to make sure every instance has its own proxy. We use the icon without wrapping, no need to. We do not give it a class either, as the user will undoubtedly style the object on his own and since our css properties may conflict with his own
+						if (self.options.iconCloning) self.$elProxy = self.options.icon.clone(true);
+						else self.$elProxy = self.options.icon;
 					}
 					
 					self.$elProxy.insertAfter(self.$el);
