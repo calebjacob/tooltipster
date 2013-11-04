@@ -519,8 +519,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				},
 				offset: $el.offset(),
 				position: {
-					left: $el.css('left'),
-					top: $el.css('top')
+					left: parseInt($el.css('left')),
+					top: parseInt($el.css('top'))
 				}
 			};
 		},
