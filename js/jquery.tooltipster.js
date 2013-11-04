@@ -17,6 +17,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			arrow: true,
 			arrowColor: '',
 			content: null,
+			contentCloning: true,
 			delay: 200,
 			fixedWidth: 0,
 			maxWidth: 0,
@@ -85,7 +86,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				var content = null;
 				// if content is provided in the options, its has precedence over the title attribute. Remark : an empty string is considered content, only 'null' represents the absence of content.
 				if (self.options.content !== null){
-					if(typeof self.options.content === 'object'){
+					if(typeof self.options.content === 'object' && self.options.contentCloning){
 						// clone the object as each instance needs its own version of the content (if a same object was provided for several instances)
 						content = self.options.content.clone(true);
 					}
