@@ -77,35 +77,27 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 		
 		init: function() {
 			
-			var self = this,
-				run = true;
+			var self = this;
 			
 			// disable the plugin on old browsers (including IE7 and lower)
 			if (document.querySelector) {
 				
-				// the content is null (empty) by default and can stay that way if the plugin remains initialized but not fed any content. The tooltip will just not appear.
-				var content = null;
+				// note : the content is null (empty) by default and can stay that way if the plugin remains initialized but not fed any content. The tooltip will just not appear.
+				
 				// if content is provided in the options, its has precedence over the title attribute. Remark : an empty string is considered content, only 'null' represents the absence of content.
 				if (self.options.content !== null){
-					if(typeof self.options.content === 'object' && self.options.contentCloning){
-						// cloning the object makes sure that each instance has its own version of the content (in case a same object were provided for several instances)
-						content = self.options.content.clone(true);
-					}
-					else {
-						// other types need no cloning (not passed by reference)
-						content = self.options.content;
-					}
+					self.updateContent(self.options.content);
 				}
 				else {
 					// the same remark as above applies : empty strings (like title="") are considered content and will be shown. Do not define any attribute at all if you want to initialize the plugin without content at start.
 					var t = self.$el.attr('title');
-					if(typeof t !== 'undefined') content = t;
+					if(typeof t === 'undefined') t = null;
+					
+					self.updateContent(t);
 				}
 				
-				var c = self.options.functionInit(self.$el, content);
-				if(c) content = c;
-				
-				self.content = content;
+				var c = self.options.functionInit(self.$el, self.content);
+				if(c) self.updateContent(c);
 				
 				self.$el
 					// strip the title off of the element to prevent the default tooltips from popping up
@@ -454,11 +446,17 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			}
 		},
 		
-		updateTooltip: function(data){
+		updateContent: function(content){
+			// clone if asked. Cloning the object makes sure that each instance has its own version of the content (in case a same object were provided for several instances)
+			if(typeof content === 'object' && this.options.contentCloning){
+				content = content.clone(true);
+			}
+			this.content = content;
+		},
+		
+		updateTooltip: function(){
 			
 			var self = this;
-			
-			self.content = data;
 			
 			if(self.content !== null){
 				
@@ -931,7 +929,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 								}
 								// setter method
 								else {
-									self.updateTooltip(args[1]);
+									self.updateContent(args[1]);
+									self.updateTooltip();
 									break;
 								}
 			
