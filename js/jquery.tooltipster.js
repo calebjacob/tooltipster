@@ -367,7 +367,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					
 					if(!identical){
 						self.positionTooltip();
-						self.elProxyPosition = p;
 					}
 				}
 				
