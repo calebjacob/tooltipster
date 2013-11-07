@@ -982,12 +982,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 								break;
 							
 							default:
-								throw "Unknown method .tooltipster('" + args[0] + "')";
+								throw new Error('Unknown method .tooltipster("' + args[0] + '")');
 								break;
 						}
 					}
 					else {
-						throw 'You called a tooltipster method on an unitialized element';
+						throw new Error('You called Tooltipster\'s "' + args[0] + '" method on an unitialized element');
 					}
 				});
 				
