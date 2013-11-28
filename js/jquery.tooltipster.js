@@ -448,7 +448,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 		
 		updateContent: function(content){
 			// clone if asked. Cloning the object makes sure that each instance has its own version of the content (in case a same object were provided for several instances)
-			if(typeof content === 'object' && this.options.contentCloning){
+			// reminder : typeof null === object
+			if(typeof content === 'object' && content !== null && this.options.contentCloning){
 				content = content.clone(true);
 			}
 			this.content = content;
