@@ -225,8 +225,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						[pluginName]('hide');
 				}
 				
-				//get rid of any appearance effect that might be queued
+				//get rid of any appearance effect that might be queued or disappearance timer that might be set
 				self.$elProxy.clearQueue();
+				clearTimeout(self.timer);
+				self.timer = null;
+				
 				// delay the showing of the tooltip according to the delay time, if there is one
 				if(self.options.delay > 0) self.$elProxy.delay(self.options.delay);
 				
@@ -317,9 +320,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						
 						// if we have a timer set, let the countdown begin
 						if (self.options.timer > 0) {
-							
-							// in case we have a timer already set, reset it
-							clearTimeout(self.timer);
 							
 							self.timer = setTimeout(function() {
 								// clean delete
@@ -483,22 +483,28 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							
 							// reset the CSS transitions and finish the change animation
 							setTimeout(function() {
-								self.$tooltip.removeClass('tooltipster-content-changing');
-								// after the changing animation has completed, reset the CSS transitions
-								setTimeout(function() {
-									self.$tooltip.css({
-										'-webkit-transition': self.options.speed + 'ms',
-										'-moz-transition': self.options.speed + 'ms',
-										'-o-transition': self.options.speed + 'ms',
-										'-ms-transition': self.options.speed + 'ms',
-										'transition': self.options.speed + 'ms'
-									});
-								}, self.options.speed);
+								if(self.$tooltip){
+									self.$tooltip.removeClass('tooltipster-content-changing');
+									// after the changing animation has completed, reset the CSS transitions
+									setTimeout(function() {
+										if(self.$tooltip){
+											self.$tooltip.css({
+												'-webkit-transition': self.options.speed + 'ms',
+												'-moz-transition': self.options.speed + 'ms',
+												'-o-transition': self.options.speed + 'ms',
+												'-ms-transition': self.options.speed + 'ms',
+												'transition': self.options.speed + 'ms'
+											});
+										}
+									}, self.options.speed);
+								}
 							}, self.options.speed);
 						}
 						else {
 							self.$tooltip.fadeTo(self.options.speed, 0.5, function() {
-								self.$tooltip.fadeTo(self.options.speed, 1);
+								if(self.$tooltip){
+									self.$tooltip.fadeTo(self.options.speed, 1);
+								}
 							});
 						}
 					}
