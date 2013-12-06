@@ -1,6 +1,6 @@
 /*
 
-Tooltipster 2.3.0 | 10/26/13
+Tooltipster 2.3.0rc3 | 10/26/13
 A rockin' custom tooltip jQuery plugin
 
 Developed by Caleb Jacob under the MIT license http://opensource.org/licenses/MIT
@@ -278,7 +278,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 								pointerEvents = self.options.interactive ? 'pointer-events: auto;' : '';
 							
 							// build the base of our tooltip
-							self.$tooltip = $('<div class="tooltipster-base '+ themeClass +'" style="'+ fixedWidth +' '+ maxWidth +' '+ pointerEvents +' '+ animationSpeed +'"><div class="tooltipster-content"></div></div>');
+							self.$tooltip = $('<div class="tooltipster-base '+ animation + ' ' + themeClass +'" style="'+ fixedWidth +' '+ maxWidth +' '+ pointerEvents +' '+ animationSpeed +'"><div class="tooltipster-content"></div></div>');
 							self.$tooltip
 								.children()
 									.append(self.content)
@@ -293,7 +293,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							
 							// animate in the tooltip
 							if (supportsTransitions()) {
-								self.$tooltip.addClass(animation + ' ' + animation + '-show');
+								self.$tooltip.addClass(animation + '-show');
 							}
 							else {
 								self.$tooltip.css('display', 'none').fadeIn(self.options.speed);
