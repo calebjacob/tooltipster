@@ -278,11 +278,14 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 								pointerEvents = self.options.interactive ? 'pointer-events: auto;' : '';
 							
 							// build the base of our tooltip
-							self.$tooltip = $('<div class="tooltipster-base '+ animation + ' ' + themeClass +'" style="'+ fixedWidth +' '+ maxWidth +' '+ pointerEvents +' '+ animationSpeed +'"><div class="tooltipster-content"></div></div>');
+							self.$tooltip = $('<div class="tooltipster-base '+ animation + ' ' + themeClass +'" style="'+ fixedWidth +' '+ maxWidth +' '+ pointerEvents +' '+ animationSpeed +'"></div>');
+							var $cont = $('<div class="tooltipster-content"></div>');
+							
+							if(typeof self.content === 'string') $cont.text(self.content);
+							else $cont.append(self.content);
+							
 							self.$tooltip
-								.children()
-									.append(self.content)
-									.end()
+								.append($cont)
 								.appendTo('body');
 							
 							// do all the crazy calculations and positioning
