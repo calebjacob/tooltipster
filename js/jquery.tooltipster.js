@@ -1,6 +1,6 @@
 /*
 
-Tooltipster 2.3.0rc3 | 10/26/13
+Tooltipster 3.0.0rc1 | 2013-12-22
 A rockin' custom tooltip jQuery plugin
 
 Developed by Caleb Jacob under the MIT license http://opensource.org/licenses/MIT
@@ -16,6 +16,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			animation: 'fade',
 			arrow: true,
 			arrowColor: '',
+			autoClose: true,
 			content: null,
 			contentCloning: true,
 			delay: 200,
@@ -34,7 +35,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			iconTheme: '.tooltipster-icon',
 			interactive: false,
 			interactiveTolerance: 350,
-			interactiveAutoClose: true,
 			offsetX: 0,
 			offsetY: 0,
 			onlyOne: false,
@@ -62,8 +62,13 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 		// this will be the element which triggers the appearance of the tooltip on hover/click/custom events.
 		// it will be the same as this.$el if icons are not used (see in the options), otherwise it will correspond to the created icon
 		this.$elProxy;
+		this.enabled = true;
 		this.options = $.extend({}, defaults, options);
-		this.timer = null;
+		this.randomId = Math.round(Math.random()*100000);
+		// status can be either : appearing, shown, disappearing, hidden
+		this.status = 'hidden';
+		this.timerHide = null;
+		this.timerShow = null;
 		// this will be the tooltip element (jQuery wrapped HTML element)
 		this.$tooltip;
 		this.tooltipArrowReposition;
@@ -86,18 +91,18 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				
 				// if content is provided in the options, its has precedence over the title attribute. Remark : an empty string is considered content, only 'null' represents the absence of content.
 				if (self.options.content !== null){
-					self.updateContent(self.options.content);
+					self.setContent(self.options.content);
 				}
 				else {
 					// the same remark as above applies : empty strings (like title="") are considered content and will be shown. Do not define any attribute at all if you want to initialize the plugin without content at start.
 					var t = self.$el.attr('title');
 					if(typeof t === 'undefined') t = null;
 					
-					self.updateContent(t);
+					self.setContent(t);
 				}
 				
 				var c = self.options.functionInit(self.$el, self.content);
-				if(c) self.updateContent(c);
+				if(typeof c !== 'undefined') self.setContent(c);
 				
 				self.$el
 					// strip the title off of the element to prevent the default tooltips from popping up
@@ -133,7 +138,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				
 				// just in case the device ever triggers touch events, add a touch handler that will launch the tooltip. Right after we'll bind the mouse events, they'll just never be used if there is no mouse on the system.
 				// informative note about device which have touch capacity : if self.options.touchDevices is false, tooltips will not be shown because of touch events. However the plugin itself has been initialized, thus preventing the native "title" tooltips to show. It is assumed that you would not want that anyway.
-				if (self.options.touchDevices && hasTouchCapability && ((self.options.trigger == 'click') || (self.options.trigger == 'hover'))) {
+				if (self.options.touchDevices && hasTouchCapability && (self.options.trigger == 'click' || self.options.trigger == 'hover')) {
 					self.$elProxy.on('touchstart.tooltipster', function() {
 						self.showTooltip();
 					});
@@ -151,7 +156,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							
 							var keepAlive = false;
 							
-							if (self.$tooltip) {
+							if (self.status == 'shown' || self.status == 'appearing') {
+								
 								self.$tooltip.mouseenter(function() {
 									keepAlive = true;
 								});
@@ -162,7 +168,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 								var tolerance = setTimeout(function() {
 
 									if (keepAlive) {
-										if (self.options.interactiveAutoClose) {
+										if (self.options.autoClose) {
 
 											self.$tooltip.mouseleave(function(e) {
 												var $target = $(e.target);
@@ -199,7 +205,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				// if click events are set to show and hide the tooltip, attach those events respectively
 				else if (self.options.trigger == 'click') {
 					self.$elProxy.on('click.tooltipster', function() {
-						if (!self.$tooltip) {
+						if (self.status != 'shown' && self.status != 'appearing') {
 							self.showTooltip();
 						}
 						else {
@@ -210,129 +216,166 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			}
 		},
 		
-		showTooltip: function(options) {
+		// this function will schedule the opening of the tooltip after the delay, if there is one
+		showTooltip: function() {
 			
 			var self = this;
 			
-			// continue if this tooltip is enabled and has any content, otherwise just ignore it completely
-			if (!self.$elProxy.hasClass('tooltipster-disable') && self.content !== null) {
-			
-				// if we only want one tooltip open at a time, close all tooltips currently open and not already dying
-				if(self.options.onlyOne){
-					$('.tooltipstered').not(self.$el).not('.tooltipster-dying')
-						.addClass('tooltipster-kill')
-						// hide using the object public method
-						[pluginName]('hide');
+			if (self.status != 'shown' && self.status != 'appearing') {
+				
+				if (self.options.delay) {
+					self.timerShow = setTimeout(function(){
+						self.showTooltipNow();
+					}, self.options.delay);
 				}
+				else self.showTooltipNow();
+			}
+		},
+		
+		// this function will open the tooltip right away
+		showTooltipNow: function() {
+			
+			var self = this;
+			
+			//get rid of any appearance timer
+			clearTimeout(self.timerShow);
+			self.timerShow = null;
+			clearTimeout(self.timerHide);
+			self.timerHide = null;
+			
+			// continue only if : is enabled, has any content, is not already open
+			if (self.enabled && self.content !== null && self.status != 'shown' && self.status != 'appearing') {
 				
-				//get rid of any appearance effect that might be queued or disappearance timer that might be set
-				self.$elProxy.clearQueue();
-				clearTimeout(self.timer);
-				self.timer = null;
-				
-				// delay the showing of the tooltip according to the delay time, if there is one
-				if(self.options.delay > 0) self.$elProxy.delay(self.options.delay);
-				
-				self.$elProxy.queue(function() {
-				
-					// call our custom function before continuing
-					self.options.functionBefore(self.$elProxy, function() {
-						
-						// if this origin already has its tooltip open
-						if (self.$tooltip) {
-							
-							// the timer (if any) will start right now
-							var extraTime = 0;
-							
-							if (!self.$tooltip.hasClass('tooltipster-kill')) {
-								
-								// if it was dying, cancel that
-								self.$tooltip.removeClass('tooltipster-dying');
-								
-								if (supportsTransitions()) {
-									self.$tooltip.clearQueue().addClass('tooltipster-'+ self.options.animation +'-show');
-								}
-								else {
-									// in case the tooltip was currently fading out, bring it back to life
-									self.$tooltip.stop().fadeIn();
-								}
-							}
-						}
-						// if the tooltip isn't already open, open that sucker up!
-						else {
-							
-							// the timer (if any) will start when the tooltip has fully appeared after its transition
-							var extraTime = self.options.speed;
-							
-							// disable horizontal scrollbar to keep overflowing tooltips from jacking with it and then restore it to its previous value
-							self.bodyOverflowX = $('body').css('overflow-x');
-							$('body').css('overflow-x', 'hidden');
-							
-							// get some other settings related to building the tooltip
-							var theme = self.options.theme,
-								themeClass = theme.replace('.', ''),
-								animation = 'tooltipster-' + self.options.animation,
-								animationSpeed = '-webkit-transition-duration: '+ self.options.speed +'ms; -webkit-animation-duration: '+ self.options.speed +'ms; -moz-transition-duration: '+ self.options.speed +'ms; -moz-animation-duration: '+ self.options.speed +'ms; -o-transition-duration: '+ self.options.speed +'ms; -o-animation-duration: '+ self.options.speed +'ms; -ms-transition-duration: '+ self.options.speed +'ms; -ms-animation-duration: '+ self.options.speed +'ms; transition-duration: '+ self.options.speed +'ms; animation-duration: '+ self.options.speed +'ms;',
-								fixedWidth = self.options.fixedWidth > 0 ? 'width:'+ Math.round(self.options.fixedWidth) +'px;' : '',
-								maxWidth = self.options.maxWidth > 0 ? 'max-width:'+ Math.round(self.options.maxWidth) +'px;' : '',
-								pointerEvents = self.options.interactive ? 'pointer-events: auto;' : '';
-							
-							// build the base of our tooltip
-							self.$tooltip = $('<div class="tooltipster-base '+ animation + ' ' + themeClass +'" style="'+ fixedWidth +' '+ maxWidth +' '+ pointerEvents +' '+ animationSpeed +'"></div>');
-							var $cont = $('<div class="tooltipster-content"></div>');
-							
-							if(typeof self.content === 'string') $cont.text(self.content);
-							else $cont.append(self.content);
-							
-							self.$tooltip
-								.append($cont)
-								.appendTo('body');
-							
-							// do all the crazy calculations and positioning
-							self.positionTooltip();
-							
-							// call our custom callback since the content of the tooltip is now part of the DOM
-							self.options.functionReady(self.$el, self.$tooltip);
-							
-							// animate in the tooltip
-							if (supportsTransitions()) {
-								self.$tooltip.addClass(animation + '-show');
-							}
-							else {
-								self.$tooltip.css('display', 'none').fadeIn(self.options.speed);
-							}
-							
-							// check to see if our tooltip origin is removed while the tooltip is alive
-							self.setCheckInterval();
-							
-							// if this is a touch device, hide the tooltip on body touch
-							if (self.options.touchDevices && hasTouchCapability) {
-								
-								// if interactive, we'll stop the events that were emitted from inside the tooltip
-								if (self.options.interactive) {
-									self.$tooltip.on('touchstart', function(event){
-										event.stopPropagation();
-									});
-								}
-								
-								$('body').one('touchstart.tooltipster', function(event) {
-									self.hideTooltip();
-								});
-							}
-						}
-						
-						// if we have a timer set, let the countdown begin
-						if (self.options.timer > 0) {
-							
-							self.timer = setTimeout(function() {
-								// clean delete
-								self.timer = null;
-								self.hideTooltip();
-							}, self.options.timer + extraTime);
+				// if we only want one tooltip open at a time, close all tooltips currently open and not already disappearing
+				if (self.options.onlyOne) {
+					$('.tooltipstered').not(self.$el).each(function(i,el) {
+						// we use the public methods here
+						var s = el[pluginName]('status');
+						if (s !== 'hidden' && s !== 'disappearing') {
+							el[pluginName]('hide');
 						}
 					});
+				}
+				
+				// call our custom function before continuing
+				self.options.functionBefore(self.$elProxy, function() {
 					
-					self.$elProxy.dequeue();
+					// if this origin already has its tooltip open
+					if (self.status !== 'hidden') {
+						
+						// the timer (if any) will start right now
+						var extraTime = 0;
+						
+						// if it was disappearing, cancel that
+						if(self.status === 'disappearing'){
+							
+							self.status = 'appearing';
+							
+							if (supportsTransitions()) {
+								
+								self.$tooltip
+									.clearQueue()
+									.removeClass('tooltipster-dying')
+									.addClass('tooltipster-'+ self.options.animation +'-show');
+								
+								if(self.options.speed > 0) self.$tooltip.delay(self.options.speed);
+								
+								self.$tooltip.queue(function(){
+									self.status = 'shown';
+								});
+							}
+							else {
+								// in case the tooltip was currently fading out, bring it back to life
+								self.$tooltip
+									.stop()
+									.fadeIn(function(){
+										self.status = 'shown';
+									});
+							}
+						}
+					}
+					// if the tooltip isn't already open, open that sucker up!
+					else {
+						
+						self.status = 'appearing';
+						
+						// the timer (if any) will start when the tooltip has fully appeared after its transition
+						var extraTime = self.options.speed;
+						
+						// disable horizontal scrollbar to keep overflowing tooltips from jacking with it and then restore it to its previous value
+						self.bodyOverflowX = $('body').css('overflow-x');
+						$('body').css('overflow-x', 'hidden');
+						
+						// get some other settings related to building the tooltip
+						var theme = self.options.theme,
+							themeClass = theme.replace('.', ''),
+							animation = 'tooltipster-' + self.options.animation,
+							animationSpeed = '-webkit-transition-duration: '+ self.options.speed +'ms; -webkit-animation-duration: '+ self.options.speed +'ms; -moz-transition-duration: '+ self.options.speed +'ms; -moz-animation-duration: '+ self.options.speed +'ms; -o-transition-duration: '+ self.options.speed +'ms; -o-animation-duration: '+ self.options.speed +'ms; -ms-transition-duration: '+ self.options.speed +'ms; -ms-animation-duration: '+ self.options.speed +'ms; transition-duration: '+ self.options.speed +'ms; animation-duration: '+ self.options.speed +'ms;',
+							fixedWidth = self.options.fixedWidth > 0 ? 'width:'+ Math.round(self.options.fixedWidth) +'px;' : '',
+							maxWidth = self.options.maxWidth > 0 ? 'max-width:'+ Math.round(self.options.maxWidth) +'px;' : '',
+							pointerEvents = self.options.interactive ? 'pointer-events: auto;' : '';
+						
+						// build the base of our tooltip
+						self.$tooltip = $('<div class="tooltipster-base '+ animation + ' ' + themeClass +'" style="'+ fixedWidth +' '+ maxWidth +' '+ pointerEvents +' '+ animationSpeed +'"></div>');
+						var $cont = $('<div class="tooltipster-content"></div>');
+						
+						if(typeof self.content === 'string') $cont.text(self.content);
+						else $cont.append(self.content);
+						
+						self.$tooltip
+							.append($cont)
+							.appendTo('body');
+						
+						// do all the crazy calculations and positioning
+						self.positionTooltip();
+						
+						// call our custom callback since the content of the tooltip is now part of the DOM
+						self.options.functionReady(self.$el, self.$tooltip);
+						
+						// animate in the tooltip
+						if (supportsTransitions()) {
+							
+							self.$tooltip.addClass(animation + '-show');
+							
+							if(self.options.speed > 0) self.$tooltip.delay(self.options.speed);
+							
+							self.$tooltip.queue(function(){
+								self.status = 'shown';
+							});
+						}
+						else {
+							self.$tooltip.css('display', 'none').fadeIn(self.options.speed, function(){
+								self.status = 'shown';
+							});
+						}
+						
+						// check to see if our tooltip origin is removed while the tooltip is alive
+						self.setCheckInterval();
+						
+						// if this is a touch device, hide the tooltip on body touch
+						if (self.options.touchDevices && hasTouchCapability) {
+							
+							// if interactive, we'll stop the events that were emitted from inside the tooltip
+							if (self.options.interactive) {
+								self.$tooltip.on('touchstart', function(event){
+									event.stopPropagation();
+								});
+							}
+							
+							$('body').one('touchstart.tooltipster', function(event) {
+								self.hideTooltip();
+							});
+						}
+					}
+					
+					// if we have a timer set, let the countdown begin
+					if (self.options.timer > 0) {
+						
+						self.timerHide = setTimeout(function() {
+							self.timerHide = null;
+							self.hideTooltip();
+						}, self.options.timer + extraTime);
+					}
 				});
 			}
 		},
@@ -368,7 +411,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				}
 				
 				// if this tooltip's origin is removed, remove the tooltip if it's still here
-				if ($('body').find(self.$el).length === 0 && self.$tooltip) {
+				if ($('body').find(self.$el).length === 0 && (self.status == 'shown' || self.status == 'appearing')) {
 					self.hideTooltip();
 				}
 				
@@ -379,8 +422,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						// if the elProxy has been removed
 					||	($('body').find(self.$elProxy).length === 0)
 						// if the tooltip has been closed
-					||	!self.$tooltip
-						// if the tooltip has been somehow removed
+					||	self.status == 'hidden'
+						// if the tooltip has somehow been removed
 					||	($('body').find(self.$tooltip).length === 0)
 				) {
 					self.cancelCheckInterval();
@@ -398,58 +441,51 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			
 			var self = this;
 			
-			//TODO : remove this unless there is a good reason behind that
-			// if the origin has been removed, find all tooltips assigned to death
-			// if (!tooltipster) {
-				// tooltipster = $('.tooltipster-dying');
-			// }
+			// get rid of any appearance timeout
+			clearTimeout(self.timerShow);
+			self.timerShow = null;
+			clearTimeout(self.timerHide);
+			self.timerHide = null;
 			
-			// clear any possible queues handling delays and such
-			self.$elProxy.clearQueue();
-			
-			if (self.$tooltip) {
+			// hide
+			if (self.status == 'shown' || self.status == 'appearing') {
 				
-				// just in case we needed to clear a timer
-				clearTimeout(self.timer);
-				self.timer = null;
-
-				var animation = 'tooltipster-'+ self.options.animation;
+				self.status = 'disappearing';
+				
+				var finish = function() {
+					
+					self.status = 'hidden';
+					
+					self.$tooltip.remove();
+					self.$tooltip = null;
+					
+					$('body').css('overflow-x', self.bodyOverflowX);
+					
+					// finally, call our custom callback function
+					self.options.functionAfter(self.$elProxy);
+				};
 				
 				if (supportsTransitions()) {
 					
 					self.$tooltip
 						.clearQueue()
-						.removeClass(animation +'-show')
+						.removeClass('tooltipster-' + self.options.animation + '-show')
+						// for transitions only
 						.addClass('tooltipster-dying');
 					
 					if(self.options.speed > 0) self.$tooltip.delay(self.options.speed);
 					
-					self.$tooltip.queue(function() {
-						self.$tooltip.remove();
-						self.$tooltip = null;
-						$('body').css('overflow-x', self.bodyOverflowX);
-						
-						// finally, call our custom callback function
-						self.options.functionAfter(self.$elProxy);
-					});
+					self.$tooltip.queue(finish);
 				}
 				else {
 					self.$tooltip
-						.clearQueue()
-						.addClass('tooltipster-dying')
-						.fadeOut(self.options.speed, function() {
-							self.$tooltip.remove();
-							self.$tooltip = null;
-							$('body').css('overflow-x', self.bodyOverflowX);
-							
-							// finally, call our custom callback function
-							self.options.functionAfter(self.$elProxy);
-						});
+						.stop()
+						.fadeOut(self.options.speed, finish);
 				}
 			}
 		},
 		
-		updateContent: function(content){
+		setContent: function(content){
 			// clone if asked. Cloning the object makes sure that each instance has its own version of the content (in case a same object were provided for several instances)
 			// reminder : typeof null === object
 			if(typeof content === 'object' && content !== null && this.options.contentCloning){
@@ -465,7 +501,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			if(self.content !== null){
 				
 				// update the tooltip if it is open
-				if(self.$tooltip){
+				if(self.status !== 'hidden'){
 				
 					// set the new content in the tooltip
 					self.$tooltip.find('.tooltipster-content')
@@ -474,7 +510,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					
 					// if we want to play a little animation showing the content changed
 					if (self.options.updateAnimation) {
+						
 						if (supportsTransitions()) {
+							
 							self.$tooltip.css({
 								'width': '',
 								'-webkit-transition': 'all ' + self.options.speed + 'ms, width 0ms, height 0ms, left 0ms, top 0ms',
@@ -486,11 +524,15 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							
 							// reset the CSS transitions and finish the change animation
 							setTimeout(function() {
-								if(self.$tooltip){
+								
+								if(self.status !== 'hidden'){
+									
 									self.$tooltip.removeClass('tooltipster-content-changing');
+									
 									// after the changing animation has completed, reset the CSS transitions
 									setTimeout(function() {
-										if(self.$tooltip){
+										
+										if(self.status !== 'hidden'){
 											self.$tooltip.css({
 												'-webkit-transition': self.options.speed + 'ms',
 												'-moz-transition': self.options.speed + 'ms',
@@ -939,7 +981,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 								}
 								// setter method
 								else {
-									self.updateContent(args[1]);
+									self.setContent(args[1]);
 									self.updateTooltip();
 									break;
 								}
@@ -960,9 +1002,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 								break;
 							
 							case 'disable':
-								// hide first, in case the tooltip would not disappear on its own (interactiveAutoClose false)
+								// hide first, in case the tooltip would not disappear on its own (autoClose false)
 								self.hideTooltip();
-								self.$elProxy.addClass('tooltipster-disable');
+								self.enabled = false;
 								break;
 								
 							case 'elementIcon':
@@ -976,20 +1018,25 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 								return false;
 							
 							case 'enable':
-								self.$elProxy.removeClass('tooltipster-disable');
+								self.enabled = true;
 								break;
 			
 							case 'hide':
 								self.hideTooltip();
 								break;
-								
+							
 							case 'reposition':
 								self.positionTooltip();
 								break;
 							
 							case 'show':
-								self.showTooltip();
+								self.showTooltipNow();
 								break;
+							
+							// for internal use use only, not part of the public API
+							case 'status':
+								v = self.status;
+								return false;
 							
 							default:
 								throw new Error('Unknown method .tooltipster("' + args[0] + '")');
