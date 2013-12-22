@@ -64,6 +64,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 		this.$elProxy;
 		this.enabled = true;
 		this.options = $.extend({}, defaults, options);
+		this.mouseIsOverProxy = false;
 		// a unique namespace per instance, for easy selective unbinding
 		this.namespace = 'tooltipster-'+ Math.round(Math.random()*100000);
 		// status can be either : appearing, shown, disappearing, hidden
@@ -144,72 +145,25 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				// just in case the device ever triggers touch events, add a touch handler that will launch the tooltip. Right after we'll bind the mouse events, they'll just never be used if there is no mouse on the system.
 				// informative note about device which have touch capacity : if self.options.touchDevices is false, tooltips will not be shown because of touch events. However the plugin itself has been initialized, thus preventing the native "title" tooltips to show. It is assumed that you would not want that anyway.
 				if (self.options.touchDevices && hasTouchCapability && (self.options.trigger == 'click' || self.options.trigger == 'hover')) {
-					self.$elProxy.on('touchstart.tooltipster', function() {
+					self.$elProxy.on('touchstart.'+ self.namespace, function() {
 						self.showTooltip();
 					});
 				}
 				
-				// if hover events are set to show and hide the tooltip, attach those events respectively
+				// for 'click' and 'hover' triggers : bind on events to open the tooltip. Note : closing is now handled in showTooltipNow() because of its bindings
 				if (self.options.trigger == 'hover') {
-					self.$elProxy.on('mouseenter.tooltipster', function() {
-						self.showTooltip();
-					});
 					
-					// if this is an interactive tooltip, delay getting rid of the tooltip right away so you have a chance to hover on the tooltip
-					if (self.options.interactive) {
-						self.$elProxy.on('mouseleave.tooltipster', function() {
-							
-							var keepAlive = false;
-							
-							if (self.status == 'shown' || self.status == 'appearing') {
-								
-								self.$tooltip.mouseenter(function() {
-									keepAlive = true;
-								});
-								self.$tooltip.mouseleave(function() {
-									keepAlive = false;
-								});
-								
-								var tolerance = setTimeout(function() {
-
-									if (keepAlive) {
-										if (self.options.autoClose) {
-
-											self.$tooltip.mouseleave(function(e) {
-												var $target = $(e.target);
-
-												if ($target.parents('.tooltipster-base').length === 0 || $target.hasClass('tooltipster-base')) {
-													self.hideTooltip();
-												}
-
-												else {
-													$target.on('mouseleave', function(e) {
-														self.hideTooltip();
-													});
-												}
-											});
-										}
-									}
-									else {
-										self.hideTooltip();
-									}
-								}, self.options.interactiveTolerance);
-							}
-							else {
-								self.hideTooltip();
-							}
+					self.$elProxy
+						.on('mouseenter.'+ self.namespace, function() {
+							self.mouseIsOverProxy = true;
+							self.showTooltip();
+						})
+						.on('mouseleave.'+ self.namespace, function() {
+							self.mouseIsOverProxy = false;
 						});
-					}
-					// if this is a dumb tooltip, just get rid of it on mouseleave
-					else {
-						self.$elProxy.on('mouseleave.tooltipster', function() {
-							self.hideTooltip();
-						});
-					}
 				}
-				// if click events are set to show and hide the tooltip, attach those events respectively
 				else if (self.options.trigger == 'click') {
-					self.$elProxy.on('click.tooltipster', function() {
+					self.$elProxy.on('click.'+ self.namespace, function() {
 						self.showTooltip();
 					});
 				}
@@ -225,7 +179,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				
 				if (self.options.delay) {
 					self.timerShow = setTimeout(function(){
-						self.showTooltipNow();
+						
+						// for hover trigger, we check if the mouse is still over the proxy, otherwise we do not show anything
+						if (self.options.trigger == 'click' || (self.options.trigger == 'hover' && self.mouseIsOverProxy)) {
+							self.showTooltipNow();
+						}
 					}, self.options.delay);
 				}
 				else self.showTooltipNow();
@@ -260,24 +218,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				// call our custom function before continuing
 				self.options.functionBefore(self.$elProxy, function() {
 					
-					// we'll listen for a click on the body to hide the tooltip if the trigger is 'click'
-					var clickListener = function(){
-						if (self.options.autoClose && self.options.trigger == 'click') {
-							
-							// in case a listener is already bound for the same thing, unbind it first
-							$('body').off('click.'+ self.namespace);
-							
-							// use a timeout to prevent immediate closing if the method was called on a click event and if options.delay == 0
-							setTimeout(function() {
-								$('body').one('click.'+ self.namespace, function() {
-									if (self.status == 'shown') {
-										self.hideTooltip();
-									}
-								});
-							}, 0);
-						}
-					};
-					
 					// if this origin already has its tooltip open
 					if (self.status !== 'hidden') {
 						
@@ -310,8 +250,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 										self.status = 'shown';
 									});
 							}
-							
-							clickListener();
 						}
 					}
 					// if the tooltip isn't already open, open that sucker up!
@@ -365,25 +303,63 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							});
 						}
 						
-						// will check to see if our tooltip origin is removed while the tooltip is alive
+						// will check if our tooltip origin is removed while the tooltip is shown
 						self.setCheckInterval();
 						
-						// if this is a touch device, hide the tooltip on body touch
-						if (self.options.touchDevices && hasTouchCapability) {
+						// auto-close bindings
+						if (self.options.autoClose){
 							
-							// if interactive, we'll stop the events that were emitted from inside the tooltip
-							if (self.options.interactive) {
-								self.$tooltip.on('touchstart', function(event) {
-									event.stopPropagation();
-								});
+							// here we'll auto-close when the mouse leaves the proxy...
+							if(self.options.trigger == 'hover') {
+								
+								// if this is an interactive tooltip, delay getting rid of the tooltip right away so you have a chance to hover on the tooltip
+								if (self.options.interactive) {
+									
+									var tolerance = null;
+									
+									self.$elProxy.add(self.$tooltip)
+										// hide after some time out of the proxy and the tooltip
+										.on('mouseleave.'+ self.namespace + '-autoClose', function() {
+											clearTimeout(tolerance);
+											tolerance = setTimeout(function(){
+												self.hideTooltip();
+											}, self.options.interactiveTolerance);
+										})
+										// suspend timeout when the mouse is over the proxy or the tooltip
+										.on('mouseenter.'+ self.namespace + '-autoClose', function() {
+											clearTimeout(tolerance);
+										});
+								}
+								// if this is a dumb tooltip, just get rid of it on mouseleave
+								else {
+									self.$elProxy.on('mouseleave.'+ self.namespace + '-autoClose', function() {
+										self.hideTooltip();
+									});
+								}
 							}
-							
-							$('body').one('touchstart.tooltipster', function(event) {
-								self.hideTooltip();
-							});
+							// here we'll listen for a click on the body to hide the tooltip
+							else if(self.options.trigger == 'click'){
+								
+								// in case a listener is already bound for the same thing, unbind it first
+								$('body').off('click.'+ self.namespace +' touchstart.'+ self.namespace);
+								
+								// use a timeout to prevent immediate closing if the method was called on a click event and if options.delay == 0
+								setTimeout(function() {
+									$('body').on('click.'+ self.namespace +' touchstart.'+ self.namespace, function() {
+										self.hideTooltip();
+									});
+								}, 0);
+								
+								// if interactive, we'll stop the events that were emitted from inside the tooltip to stop autoClosing
+								if (self.options.interactive) {
+									
+									// note : the touch events will just not be used if the plugin is not enabled on touch devices
+									self.$tooltip.on('click.'+ self.namespace +' touchstart.'+ self.namespace, function(event) {
+										event.stopPropagation();
+									});
+								}
+							}
 						}
-						
-						clickListener();
 					}
 					
 					// if we have a timer set, let the countdown begin
@@ -470,8 +446,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				
 				self.status = 'disappearing';
 				
-				// in case there is still a click listener for auto-closing
-				$('body').off('click.'+ self.namespace);
 				
 				var finish = function() {
 					
@@ -480,7 +454,13 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					self.$tooltip.remove();
 					self.$tooltip = null;
 					
-					$('body').css('overflow-x', self.bodyOverflowX);
+					$('body')
+						// unbind any auto-closing click/touch listeners
+						.off('.'+ self.namespace)
+						.css('overflow-x', self.bodyOverflowX);
+					
+					// unbind any auto-closing hover listeners
+					self.$elProxy.off('.'+ self.namespace + '-autoClose');
 					
 					// finally, call our custom callback function
 					self.options.functionAfter(self.$elProxy);
@@ -1034,7 +1014,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 									.removeClass('tooltipstered')
 									.attr('title', stringifiedContent)
 									.removeData('tooltipster')
-									.off('.tooltipster');
+									.off('.'+ self.namespace);
 								break;
 							
 							case 'disable':
