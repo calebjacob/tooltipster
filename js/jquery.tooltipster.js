@@ -64,7 +64,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 		this.$elProxy;
 		this.enabled = true;
 		this.options = $.extend({}, defaults, options);
-		this.randomId = Math.round(Math.random()*100000);
+		// a unique namespace per instance, for easy selective unbinding
+		this.namespace = 'tooltipster-'+ Math.round(Math.random()*100000);
 		// status can be either : appearing, shown, disappearing, hidden
 		this.status = 'hidden';
 		this.timerHide = null;
@@ -209,12 +210,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				// if click events are set to show and hide the tooltip, attach those events respectively
 				else if (self.options.trigger == 'click') {
 					self.$elProxy.on('click.tooltipster', function() {
-						if (self.status != 'shown' && self.status != 'appearing') {
-							self.showTooltip();
-						}
-						else {
-							self.hideTooltip();
-						}
+						self.showTooltip();
 					});
 				}
 			}
@@ -247,8 +243,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			clearTimeout(self.timerHide);
 			self.timerHide = null;
 			
-			// continue only if : is enabled, has any content, is not already open
-			if (self.enabled && self.content !== null && self.status != 'shown' && self.status != 'appearing') {
+			// continue only if the tooltip is enabled and has any content
+			if (self.enabled && self.content !== null) {
 				
 				// if we only want one tooltip open at a time, close all tooltips currently open and not already disappearing
 				if (self.options.onlyOne) {
@@ -264,14 +260,32 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				// call our custom function before continuing
 				self.options.functionBefore(self.$elProxy, function() {
 					
+					// we'll listen for a click on the body to hide the tooltip if the trigger is 'click'
+					var clickListener = function(){
+						if (self.options.autoClose && self.options.trigger == 'click') {
+							
+							// in case a listener is already bound for the same thing, unbind it first
+							$('body').off('click.'+ self.namespace);
+							
+							// use a timeout to prevent immediate closing if the method was called on a click event and if options.delay == 0
+							setTimeout(function() {
+								$('body').one('click.'+ self.namespace, function() {
+									if (self.status == 'shown') {
+										self.hideTooltip();
+									}
+								});
+							}, 0);
+						}
+					};
+					
 					// if this origin already has its tooltip open
 					if (self.status !== 'hidden') {
 						
-						// the timer (if any) will start right now
+						// the timer (if any) will start (or restart) right now
 						var extraTime = 0;
 						
 						// if it was disappearing, cancel that
-						if(self.status === 'disappearing'){
+						if (self.status === 'disappearing') {
 							
 							self.status = 'appearing';
 							
@@ -296,6 +310,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 										self.status = 'shown';
 									});
 							}
+							
+							clickListener();
 						}
 					}
 					// if the tooltip isn't already open, open that sucker up!
@@ -318,15 +334,13 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							pointerEvents = self.options.interactive ? 'pointer-events: auto;' : '';
 						
 						// build the base of our tooltip
-						self.$tooltip = $('<div class="tooltipster-base '+ animation +' '+ self.options.theme +'" style="'+ fixedWidth +' '+ maxWidth +' '+ pointerEvents +' '+ animationSpeed +'"></div>');
-						var $cont = $('<div class="tooltipster-content"></div>');
+						self.$tooltip = $('<div class="tooltipster-base '+ animation +' '+ self.options.theme +'" style="'+ fixedWidth +' '+ maxWidth +' '+ pointerEvents +' '+ animationSpeed +'"><div class="tooltipster-content"></div></div>');
 						
-						if(typeof self.content === 'string') $cont.text(self.content);
-						else $cont.append(self.content);
+						// insert the content
+						self.insertContent();
 						
-						self.$tooltip
-							.append($cont)
-							.appendTo('body');
+						// attach
+						self.$tooltip.appendTo('body');
 						
 						// do all the crazy calculations and positioning
 						self.positionTooltip();
@@ -351,7 +365,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							});
 						}
 						
-						// check to see if our tooltip origin is removed while the tooltip is alive
+						// will check to see if our tooltip origin is removed while the tooltip is alive
 						self.setCheckInterval();
 						
 						// if this is a touch device, hide the tooltip on body touch
@@ -359,7 +373,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							
 							// if interactive, we'll stop the events that were emitted from inside the tooltip
 							if (self.options.interactive) {
-								self.$tooltip.on('touchstart', function(event){
+								self.$tooltip.on('touchstart', function(event) {
 									event.stopPropagation();
 								});
 							}
@@ -368,6 +382,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 								self.hideTooltip();
 							});
 						}
+						
+						clickListener();
 					}
 					
 					// if we have a timer set, let the countdown begin
@@ -454,6 +470,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				
 				self.status = 'disappearing';
 				
+				// in case there is still a click listener for auto-closing
+				$('body').off('click.'+ self.namespace);
+				
 				var finish = function() {
 					
 					self.status = 'hidden';
@@ -487,28 +506,47 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			}
 		},
 		
-		setContent: function(content){
+		setContent: function(content) {
 			// clone if asked. Cloning the object makes sure that each instance has its own version of the content (in case a same object were provided for several instances)
 			// reminder : typeof null === object
-			if(typeof content === 'object' && content !== null && this.options.contentCloning){
+			if (typeof content === 'object' && content !== null && this.options.contentCloning) {
 				content = content.clone(true);
 			}
 			this.content = content;
 		},
 		
-		updateTooltip: function(){
+		insertContent: function() {
+			
+			var self = this,
+				$d = this.$tooltip.find('.tooltipster-content');
+			
+			if (typeof self.content === 'string') {
+				$d.text(self.content);
+			}
+			else {
+				$d
+					.empty()
+					.append(self.content);
+			}
+		},
+		
+		updateTooltip: function(content) {
 			
 			var self = this;
 			
-			if(self.content !== null){
+			// change the content
+			self.setContent(content);
+			
+			if (self.content !== null) {
 				
 				// update the tooltip if it is open
-				if(self.status !== 'hidden'){
-				
-					// set the new content in the tooltip
-					self.$tooltip.find('.tooltipster-content')
-						.empty()
-						.append(self.content);
+				if (self.status !== 'hidden') {
+					
+					// reset the content in the tooltip
+					self.insertContent();
+					
+					// reposition and resize the tooltip
+					self.positionTooltip();
 					
 					// if we want to play a little animation showing the content changed
 					if (self.options.updateAnimation) {
@@ -527,7 +565,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							// reset the CSS transitions and finish the change animation
 							setTimeout(function() {
 								
-								if(self.status !== 'hidden'){
+								if(self.status != 'hidden'){
 									
 									self.$tooltip.removeClass('tooltipster-content-changing');
 									
@@ -549,15 +587,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						}
 						else {
 							self.$tooltip.fadeTo(self.options.speed, 0.5, function() {
-								if(self.$tooltip){
+								if(self.status != 'hidden'){
 									self.$tooltip.fadeTo(self.options.speed, 1);
 								}
 							});
 						}
 					}
-					
-					// reposition and resize the tooltip
-					self.positionTooltip();
 				}
 			}
 			else {
@@ -983,8 +1018,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 								}
 								// setter method
 								else {
-									self.setContent(args[1]);
-									self.updateTooltip();
+									self.updateTooltip(args[1]);
 									break;
 								}
 			
@@ -1066,7 +1100,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 	};
 	
 	// quick & dirty compare function (not bijective nor multidimensional)
-	function areEqual(a,b){
+	function areEqual(a,b) {
 		var same = true;
 		$.each(a, function(i, el){
 			if(typeof b[i] === 'undefined' || a[i] !== b[i]){
