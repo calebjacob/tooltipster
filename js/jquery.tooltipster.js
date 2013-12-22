@@ -32,7 +32,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			iconCloning: true,
 			iconDesktop: false,
 			iconTouch: false,
-			iconTheme: '.tooltipster-icon',
+			iconTheme: 'tooltipster-icon',
 			interactive: false,
 			interactiveTolerance: 350,
 			offsetX: 0,
@@ -42,7 +42,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			positionTracker: false,
 			speed: 350,
 			timer: 0,
-			theme: '.tooltipster-default',
+			theme: 'tooltipster-default',
 			touchDevices: true,
 			trigger: 'hover',
 			updateAnimation: true
@@ -72,6 +72,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 		// this will be the tooltip element (jQuery wrapped HTML element)
 		this.$tooltip;
 		this.tooltipArrowReposition;
+		
+		// for backward compatibility
+		this.options.iconTheme = this.options.iconTheme.replace('.', '');
+		this.options.theme = this.options.theme.replace('.', '');
 		
 		// launch
 		
@@ -120,7 +124,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					// if the icon provided is in the form of a string
 					if(typeof self.options.icon === 'string'){
 						// wrap it in a span with the icon class
-						self.$elProxy = $('<span class="'+ self.options.iconTheme.replace('.', '') +'"></span>');
+						self.$elProxy = $('<span class="'+ self.options.iconTheme +'"></span>');
 						self.$elProxy.append(self.options.icon);
 					}
 					// if it is an object (sensible choice)
@@ -307,16 +311,14 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						$('body').css('overflow-x', 'hidden');
 						
 						// get some other settings related to building the tooltip
-						var theme = self.options.theme,
-							themeClass = theme.replace('.', ''),
-							animation = 'tooltipster-' + self.options.animation,
+						var animation = 'tooltipster-' + self.options.animation,
 							animationSpeed = '-webkit-transition-duration: '+ self.options.speed +'ms; -webkit-animation-duration: '+ self.options.speed +'ms; -moz-transition-duration: '+ self.options.speed +'ms; -moz-animation-duration: '+ self.options.speed +'ms; -o-transition-duration: '+ self.options.speed +'ms; -o-animation-duration: '+ self.options.speed +'ms; -ms-transition-duration: '+ self.options.speed +'ms; -ms-animation-duration: '+ self.options.speed +'ms; transition-duration: '+ self.options.speed +'ms; animation-duration: '+ self.options.speed +'ms;',
 							fixedWidth = self.options.fixedWidth > 0 ? 'width:'+ Math.round(self.options.fixedWidth) +'px;' : '',
 							maxWidth = self.options.maxWidth > 0 ? 'max-width:'+ Math.round(self.options.maxWidth) +'px;' : '',
 							pointerEvents = self.options.interactive ? 'pointer-events: auto;' : '';
 						
 						// build the base of our tooltip
-						self.$tooltip = $('<div class="tooltipster-base '+ animation + ' ' + themeClass +'" style="'+ fixedWidth +' '+ maxWidth +' '+ pointerEvents +' '+ animationSpeed +'"></div>');
+						self.$tooltip = $('<div class="tooltipster-base '+ animation +' '+ self.options.theme +'" style="'+ fixedWidth +' '+ maxWidth +' '+ pointerEvents +' '+ animationSpeed +'"></div>');
 						var $cont = $('<div class="tooltipster-content"></div>');
 						
 						if(typeof self.content === 'string') $cont.text(self.content);
