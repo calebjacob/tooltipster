@@ -150,6 +150,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					// - we check deviceIsPureTouch() at each event rather than prior to binding because the situation may change during browsing
 				if (self.options.trigger == 'hover') {
 					
+					// these binding are for mouse interaction only
 					self.$elProxy
 						.on('mouseenter.'+ self.namespace, function() {
 							if (!deviceIsPureTouch() || self.options.touchDevices) {
@@ -163,6 +164,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							}
 						});
 					
+					// for touch interaction only
 					if (deviceHasTouchCapability && self.options.touchDevices) {
 						
 						// for touch devices, we immediately display the tooltip because we cannot rely on mouseleave to handle the delay
@@ -173,7 +175,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				}
 				else if (self.options.trigger == 'click') {
 					
-					// note : for touch devices, we do not bind on touchstart, we only rely on the emulated click (triggered by a tap)
+					// note : for touch devices, we do not bind on touchstart, we only rely on the emulated clicks (triggered by taps)
 					self.$elProxy.on('click.'+ self.namespace, function() {
 						if (!deviceIsPureTouch() || self.options.touchDevices) {
 							self.showTooltip();
@@ -315,7 +317,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							});
 						}
 						else {
-							self.$tooltip.css('display', 'none').fadeIn(self.options.speed, function(){
+							self.$tooltip.css('display', 'none').fadeIn(self.options.speed, function() {
 								self.status = 'shown';
 							});
 						}
@@ -324,14 +326,36 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						self.setCheckInterval();
 						
 						// auto-close bindings
-						if (self.options.autoClose){
+						if (self.options.autoClose) {
 							
-							// here we'll auto-close when the mouse leaves the proxy...
-							if(self.options.trigger == 'hover') {
+							// in case a listener is already bound for autoclosing (mouse or touch, hover or click), unbind it first
+							$('body').off('.'+ self.namespace);
+							
+							// here we'll have to set different sets of bindings for both touch and mouse
+							if (self.options.trigger == 'hover') {
 								
-								// if this is an interactive tooltip, delay getting rid of the tooltip right away so you have a chance to hover on the tooltip
+								// if the user touches the body, hide
+								if (deviceHasTouchCapability) {
+									// timeout 0 : explanation below in click section
+									setTimeout(function() {
+										// we don't want to bind on click here because the initial touchstart event has not yet triggered its click event, which is thus about to happen
+										$('body').on('touchstart.'+ self.namespace, function() {
+											self.hideTooltip();
+										});
+									}, 0);
+								}
+								
+								// if we have to allow interaction
 								if (self.options.interactive) {
 									
+									// touch events inside the tooltip must not close it
+									if (deviceHasTouchCapability) {
+										self.$tooltip.on('touchstart.'+ self.namespace, function(event) {
+											event.stopPropagation();
+										});
+									}
+									
+									// as for mouse interaction, we get rid of the tooltip only after the mouse has spent some time out of it
 									var tolerance = null;
 									
 									self.$elProxy.add(self.$tooltip)
@@ -347,20 +371,17 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 											clearTimeout(tolerance);
 										});
 								}
-								// if this is a dumb tooltip, just get rid of it on mouseleave
+								// if this is a non-interactive tooltip, get rid of it if the mouse leaves
 								else {
 									self.$elProxy.on('mouseleave.'+ self.namespace + '-autoClose', function() {
 										self.hideTooltip();
 									});
 								}
 							}
-							// here we'll listen for a click on the body to hide the tooltip
+							// here we'll set the same bindings for both clicks and touch on the body to hide the tooltip
 							else if(self.options.trigger == 'click'){
 								
-								// in case a listener is already bound for the same thing, unbind it first
-								$('body').off('click.'+ self.namespace +' touchstart.'+ self.namespace);
-								
-								// use a timeout to prevent immediate closing if the method was called on a click event and if options.delay == 0
+								// use a timeout to prevent immediate closing if the method was called on a click event and if options.delay == 0 (because of bubbling)
 								setTimeout(function() {
 									$('body').on('click.'+ self.namespace +' touchstart.'+ self.namespace, function() {
 										self.hideTooltip();
