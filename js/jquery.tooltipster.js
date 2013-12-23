@@ -43,7 +43,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			speed: 350,
 			timer: 0,
 			theme: 'tooltipster-default',
-			touchDevices: true,
 			trigger: 'hover',
 			updateAnimation: true
 		};
@@ -127,7 +126,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					if(typeof self.options.icon === 'string'){
 						// wrap it in a span with the icon class
 						self.$elProxy = $('<span class="'+ self.options.iconTheme +'"></span>');
-						self.$elProxy.append(self.options.icon);
+						self.$elProxy.text(self.options.icon);
 					}
 					// if it is an object (sensible choice)
 					else {
@@ -142,14 +141,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					self.$elProxy = self.$el;
 				}
 				
-				// just in case the device ever triggers touch events, add a touch handler that will launch the tooltip. Right after we'll bind the mouse events, they'll just never be used if there is no mouse on the system.
-				// informative note about device which have touch capacity : if self.options.touchDevices is false, tooltips will not be shown because of touch events. However the plugin itself has been initialized, thus preventing the native "title" tooltips to show. It is assumed that you would not want that anyway.
-				if (self.options.touchDevices && hasTouchCapability && (self.options.trigger == 'click' || self.options.trigger == 'hover')) {
-					self.$elProxy.on('touchstart.'+ self.namespace, function() {
-						self.showTooltip();
-					});
-				}
-				
 				// for 'click' and 'hover' triggers : bind on events to open the tooltip. Note : closing is now handled in showTooltipNow() because of its bindings
 				if (self.options.trigger == 'hover') {
 					
@@ -160,9 +151,14 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						})
 						.on('mouseleave.'+ self.namespace, function() {
 							self.mouseIsOverProxy = false;
+						})
+						// for touch devices, we immediately display the tooltip because we cannot rely on mouseleave to handle the delay
+						.on('touchstart.'+ self.namespace, function() {
+							self.showTooltipNow();
 						});
 				}
 				else if (self.options.trigger == 'click') {
+					// note : for touch devices, we do not bind on touchstart, we only rely on the emulated click
 					self.$elProxy.on('click.'+ self.namespace, function() {
 						self.showTooltip();
 					});
