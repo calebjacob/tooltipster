@@ -18,6 +18,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			arrowColor: '',
 			autoClose: true,
 			content: null,
+			contentAsHTML: false,
 			contentCloning: true,
 			delay: 200,
 			fixedWidth: 0,
@@ -499,7 +500,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			var self = this,
 				$d = this.$tooltip.find('.tooltipster-content');
 			
-			if (typeof self.content === 'string') {
+			if (typeof self.content === 'string' && !self.options.contentAsHTML) {
 				$d.text(self.content);
 			}
 			else {
