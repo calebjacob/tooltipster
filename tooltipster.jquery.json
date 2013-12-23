@@ -5,7 +5,7 @@
   "keywords": [
     "tooltip"
   ],
-  "version": "2.3.0",
+  "version": "3.0.0",
   "author": {
     "name": "Caleb Jacob",
     "url": "http://calebjacob.com/"
@@ -23,9 +23,9 @@
       "url": "http://opensource.org/licenses/MIT"
     }
   ],
-  "homepage": "http://calebjacob.com/tooltipster/",
-  "docs": "http://calebjacob.com/tooltipster/#getting-started",
+  "homepage": "https://github.com/iamceege/tooltipster",
+  "docs": "http://iamceege.github.io/tooltipster",
   "dependencies": {
-    "jquery": ">=1.4"
+    "jquery": ">=1.7"
   }
 }

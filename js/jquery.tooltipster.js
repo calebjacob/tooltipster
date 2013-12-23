@@ -204,13 +204,17 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			// continue only if the tooltip is enabled and has any content
 			if (self.enabled && self.content !== null) {
 				
-				// if we only want one tooltip open at a time, close all tooltips currently open and not already disappearing
+				// if we only want one tooltip open at a time, close all auto-closing tooltips currently open and not already disappearing
 				if (self.options.onlyOne) {
 					$('.tooltipstered').not(self.$el).each(function(i,el) {
-						// we use the public methods here
-						var s = el[pluginName]('status');
-						if (s !== 'hidden' && s !== 'disappearing') {
-							el[pluginName]('hide');
+						
+						// we have to use the public methods here
+						var $el = $(el),
+							s = $el[pluginName]('status'),
+							ac = $el[pluginName]('option', 'autoClose');
+						
+						if (s !== 'hidden' && s !== 'disappearing' && ac) {
+							$el[pluginName]('hide');
 						}
 					});
 				}
@@ -445,7 +449,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			if (self.status == 'shown' || self.status == 'appearing') {
 				
 				self.status = 'disappearing';
-				
 				
 				var finish = function() {
 					
@@ -1039,6 +1042,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			
 							case 'hide':
 								self.hideTooltip();
+								break;
+							
+							// for internal use only
+							case 'option':
+								v = self.options[args[1]];
 								break;
 							
 							case 'reposition':
