@@ -44,6 +44,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			speed: 350,
 			timer: 0,
 			theme: 'tooltipster-default',
+			touchDevices: true,
 			trigger: 'hover',
 			updateAnimation: true
 		};
@@ -118,7 +119,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 				// detect if we're changing the tooltip origin to an icon
 				// note about this condition : if the device has touch capability and self.options.iconTouch is false, you'll have no icons event though you may consider your device as a desktop if it also has a mouse. Not sure why someone would have this use case though.
-				if ((!hasTouchCapability && self.options.iconDesktop) || (hasTouchCapability && self.options.iconTouch)) {
+				if ((!deviceHasTouchCapability && self.options.iconDesktop) || (deviceHasTouchCapability && self.options.iconTouch)) {
 					
 					// TODO : the tooltip should be automatically be given an absolute position to be near the origin. Otherwise, when the origin is floating or what, it's going to be nowhere near it and disturb the position flow of the page elements. It will imply that the icon also detects when its origin moves, to follow it : not trivial.
 					// Until it's done, the icon feature does not really make sense since the user still has most of the work to do by himself
@@ -142,26 +143,41 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					self.$elProxy = self.$el;
 				}
 				
-				// for 'click' and 'hover' triggers : bind on events to open the tooltip. Note : closing is now handled in showTooltipNow() because of its bindings
+				// for 'click' and 'hover' triggers : bind on events to open the tooltip. Closing is now handled in showTooltipNow() because of its bindings.
+				// Notes about touch events :
+					// - mouseenter, mouseleave and clicks happen even on pure touch devices because they are emulated. deviceIsPureTouch() is a simple attempt to detect them.
+					// - on hybrid devices, we do not prevent touch gesture from opening tooltips. It would be too complex to differentiate real mouse events from emulated ones.
+					// - we check deviceIsPureTouch() at each event rather than prior to binding because the situation may change during browsing
 				if (self.options.trigger == 'hover') {
 					
 					self.$elProxy
 						.on('mouseenter.'+ self.namespace, function() {
-							self.mouseIsOverProxy = true;
-							self.showTooltip();
+							if (!deviceIsPureTouch() || self.options.touchDevices) {
+								self.mouseIsOverProxy = true;
+								self.showTooltip();
+							}
 						})
 						.on('mouseleave.'+ self.namespace, function() {
-							self.mouseIsOverProxy = false;
-						})
+							if (!deviceIsPureTouch() || self.options.touchDevices) {
+								self.mouseIsOverProxy = false;
+							}
+						});
+					
+					if (deviceHasTouchCapability && self.options.touchDevices) {
+						
 						// for touch devices, we immediately display the tooltip because we cannot rely on mouseleave to handle the delay
-						.on('touchstart.'+ self.namespace, function() {
+						self.$elProxy.on('touchstart.'+ self.namespace, function() {
 							self.showTooltipNow();
 						});
+					}
 				}
 				else if (self.options.trigger == 'click') {
-					// note : for touch devices, we do not bind on touchstart, we only rely on the emulated click
+					
+					// note : for touch devices, we do not bind on touchstart, we only rely on the emulated click (triggered by a tap)
 					self.$elProxy.on('click.'+ self.namespace, function() {
-						self.showTooltip();
+						if (!deviceIsPureTouch() || self.options.touchDevices) {
+							self.showTooltip();
+						}
 					});
 				}
 			}
@@ -1097,7 +1113,17 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 	}
 	
 	// detect if this device can trigger touch events
-	var hasTouchCapability = !!('ontouchstart' in window);
+	var deviceHasTouchCapability = !!('ontouchstart' in window);
+	
+	// we'll assume the device has no mouse until we detect any mouse movement
+	var deviceHasMouse = false;
+	$('body').one('mousemove', function() {
+		deviceHasMouse = true;
+	});
+	
+	function deviceIsPureTouch() {
+		return (!deviceHasMouse && deviceHasTouchCapability);
+	}
 	
 	// detecting support for CSS transitions
 	function supportsTransitions() {
