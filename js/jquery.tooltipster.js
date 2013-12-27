@@ -1045,7 +1045,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 								if(self.$el[0] !== self.$elProxy[0]) self.$elProxy.remove();
 								
 								// old school technique when outerHTML is not supported
-								var stringifiedContent = $('<div></div>').append(self.content).html();
+								var stringifiedContent = (typeof self.content === 'string') ? self.content : $('<div></div>').append(self.content).html();
 								
 								self.$el
 									.removeClass('tooltipstered')
