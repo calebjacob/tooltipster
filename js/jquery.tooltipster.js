@@ -1,22 +1,23 @@
 /*
 
-Tooltipster 2.2.3 | 10/29/13
+Tooltipster 2.3.0rc3 | 10/26/13
 A rockin' custom tooltip jQuery plugin
 
-Developed by Caleb Jacob uner the MIT license http://opensource.org/licenses/MIT
+Developed by Caleb Jacob under the MIT license http://opensource.org/licenses/MIT
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 */
 
-;(function ($, window, document, undefined) {
+;(function ($, window, document) {
 
 	var pluginName = "tooltipster",
 		defaults = {
 			animation: 'fade',
 			arrow: true,
 			arrowColor: '',
-			content: '',
+			content: null,
+			contentCloning: true,
 			delay: 200,
 			fixedWidth: 0,
 			maxWidth: 0,
@@ -27,6 +28,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			functionReady: function(origin, tooltip) {},
 			functionAfter: function(origin) {},
 			icon: '(?)',
+			iconCloning: true,
 			iconDesktop: false,
 			iconTouch: false,
 			iconTheme: '.tooltipster-icon',
@@ -35,8 +37,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			interactiveAutoClose: true,
 			offsetX: 0,
 			offsetY: 0,
-			onlyOne: true,
+			onlyOne: false,
 			position: 'top',
+			positionTracker: false,
 			speed: 350,
 			timer: 0,
 			theme: '.tooltipster-default',
@@ -46,523 +49,544 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 		};
 	
 	function Plugin(element, options) {
-		this.element = element;
 		
-		this.options = $.extend( {}, defaults, options );
+		// list of instance variables
 		
-		this._defaults = defaults;
-		this._name = pluginName;
+		this.bodyOverflowX;
+		this.checkInterval = null;
+		// this will be the user content shown in the tooltip
+		this.content;
+		// this is the original element which is being applied the tooltipster plugin
+		this.$el = $(element);
+		this.elProxyPosition;
+		// this will be the element which triggers the appearance of the tooltip on hover/click/custom events.
+		// it will be the same as this.$el if icons are not used (see in the options), otherwise it will correspond to the created icon
+		this.$elProxy;
+		this.options = $.extend({}, defaults, options);
+		this.timer = null;
+		// this will be the tooltip element (jQuery wrapped HTML element)
+		this.$tooltip;
+		this.tooltipArrowReposition;
+		
+		// launch
 		
 		this.init();
 	}
 	
-	// we'll use this to detect for mobile devices
-	function is_touch_device() {
-		return !!('ontouchstart' in window);
-	}
-
-	// detecting support for CSS transitions
-	function supportsTransitions() {
-		var b = document.body || document.documentElement;
-		var s = b.style;
-		var p = 'transition';
-		if(typeof s[p] == 'string') {return true; }
-
-		v = ['Moz', 'Webkit', 'Khtml', 'O', 'ms'],
-		p = p.charAt(0).toUpperCase() + p.substr(1);
-		for(var i=0; i<v.length; i++) {
-			if(typeof s[v[i] + p] == 'string') { return true; }
-		}
-		return false;
-	}
-	var transitionSupport = true;
-	if (!supportsTransitions()) {
-		transitionSupport = false;
-	}
-
-	// detect if this device is mouse driven over purely touch
-	var touchDevice = is_touch_device();
-
-	// on mousemove, double confirm that this is a desktop - not a touch device
-	$(window).on('mousemove.tooltipster', function() {
-		touchDevice = false;
-		$(window).off('mousemove.tooltipster');
-	});
-
 	Plugin.prototype = {
 		
 		init: function() {
-			var $this = $(this.element);
-			var object = this;
-			var run = true;
 			
-			// if this is a touch device and touch devices are disabled, disable the plugin
-			if (!object.options.touchDevices && touchDevice) {
-				run = false;
-			}
+			var self = this;
 			
-			// if IE7 or lower, disable the plugin
-			if (document.all && !document.querySelector) {
-				run = false;
-			}
-
-			if (run) {
-				// first, strip the title off of the element and set it as a data attribute to prevent the default tooltips from popping up
-				var tooltipsterContent = $.trim(object.options.content).length > 0 ? object.options.content : $this.attr('title');
+			// disable the plugin on old browsers (including IE7 and lower)
+			if (document.querySelector) {
 				
-				var c = object.options.functionInit($this, tooltipsterContent);
-				if(c) tooltipsterContent = c;
+				// note : the content is null (empty) by default and can stay that way if the plugin remains initialized but not fed any content. The tooltip will just not appear.
 				
-				$this.data('tooltipsterContent', tooltipsterContent);
-				$this.removeAttr('title');
+				// if content is provided in the options, its has precedence over the title attribute. Remark : an empty string is considered content, only 'null' represents the absence of content.
+				if (self.options.content !== null){
+					self.updateContent(self.options.content);
+				}
+				else {
+					// the same remark as above applies : empty strings (like title="") are considered content and will be shown. Do not define any attribute at all if you want to initialize the plugin without content at start.
+					var t = self.$el.attr('title');
+					if(typeof t === 'undefined') t = null;
+					
+					self.updateContent(t);
+				}
+				
+				var c = self.options.functionInit(self.$el, self.content);
+				if(c) self.updateContent(c);
+				
+				self.$el
+					// strip the title off of the element to prevent the default tooltips from popping up
+					.removeAttr('title')
+					// to be able to find all instances on the page later (upon window events in particular)
+					.addClass('tooltipstered');
 
 				// detect if we're changing the tooltip origin to an icon
-				if ((object.options.iconDesktop) && (!touchDevice) || ((object.options.iconTouch) && (touchDevice))) {
-					var theme = object.options.iconTheme;
-					var icon = $('<span class="'+ theme.replace('.', '') +'"></span>');
-					icon
-						.data('tooltipsterContent', tooltipsterContent)
-						.append(object.options.icon)
-						.insertAfter($this);
-					$this.data('tooltipsterIcon', icon);
-					$this = icon;
+				// note about this condition : if the device has touch capability and self.options.iconTouch is false, you'll have no icons event though you may consider your device as a desktop if it also has a mouse. Not sure why someone would have this use case though.
+				if ((!hasTouchCapability && self.options.iconDesktop) || (hasTouchCapability && self.options.iconTouch)) {
+					
+					// TODO : the tooltip should be automatically be given an absolute position to be near the origin. Otherwise, when the origin is floating or what, it's going to be nowhere near it and disturb the position flow of the page elements. It will imply that the icon also detects when its origin moves, to follow it : not trivial.
+					// Until it's done, the icon feature does not really make sense since the user still has most of the work to do by himself
+					
+					// if the icon provided is in the form of a string
+					if(typeof self.options.icon === 'string'){
+						// wrap it in a span with the icon class
+						self.$elProxy = $('<span class="'+ self.options.iconTheme.replace('.', '') +'"></span>');
+						self.$elProxy.append(self.options.icon);
+					}
+					// if it is an object (sensible choice)
+					else {
+						// (deep) clone the object if iconCloning == true, to make sure every instance has its own proxy. We use the icon without wrapping, no need to. We do not give it a class either, as the user will undoubtedly style the object on his own and since our css properties may conflict with his own
+						if (self.options.iconCloning) self.$elProxy = self.options.icon.clone(true);
+						else self.$elProxy = self.options.icon;
+					}
+					
+					self.$elProxy.insertAfter(self.$el);
 				}
-
-				// if this is a touch device, add some touch events to launch the tooltip
-				if ((object.options.touchDevices) && (touchDevice) && ((object.options.trigger == 'click') || (object.options.trigger == 'hover'))) {
-					$this.on('touchstart.tooltipster', function(element, options) {
-						object.showTooltip();
+				else {
+					self.$elProxy = self.$el;
+				}
+				
+				// just in case the device ever triggers touch events, add a touch handler that will launch the tooltip. Right after we'll bind the mouse events, they'll just never be used if there is no mouse on the system.
+				// informative note about device which have touch capacity : if self.options.touchDevices is false, tooltips will not be shown because of touch events. However the plugin itself has been initialized, thus preventing the native "title" tooltips to show. It is assumed that you would not want that anyway.
+				if (self.options.touchDevices && hasTouchCapability && ((self.options.trigger == 'click') || (self.options.trigger == 'hover'))) {
+					self.$elProxy.on('touchstart.tooltipster', function() {
+						self.showTooltip();
 					});
 				}
 				
-				// if this is a desktop, deal with adding regular mouse events
-				else {
-				
-					// if hover events are set to show and hide the tooltip, attach those events respectively
-					if (object.options.trigger == 'hover') {
-						$this.on('mouseenter.tooltipster', function() {
-							object.showTooltip();
-						});
-						
-						// if this is an interactive tooltip, delay getting rid of the tooltip right away so you have a chance to hover on the tooltip
-						if (object.options.interactive) {
-							$this.on('mouseleave.tooltipster', function() {
-								var tooltipster = $this.data('tooltipster');
-								var keepAlive = false;
-								
-								if ((tooltipster !== undefined) && (tooltipster !== '')) {
-									tooltipster.mouseenter(function() {
-										keepAlive = true;
-									});
-									tooltipster.mouseleave(function() {
-										keepAlive = false;
-									});
-									
-									var tolerance = setTimeout(function() {
-
-										if (keepAlive) {
-											if (object.options.interactiveAutoClose) {
-												tooltipster.find('select').on('change', function() {
-													object.hideTooltip();
-												});
-
-												tooltipster.mouseleave(function(e) {
-													var $target = $(e.target);
-
-													if ($target.parents('.tooltipster-base').length === 0 || $target.hasClass('tooltipster-base')) {
-														object.hideTooltip();
-													}
-
-													else {
-														$target.on('mouseleave', function(e) {
-															object.hideTooltip();
-														});
-													}
-												});
-											}
-										}
-										else {
-											object.hideTooltip();
-										}
-									}, object.options.interactiveTolerance);
-								}
-								else {
-									object.hideTooltip();
-								}
-							});
-						}
-						
-						// if this is a dumb tooltip, just get rid of it on mouseleave
-						else {
-							$this.on('mouseleave.tooltipster', function() {
-								object.hideTooltip();
-							});
-						}
-					}
+				// if hover events are set to show and hide the tooltip, attach those events respectively
+				if (self.options.trigger == 'hover') {
+					self.$elProxy.on('mouseenter.tooltipster', function() {
+						self.showTooltip();
+					});
 					
-					// if click events are set to show and hide the tooltip, attach those events respectively
-					if (object.options.trigger == 'click') {
-						$this.on('click.tooltipster', function() {
-							if (($this.data('tooltipster') === '') || ($this.data('tooltipster') === undefined)) {
-								object.showTooltip();
+					// if this is an interactive tooltip, delay getting rid of the tooltip right away so you have a chance to hover on the tooltip
+					if (self.options.interactive) {
+						self.$elProxy.on('mouseleave.tooltipster', function() {
+							
+							var keepAlive = false;
+							
+							if (self.$tooltip) {
+								self.$tooltip.mouseenter(function() {
+									keepAlive = true;
+								});
+								self.$tooltip.mouseleave(function() {
+									keepAlive = false;
+								});
+								
+								var tolerance = setTimeout(function() {
+
+									if (keepAlive) {
+										if (self.options.interactiveAutoClose) {
+
+											self.$tooltip.mouseleave(function(e) {
+												var $target = $(e.target);
+
+												if ($target.parents('.tooltipster-base').length === 0 || $target.hasClass('tooltipster-base')) {
+													self.hideTooltip();
+												}
+
+												else {
+													$target.on('mouseleave', function(e) {
+														self.hideTooltip();
+													});
+												}
+											});
+										}
+									}
+									else {
+										self.hideTooltip();
+									}
+								}, self.options.interactiveTolerance);
 							}
 							else {
-								object.hideTooltip();
+								self.hideTooltip();
 							}
 						});
 					}
+					// if this is a dumb tooltip, just get rid of it on mouseleave
+					else {
+						self.$elProxy.on('mouseleave.tooltipster', function() {
+							self.hideTooltip();
+						});
+					}
+				}
+				// if click events are set to show and hide the tooltip, attach those events respectively
+				else if (self.options.trigger == 'click') {
+					self.$elProxy.on('click.tooltipster', function() {
+						if (!self.$tooltip) {
+							self.showTooltip();
+						}
+						else {
+							self.hideTooltip();
+						}
+					});
 				}
 			}
 		},
 		
 		showTooltip: function(options) {
-			var $this = $(this.element);
-			var object = this;
-						
-			// detect if we're actually dealing with an icon or the origin itself
-			if ($this.data('tooltipsterIcon') !== undefined) {
-				$this = $this.data('tooltipsterIcon');
-			}
 			
-			// continue if this tooltip is enabled
-			if (!$this.hasClass('tooltipster-disable')) {
+			var self = this;
 			
-				// if we only want one tooltip open at a time, close all tooltips currently open
-				if (($('.tooltipster-base').not('.tooltipster-dying').length > 0) && (object.options.onlyOne)) {
-					$('.tooltipster-base').not('.tooltipster-dying').not($this.data('tooltipster')).each(function() {
-						$(this).addClass('tooltipster-kill');
-						var origin = $(this).data('origin');
-						origin.data('plugin_tooltipster').hideTooltip();
-					});
+			// continue if this tooltip is enabled and has any content, otherwise just ignore it completely
+			if (!self.$elProxy.hasClass('tooltipster-disable') && self.content !== null) {
+			
+				// if we only want one tooltip open at a time, close all tooltips currently open and not already dying
+				if(self.options.onlyOne){
+					$('.tooltipstered').not(self.$el).not('.tooltipster-dying')
+						.addClass('tooltipster-kill')
+						// hide using the object public method
+						[pluginName]('hide');
 				}
-						
-				// delay the showing of the tooltip according to the delay time
-				$this.clearQueue().delay(object.options.delay).queue(function() {
+				
+				//get rid of any appearance effect that might be queued or disappearance timer that might be set
+				self.$elProxy.clearQueue();
+				clearTimeout(self.timer);
+				self.timer = null;
+				
+				// delay the showing of the tooltip according to the delay time, if there is one
+				if(self.options.delay > 0) self.$elProxy.delay(self.options.delay);
+				
+				self.$elProxy.queue(function() {
 				
 					// call our custom function before continuing
-					object.options.functionBefore($this, function() {
+					self.options.functionBefore(self.$elProxy, function() {
 						
-						// if this origin already has its tooltip open, keep it open and do nothing else
-						if (($this.data('tooltipster') !== undefined) && ($this.data('tooltipster') !== '')) {
-							var tooltipster = $this.data('tooltipster');
+						// if this origin already has its tooltip open
+						if (self.$tooltip) {
 							
-							if (!tooltipster.hasClass('tooltipster-kill')) {
-	
-								var animation = 'tooltipster-'+ object.options.animation;
+							// the timer (if any) will start right now
+							var extraTime = 0;
+							
+							if (!self.$tooltip.hasClass('tooltipster-kill')) {
 								
-								tooltipster.removeClass('tooltipster-dying');
+								// if it was dying, cancel that
+								self.$tooltip.removeClass('tooltipster-dying');
 								
-								if (transitionSupport) {
-									tooltipster.clearQueue().addClass(animation +'-show');
+								if (supportsTransitions()) {
+									self.$tooltip.clearQueue().addClass('tooltipster-'+ self.options.animation +'-show');
 								}
-								
-								// if we have a timer set, we need to reset it
-								if (object.options.timer > 0) {
-									var timer = tooltipster.data('tooltipsterTimer');
-									clearTimeout(timer);
-														
-									timer = setTimeout(function() {
-										tooltipster.data('tooltipsterTimer', undefined);
-										object.hideTooltip();
-									}, object.options.timer);
-									
-									tooltipster.data('tooltipsterTimer', timer);
-								}
-								
-								// if this is a touch device, hide the tooltip on body touch
-								if ((object.options.touchDevices) && (touchDevice)) {
-									$('body').bind('touchstart', function(event) {
-										if (object.options.interactive) {
-											var touchTarget = $(event.target);
-											var closeTooltip = true;
-											
-											touchTarget.parents().each(function() {
-												if ($(this).hasClass('tooltipster-base')) {
-													closeTooltip = false;
-												}
-											});
-											
-											if (closeTooltip) {
-												object.hideTooltip();
-												$('body').unbind('touchstart');
-											}
-										}
-										else {
-											object.hideTooltip();
-											$('body').unbind('touchstart');
-										}
-									});
+								else {
+									// in case the tooltip was currently fading out, bring it back to life
+									self.$tooltip.stop().fadeIn();
 								}
 							}
 						}
-						
 						// if the tooltip isn't already open, open that sucker up!
 						else {
-							// disable horizontal scrollbar to keep overflowing tooltips from jacking with it and then restore it to it's previous value
-							object.options._bodyOverflowX = $('body').css('overflow-x');
+							
+							// the timer (if any) will start when the tooltip has fully appeared after its transition
+							var extraTime = self.options.speed;
+							
+							// disable horizontal scrollbar to keep overflowing tooltips from jacking with it and then restore it to its previous value
+							self.bodyOverflowX = $('body').css('overflow-x');
 							$('body').css('overflow-x', 'hidden');
 							
-							// get the content for the tooltip
-							var content = object.getContent($this);
-							
 							// get some other settings related to building the tooltip
-							var theme = object.options.theme;
-							var themeClass = theme.replace('.', '');
-							var animation = 'tooltipster-' + object.options.animation;
-							var animationSpeed = '-webkit-transition-duration: '+ object.options.speed +'ms; -webkit-animation-duration: '+ object.options.speed +'ms; -moz-transition-duration: '+ object.options.speed +'ms; -moz-animation-duration: '+ object.options.speed +'ms; -o-transition-duration: '+ object.options.speed +'ms; -o-animation-duration: '+ object.options.speed +'ms; -ms-transition-duration: '+ object.options.speed +'ms; -ms-animation-duration: '+ object.options.speed +'ms; transition-duration: '+ object.options.speed +'ms; animation-duration: '+ object.options.speed +'ms;';
-							var fixedWidth = object.options.fixedWidth > 0 ? 'width:'+ Math.round(object.options.fixedWidth) +'px;' : '';
-							var maxWidth = object.options.maxWidth > 0 ? 'max-width:'+ Math.round(object.options.maxWidth) +'px;' : '';
-							var pointerEvents = object.options.interactive ? 'pointer-events: auto;' : '';
-												
+							var theme = self.options.theme,
+								themeClass = theme.replace('.', ''),
+								animation = 'tooltipster-' + self.options.animation,
+								animationSpeed = '-webkit-transition-duration: '+ self.options.speed +'ms; -webkit-animation-duration: '+ self.options.speed +'ms; -moz-transition-duration: '+ self.options.speed +'ms; -moz-animation-duration: '+ self.options.speed +'ms; -o-transition-duration: '+ self.options.speed +'ms; -o-animation-duration: '+ self.options.speed +'ms; -ms-transition-duration: '+ self.options.speed +'ms; -ms-animation-duration: '+ self.options.speed +'ms; transition-duration: '+ self.options.speed +'ms; animation-duration: '+ self.options.speed +'ms;',
+								fixedWidth = self.options.fixedWidth > 0 ? 'width:'+ Math.round(self.options.fixedWidth) +'px;' : '',
+								maxWidth = self.options.maxWidth > 0 ? 'max-width:'+ Math.round(self.options.maxWidth) +'px;' : '',
+								pointerEvents = self.options.interactive ? 'pointer-events: auto;' : '';
+							
 							// build the base of our tooltip
-							var tooltipster = $('<div class="tooltipster-base '+ themeClass +' '+ animation +'" style="'+ fixedWidth +' '+ maxWidth +' '+ pointerEvents +' '+ animationSpeed +'"></div>');
-							var tooltipsterHTML = $('<div class="tooltipster-content"></div>');
-							tooltipsterHTML.html(content);
-							tooltipster.append(tooltipsterHTML);
-							
-							
-							tooltipster.appendTo('body');
-							
-							// attach the tooltip to its origin
-							$this.data('tooltipster', tooltipster);
-							tooltipster.data('origin', $this);
+							self.$tooltip = $('<div class="tooltipster-base '+ animation + ' ' + themeClass +'" style="'+ fixedWidth +' '+ maxWidth +' '+ pointerEvents +' '+ animationSpeed +'"><div class="tooltipster-content"></div></div>');
+							self.$tooltip
+								.children()
+									.append(self.content)
+									.end()
+								.appendTo('body');
 							
 							// do all the crazy calculations and positioning
-							object.positionTooltip();
+							self.positionTooltip();
 							
 							// call our custom callback since the content of the tooltip is now part of the DOM
-							object.options.functionReady($this, tooltipster);
+							self.options.functionReady(self.$el, self.$tooltip);
 							
 							// animate in the tooltip
-							if (transitionSupport) {
-								tooltipster.addClass(animation + '-show');
+							if (supportsTransitions()) {
+								self.$tooltip.addClass(animation + '-show');
 							}
 							else {
-								tooltipster.css('display', 'none').removeClass(animation).fadeIn(object.options.speed);
+								self.$tooltip.css('display', 'none').fadeIn(self.options.speed);
 							}
 							
-							// check to see if our tooltip content changes or its origin is removed while the tooltip is alive
-							var currentTooltipContent = content;
-							var contentUpdateChecker = setInterval(function() {
-								var newTooltipContent = object.getContent($this);
-								
-								// if this tooltip's origin is removed, remove the tooltip
-								if ($('body').find($this).length === 0) {
-									tooltipster.addClass('tooltipster-dying');
-									object.hideTooltip();
-								}
-								
-								// if the content changed for the tooltip, update it											
-								else if ((currentTooltipContent !== newTooltipContent) && (newTooltipContent !== '')) {
-									currentTooltipContent = newTooltipContent;
-
-									// set the new content in the tooltip
-									tooltipster.find('.tooltipster-content').html(newTooltipContent);
-									
-									// if we want to play a little animation showing the content changed
-									if (object.options.updateAnimation) {
-										if (supportsTransitions()) {
-											tooltipster.css({
-												'width': '',
-												'-webkit-transition': 'all ' + object.options.speed + 'ms, width 0ms, height 0ms, left 0ms, top 0ms',
-												'-moz-transition': 'all ' + object.options.speed + 'ms, width 0ms, height 0ms, left 0ms, top 0ms',
-												'-o-transition': 'all ' + object.options.speed + 'ms, width 0ms, height 0ms, left 0ms, top 0ms',
-												'-ms-transition': 'all ' + object.options.speed + 'ms, width 0ms, height 0ms, left 0ms, top 0ms',
-												'transition': 'all ' + object.options.speed + 'ms, width 0ms, height 0ms, left 0ms, top 0ms'
-											}).addClass('tooltipster-content-changing');
-											
-											// reset the CSS transitions and finish the change animation
-											setTimeout(function() {
-												tooltipster.removeClass('tooltipster-content-changing');
-												// after the changing animation has completed, reset the CSS transitions
-												setTimeout(function() {
-													tooltipster.css({
-														'-webkit-transition': object.options.speed + 'ms',
-														'-moz-transition': object.options.speed + 'ms',
-														'-o-transition': object.options.speed + 'ms',
-														'-ms-transition': object.options.speed + 'ms',
-														'transition': object.options.speed + 'ms'
-													});
-												}, object.options.speed);
-											}, object.options.speed);
-										}
-										else {
-											tooltipster.fadeTo(object.options.speed, 0.5, function() {
-												tooltipster.fadeTo(object.options.speed, 1);
-											});
-										}
-									}
-									
-									// reposition and resize the tooltip
-									object.positionTooltip();
-								}
-								
-								// if the tooltip is closed or origin is removed, clear this interval
-								if (($('body').find(tooltipster).length === 0) || ($('body').find($this).length === 0)) {
-									clearInterval(contentUpdateChecker);
-								}
-							}, 200);
-							
-							// if we have a timer set, let the countdown begin!
-							if (object.options.timer > 0) {
-								var timer = setTimeout(function() {
-									tooltipster.data('tooltipsterTimer', undefined);
-									object.hideTooltip();
-								}, object.options.timer + object.options.speed);
-								
-								tooltipster.data('tooltipsterTimer', timer);
-							}
+							// check to see if our tooltip origin is removed while the tooltip is alive
+							self.setCheckInterval();
 							
 							// if this is a touch device, hide the tooltip on body touch
-							if ((object.options.touchDevices) && (touchDevice)) {
-								$('body').bind('touchstart', function(event) {
-									if (object.options.interactive) {
-										
-										var touchTarget = $(event.target);
-										var closeTooltip = true;
-																			
-										touchTarget.parents().each(function() {
-											if ($(this).hasClass('tooltipster-base')) {
-												closeTooltip = false;
-											}
-										});
-										
-										if (closeTooltip) {
-											object.hideTooltip();
-											$('body').unbind('touchstart');
-										}
-									}
-									else {
-										object.hideTooltip();
-										$('body').unbind('touchstart');
-									}
+							if (self.options.touchDevices && hasTouchCapability) {
+								
+								// if interactive, we'll stop the events that were emitted from inside the tooltip
+								if (self.options.interactive) {
+									self.$tooltip.on('touchstart', function(event){
+										event.stopPropagation();
+									});
+								}
+								
+								$('body').one('touchstart.tooltipster', function(event) {
+									self.hideTooltip();
 								});
 							}
 						}
+						
+						// if we have a timer set, let the countdown begin
+						if (self.options.timer > 0) {
+							
+							self.timer = setTimeout(function() {
+								// clean delete
+								self.timer = null;
+								self.hideTooltip();
+							}, self.options.timer + extraTime);
+						}
 					});
 					
-					$this.dequeue();
+					self.$elProxy.dequeue();
 				});
 			}
 		},
 		
-		hideTooltip: function(options) {
+		setCheckInterval: function(){
+			
+			var self = this;
+			
+			self.checkInterval = setInterval(function() {
+				
+				// compare the former and current positions of the elProxy to reposition the tooltip if need be
+				if(self.options.positionTracker){
+					
+					var p = self.positionInfo(self.$elProxy),
+						identical = false;
+					
+					// compare size first (a change requires repositioning too)
+					if(areEqual(p.dimension, self.elProxyPosition.dimension)){
 						
-			var $this = $(this.element);
-			var object = this;
+						// for elements with a fixed position, we track the top and left properties (relative to window)
+						if(self.$elProxy.css('position') === 'fixed'){
+							if(areEqual(p.position, self.elProxyPosition.position)) identical = true;
+						}
+						// otherwise, track total offset (relative to document)
+						else {
+							if(areEqual(p.offset, self.elProxyPosition.offset)) identical = true;
+						}
+					}
+					
+					if(!identical){
+						self.positionTooltip();
+					}
+				}
+				
+				// if this tooltip's origin is removed, remove the tooltip if it's still here
+				if ($('body').find(self.$el).length === 0 && self.$tooltip) {
+					self.hideTooltip();
+				}
+				
+				// clear this interval if it is no longer necessary
+				if (
+						// if the origin has been removed
+						($('body').find(self.$el).length === 0)
+						// if the elProxy has been removed
+					||	($('body').find(self.$elProxy).length === 0)
+						// if the tooltip has been closed
+					||	!self.$tooltip
+						// if the tooltip has been somehow removed
+					||	($('body').find(self.$tooltip).length === 0)
+				) {
+					self.cancelCheckInterval();
+				}
+			}, 200);
+		},
+		
+		cancelCheckInterval: function(){
+			clearInterval(this.checkInterval);
+			// clean delete
+			this.checkInterval = null;
+		},
+		
+		hideTooltip: function() {
 			
-			// detect if we're actually dealing with an icon or the origin itself
-			if ($this.data('tooltipsterIcon') !== undefined) {
-				$this = $this.data('tooltipsterIcon');
-			}
+			var self = this;
 			
-			var tooltipster = $this.data('tooltipster');
-			
+			//TODO : remove this unless there is a good reason behind that
 			// if the origin has been removed, find all tooltips assigned to death
-			if (tooltipster === undefined) {
-				tooltipster = $('.tooltipster-dying');
-			}
+			// if (!tooltipster) {
+				// tooltipster = $('.tooltipster-dying');
+			// }
 			
 			// clear any possible queues handling delays and such
-			$this.clearQueue();
+			self.$elProxy.clearQueue();
 			
-			if ((tooltipster !== undefined) && (tooltipster !== '')) {
+			if (self.$tooltip) {
 				
-				// detect if we need to clear a timer
-				var timer = tooltipster.data('tooltipsterTimer');
-				if (timer !== undefined) {
-					clearTimeout(timer);
-				}
+				// just in case we needed to clear a timer
+				clearTimeout(self.timer);
+				self.timer = null;
 
-				var animation = 'tooltipster-'+ object.options.animation;
+				var animation = 'tooltipster-'+ self.options.animation;
 				
-				if (transitionSupport) {
-					tooltipster.clearQueue().removeClass(animation +'-show').addClass('tooltipster-dying').delay(object.options.speed).queue(function() {
-						tooltipster.remove();
-						$this.data('tooltipster', '');
-						$('body').css('overflow-x', object.options._bodyOverflowX);
+				if (supportsTransitions()) {
+					
+					self.$tooltip
+						.clearQueue()
+						.removeClass(animation +'-show')
+						.addClass('tooltipster-dying');
+					
+					if(self.options.speed > 0) self.$tooltip.delay(self.options.speed);
+					
+					self.$tooltip.queue(function() {
+						self.$tooltip.remove();
+						self.$tooltip = null;
+						$('body').css('overflow-x', self.bodyOverflowX);
 						
 						// finally, call our custom callback function
-						object.options.functionAfter($this);
+						self.options.functionAfter(self.$elProxy);
 					});
 				}
 				else {
-					tooltipster.clearQueue().addClass('tooltipster-dying').fadeOut(object.options.speed, function() {
-						tooltipster.remove();
-						$this.data('tooltipster', '');
-						$('body').css('overflow-x', object.options._bodyOverflowX);
-						
-						// finally, call our custom callback function
-						object.options.functionAfter($this);
-					});
+					self.$tooltip
+						.clearQueue()
+						.addClass('tooltipster-dying')
+						.fadeOut(self.options.speed, function() {
+							self.$tooltip.remove();
+							self.$tooltip = null;
+							$('body').css('overflow-x', self.bodyOverflowX);
+							
+							// finally, call our custom callback function
+							self.options.functionAfter(self.$elProxy);
+						});
 				}
 			}
 		},
-
-		positionTooltip: function(options) {
-
-			var $this = $(this.element);
-			var object = this;
-									
-			// detect if we're actually dealing with an icon or the origin itself
-			if ($this.data('tooltipsterIcon') !== undefined) {
-				$this = $this.data('tooltipsterIcon');
+		
+		updateContent: function(content){
+			// clone if asked. Cloning the object makes sure that each instance has its own version of the content (in case a same object were provided for several instances)
+			// reminder : typeof null === object
+			if(typeof content === 'object' && content !== null && this.options.contentCloning){
+				content = content.clone(true);
 			}
+			this.content = content;
+		},
+		
+		updateTooltip: function(){
 			
-			if (($this.data('tooltipster') !== undefined) && ($this.data('tooltipster') !== '')) {
-						
-				// find tooltipster and reset its width
-				var tooltipster = $this.data('tooltipster');
-				tooltipster.css('width', '');
+			var self = this;
+			
+			if(self.content !== null){
+				
+				// update the tooltip if it is open
+				if(self.$tooltip){
+				
+					// set the new content in the tooltip
+					self.$tooltip.find('.tooltipster-content')
+						.empty()
+						.append(self.content);
+					
+					// if we want to play a little animation showing the content changed
+					if (self.options.updateAnimation) {
+						if (supportsTransitions()) {
+							self.$tooltip.css({
+								'width': '',
+								'-webkit-transition': 'all ' + self.options.speed + 'ms, width 0ms, height 0ms, left 0ms, top 0ms',
+								'-moz-transition': 'all ' + self.options.speed + 'ms, width 0ms, height 0ms, left 0ms, top 0ms',
+								'-o-transition': 'all ' + self.options.speed + 'ms, width 0ms, height 0ms, left 0ms, top 0ms',
+								'-ms-transition': 'all ' + self.options.speed + 'ms, width 0ms, height 0ms, left 0ms, top 0ms',
+								'transition': 'all ' + self.options.speed + 'ms, width 0ms, height 0ms, left 0ms, top 0ms'
+							}).addClass('tooltipster-content-changing');
+							
+							// reset the CSS transitions and finish the change animation
+							setTimeout(function() {
+								if(self.$tooltip){
+									self.$tooltip.removeClass('tooltipster-content-changing');
+									// after the changing animation has completed, reset the CSS transitions
+									setTimeout(function() {
+										if(self.$tooltip){
+											self.$tooltip.css({
+												'-webkit-transition': self.options.speed + 'ms',
+												'-moz-transition': self.options.speed + 'ms',
+												'-o-transition': self.options.speed + 'ms',
+												'-ms-transition': self.options.speed + 'ms',
+												'transition': self.options.speed + 'ms'
+											});
+										}
+									}, self.options.speed);
+								}
+							}, self.options.speed);
+						}
+						else {
+							self.$tooltip.fadeTo(self.options.speed, 0.5, function() {
+								if(self.$tooltip){
+									self.$tooltip.fadeTo(self.options.speed, 1);
+								}
+							});
+						}
+					}
+					
+					// reposition and resize the tooltip
+					self.positionTooltip();
+				}
+			}
+			else {
+				self.hideTooltip();
+			}
+		},
+		
+		positionInfo: function($el){
+			return {
+				dimension: {
+					height: $el.outerHeight(false),
+					width: $el.outerWidth(false)
+				},
+				offset: $el.offset(),
+				position: {
+					left: parseInt($el.css('left')),
+					top: parseInt($el.css('top'))
+				}
+			};
+		},
+		
+		positionTooltip: function() {
+
+			var self = this;
+			
+			if (self.$tooltip) {
+				
+				// reset width
+				self.$tooltip.css('width', '');
 				
 				// find variables to determine placement
-				var windowWidth = $(window).width();
-				var containerWidth = $this.outerWidth(false);
-				var containerHeight = $this.outerHeight(false);
-				var tooltipWidth = tooltipster.outerWidth(false);
-				var tooltipInnerWidth = tooltipster.innerWidth() + 1; // this +1 stops FireFox from sometimes forcing an additional text line
-				var tooltipHeight = tooltipster.outerHeight(false);
-				var offset = $this.offset();
-				var offsetTop = offset.top;
-				var offsetLeft = offset.left;
-				var resetPosition = undefined;
+				self.elProxyPosition = self.positionInfo(self.$elProxy);
+				var windowWidth = $(window).width(),
+					// shorthand
+					proxy = self.elProxyPosition,
+					tooltipWidth = self.$tooltip.outerWidth(false),
+					tooltipInnerWidth = self.$tooltip.innerWidth() + 1, // this +1 stops FireFox from sometimes forcing an additional text line
+					tooltipHeight = self.$tooltip.outerHeight(false),
+					resetPosition = null;
 				
 				// if this is an <area> tag inside a <map>, all hell breaks loose. Recaclulate all the measurements based on coordinates
-				if ($this.is('area')) {
-					var areaShape = $this.attr('shape');
-					var mapName = $this.parent().attr('name');
-					var map = $('img[usemap="#'+ mapName +'"]');
-					var mapOffsetLeft = map.offset().left;
-					var mapOffsetTop = map.offset().top;
-					var areaMeasurements = $this.attr('coords') !== undefined ? $this.attr('coords').split(',') : undefined;
+				if (self.$elProxy.is('area')) {
+					var areaShape = self.$elProxy.attr('shape'),
+						mapName = self.$elProxy.parent().attr('name'),
+						map = $('img[usemap="#'+ mapName +'"]'),
+						mapOffsetLeft = map.offset().left,
+						mapOffsetTop = map.offset().top,
+						areaMeasurements = self.$elProxy.attr('coords') !== undefined ? self.$elProxy.attr('coords').split(',') : undefined;
 					
 					if (areaShape == 'circle') {
-						var areaLeft = parseInt(areaMeasurements[0]);
-						var areaTop = parseInt(areaMeasurements[1]);
-						var areaWidth = parseInt(areaMeasurements[2]);
-						containerHeight = areaWidth * 2;
-						containerWidth = areaWidth * 2;
-						offsetTop = mapOffsetTop + areaTop - areaWidth;
-						offsetLeft = mapOffsetLeft + areaLeft - areaWidth;
+						var areaLeft = parseInt(areaMeasurements[0]),
+							areaTop = parseInt(areaMeasurements[1]),
+							areaWidth = parseInt(areaMeasurements[2]);
+						proxy.dimension.height = areaWidth * 2;
+						proxy.dimension.width = areaWidth * 2;
+						proxy.offset.top = mapOffsetTop + areaTop - areaWidth;
+						proxy.offset.left = mapOffsetLeft + areaLeft - areaWidth;
 					}
 					else if (areaShape == 'rect') {
-						var areaLeft = parseInt(areaMeasurements[0]);
-						var areaTop = parseInt(areaMeasurements[1]);
-						var areaRight = parseInt(areaMeasurements[2]);
-						var areaBottom = parseInt(areaMeasurements[3]);
-						containerHeight = areaBottom - areaTop;
-						containerWidth = areaRight - areaLeft;
-						offsetTop = mapOffsetTop + areaTop;
-						offsetLeft = mapOffsetLeft + areaLeft;
+						var areaLeft = parseInt(areaMeasurements[0]),
+							areaTop = parseInt(areaMeasurements[1]),
+							areaRight = parseInt(areaMeasurements[2]),
+							areaBottom = parseInt(areaMeasurements[3]);
+						proxy.dimension.height = areaBottom - areaTop;
+						proxy.dimension.width = areaRight - areaLeft;
+						proxy.offset.top = mapOffsetTop + areaTop;
+						proxy.offset.left = mapOffsetLeft + areaLeft;
 					}
 					else if (areaShape == 'poly') {
-						var areaXs = [];
-						var areaYs = [];
-						var areaSmallestX = 0,
+						var areaXs = [],
+							areaYs = [],
+							areaSmallestX = 0,
 							areaSmallestY = 0,
 							areaGreatestX = 0,
-							areaGreatestY = 0;
-						var arrayAlternate = 'even';
+							areaGreatestY = 0,
+							arrayAlternate = 'even';
 						
 						for (i = 0; i < areaMeasurements.length; i++) {
 							var areaNumber = parseInt(areaMeasurements[i]);
@@ -597,22 +621,22 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							}
 						}
 					
-						containerHeight = areaGreatestY - areaSmallestY;
-						containerWidth = areaGreatestX - areaSmallestX;
-						offsetTop = mapOffsetTop + areaSmallestY;
-						offsetLeft = mapOffsetLeft + areaSmallestX;
+						proxy.dimension.height = areaGreatestY - areaSmallestY;
+						proxy.dimension.width = areaGreatestX - areaSmallestX;
+						proxy.offset.top = mapOffsetTop + areaSmallestY;
+						proxy.offset.left = mapOffsetLeft + areaSmallestX;
 					}
 					else {
-						containerHeight = map.outerHeight(false);
-						containerWidth = map.outerWidth(false);
-						offsetTop = mapOffsetTop;
-						offsetLeft = mapOffsetLeft;
+						proxy.dimension.height = map.outerHeight(false);
+						proxy.dimension.width = map.outerWidth(false);
+						proxy.offset.top = mapOffsetTop;
+						proxy.offset.left = mapOffsetLeft;
 					}
 				}
-																
+				
 				// hardcoding the width and removing the padding fixed an issue with the tooltip width collapsing when the window size is small
-				if(object.options.fixedWidth === 0) {
-					tooltipster.css({
+				if(self.options.fixedWidth === 0) {
+					self.$tooltip.css({
 						'width': Math.round(tooltipInnerWidth) + 'px',
 						'padding-left': '0px',
 						'padding-right': '0px'
@@ -622,158 +646,156 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				// our function and global vars for positioning our tooltip
 				var myLeft = 0,
 					myLeftMirror = 0,
-					myTop = 0;
-				var offsetY = parseInt(object.options.offsetY);
-				var offsetX = parseInt(object.options.offsetX);
-				var arrowConstruct = '';
+					myTop = 0,
+					offsetY = parseInt(self.options.offsetY),
+					offsetX = parseInt(self.options.offsetX),
+					// this is the arrow position that will eventually be used. It may differ from the position option if the tooltip cannot be displayed in this position
+					practicalPosition = self.options.position;
 				
-				// A function to detect if the tooltip is going off the screen horizontally. If so, reposition the crap out of it!
+				// a function to detect if the tooltip is going off the screen horizontally. If so, reposition the crap out of it!
 				function dontGoOffScreenX() {
 				
 					var windowLeft = $(window).scrollLeft();
 					
-					// If the tooltip goes off the left side of the screen, line it up with the left side of the window
+					// if the tooltip goes off the left side of the screen, line it up with the left side of the window
 					if((myLeft - windowLeft) < 0) {
 						var arrowReposition = myLeft - windowLeft;
 						myLeft = windowLeft;
-																								
-						tooltipster.data('arrow-reposition', arrowReposition);
+						
+						self.tooltipArrowReposition = arrowReposition;
 					}
 					
-					// If the tooltip goes off the right of the screen, line it up with the right side of the window
+					// if the tooltip goes off the right of the screen, line it up with the right side of the window
 					if (((myLeft + tooltipWidth) - windowLeft) > windowWidth) {
 						var arrowReposition = myLeft - ((windowWidth + windowLeft) - tooltipWidth);
 						myLeft = (windowWidth + windowLeft) - tooltipWidth;
-																												
-						tooltipster.data('arrow-reposition', arrowReposition);
+						
+						self.tooltipArrowReposition = arrowReposition;
 					}
 				}
 				
-				// A function to detect if the tooltip is going off the screen vertically. If so, switch to the opposite!
-				function dontGoOffScreenY(switchTo, resetTo) {
+				// a function to detect if the tooltip is going off the screen vertically. If so, switch to the opposite!
+				function dontGoOffScreenY(switchTo, switchFrom) {
 					// if it goes off the top off the page
-					if(((offsetTop - $(window).scrollTop() - tooltipHeight - offsetY - 12) < 0) && (resetTo.indexOf('top') > -1)) {
-						object.options.position = switchTo;
-						resetPosition = resetTo;
+					if(((proxy.offset.top - $(window).scrollTop() - tooltipHeight - offsetY - 12) < 0) && (switchFrom.indexOf('top') > -1)) {
+						practicalPosition = switchTo;
 					}
 					
 					// if it goes off the bottom of the page
-					if (((offsetTop + containerHeight + tooltipHeight + 12 + offsetY) > ($(window).scrollTop() + $(window).height())) && (resetTo.indexOf('bottom') > -1)) {
-						object.options.position = switchTo;
-						resetPosition = resetTo;
-						myTop = (offsetTop - tooltipHeight) - offsetY - 12;
+					if (((proxy.offset.top + proxy.dimension.height + tooltipHeight + 12 + offsetY) > ($(window).scrollTop() + $(window).height())) && (switchFrom.indexOf('bottom') > -1)) {
+						practicalPosition = switchTo;
+						myTop = (proxy.offset.top - tooltipHeight) - offsetY - 12;
 					}
 				}
-							
-				if(object.options.position == 'top') {
-					var leftDifference = (offsetLeft + tooltipWidth) - (offsetLeft + containerWidth);
-					myLeft =  (offsetLeft + offsetX) - (leftDifference / 2);
-					myTop = (offsetTop - tooltipHeight) - offsetY - 12;
+				
+				if(practicalPosition == 'top') {
+					var leftDifference = (proxy.offset.left + tooltipWidth) - (proxy.offset.left + proxy.dimension.width);
+					myLeft = (proxy.offset.left + offsetX) - (leftDifference / 2);
+					myTop = (proxy.offset.top - tooltipHeight) - offsetY - 12;
 					dontGoOffScreenX();
 					dontGoOffScreenY('bottom', 'top');
 				}
 				
-				if(object.options.position == 'top-left') {
-					myLeft = offsetLeft + offsetX;
-					myTop = (offsetTop - tooltipHeight) - offsetY - 12;
+				if(practicalPosition == 'top-left') {
+					myLeft = proxy.offset.left + offsetX;
+					myTop = (proxy.offset.top - tooltipHeight) - offsetY - 12;
 					dontGoOffScreenX();
 					dontGoOffScreenY('bottom-left', 'top-left');
 				}
 				
-				if(object.options.position == 'top-right') {
-					myLeft = (offsetLeft + containerWidth + offsetX) - tooltipWidth;
-					myTop = (offsetTop - tooltipHeight) - offsetY - 12;
+				if(practicalPosition == 'top-right') {
+					myLeft = (proxy.offset.left + proxy.dimension.width + offsetX) - tooltipWidth;
+					myTop = (proxy.offset.top - tooltipHeight) - offsetY - 12;
 					dontGoOffScreenX();
 					dontGoOffScreenY('bottom-right', 'top-right');
 				}
 				
-				if(object.options.position == 'bottom') {
-					var leftDifference = (offsetLeft + tooltipWidth) - (offsetLeft + containerWidth);
-					myLeft =  offsetLeft - (leftDifference / 2) + offsetX;
-					myTop = (offsetTop + containerHeight) + offsetY + 12;
+				if(practicalPosition == 'bottom') {
+					var leftDifference = (proxy.offset.left + tooltipWidth) - (proxy.offset.left + proxy.dimension.width);
+					myLeft = proxy.offset.left - (leftDifference / 2) + offsetX;
+					myTop = (proxy.offset.top + proxy.dimension.height) + offsetY + 12;
 					dontGoOffScreenX();
 					dontGoOffScreenY('top', 'bottom');
 				}
 				
-				if(object.options.position == 'bottom-left') {
-					myLeft = offsetLeft + offsetX;
-					myTop = (offsetTop + containerHeight) + offsetY + 12;
+				if(practicalPosition == 'bottom-left') {
+					myLeft = proxy.offset.left + offsetX;
+					myTop = (proxy.offset.top + proxy.dimension.height) + offsetY + 12;
 					dontGoOffScreenX();
 					dontGoOffScreenY('top-left', 'bottom-left');
 				}
 				
-				if(object.options.position == 'bottom-right') {
-					myLeft = (offsetLeft + containerWidth + offsetX) - tooltipWidth;
-					myTop = (offsetTop + containerHeight) + offsetY + 12;
+				if(practicalPosition == 'bottom-right') {
+					myLeft = (proxy.offset.left + proxy.dimension.width + offsetX) - tooltipWidth;
+					myTop = (proxy.offset.top + proxy.dimension.height) + offsetY + 12;
 					dontGoOffScreenX();
 					dontGoOffScreenY('top-right', 'bottom-right');
 				}
 				
-				if(object.options.position == 'left') {
-					myLeft = offsetLeft - offsetX - tooltipWidth - 12;
-					myLeftMirror = offsetLeft + offsetX + containerWidth + 12;
-					var topDifference = (offsetTop + tooltipHeight) - (offsetTop + $this.outerHeight(false));
-					myTop =  offsetTop - (topDifference / 2) - offsetY;
-												
-					// If the tooltip goes off boths sides of the page
+				if(practicalPosition == 'left') {
+					myLeft = proxy.offset.left - offsetX - tooltipWidth - 12;
+					myLeftMirror = proxy.offset.left + offsetX + proxy.dimension.width + 12;
+					var topDifference = (proxy.offset.top + tooltipHeight) - (proxy.offset.top + self.$elProxy.outerHeight(false));
+					myTop = proxy.offset.top - (topDifference / 2) - offsetY;
+					
+					// if the tooltip goes off boths sides of the page
 					if((myLeft < 0) && ((myLeftMirror + tooltipWidth) > windowWidth)) {
-						var borderWidth = parseFloat(tooltipster.css('border-width')) * 2;
-						var newWidth = (tooltipWidth + myLeft) - borderWidth;
-						tooltipster.css('width', newWidth + 'px');
+						var borderWidth = parseFloat(self.$tooltip.css('border-width')) * 2,
+							newWidth = (tooltipWidth + myLeft) - borderWidth;
+						self.$tooltip.css('width', newWidth + 'px');
 						
-						tooltipHeight = tooltipster.outerHeight(false);
-						myLeft = offsetLeft - offsetX - newWidth - 12 - borderWidth;
-						topDifference = (offsetTop + tooltipHeight) - (offsetTop + $this.outerHeight(false));
-						myTop =  offsetTop - (topDifference / 2) - offsetY;
+						tooltipHeight = self.$tooltip.outerHeight(false);
+						myLeft = proxy.offset.left - offsetX - newWidth - 12 - borderWidth;
+						topDifference = (proxy.offset.top + tooltipHeight) - (proxy.offset.top + self.$elProxy.outerHeight(false));
+						myTop = proxy.offset.top - (topDifference / 2) - offsetY;
 					}
 					
-					// If it only goes off one side, flip it to the other side
+					// if it only goes off one side, flip it to the other side
 					else if(myLeft < 0) {
-						myLeft = offsetLeft + offsetX + containerWidth + 12;
-						tooltipster.data('arrow-reposition', 'left');
+						myLeft = proxy.offset.left + offsetX + proxy.dimension.width + 12;
+						self.tooltipArrowReposition = 'left';
 					}
 				}
 				
-				if(object.options.position == 'right') {
-					myLeft = offsetLeft + offsetX + containerWidth + 12;
-					myLeftMirror = offsetLeft - offsetX - tooltipWidth - 12;
-					var topDifference = (offsetTop + tooltipHeight) - (offsetTop + $this.outerHeight(false));
-					myTop =  offsetTop - (topDifference / 2) - offsetY;
+				if(practicalPosition == 'right') {
+					myLeft = proxy.offset.left + offsetX + proxy.dimension.width + 12;
+					myLeftMirror = proxy.offset.left - offsetX - tooltipWidth - 12;
+					var topDifference = (proxy.offset.top + tooltipHeight) - (proxy.offset.top + self.$elProxy.outerHeight(false));
+					myTop = proxy.offset.top - (topDifference / 2) - offsetY;
 					
-					// If the tooltip goes off boths sides of the page
+					// if the tooltip goes off boths sides of the page
 					if(((myLeft + tooltipWidth) > windowWidth) && (myLeftMirror < 0)) {
-						var borderWidth = parseFloat(tooltipster.css('border-width')) * 2;
-						var newWidth = (windowWidth - myLeft) - borderWidth;
-						tooltipster.css('width', newWidth + 'px');
+						var borderWidth = parseFloat(self.$tooltip.css('border-width')) * 2,
+							newWidth = (windowWidth - myLeft) - borderWidth;
+						self.$tooltip.css('width', newWidth + 'px');
 						
-						tooltipHeight = tooltipster.outerHeight(false);
-						topDifference = (offsetTop + tooltipHeight) - (offsetTop + $this.outerHeight(false));
-						myTop =  offsetTop - (topDifference / 2) - offsetY;
-	
+						tooltipHeight = self.$tooltip.outerHeight(false);
+						topDifference = (proxy.offset.top + tooltipHeight) - (proxy.offset.top + self.$elProxy.outerHeight(false));
+						myTop = proxy.offset.top - (topDifference / 2) - offsetY;
 					}
 						
-					// If it only goes off one side, flip it to the other side
+					// if it only goes off one side, flip it to the other side
 					else if((myLeft + tooltipWidth) > windowWidth) {
-						myLeft = offsetLeft - offsetX - tooltipWidth - 12;
-						tooltipster.data('arrow-reposition', 'right');
+						myLeft = proxy.offset.left - offsetX - tooltipWidth - 12;
+						self.tooltipArrowReposition = 'right';
 					}
 				}
 				
 				// if arrow is set true, style it and append it
-				if (object.options.arrow) {
+				if (self.options.arrow) {
 	
-					var arrowClass = 'tooltipster-arrow-' + object.options.position;
+					var arrowClass = 'tooltipster-arrow-' + practicalPosition;
 					
 					// set color of the arrow
-					if(object.options.arrowColor.length < 1) {
-						var arrowColor = tooltipster.css('background-color');
+					if(self.options.arrowColor.length < 1) {
+						var arrowColor = self.$tooltip.css('background-color');
 					}
 					else {
-						var arrowColor = object.options.arrowColor;
+						var arrowColor = self.options.arrowColor;
 					}
 					
 					// if the tooltip was going off the page and had to re-adjust, we need to update the arrow's position
-					var arrowReposition = tooltipster.data('arrow-reposition');
+					var arrowReposition = self.tooltipArrowReposition;
 					if (!arrowReposition) {
 						arrowReposition = '';
 					}
@@ -788,27 +810,27 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					else {
 						arrowReposition = 'left:'+ Math.round(arrowReposition) +'px;';
 					}
-										
+					
 					// building the logic to create the border around the arrow of the tooltip
-					if ((object.options.position == 'top') || (object.options.position == 'top-left') || (object.options.position == 'top-right')) {
-						var tooltipBorderWidth = parseFloat(tooltipster.css('border-bottom-width'));
-						var tooltipBorderColor = tooltipster.css('border-bottom-color');
+					if ((practicalPosition == 'top') || (practicalPosition == 'top-left') || (practicalPosition == 'top-right')) {
+						var tooltipBorderWidth = parseFloat(self.$tooltip.css('border-bottom-width')),
+							tooltipBorderColor = self.$tooltip.css('border-bottom-color');
 					}
-					else if ((object.options.position == 'bottom') || (object.options.position == 'bottom-left') || (object.options.position == 'bottom-right')) {
-						var tooltipBorderWidth = parseFloat(tooltipster.css('border-top-width'));
-						var tooltipBorderColor = tooltipster.css('border-top-color');
+					else if ((practicalPosition == 'bottom') || (practicalPosition == 'bottom-left') || (practicalPosition == 'bottom-right')) {
+						var tooltipBorderWidth = parseFloat(self.$tooltip.css('border-top-width')),
+							tooltipBorderColor = self.$tooltip.css('border-top-color');
 					}
-					else if (object.options.position == 'left') {
-						var tooltipBorderWidth = parseFloat(tooltipster.css('border-right-width'));
-						var tooltipBorderColor = tooltipster.css('border-right-color');
+					else if (practicalPosition == 'left') {
+						var tooltipBorderWidth = parseFloat(self.$tooltip.css('border-right-width')),
+							tooltipBorderColor = self.$tooltip.css('border-right-color');
 					}
-					else if (object.options.position == 'right') {
-						var tooltipBorderWidth = parseFloat(tooltipster.css('border-left-width'));
-						var tooltipBorderColor = tooltipster.css('border-left-color');
+					else if (practicalPosition == 'right') {
+						var tooltipBorderWidth = parseFloat(self.$tooltip.css('border-left-width')),
+							tooltipBorderColor = self.$tooltip.css('border-left-color');
 					}
 					else {
-						var tooltipBorderWidth = parseFloat(tooltipster.css('border-bottom-width'));
-						var tooltipBorderColor = tooltipster.css('border-bottom-color');
+						var tooltipBorderWidth = parseFloat(self.$tooltip.css('border-bottom-width')),
+							tooltipBorderColor = self.$tooltip.css('border-bottom-color');
 					}
 					
 					if (tooltipBorderWidth > 1) {
@@ -817,8 +839,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					
 					var arrowBorder = '';
 					if (tooltipBorderWidth !== 0) {
-						var arrowBorderSize = '';
-						var arrowBorderColor = 'border-color: '+ tooltipBorderColor +';';
+						var arrowBorderSize = '',
+							arrowBorderColor = 'border-color: '+ tooltipBorderColor +';';
 						if (arrowClass.indexOf('bottom') !== -1) {
 							arrowBorderSize = 'margin-top: -'+ Math.round(tooltipBorderWidth) +'px;';
 						}
@@ -835,163 +857,204 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					}
 					
 					// if the arrow already exists, remove and replace it
-					tooltipster.find('.tooltipster-arrow').remove();
+					self.$tooltip.find('.tooltipster-arrow').remove();
 					
 					// build out the arrow and append it		
-					arrowConstruct = '<div class="'+ arrowClass +' tooltipster-arrow" style="'+ arrowReposition +'">'+ arrowBorder +'<span style="border-color:'+ arrowColor +';"></span></div>';
-					tooltipster.append(arrowConstruct);
+					var arrowConstruct = '<div class="'+ arrowClass +' tooltipster-arrow" style="'+ arrowReposition +'">'+ arrowBorder +'<span style="border-color:'+ arrowColor +';"></span></div>';
+					self.$tooltip.append(arrowConstruct);
 				}
 				
 				// position the tooltip
-				tooltipster.css({'top': Math.round(myTop) + 'px', 'left': Math.round(myLeft) + 'px'});
-				
-				// if we had to change the position of the tooltip so it wouldn't go off screen, reset it
-				if (resetPosition !== undefined) {
-					object.options.position = resetPosition;
-				}
+				self.$tooltip.css({'top': Math.round(myTop) + 'px', 'left': Math.round(myLeft) + 'px'});
 			}
-		},
-    getContent: function(element) {
-      var content = element.data('tooltipsterContent');
-      // will remove <script> tags to prevent XSS (execution of JS for dynamic tooltips)
-      content = $($.parseHTML('<div>' + content + '</div>')).html();
-
-      return content;
-    }
-	};
-		
-	$.fn[pluginName] = function (options) {		
-		// change default options for all future instances, using $.fn.tooltipster('setDefaults', myOptions)
-		if(options && options === 'setDefaults'){
-			$.extend(defaults, arguments[1]);
 		}
-
+	};
+	
+	$.fn[pluginName] = function () {
+		
+		// for using in closures
+		var args = arguments;
+		
+		// if we are not in the context of jQuery wrapped HTML element(s) :
+		// this happens when calling static methods in the form $.fn.tooltipster('methodName'), or when calling $(sel).tooltipster('methodName or options') where $(sel) does not match anything
+		if (this.length === 0) {
+			
+			// if the first argument is a method name
+			if (typeof args[0] === 'string') {
+				
+				var methodIsStatic = true;
+				
+				// list static methods here (usable by calling $.fn.tooltipster('methodName');)
+				switch (args[0]) {
+					
+					case 'setDefaults':
+						// change default options for all future instances
+						$.extend(defaults, args[1]);
+						break;
+					
+					default:
+						methodIsStatic = false;
+						break;
+				}
+				
+				// $.fn.tooltipster('methodName') calls will return true
+				if (methodIsStatic) return true;
+				// $(sel).tooltipster('methodName') calls will return the list of objects event though it's empty because chaining should work on empty lists
+				else return this;
+			}
+			// the first argument is undefined or an object of options : we are initalizing but there is no element matched by selector
+			else {
+				// still chainable : same as above
+				return this;
+			}
+		}
+		// this happens when calling $(sel).tooltipster('methodName or options') where $(sel) matches one or more elements
 		else {
-			// better API name spacing by glebtv
-			if (typeof options === 'string') {
-				var $t = this;
-				var arg = arguments[1];
+			
+			// method calls
+			if (typeof args[0] === 'string') {
+				
 				var v = null;
 				
-				// if we're calling a container to interact with API's of tooltips inside it - select all those tooltip origins first
-				if ($t.data('plugin_tooltipster') === undefined) {
-					var query = $t.find('*');
-					$t = $();
-					query.each(function() {
-						if ($(this).data('plugin_tooltipster') !== undefined) {
-							$t.push($(this));
+				this.each(function() {
+					
+					// self represent the instance of the tooltipster plugin associated to the current HTML object of the loop
+					var self = $(this).data('tooltipster');
+					
+					// if the current element is a tooltipster instance
+					if(self){
+						switch (args[0]) {
+
+							case 'content':
+							// 'update' is deprecated but kept for retrocompatibility
+							case 'update':
+								// getter method
+								if(typeof args[1] === 'undefined'){
+									v = self.content;
+									// return false to stop .each iteration on the first element matched by the selector
+									return false;
+								}
+								// setter method
+								else {
+									self.updateContent(args[1]);
+									self.updateTooltip();
+									break;
+								}
+			
+							case 'destroy':
+								self.hideTooltip();
+								
+								if(self.$el[0] !== self.$elProxy[0]) self.$elProxy.remove();
+								
+								// old school technique when outerHTML is not supported
+								var stringifiedContent = $('<div></div>').append(self.content).html();
+								
+								self.$el
+									.removeClass('tooltipstered')
+									.attr('title', stringifiedContent)
+									.removeData('tooltipster')
+									.off('.tooltipster');
+								break;
+							
+							case 'disable':
+								// hide first, in case the tooltip would not disappear on its own (interactiveAutoClose false)
+								self.hideTooltip();
+								self.$elProxy.addClass('tooltipster-disable');
+								break;
+								
+							case 'elementIcon':
+								v = (self.$el[0] !== self.$elProxy[0]) ? self.$elProxy[0] : undefined;
+								// return false : same as above
+								return false;
+								
+							case 'elementTooltip':
+								v = self.$tooltip ? self.$tooltip[0] : undefined;
+								// return false : same as above
+								return false;
+							
+							case 'enable':
+								self.$elProxy.removeClass('tooltipster-disable');
+								break;
+			
+							case 'hide':
+								self.hideTooltip();
+								break;
+								
+							case 'reposition':
+								self.positionTooltip();
+								break;
+							
+							case 'show':
+								self.showTooltip();
+								break;
+							
+							default:
+								throw new Error('Unknown method .tooltipster("' + args[0] + '")');
+								break;
 						}
-					});
-				}
-				
-				$t.each(function() {
-					switch (options.toLowerCase()) {
-						case 'show':
-							$(this).data('plugin_tooltipster').showTooltip();
-							break;
-		
-						case 'hide':
-							$(this).data('plugin_tooltipster').hideTooltip();
-							break;
-						
-						case 'disable':
-							$(this).addClass('tooltipster-disable');
-							break;
-						
-						case 'enable':
-							$(this).removeClass('tooltipster-disable');
-							break;
-		
-						case 'destroy':
-							
-							$(this).data('plugin_tooltipster').hideTooltip();
-							
-							var icon = $(this).data('tooltipsterIcon');
-							if(icon) icon.remove();
-							
-							$(this)
-								.attr('title', $t.data('tooltipsterContent'))
-								.removeData('plugin_tooltipster')
-								.removeData('tooltipsterContent')
-								.removeData('tooltipsterIcon')
-								.off('.tooltipster');
-							break;
-							
-						case 'elementicon':
-							v = $(this).data('tooltipsterIcon');
-							// we will return the raw HTML element if there is an icon, undefined otherwise
-							v = v ? v[0] : undefined;
-							//return false to stop .each iteration on the first element matched by the selector. No need for a 'break;' after that.
-							return false;
-		
-						case 'update':
-							var content = arg;
-
-							if ($(this).data('tooltipsterIcon') === undefined) {
-								$(this).data('tooltipsterContent', content);
-							}
-							
-							else {
-								var $this = $(this).data('tooltipsterIcon');
-								$this.data('tooltipsterContent', content);
-							}
-							
-							break;
-							
-						case 'reposition':
-							$(this).data('plugin_tooltipster').positionTooltip();
-							break;
-
-						case 'val':
-							v = $(this).data('tooltipsterContent');
-							console.log(v);
-							//return false : same as above
-							return false;
+					}
+					else {
+						throw new Error('You called Tooltipster\'s "' + args[0] + '" method on an unitialized element');
 					}
 				});
 				
 				return (v !== null) ? v : this;
 			}
-
+			// first argument is undefined or an object : the tooltip is initializing
 			else {
-				// attach a tooltipster object to each element if it doesn't already have one
+				// initialize a tooltipster instance for each element if it doesn't already have one, and attach the object to it
 				return this.each(function () {
 
-					if (!$.data(this, "plugin_" + pluginName)) {
-						$.data(this, "plugin_" + pluginName, new Plugin(this, options));
+					if (!$(this).data('tooltipster')) {
+						$(this).data('tooltipster', new Plugin( this, args[0] ));
 					}
 				});
 			}
 		}
 	};
 	
-	// hide tooltips on orientation change
-	if (touchDevice) {
-		window.addEventListener("orientationchange", function() {
-			if ($('.tooltipster-base').length > 0) {
-				$('.tooltipster-base').each(function() {
-					var origin = $(this).data('origin');
-					origin.data('plugin_tooltipster').hideTooltip();
-				});
+	// quick & dirty compare function (not bijective nor multidimensional)
+	function areEqual(a,b){
+		var same = true;
+		$.each(a, function(i, el){
+			if(typeof b[i] === 'undefined' || a[i] !== b[i]){
+				same = false;
+				return false;
 			}
-		}, false);
-  }
+		});
+		return same;
+	}
+	
+	// detect if this device can trigger touch events
+	var hasTouchCapability = !!('ontouchstart' in window);
+	
+	// detecting support for CSS transitions
+	function supportsTransitions() {
+		var b = document.body || document.documentElement,
+			s = b.style,
+			p = 'transition';
+		
+		if(typeof s[p] == 'string') {return true; }
 
-	// on scroll reposition - otherwise position:fixed element's tooltips will 'scroll-away'
-	$(window).on('scroll.tooltipster', function() {
-		var origin = $('.tooltipster-base').data('origin');
-
-		if (origin) {
-			origin.tooltipster('reposition');
+		v = ['Moz', 'Webkit', 'Khtml', 'O', 'ms'],
+		p = p.charAt(0).toUpperCase() + p.substr(1);
+		for(var i=0; i<v.length; i++) {
+			if(typeof s[v[i] + p] == 'string') { return true; }
 		}
+		return false;
+	}
+	
+	// hide tooltips on orientation change
+	$(window).on('orientationchange', function() {
+		$('.tooltipstered').each(function(){
+			$(this)[pluginName]('hide');
+		})
 	});
-
-	// on window resize, reposition and open tooltips
-	$(window).on('resize.tooltipster', function() {
-		var origin = $('.tooltipster-base').data('origin');
-
-		if ((origin !== null) && (origin !== undefined)) {
-			origin.tooltipster('reposition');
-		}
+	
+	// reposition on scroll (otherwise position:fixed element's tooltips will move away form their origin) and on resize (in case position can/has to be changed)
+	$(window).on('scroll resize', function() {
+		$('.tooltipstered').each(function(){
+			$(this)[pluginName]('reposition');
+		})
 	});
 })( jQuery, window, document );
