@@ -1,8 +1,8 @@
 {
   "name": "tooltipster",
-  "version": "2.3.0",
+  "version": "3.0.0",
   "main": ["js/jquery.tooltipster.min.js", "css/tooltipster.css"],
   "dependencies": {
-    "jquery": ">=1.4"
+    "jquery": ">=1.7"
   }
 }
