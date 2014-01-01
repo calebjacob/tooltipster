@@ -1,6 +1,6 @@
 /*
 
-Tooltipster 3.0.0rc1 | 2013-12-22
+Tooltipster 3.0.0 | 2013-12-22
 A rockin' custom tooltip jQuery plugin
 
 Developed by Caleb Jacob under the MIT license http://opensource.org/licenses/MIT
