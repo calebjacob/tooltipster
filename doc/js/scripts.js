@@ -5,7 +5,7 @@ $(function() {
 	});
 	$('#welcome .tooltip').tooltipster({
 		offsetY: 2,
-		theme: '.tooltipster-white'
+		theme: 'tooltipster-white'
 	});
 	$('#demo-default').tooltipster({
 		offsetY: 2
@@ -17,7 +17,7 @@ $(function() {
 	});
 	$('#demo-theme').tooltipster({
 		animation: 'grow',
-		theme: '.tooltipster-pink'
+		theme: 'tooltipster-pink'
 	});
 	$('#demo-callback').tooltipster({
 		content: 'Loading...',
@@ -67,16 +67,16 @@ $(function() {
 		iconTouch: true
 	});	
 	$('.tooltipster-light-preview').tooltipster({
-		theme: '.tooltipster-light'
+		theme: 'tooltipster-light'
 	});
 	$('.tooltipster-punk-preview').tooltipster({
-		theme: '.tooltipster-punk'
+		theme: 'tooltipster-punk'
 	});
 	$('.tooltipster-noir-preview').tooltipster({
-		theme: '.tooltipster-noir'
+		theme: 'tooltipster-noir'
 	});
 	$('.tooltipster-shadow-preview').tooltipster({
-		theme: '.tooltipster-shadow'
+		theme: 'tooltipster-shadow'
 	});
 	
 	$('header select').change(function() {
