@@ -22,6 +22,10 @@
 	<link rel="stylesheet" type="text/css" href="doc/css/prettify.css" />
 	<link rel="stylesheet" type="text/css" href="doc/css/style.css" />
 	<link rel="stylesheet" type="text/css" href="css/tooltipster.css" />
+	<link rel="stylesheet" type="text/css" href="css/themes/tooltipster-light.css" />
+	<link rel="stylesheet" type="text/css" href="css/themes/tooltipster-noir.css" />
+	<link rel="stylesheet" type="text/css" href="css/themes/tooltipster-punk.css" />
+	<link rel="stylesheet" type="text/css" href="css/themes/tooltipster-shadow.css" />
 	
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js"></script>
 	<script type="text/javascript" src="doc/js/jquery.jgfeed.js"></script>
@@ -188,15 +192,22 @@
 &lt;/body&#62;</pre>
 			
 			<h4>Customizing Your Tooltipster's Style</h4>
-			<p>The style of your Tooltipsters can be easily changed by modifying or overriding the default Tooltipster theme in the <strong>tooltipster.css</strong> file. You also have the option to create and attach a brand new theme (comes in handy if you want to use more than one theme at once). To do this, start with this example and add your flair:</p>
+			<p>The style of your Tooltipsters can be easily changed by editing/overriding the default Tooltipster theme, located in the <strong>css/tooltipster.css</strong> file.</p>
+			<p>Tooltipster is also packaged with 4 alternative themes to choose from. They are demonstrated at the bottom of this page. To use a theme, just include its css file (located in the css/themes folder) in your page and specify its name in Tooltipster's settings :</p>
+			<pre class="prettyprint">
+$('.tooltip').tooltipster({
+    theme: 'tooltipster-noir'
+});</pre>
+			<p>And of course, you also have the option to create a brand new theme to suit your needs. To do this, start with the example below and add your flair. When you are done, include and specify your theme just like you would for one of Tooltipster's existing theme.</p>
 			<pre class="prettyprint lang-css">
+/* This is how you would create a theme called "my-custom-theme": */
+
 .my-custom-theme {
 	border-radius: 5px; 
 	border: 2px solid #000;
 	background: #4c4c4c;
 	color: #fff;
 }
-
 /* Use this next selector to style things like font-size and line-height: */
 .my-custom-theme .tooltipster-content {
 	font-family: Arial, sans-serif;
@@ -204,14 +215,9 @@
 	line-height: 16px;
 	padding: 8px 10px;
 }</pre>
-			<p>After you have created your new theme, don't forget to specify it in your Tooltipster settings:</p>
-			<pre class="prettyprint">
-$('.tooltip').tooltipster({
-    theme: 'my-custom-theme'
-});</pre>
 			
 			<h4>Customizing Tooltipster's Functionality</h4>
-			<p>Tooltipster's options gives you a wide range of variables to tweak your tooltip to your heart's content. To learn more about all of the options, <a href="#options">read the documentation section</a>. Here's just a few of the things you can play with:</p>
+			<p>Tooltipster's options gives you a wide range of variables to tweak your tooltip to your heart's content. To learn more about all of the options, <a href="#options">read the Options section</a>. Here's just a few of the things you can play with:</p>
 			<pre class="prettyprint">
 $('.tooltip').tooltipster({
    animation: 'fade',
@@ -517,11 +523,11 @@ $('#my-special-tooltip').tooltipster('content', 'My new content');</pre>
 			<h2>Themes</h2>
 			<p>Tired of the same old? Download some rocking themes for your Tooltipsters (or create and <a href="#talk">share</a> your own)! Click to download.</p>
 			<div class="themes">
-				<a href="#" class="tooltipster-default-preview tooltip" title="The default theme" target="_blank">Default</a>
-				<a href="../../github.com/iamceege/tooltipster/blob/master/css/themes/tooltipster-light.html" class="tooltipster-light-preview" title="Light and frisky!" target="_blank">Light</a>
-				<a href="../../github.com/iamceege/tooltipster/blob/master/css/themes/tooltipster-punk.html" class="tooltipster-punk-preview" title="I will not conform to your old fart ways!" target="_blank">Punk</a>
-				<a href="../../github.com/iamceege/tooltipster/blob/master/css/themes/tooltipster-noir.html" class="tooltipster-noir-preview" title="Hipsterific!" target="_blank">Noir</a>
-				<a href="../../github.com/iamceege/tooltipster/blob/master/css/themes/tooltipster-shadow.html" class="tooltipster-shadow-preview" title="Check out my shadow" target="_blank">Shadow</a>
+				<span class="tooltipster-default-preview tooltip" title="The default theme" target="_blank">Default</span>
+				<span class="tooltipster-light-preview" title="Light and frisky!" target="_blank">Light</span>
+				<span class="tooltipster-punk-preview" title="I will not conform to your old fart ways!" target="_blank">Punk</span>
+				<span class="tooltipster-noir-preview" title="Hipsterific!" target="_blank">Noir</span>
+				<span class="tooltipster-shadow-preview" title="Check out my shadow" target="_blank">Shadow</span>
 			</div>
 		</section>
 				

@@ -523,18 +523,15 @@ Themes
 -------------------------------------
 */
 
-#themes .themes a {
+#themes .themes span {
 	display: inline-block;
 	padding: 1em;
 	margin-right: 1em;
 	margin-bottom: 1em;
 	opacity: 0.8;
 }
-#themes a:hover {
-	opacity: 1;
-}
 
-a.tooltipster-default-preview {
+.tooltipster-default-preview {
 	border-radius: 5px; 
 	border: 2px solid #000;
 	background: #4c4c4c;
@@ -548,7 +545,7 @@ a.tooltipster-default-preview {
 	-moz-box-sizing: border-box;
 }
 
-a.tooltipster-light-preview {
+.tooltipster-light-preview {
 	border-radius: 5px; 
 	border: 1px solid #cccccc;
 	background: #ededed;
@@ -559,20 +556,8 @@ a.tooltipster-light-preview {
 	padding: 8px 10px;
 	font-weight: 400;
 }
-.tooltipster-light {
-	border-radius: 5px; 
-	border: 1px solid #cccccc;
-	background: #ededed;
-	color: #666666;
-}
-.tooltipster-light .tooltipster-content {
-	font-family: Arial, sans-serif;
-	font-size: 14px;
-	line-height: 16px;
-	padding: 8px 10px;
-}
 
-a.tooltipster-punk-preview {
+.tooltipster-punk-preview {
 	border-radius: 5px;
 	border-bottom: 3px solid #f71169;
 	background: #2a2a2a;
@@ -583,20 +568,8 @@ a.tooltipster-punk-preview {
 	padding: 8px 10px;
 	font-weight: 400;
 }
-.tooltipster-punk {
-	border-radius: 5px; 
-	border-bottom: 3px solid #f71169;
-	background: #2a2a2a;
-	color: #fff;
-}
-.tooltipster-punk .tooltipster-content {
-	font-family: 'Courier', monospace;
-	font-size: 14px;
-	line-height: 16px;
-	padding: 8px 10px;
-}
 
-a.tooltipster-noir-preview {
+.tooltipster-noir-preview {
 	border-radius: 0px;
 	border: 3px solid #2c2c2c;
 	background: #fff;
@@ -607,20 +580,8 @@ a.tooltipster-noir-preview {
 	padding: 8px 10px;
 	font-weight: 400;
 }
-.tooltipster-noir {
-	border-radius: 0px; 
-	border: 3px solid #2c2c2c;
-	background: #fff;
-	color: #2c2c2c;
-}
-.tooltipster-noir .tooltipster-content {
-	font-family: 'Georgia', serif;
-	font-size: 14px;
-	line-height: 16px;
-	padding: 8px 10px;
-}
 
-a.tooltipster-shadow-preview {
+.tooltipster-shadow-preview {
 	border-radius: 5px;
 	background: #fff;
 	box-shadow: 0px 0px 14px rgba(0,0,0,0.3);
@@ -630,18 +591,6 @@ a.tooltipster-shadow-preview {
 	line-height: 16px;
 	padding: 8px 10px;
 	font-weight: 400;
-}
-.tooltipster-shadow {
-	border-radius: 5px;
-	background: #fff;
-	box-shadow: 0px 0px 14px rgba(0,0,0,0.3);
-	color: #2c2c2c;
-}
-.tooltipster-shadow .tooltipster-content {
-	font-family: 'Arial', sans-serif;
-	font-size: 14px;
-	line-height: 16px;
-	padding: 8px 10px;
 }
 
 
