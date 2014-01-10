@@ -1,6 +1,6 @@
 /*
 
-Tooltipster 3.0.0 | 2013-12-22
+Tooltipster 3.0.1 | 2014-01-10
 A rockin' custom tooltip jQuery plugin
 
 Developed by Caleb Jacob under the MIT license http://opensource.org/licenses/MIT
@@ -292,10 +292,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						
 						// build the base of our tooltip
 						self.$tooltip = $('<div class="tooltipster-base '+ self.options.theme +'" style="'+ fixedWidth +' '+ maxWidth +' '+ pointerEvents +' '+ animationSpeed +'"><div class="tooltipster-content"></div></div>');
-						if(supportsTransitions()) {
-                            // only add the animation class if the user has a browser that supports animations
-                            self.$tooltip.addClass(animation);
-                        }
+						
+						// only add the animation class if the user has a browser that supports animations
+						if (supportsTransitions()) self.$tooltip.addClass(animation);
 						
 						// insert the content
 						self.insertContent();
