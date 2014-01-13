@@ -43,6 +43,8 @@ html {
 	padding: 0;
 	font-size: 0;
 	line-height: 0;
+  top: 0;
+  left: 0;
 	position: absolute;
 	z-index: 9999999;
 	pointer-events: none;
