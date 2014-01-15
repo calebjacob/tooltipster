@@ -431,47 +431,48 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			
 			self.checkInterval = setInterval(function() {
 				
-				// compare the former and current positions of the elProxy to reposition the tooltip if need be
-				if(self.options.positionTracker){
-					
-					var p = self.positionInfo(self.$elProxy),
-						identical = false;
-					
-					// compare size first (a change requires repositioning too)
-					if(areEqual(p.dimension, self.elProxyPosition.dimension)){
-						
-						// for elements with a fixed position, we track the top and left properties (relative to window)
-						if(self.$elProxy.css('position') === 'fixed'){
-							if(areEqual(p.position, self.elProxyPosition.position)) identical = true;
-						}
-						// otherwise, track total offset (relative to document)
-						else {
-							if(areEqual(p.offset, self.elProxyPosition.offset)) identical = true;
-						}
-					}
-					
-					if(!identical){
-						self.positionTooltip();
-					}
-				}
-				
-				// if this tooltip's origin is removed, remove the tooltip if it's still here
-				if ($('body').find(self.$el).length === 0 && (self.status == 'shown' || self.status == 'appearing')) {
-					self.hideTooltip();
-				}
-				
-				// clear this interval if it is no longer necessary
+				// if the tooltip and/or its interval should be stopped
 				if (
 						// if the origin has been removed
-						($('body').find(self.$el).length === 0)
+						$('body').find(self.$el).length === 0
 						// if the elProxy has been removed
-					||	($('body').find(self.$elProxy).length === 0)
+					||	$('body').find(self.$elProxy).length === 0
 						// if the tooltip has been closed
 					||	self.status == 'hidden'
 						// if the tooltip has somehow been removed
-					||	($('body').find(self.$tooltip).length === 0)
+					||	$('body').find(self.$tooltip).length === 0
 				) {
+					// remove the tooltip if it's still here
+					if (self.status == 'shown' || self.status == 'appearing') self.hideTooltip();
+					
+					// clear this interval as it is no longer necessary
 					self.cancelCheckInterval();
+				}
+				// if everything is alright
+				else {
+					// compare the former and current positions of the elProxy to reposition the tooltip if need be
+					if(self.options.positionTracker){
+						
+						var p = self.positionInfo(self.$elProxy),
+							identical = false;
+						
+						// compare size first (a change requires repositioning too)
+						if(areEqual(p.dimension, self.elProxyPosition.dimension)){
+							
+							// for elements with a fixed position, we track the top and left properties (relative to window)
+							if(self.$elProxy.css('position') === 'fixed'){
+								if(areEqual(p.position, self.elProxyPosition.position)) identical = true;
+							}
+							// otherwise, track total offset (relative to document)
+							else {
+								if(areEqual(p.offset, self.elProxyPosition.offset)) identical = true;
+							}
+						}
+						
+						if(!identical){
+							self.positionTooltip();
+						}
+					}
 				}
 			}, 200);
 		},
@@ -648,10 +649,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 		},
 		
 		positionTooltip: function() {
-
+			
 			var self = this;
 			
-			if (self.$tooltip) {
+			// in case the tooltip has been removed from DOM manually
+			if ($('body').find(self.$tooltip).length !== 0) {
 				
 				// reset width
 				self.$tooltip.css('width', '');
