@@ -1,6 +1,6 @@
 /*
 
-Tooltipster 3.0.2 | 2014-01-10
+Tooltipster 3.0.3 | 2014-01-15
 A rockin' custom tooltip jQuery plugin
 
 Developed by Caleb Jacob under the MIT license http://opensource.org/licenses/MIT
@@ -328,6 +328,16 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						// will check if our tooltip origin is removed while the tooltip is shown
 						self.setCheckInterval();
 						
+						// hide tooltips on orientation change
+						$(window).on('orientationchange.'+ self.namespace, function() {
+							self.hideTooltip();
+						});
+						
+						// reposition on scroll (otherwise position:fixed element's tooltips will move away form their origin) and on resize (in case position can/has to be changed)
+						$(window).on('scroll.'+ self.namespace +' resize.'+ self.namespace, function() {
+							self.positionTooltip();
+						});
+						
 						// auto-close bindings
 						if (self.options.autoClose) {
 							
@@ -493,6 +503,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					
 					self.$tooltip.remove();
 					self.$tooltip = null;
+					
+					// unbind orientationchange, scroll and resize listeners
+					$(window).off('.'+ self.namespace);
 					
 					$('body')
 						// unbind any auto-closing click/touch listeners
@@ -1164,18 +1177,4 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 		}
 		return false;
 	}
-	
-	// hide tooltips on orientation change
-	$(window).on('orientationchange', function() {
-		$('.tooltipstered').each(function(){
-			$(this)[pluginName]('hide');
-		})
-	});
-	
-	// reposition on scroll (otherwise position:fixed element's tooltips will move away form their origin) and on resize (in case position can/has to be changed)
-	$(window).on('scroll resize', function() {
-		$('.tooltipstered').each(function(){
-			$(this)[pluginName]('reposition');
-		})
-	});
 })( jQuery, window, document );
