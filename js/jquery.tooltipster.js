@@ -328,11 +328,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						// will check if our tooltip origin is removed while the tooltip is shown
 						self.setCheckInterval();
 						
-						// hide tooltips on orientation change
-						$(window).on('orientationchange.'+ self.namespace, function() {
-							self.hideTooltip();
-						});
-						
 						// reposition on scroll (otherwise position:fixed element's tooltips will move away form their origin) and on resize (in case position can/has to be changed)
 						$(window).on('scroll.'+ self.namespace +' resize.'+ self.namespace, function() {
 							self.positionTooltip();
