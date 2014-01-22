@@ -74,7 +74,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 		this.timerShow = null;
 		// this will be the tooltip element (jQuery wrapped HTML element)
 		this.$tooltip;
-		this.tooltipArrowReposition;
 		
 		// for backward compatibility
 		this.options.iconTheme = this.options.iconTheme.replace('.', '');
@@ -655,7 +654,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				
 				// find variables to determine placement
 				self.elProxyPosition = self.positionInfo(self.$elProxy);
-				var windowWidth = $(window).width(),
+				var arrowReposition = null,
+					windowWidth = $(window).width(),
 					// shorthand
 					proxy = self.elProxyPosition,
 					tooltipWidth = self.$tooltip.outerWidth(false),
@@ -771,18 +771,14 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					
 					// if the tooltip goes off the left side of the screen, line it up with the left side of the window
 					if((myLeft - windowLeft) < 0) {
-						var arrowReposition = myLeft - windowLeft;
+						arrowReposition = myLeft - windowLeft;
 						myLeft = windowLeft;
-						
-						self.tooltipArrowReposition = arrowReposition;
 					}
 					
 					// if the tooltip goes off the right of the screen, line it up with the right side of the window
 					if (((myLeft + tooltipWidth) - windowLeft) > windowWidth) {
-						var arrowReposition = myLeft - ((windowWidth + windowLeft) - tooltipWidth);
+						arrowReposition = myLeft - ((windowWidth + windowLeft) - tooltipWidth);
 						myLeft = (windowWidth + windowLeft) - tooltipWidth;
-						
-						self.tooltipArrowReposition = arrowReposition;
 					}
 				}
 				
@@ -865,7 +861,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					// if it only goes off one side, flip it to the other side
 					else if(myLeft < 0) {
 						myLeft = proxy.offset.left + offsetX + proxy.dimension.width + 12;
-						self.tooltipArrowReposition = 'left';
+						arrowReposition = 'left';
 					}
 				}
 				
@@ -889,7 +885,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					// if it only goes off one side, flip it to the other side
 					else if((myLeft + tooltipWidth) > windowWidth) {
 						myLeft = proxy.offset.left - offsetX - tooltipWidth - 12;
-						self.tooltipArrowReposition = 'right';
+						arrowReposition = 'right';
 					}
 				}
 				
@@ -907,7 +903,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					}
 					
 					// if the tooltip was going off the page and had to re-adjust, we need to update the arrow's position
-					var arrowReposition = self.tooltipArrowReposition;
 					if (!arrowReposition) {
 						arrowReposition = '';
 					}
