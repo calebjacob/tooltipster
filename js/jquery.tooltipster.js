@@ -1,6 +1,6 @@
 /*
 
-Tooltipster 3.0.4 | 2014-01-15
+Tooltipster 3.0.5 | 2014-01-15
 A rockin' custom tooltip jQuery plugin
 
 Developed by Caleb Jacob under the MIT license http://opensource.org/licenses/MIT
@@ -1021,7 +1021,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			// method calls
 			if (typeof args[0] === 'string') {
 				
-				var v = null;
+				var v = '#*$~&';
 				
 				this.each(function() {
 					
@@ -1114,7 +1114,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					}
 				});
 				
-				return (v !== null) ? v : this;
+				return (v !== '#*$~&') ? v : this;
 			}
 			// first argument is undefined or an object : the tooltip is initializing
 			else {
