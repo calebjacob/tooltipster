@@ -660,8 +660,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					proxy = self.elProxyPosition,
 					tooltipWidth = self.$tooltip.outerWidth(false),
 					tooltipInnerWidth = self.$tooltip.innerWidth() + 1, // this +1 stops FireFox from sometimes forcing an additional text line
-					tooltipHeight = self.$tooltip.outerHeight(false),
-					resetPosition = null;
+					tooltipHeight = self.$tooltip.outerHeight(false);
 				
 				// if this is an <area> tag inside a <map>, all hell breaks loose. Recaclulate all the measurements based on coordinates
 				if (self.$elProxy.is('area')) {
