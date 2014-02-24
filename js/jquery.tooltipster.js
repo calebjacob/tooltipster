@@ -112,7 +112,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					self.setContent(t);
 				}
 				
-				var c = self.options.functionInit(self.$el, self.content);
+				var c = self.options.functionInit.call(self.$el, self.$el, self.content);
 				if(typeof c !== 'undefined') self.setContent(c);
 				
 				self.$el
@@ -243,7 +243,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				}
 				
 				// call our constructor custom function before continuing
-				self.options.functionBefore(self.$elProxy, function() {
+				self.options.functionBefore.call(self.$el, self.$el, function() {
 					
 					var finish = function() {
 						self.status = 'shown';
@@ -322,7 +322,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						self.positionTooltip();
 						
 						// call our custom callback since the content of the tooltip is now part of the DOM
-						self.options.functionReady(self.$el, self.$tooltip);
+						self.options.functionReady.call(self.$el, self.$el, self.$tooltip);
 						
 						// animate in the tooltip
 						if (supportsTransitions()) {
@@ -534,7 +534,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					self.$elProxy.off('.'+ self.namespace + '-autoClose');
 					
 					// call our constructor custom callback function
-					self.options.functionAfter(self.$elProxy);
+					self.options.functionAfter.call(self.$el, self.$el);
 					
 					// call our method custom callbacks functions
 					finishCallbacks();
