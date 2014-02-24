@@ -198,7 +198,7 @@
 $('.tooltip').tooltipster({
     theme: 'tooltipster-noir'
 });</pre>
-			<p>And of course, you also have the option to create a brand new theme to suit your needs. To do this, start with the example below and add your flair. When you are done, include and specify your theme just like you would for one of Tooltipster's existing theme.</p>
+			<p>And of course, you also have the option to create a brand new theme to suit your needs. To do this, start with the example below and add your flair. When you are done, include and specify your theme just like you would for one of Tooltipster's existing themes.</p>
 			<pre class="prettyprint lang-css">
 /* This is how you would create a theme called "my-custom-theme": */
 
@@ -406,11 +406,11 @@ $.fn.tooltipster('setDefaults', {
   position: 'bottom'
 });
 
-// show a tooltip
-$(...).tooltipster('show');
+// show a tooltip (the 'callback' argument is optional)
+$(...).tooltipster('show', callback);
 
-// hide a tooltip
-$(...).tooltipster('hide');
+// hide a tooltip (the 'callback' argument is optional)
+$(...).tooltipster('hide', callback);
 
 // temporarily disable a tooltip from being able to open
 $(...).tooltipster('disable');
@@ -485,25 +485,42 @@ $('.tooltip').tooltipster({
     }
 });</pre>
 
-			<h3>Manually launch and hide a tooltip</h3>
-			<p>Tooltipster gives you complete freedom with how you'd like to open and close tooltips. You <strong>do not</strong> need to set your trigger option to 'custom' for this to work. If you have your trigger set to 'hover', the tooltip can be triggered by custom events as well as have the default hover functionality.</p>
+			<h3>Manually show and hide a tooltip</h3>
+			<p>By default and according to the 'trigger' option, Tooltipster automatically shows tooltips upon users' mouse clicks or mouse hovering (or their touch-gesture equivalents). In addition to this, you may also manually open or close a tooltip at anytime with a simple javascript command.</p>
+			<p>To achieve this, Tooltipster has the 'show' and 'hide' methods. Both of them may receive an optional 'callback' parameter, which represents a function you'd like to call when the tooltip is done animating.</p>
 			<p>Here's an example of how you could launch a specific tooltip on page load and close it when any key on your keyboard is pressed. This will still preserve the default hover trigger.</p>
 			<pre class="prettyprint">
 &lt;span class="tooltip" id="example" title="My tooltip content"&#62;Example&lt;/span&#62;
 </pre>
 			<pre class="prettyprint">
-// first, launch the Tooltipster plugin
 $(document).ready(function() {
-   $('.tooltip').tooltipster();
-});
    
-// on window load, show the tooltip
-$(window).load(function() {
+   // first on page load, initiate the Tooltipster plugin
+   $('.tooltip').tooltipster();
+   
+   // then immediately show the tooltip
    $('#example').tooltipster('show');
-      
-   // once a key is pressed on your keyboard, hide the tooltip
+   
+   // as soon as a key is pressed on the keyboard, hide the tooltip.
    $(window).keypress(function() {
       $('#example').tooltipster('hide');
+   });
+});
+</pre>
+			<p>You may also provide a function as the callback parameter of the show/hide methods. The callback functions are called in the context of the tooltipstered element. Please note that if the show/hide action is somehow cancelled before it has completed, the callback function will never be called.</p>
+			<pre class="prettyprint">
+$(document).ready(function() {
+   
+   $('.tooltip').tooltipster();
+   
+   $('#example').tooltipster('show', function() {
+       alert('The tooltip is now fully open. The content is: ' + this.tooltipster('content'));
+   });
+   
+   $(window).keypress(function() {
+      $('#example').tooltipster('hide', function() {
+         alert('The tooltip is now fully closed');
+      });
    });
 });
 </pre>

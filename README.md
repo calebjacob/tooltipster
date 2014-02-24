@@ -46,8 +46,8 @@ Methods
 -------------------------
 
 $.fn.tooltipster('setDefaults', {})  
-$(...).tooltipster('show')  
-$(...).tooltipster('hide')  
+$(...).tooltipster('show' [, callback])  
+$(...).tooltipster('hide' [, callback])  
 $(...).tooltipster('disable')  
 $(...).tooltipster('enable')  
 $(...).tooltipster('destroy')  

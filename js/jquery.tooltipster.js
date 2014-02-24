@@ -54,15 +54,20 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 		// list of instance variables
 		
 		this.bodyOverflowX;
+		// stack of custom callbacks provided as parameters to API methods
+		this.callbacks = {
+			hide: [],
+			show: []
+		};
 		this.checkInterval = null;
 		// this will be the user content shown in the tooltip
 		this.content;
 		// this is the original element which is being applied the tooltipster plugin
 		this.$el = $(element);
-		this.elProxyPosition;
 		// this will be the element which triggers the appearance of the tooltip on hover/click/custom events.
 		// it will be the same as this.$el if icons are not used (see in the options), otherwise it will correspond to the created icon
 		this.$elProxy;
+		this.elProxyPosition;
 		this.enabled = true;
 		this.options = $.extend({}, defaults, options);
 		this.mouseIsOverProxy = false;
@@ -205,9 +210,13 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 		},
 		
 		// this function will open the tooltip right away
-		showTooltipNow: function() {
+		showTooltipNow: function(callback) {
 			
 			var self = this;
+			
+			// save the method callback and cancel hide method callbacks
+			if (callback) self.callbacks.show.push(callback);
+			self.callbacks.hide = [];
 			
 			//get rid of any appearance timer
 			clearTimeout(self.timerShow);
@@ -233,8 +242,16 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					});
 				}
 				
-				// call our custom function before continuing
+				// call our constructor custom function before continuing
 				self.options.functionBefore(self.$elProxy, function() {
+					
+					var finish = function() {
+						self.status = 'shown';
+						
+						// trigger any show method custom callbacks and reset them
+						$.each(self.callbacks.show, function(i,c) { c.call(self.$el); });
+						self.callbacks.show = [];
+					};
 					
 					// if this origin already has its tooltip open
 					if (self.status !== 'hidden') {
@@ -254,20 +271,20 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 									.removeClass('tooltipster-dying')
 									.addClass('tooltipster-'+ self.options.animation +'-show');
 								
-								if(self.options.speed > 0) self.$tooltip.delay(self.options.speed);
+								if (self.options.speed > 0) self.$tooltip.delay(self.options.speed);
 								
-								self.$tooltip.queue(function(){
-									self.status = 'shown';
-								});
+								self.$tooltip.queue(finish);
 							}
 							else {
 								// in case the tooltip was currently fading out, bring it back to life
 								self.$tooltip
 									.stop()
-									.fadeIn(function(){
-										self.status = 'shown';
-									});
+									.fadeIn(finish);
 							}
+						}
+						// if the tooltip is already open, we still need to trigger the method custom callback
+						else if(self.status === 'shown') {
+							finish();
 						}
 					}
 					// if the tooltip isn't already open, open that sucker up!
@@ -314,14 +331,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							
 							if(self.options.speed > 0) self.$tooltip.delay(self.options.speed);
 							
-							self.$tooltip.queue(function(){
-								self.status = 'shown';
-							});
+							self.$tooltip.queue(finish);
 						}
 						else {
-							self.$tooltip.css('display', 'none').fadeIn(self.options.speed, function() {
-								self.status = 'shown';
-							});
+							self.$tooltip.css('display', 'none').fadeIn(self.options.speed, finish);
 						}
 						
 						// will check if our tooltip origin is removed while the tooltip is shown
@@ -477,15 +490,25 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			this.checkInterval = null;
 		},
 		
-		hideTooltip: function() {
+		hideTooltip: function(callback) {
 			
 			var self = this;
+			
+			// save the method custom callback and cancel any show method custom callbacks
+			if (callback) self.callbacks.hide.push(callback);
+			self.callbacks.show = [];
 			
 			// get rid of any appearance timeout
 			clearTimeout(self.timerShow);
 			self.timerShow = null;
 			clearTimeout(self.timerHide);
 			self.timerHide = null;
+			
+			var finishCallbacks = function() {
+				// trigger any hide method custom callbacks and reset them
+				$.each(self.callbacks.hide, function(i,c) { c.call(self.$el); });
+				self.callbacks.hide = [];
+			};
 			
 			// hide
 			if (self.status == 'shown' || self.status == 'appearing') {
@@ -510,8 +533,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					// unbind any auto-closing hover listeners
 					self.$elProxy.off('.'+ self.namespace + '-autoClose');
 					
-					// finally, call our custom callback function
+					// call our constructor custom callback function
 					self.options.functionAfter(self.$elProxy);
+					
+					// call our method custom callbacks functions
+					finishCallbacks();
 				};
 				
 				if (supportsTransitions()) {
@@ -531,6 +557,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						.stop()
 						.fadeOut(self.options.speed, finish);
 				}
+			}
+			// if the tooltip is already hidden, we still need to trigger the method custom callback
+			else if(self.status == 'hidden') {
+				finishCallbacks();
 			}
 		},
 		
@@ -1082,20 +1112,20 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 								break;
 			
 							case 'hide':
-								self.hideTooltip();
+								self.hideTooltip(args[1]);
 								break;
 							
 							// for internal use only
 							case 'option':
 								v = self.options[args[1]];
-								break;
+								return false;
 							
 							case 'reposition':
 								self.positionTooltip();
 								break;
 							
 							case 'show':
-								self.showTooltipNow();
+								self.showTooltipNow(args[1]);
 								break;
 							
 							// for internal use use only, not part of the public API
