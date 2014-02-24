@@ -214,36 +214,36 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			
 			var self = this;
 			
-			// save the method callback and cancel hide method callbacks
-			if (callback) self.callbacks.show.push(callback);
-			self.callbacks.hide = [];
-			
-			//get rid of any appearance timer
-			clearTimeout(self.timerShow);
-			self.timerShow = null;
-			clearTimeout(self.timerHide);
-			self.timerHide = null;
-			
-			// continue only if the tooltip is enabled and has any content
-			if (self.enabled && self.content !== null) {
+			// call our constructor custom function before continuing
+			self.options.functionBefore.call(self.$el, self.$el, function() {
 				
-				// if we only want one tooltip open at a time, close all auto-closing tooltips currently open and not already disappearing
-				if (self.options.onlyOne) {
-					$('.tooltipstered').not(self.$el).each(function(i,el) {
-						
-						// we have to use the public methods here
-						var $el = $(el),
-							s = $el[pluginName]('status'),
-							ac = $el[pluginName]('option', 'autoClose');
-						
-						if (s !== 'hidden' && s !== 'disappearing' && ac) {
-							$el[pluginName]('hide');
-						}
-					});
-				}
+				// continue only if the tooltip is enabled and has any content
+				if (self.enabled && self.content !== null) {
 				
-				// call our constructor custom function before continuing
-				self.options.functionBefore.call(self.$el, self.$el, function() {
+					// save the method callback and cancel hide method callbacks
+					if (callback) self.callbacks.show.push(callback);
+					self.callbacks.hide = [];
+					
+					//get rid of any appearance timer
+					clearTimeout(self.timerShow);
+					self.timerShow = null;
+					clearTimeout(self.timerHide);
+					self.timerHide = null;
+					
+					// if we only want one tooltip open at a time, close all auto-closing tooltips currently open and not already disappearing
+					if (self.options.onlyOne) {
+						$('.tooltipstered').not(self.$el).each(function(i,el) {
+							
+							// we have to use the public methods here
+							var $el = $(el),
+								s = $el[pluginName]('status'),
+								ac = $el[pluginName]('option', 'autoClose');
+							
+							if (s !== 'hidden' && s !== 'disappearing' && ac) {
+								$el[pluginName]('hide');
+							}
+						});
+					}
 					
 					var finish = function() {
 						self.status = 'shown';
@@ -428,8 +428,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							self.hideTooltip();
 						}, self.options.timer + extraTime);
 					}
-				});
-			}
+				}
+			});
 		},
 		
 		setCheckInterval: function(){
