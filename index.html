@@ -507,7 +507,7 @@ $(document).ready(function() {
    });
 });
 </pre>
-			<p>You may also provide a function as the callback parameter of the show/hide methods. The callback functions are called in the context of the tooltipstered element. Please note that if the show/hide action is somehow cancelled before it has completed, the callback function will never be called.</p>
+			<p>You may also provide a function as the callback parameter of the show/hide methods. The callback functions are called in the context of the tooltipstered element. If the tooltip is already in the state you are asking for (open/closed), the callback is executed immediately. Please note that if the show/hide action is somehow cancelled before it has completed its animation, the callback function will never be called.</p>
 			<pre class="prettyprint">
 $(document).ready(function() {
    
