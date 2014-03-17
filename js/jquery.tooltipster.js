@@ -1,6 +1,6 @@
 /*
 
-Tooltipster 3.1.1 | 2014-01-15
+Tooltipster 3.1.2 | 2014-03-17
 A rockin' custom tooltip jQuery plugin
 
 Developed by Caleb Jacob under the MIT license http://opensource.org/licenses/MIT
@@ -53,7 +53,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 		
 		// list of instance variables
 		
-		this.bodyOverflowX;
 		// stack of custom callbacks provided as parameters to API methods
 		this.callbacks = {
 			hide: [],
@@ -295,10 +294,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						// the timer (if any) will start when the tooltip has fully appeared after its transition
 						var extraTime = self.options.speed;
 						
-						// disable horizontal scrollbar to keep overflowing tooltips from jacking with it and then restore it to its previous value
-						self.bodyOverflowX = $('body').css('overflow-x');
-						$('body').css('overflow-x', 'hidden');
-						
 						// get some other settings related to building the tooltip
 						var animation = 'tooltipster-' + self.options.animation,
 							animationSpeed = '-webkit-transition-duration: '+ self.options.speed +'ms; -webkit-animation-duration: '+ self.options.speed +'ms; -moz-transition-duration: '+ self.options.speed +'ms; -moz-animation-duration: '+ self.options.speed +'ms; -o-transition-duration: '+ self.options.speed +'ms; -o-animation-duration: '+ self.options.speed +'ms; -ms-transition-duration: '+ self.options.speed +'ms; -ms-animation-duration: '+ self.options.speed +'ms; transition-duration: '+ self.options.speed +'ms; animation-duration: '+ self.options.speed +'ms;',
@@ -530,10 +525,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					// unbind orientationchange, scroll and resize listeners
 					$(window).off('.'+ self.namespace);
 					
-					$('body')
-						// unbind any auto-closing click/touch listeners
-						.off('.'+ self.namespace)
-						.css('overflow-x', self.bodyOverflowX);
+					// unbind any auto-closing click/touch listeners
+					$('body').off('.'+ self.namespace);
 					
 					// unbind any auto-closing hover listeners
 					self.$elProxy.off('.'+ self.namespace + '-autoClose');
