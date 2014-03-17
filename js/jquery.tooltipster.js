@@ -1,6 +1,6 @@
 /*
 
-Tooltipster 3.0.5 | 2014-01-15
+Tooltipster 3.1.1 | 2014-01-15
 A rockin' custom tooltip jQuery plugin
 
 Developed by Caleb Jacob under the MIT license http://opensource.org/licenses/MIT
@@ -518,6 +518,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				var finish = function() {
 					
 					self.status = 'hidden';
+					
+					// detach our content object first, so the next jQuery's remove() call does not unbind its event handlers
+					if (typeof self.content == 'object' && self.content !== null) {
+						self.content.detach();
+					}
 					
 					self.$tooltip.remove();
 					self.$tooltip = null;
