@@ -1,6 +1,6 @@
 /*
 
-Tooltipster 3.1.2 | 2014-03-17
+Tooltipster 3.1.3 | 2014-03-20
 A rockin' custom tooltip jQuery plugin
 
 Developed by Caleb Jacob under the MIT license http://opensource.org/licenses/MIT
@@ -690,7 +690,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					tooltipInnerWidth = self.$tooltip.innerWidth() + 1, // this +1 stops FireFox from sometimes forcing an additional text line
 					tooltipHeight = self.$tooltip.outerHeight(false);
 				
-				// if this is an <area> tag inside a <map>, all hell breaks loose. Recaclulate all the measurements based on coordinates
+				// if this is an <area> tag inside a <map>, all hell breaks loose. Recalculate all the measurements based on coordinates
 				if (self.$elProxy.is('area')) {
 					var areaShape = self.$elProxy.attr('shape'),
 						mapName = self.$elProxy.parent().attr('name'),
@@ -727,7 +727,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 							areaGreatestY = 0,
 							arrayAlternate = 'even';
 						
-						for (i = 0; i < areaMeasurements.length; i++) {
+						for (var i = 0; i < areaMeasurements.length; i++) {
 							var areaNumber = parseInt(areaMeasurements[i]);
 							
 							if (arrayAlternate == 'even') {
@@ -870,7 +870,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				if(practicalPosition == 'left') {
 					myLeft = proxy.offset.left - offsetX - tooltipWidth - 12;
 					myLeftMirror = proxy.offset.left + offsetX + proxy.dimension.width + 12;
-					var topDifference = (proxy.offset.top + tooltipHeight) - (proxy.offset.top + self.$elProxy.outerHeight(false));
+					var topDifference = (proxy.offset.top + tooltipHeight) - (proxy.offset.top + proxy.dimension.height);
 					myTop = proxy.offset.top - (topDifference / 2) - offsetY;
 					
 					// if the tooltip goes off boths sides of the page
@@ -881,7 +881,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						
 						tooltipHeight = self.$tooltip.outerHeight(false);
 						myLeft = proxy.offset.left - offsetX - newWidth - 12 - borderWidth;
-						topDifference = (proxy.offset.top + tooltipHeight) - (proxy.offset.top + self.$elProxy.outerHeight(false));
+						topDifference = (proxy.offset.top + tooltipHeight) - (proxy.offset.top + proxy.dimension.height);
 						myTop = proxy.offset.top - (topDifference / 2) - offsetY;
 					}
 					
@@ -895,7 +895,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				if(practicalPosition == 'right') {
 					myLeft = proxy.offset.left + offsetX + proxy.dimension.width + 12;
 					myLeftMirror = proxy.offset.left - offsetX - tooltipWidth - 12;
-					var topDifference = (proxy.offset.top + tooltipHeight) - (proxy.offset.top + self.$elProxy.outerHeight(false));
+					var topDifference = (proxy.offset.top + tooltipHeight) - (proxy.offset.top + proxy.dimension.height);
 					myTop = proxy.offset.top - (topDifference / 2) - offsetY;
 					
 					// if the tooltip goes off boths sides of the page
@@ -905,7 +905,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						self.$tooltip.css('width', newWidth + 'px');
 						
 						tooltipHeight = self.$tooltip.outerHeight(false);
-						topDifference = (proxy.offset.top + tooltipHeight) - (proxy.offset.top + self.$elProxy.outerHeight(false));
+						topDifference = (proxy.offset.top + tooltipHeight) - (proxy.offset.top + proxy.dimension.height);
 						myTop = proxy.offset.top - (topDifference / 2) - offsetY;
 					}
 						
