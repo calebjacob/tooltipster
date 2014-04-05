@@ -590,6 +590,7 @@ $('#my-element').tooltipster({
 
 // instantiate a second tooltip and keep the returned Tooltipster objects array for later use of the API
 var tooltipsterObjects = $('#my-element').tooltipster({
+	// don't forget to provide content here as the 1st tooltip will have deleted the original title attribute of the element
 	content: 'My second tooltip',
 	multiple: true,
 	position: 'bottom'
