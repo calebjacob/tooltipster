@@ -30,6 +30,7 @@ iconTheme
 iconTouch  
 interactive  
 interactiveTolerance  
+multiple
 offsetX  
 offsetY  
 onlyOne  
