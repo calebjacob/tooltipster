@@ -65,6 +65,33 @@ $(function() {
 	$('#demo-icon').tooltipster({
 		iconDesktop: true,
 		iconTouch: true
+	});
+	$('#demo-multiple').tooltipster({
+		animation: 'swing',
+		content: 'North',
+		multiple: true,
+		position: 'top'
+	});
+	$('#demo-multiple').tooltipster({
+		content: 'East',
+		multiple: true,
+		position: 'right',
+		theme: 'tooltipster-punk'
+	});	
+	$('#demo-multiple').tooltipster({
+		animation: 'grow',
+		content: 'South',
+		delay: 200,
+		multiple: true,
+		position: 'bottom',
+		theme: 'tooltipster-light'
+	});	
+	$('#demo-multiple').tooltipster({
+		animation: 'fall',
+		content: 'West',
+		multiple: true,
+		position: 'left',
+		theme: 'tooltipster-shadow'
 	});	
 	$('.tooltipster-light-preview').tooltipster({
 		theme: 'tooltipster-light'

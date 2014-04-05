@@ -5,7 +5,7 @@
   "keywords": [
     "tooltip"
   ],
-  "version": "3.1.4",
+  "version": "3.2.0",
   "author": {
     "name": "Caleb Jacob",
     "url": "http://calebjacob.com/"
@@ -15,6 +15,11 @@
       "name": "Caleb Jacob",
       "email": "hello@calebjacob.com",
       "url": "http://calebjacob.com/"
+    },
+    {
+      "name": "Louis Ameline",
+      "email": "evangun2001@yahoo.fr",
+      "url": "https://github.com/louisameline"
     }
   ],
   "licenses": [

@@ -1,6 +1,6 @@
 /*
 
-Tooltipster 3.1.4 | 2014-03-20
+Tooltipster 3.2.0 | 2014-04-05
 A rockin' custom tooltip jQuery plugin
 
 Developed by Caleb Jacob under the MIT license http://opensource.org/licenses/MIT
@@ -36,6 +36,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			iconTheme: 'tooltipster-icon',
 			interactive: false,
 			interactiveTolerance: 350,
+			multiple: false,
 			offsetX: 0,
 			offsetY: 0,
 			onlyOne: false,
@@ -1057,16 +1058,37 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			
 			self.hide();
 			
+			// remove the icon, if any
 			if(self.$el[0] !== self.$elProxy[0]) self.$elProxy.remove();
 			
-			// old school technique when outerHTML is not supported
-			var stringifiedContent = (typeof self.Content === 'string') ? self.Content : $('<div></div>').append(self.Content).html();
-			
 			self.$el
-				.removeClass('tooltipstered')
-				.attr('title', stringifiedContent)
-				.removeData('tooltipster')
+				.removeData(self.namespace)
 				.off('.'+ self.namespace);
+			
+			var ns = self.$el.data('tooltipster-ns');
+			
+			// if there are no more tooltips on this element
+			if(ns.length === 1){
+				
+				// old school technique when outerHTML is not supported
+				var stringifiedContent = (typeof self.Content === 'string') ? self.Content : $('<div></div>').append(self.Content).html();
+				
+				self.$el
+					.removeClass('tooltipstered')
+					.attr('title', stringifiedContent)
+					.removeData(self.namespace)
+					.removeData('tooltipster-ns')
+					.off('.'+ self.namespace);
+			}
+			else {
+				// remove the instance namespace from the list of namespaces of tooltips present on the element
+				ns = $.grep(ns, function(el, i){
+					return el !== self.namespace;
+				});
+				self.$el.data('tooltipster-ns', ns);
+			}
+			
+			return self;
 		},
 		
 		elementIcon: function() {
@@ -1134,8 +1156,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				
 				this.each(function() {
 					
-					// self represent the instance of the tooltipster plugin associated to the current HTML object of the loop
-					var self = $(this).data('tooltipster');
+					// retrieve the namepaces of the tooltip(s) that exist on that element. We will interact with the first tooltip only.
+					var ns = $(this).data('tooltipster-ns'),
+						// self represents the instance of the first tooltipster plugin associated to the current HTML object of the loop
+						self = ns ? $(this).data(ns[0]) : null;
 					
 					// if the current element holds a tooltipster instance
 					if(self){
@@ -1163,13 +1187,45 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			}
 			// first argument is undefined or an object : the tooltip is initializing
 			else {
-				// initialize a tooltipster instance for each element if it doesn't already have one, and attach the object to it
-				return this.each(function () {
-
-					if (!$(this).data('tooltipster')) {
-						$(this).data('tooltipster', new Plugin( this, args[0] ));
+				
+				var instances = [],
+					// is there a defined value for the multiple option in the options object ?
+					multipleIsSet = args[0] && typeof args[0].multiple !== 'undefined',
+					// if the multople option is set to true, or if it's not defined but set to true in the defaults
+					multiple = (multipleIsSet && args[0].multiple) || (!multipleIsSet && defaults.multiple);
+				
+				// initialize a tooltipster instance for each element if it doesn't already have one or if the multiple option is set, and attach the object to it
+				this.each(function () {
+					
+					var go = false,
+						ns = $(this).data('tooltipster-ns'),
+						instance = null;
+					
+					if (!ns) {
+						go = true;
 					}
+					else {
+						if(multiple) go = true;
+						else throw new Error('One or more tooltips are already attached to this element, use the "multiple" option to attach more tooltips.');
+					}
+					
+					if(go) {
+						instance = new Plugin(this, args[0]);
+						
+						// save the reference of the new instance
+						if (!ns) ns = [];
+						ns.push(instance.namespace);
+						$(this).data('tooltipster-ns', ns)
+						
+						// save the instance itself
+						$(this).data(instance.namespace, instance);
+					}
+					
+					instances.push(instance);
 				});
+				
+				if(multiple) return instances;
+				else return this;
 			}
 		}
 	};

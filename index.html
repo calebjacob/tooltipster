@@ -39,11 +39,43 @@
 	<![endif]-->
 </head>
 <body>
-	
 	<div id="background">
 		<img src="doc/images/large-background.jpg" />
 	</div>
 	<div id="wrapper">
+		<header>
+			<div id="social">
+				<div id="github">
+					<iframe src="http://ghbtns.com/github-btn.html?user=iamceege&repo=tooltipster&type=watch&count=true" allowtransparency="true" frameborder="0" scrolling="0" width="100" height="20"></iframe>
+				</div>
+				<div id="tweet">
+					<a href="https://twitter.com/share" class="twitter-share-button" data-text="Tooltipster - A powerful &amp; degradable jQuery tooltip plugin" data-via="iamceege" data-related="iamceege">Tweet</a>
+					<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+				</div>
+				<div id="gplus">
+					<g:plusone href="http://calebjacob.com/tooltipster"></g:plusone>
+				</div>
+			</div>
+			<nav>
+				<ul>
+					<li><a href="https://github.com/iamceege/tooltipster/archive/master.zip">Download</a></li>
+					<li><a href="#demos">Demos</a></li>
+					<li><a href="#getting-started">Get Started</a></li>
+					<li><a href="#options">Options</a></li>
+					<li><a href="#advanced">Advanced</a></li>
+					<li><a href="#themes">Themes</a></li>
+					<li><a href="#talk">Talk</a></li>
+				</ul>
+			</nav>
+			<select>
+				<option selected="selected" disabled="disabled">Menu...</option>
+				<option value="demos">Demos</option>
+				<option value="getting-started">Get Started</option>
+				<option value="options">Options</option>
+				<option value="themes">Themes</option>
+				<option value="talk">Talk</option>
+			</select>
+		</header>
 		<section id="welcome">
 			<img src="doc/images/tooltipster.svg" alt="Tooltipster" id="tooltipster" />
 			<h1>A powerful, flexible jQuery plugin enabling you to easily create semantic, modern tooltips enhanced with the power of CSS.</h1>
@@ -96,6 +128,9 @@
 				<li>
 					<span id="demo-icon" title="Use separate icons to launch your tooltips on either desktops or touch devices - or both!"></span> Attach tooltips to icons
 				</li>
+				<li>
+					<span id="demo-multiple">Hover</span> Multiple tooltips on a single element
+				</li>
 				<li>...&amp; more!</li>
 			</ul>
 		</section>
@@ -144,7 +179,7 @@
     &lt;/script&#62;
 &lt;/head&#62;</pre>
 			
-			<h3>4. Taking It a Step Further</h3>
+			<h3><a name="further">4. Taking It a Step Further</a></h3>
 			<h4>Using HTML tags inside your tooltips</h4>
 			<p>Tooltipster allows you to use any HTML markup you can think of inside your tooltips. This means you can insert things like images and text formatting tags. To achieve this, the recommended method is a little different : provide your content as a jQuery object in the script rather than in the title attribute :</p>
 			<pre class="prettyprint">
@@ -337,6 +372,11 @@ $('.tooltip').tooltipster({
 					<td>If the tooltip is interactive and activated by a hover event, set the amount of time (milliseconds) allowed for a user to hover off of the tooltip activator (origin) on to the tooltip itself - keeping the tooltip from closing. <strong>Default: 350</strong></td>
 				</tr>
 				<tr>
+					<td><h4>multiple</h4></td>
+					<td>boolean</td>
+					<td>Allows you to put multiple tooltips on a single element. Read further instructions down this page. <strong>Default: false</strong></td>
+				</tr>
+				<tr>
 					<td><h4>offsetX</h4></td>
 					<td>integer</td>
 					<td>Offsets the tooltip (in pixels) farther left/right from the origin. <strong>Default: 0</strong></td>
@@ -397,6 +437,7 @@ $('.tooltip').tooltipster({
 		<section id="advanced">
 			<h2>Advanced</h2>
 			
+			<a name="api"></a>
 			<h3>The awesomesauce Tooltipster API</h3>
 			<p>The Tooltipster API was created to be as flexible and easy to use as possible (thanks to <a href="https://github.com/glebtv">glebtv</a> for the inspiration). The API allows you to create custom triggers, update tooltip content on the fly (whether the tooltip is currently open or not), destroy Tooltipster functionality if needed, and reposition tooltips for unique use cases.</p>
 			<p>Here is a quick look at all of the API methods:</p>
@@ -436,6 +477,7 @@ $(...).tooltipster('elementTooltip');
 // return the HTML root element of the icon if there is one, 'undefined' otherwise
 $(...).tooltipster('elementIcon');</pre>
 			
+			<a name="ajax"></a>
 			<h3>Using AJAX to generate your tooltip content</h3>
 			<p>Tooltipster gives you the ability to fire a custom synchronous or asynchronous function everytime before the tooltip launches (<a href="#functionBeforeExample">functionBefore</a>) or just once upon instantiation (<a href="#functionInitExample">functionInit</a>). One great use for this is to grab dynamic content for your tooltips via AJAX.</p>
 			<p id="functionBeforeExample">Here is an example of using functionBefore() asynchronously to replace a loading notification with our AJAX call. Once the content has been retrieved and updated, we'll take advantage of setting $.data() to keep our content cached for the next time the tooltip is opened:</p>
@@ -484,7 +526,8 @@ $('.tooltip').tooltipster({
         }
     }
 });</pre>
-
+			
+			<a name="apishow"></a>
 			<h3>Manually show and hide a tooltip</h3>
 			<p>By default and according to the 'trigger' option, Tooltipster automatically shows tooltips upon users' mouse clicks or mouse hovering (or their touch-gesture equivalents). In addition to this, you may also manually open or close a tooltip at anytime with a simple javascript command.</p>
 			<p>To achieve this, Tooltipster has the 'show' and 'hide' methods. Both of them may receive an optional 'callback' parameter, which represents a function you'd like to call when the tooltip is done animating.</p>
@@ -525,12 +568,59 @@ $(document).ready(function() {
 });
 </pre>
 			
+			<a name="apicontent"></a>
 			<h3>Updating a tooltip's content</h3>
 			<p>It's easy as pie to update a tooltip's content - whether it's open or closed. Depending on your selector, you can update multiple tooltips at once or just one:</p>
 			<pre class="prettyprint">
-$('#my-special-tooltip').tooltipster('content', 'My new content');</pre>
+$('#my-special-element').tooltipster('content', 'My new content');</pre>
 			<p>By default, Tooltipster will play a subtle animation when the content changes. To tweak the animation, check out the '.tooltipster-content-changing' class in your tooltipster.css file. It's important to note that only CSS transforms will be animated. To disable this animation, set updateAnimation to false.</p>
 			
+			<a name="multiple"></a>
+			<h3>Using several tooltips on a single element</h3>
+			<p>Several independant tooltips can be set on a single element, each one having its own triggers and options. Just set the 'multiple' option to true when you initialize your tooltip. This will only change two things that you might want to be aware of.</p>
+			<p>Firstly, the instantiation call will now return an array of Tooltipster objects generated by the call, instead of the tooltipped jQuery-wrapped elements.</p>
+			<p>Secondly, you will have to use the Tooltipster object of a tooltip to make any API method calls on it. All methods documented on this page remain available, only the way to call them changes.</p>
+			
+			<pre class="prettyprint">
+// create a first tooltip as usual. The multiple option is actually optional for the first tooltip
+$('#my-element').tooltipster({
+	content: 'My first tooltip',
+	position: 'top'
+});
+
+// instantiate a second tooltip and keep the returned Tooltipster objects array for later use of the API
+var tooltipsterObjects = $('#my-element').tooltipster({
+	content: 'My second tooltip',
+	multiple: true,
+	position: 'bottom'
+});
+
+// since the jQuery selector matches only one element, the array will contain only one Tooltipster object.
+// Otherwise the array would contain one object for each matched element, in the same order as them
+var tooltip2 = tooltipsterObjects[0];
+
+// use this Tooltipster object to make any API method call on the tooltip
+tooltip2.content('New content for my second tooltip').show();
+// all documented methods can be called that way
+var element = tooltip2.elementTooltip();
+
+// calling the API methods in the usual way only affects the first tooltip that was created on the element
+$('#my-element').tooltipster('content', 'New content for my first tooltip')
+</pre>
+
+<pre class="prettyprint">
+// You may use the 'multiple' option on the first tooltip as well, it will return an array of objects too
+var tooltipsterObjects = $('#my-element').tooltipster({
+	content: 'My first tooltip',
+	multiple: true
+});
+
+// this is also a way to call API methods on the first tooltip
+var tooltip1 = tooltipsterObjects[0];
+tooltip1.content('New content for my first tooltip').show();</pre>
+
+<p>Note : if you have multiple tooltips and destroy them, only the last destroyed tooltip will transfer its content back to the title attribute of the tooltipped element.</p>
+	
 			<h3>Community submitted use cases</h3>
 			<p><a href="http://stackoverflow.com/questions/14741688/how-to-display-messages-from-jquery-validate-plugin-inside-of-tooltipster-toolti">Using Tooltipster alongside jQuery Validate</a> by <a href="https://github.com/sparky672">sparky672</a></p>
 			<p>Did you do something awesome with Tooltipster? <a href="#talk">Tell me</a> and I'll post it up here!</p>
@@ -558,41 +648,6 @@ $('#my-special-tooltip').tooltipster('content', 'My new content');</pre>
 		<footer>
 			Developed and maintained by <a href="https://plus.google.com/116532683962309427991?rel=author" class="white">Caleb Jacob</a> and <a href="https://github.com/louisameline" class="white">Louis Ameline</a> under the <a href="http://opensource.org/licenses/MIT" class="white">MIT license</a>
 		</footer>
-	
-		<header>
-			<div id="social">
-				<div id="github">
-					<a href="https://github.com/iamceege/tooltipster"
-	class="gitforked-button gitforked-forks gitforked-watchers">Fork</a>
-				</div>
-				<div id="tweet">
-					<a href="https://twitter.com/share" class="twitter-share-button" data-text="Tooltipster - A powerful &amp; degradable jQuery tooltip plugin" data-via="iamceege" data-related="iamceege">Tweet</a>
-	<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-				</div>
-				<div id="gplus">
-					<g:plusone href="http://calebjacob.com/tooltipster"></g:plusone>
-				</div>
-			</div>
-			<nav>
-				<ul>
-					<li><a href="https://github.com/iamceege/tooltipster/archive/master.zip">Download</a></li>
-					<li><a href="#demos">Demos</a></li>
-					<li><a href="#getting-started">Get Started</a></li>
-					<li><a href="#options">Options</a></li>
-					<li><a href="#advanced">Advanced</a></li>
-					<li><a href="#themes">Themes</a></li>
-					<li><a href="#talk">Talk</a></li>
-				</ul>
-			</nav>
-			<select>
-				<option selected="selected" disabled="disabled">Menu...</option>
-				<option value="demos">Demos</option>
-				<option value="getting-started">Get Started</option>
-				<option value="options">Options</option>
-				<option value="themes">Themes</option>
-				<option value="talk">Talk</option>
-			</select>
-		</header>
 	</div>
 	
 	<div id="fb-root"></div>
@@ -603,7 +658,6 @@ $('#my-special-tooltip').tooltipster('content', 'My new content');</pre>
 	    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
 	  })();
   	</script>
-	<script src="//gitforked.com/api/1.1/button.js" type="text/javascript"></script>
 </body>
 </html>
 
