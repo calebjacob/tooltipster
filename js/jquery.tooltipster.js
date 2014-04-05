@@ -1,6 +1,6 @@
 /*
 
-Tooltipster 3.2.1 | 2014-04-05
+Tooltipster 4.0.0rc1 | 2014-04-05
 A rockin' custom tooltip jQuery plugin
 
 Developed by Caleb Jacob under the MIT license http://opensource.org/licenses/MIT
@@ -23,11 +23,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			delay: 200,
 			fixedWidth: 0,
 			maxWidth: 0,
-			functionInit: function(origin, content) {},
-			functionBefore: function(origin, continueTooltip) {
-				continueTooltip();
-			},
-			functionReady: function(origin, tooltip) {},
+			functionInit: function(origin) {},
+			functionBefore: function(origin) {},
+			functionReady: function(origin) {},
 			functionAfter: function(origin) {},
 			icon: '(?)',
 			iconCloning: true,
@@ -112,9 +110,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					
 					self._content_set(t);
 				}
-				
-				var c = self.options.functionInit.call(self.$el, self.$el, self.Content);
-				if(typeof c !== 'undefined') self._content_set(c);
 				
 				self.$el
 					// strip the title off of the element to prevent the default tooltips from popping up
@@ -216,7 +211,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			var self = this;
 			
 			// call our constructor custom function before continuing
-			self.options.functionBefore.call(self.$el, self.$el, function() {
+			if (self.options.functionBefore.call(self, self.$el[0]) !== false) {
 				
 				// continue only if the tooltip is enabled and has any content
 				if (self.enabled && self.Content !== null) {
@@ -256,7 +251,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						self.Status = 'shown';
 						
 						// trigger any show method custom callbacks and reset them
-						$.each(self.callbacks.show, function(i,c) { c.call(self.$el); });
+						$.each(self.callbacks.show, function(i,c) { c.call(self, self.$el[0]); });
 						self.callbacks.show = [];
 					};
 					
@@ -329,7 +324,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						self.reposition();
 						
 						// call our custom callback since the content of the tooltip is now part of the DOM
-						self.options.functionReady.call(self.$el, self.$el, self.$tooltip);
+						self.options.functionReady.call(self, self.$el[0]);
 						
 						// animate in the tooltip
 						if (supportsTransitions()) {
@@ -436,7 +431,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						}, self.options.timer + extraTime);
 					}
 				}
-			});
+			}
 		},
 		
 		_interval_set: function() {
@@ -621,7 +616,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			
 			var finishCallbacks = function() {
 				// trigger any hide method custom callbacks and reset them
-				$.each(self.callbacks.hide, function(i,c) { c.call(self.$el); });
+				$.each(self.callbacks.hide, function(i,c) { c.call(self, self.$el[0]); });
 				self.callbacks.hide = [];
 			};
 			
@@ -657,7 +652,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					self.$elProxy.off('.'+ self.namespace + '-autoClose');
 					
 					// call our constructor custom callback function
-					self.options.functionAfter.call(self.$el, self.$el);
+					self.options.functionAfter.call(self, self.$el[0]);
 					
 					// call our method custom callbacks functions
 					finishCallbacks();
@@ -1101,6 +1096,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			return (this.$el[0] !== this.$elProxy[0]) ? this.$elProxy[0] : undefined;
 		},
 		
+		elementOrigin: function() {
+			return this.$el[0];
+		},
+		
 		elementTooltip: function() {
 			return this.$tooltip ? this.$tooltip[0] : undefined;
 		},
@@ -1225,6 +1224,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						
 						// save the instance itself
 						$(this).data(instance.namespace, instance);
+						
+						// call our constructor custom function
+						instance.options.functionInit.call(instance, this);
 					}
 					
 					instances.push(instance);

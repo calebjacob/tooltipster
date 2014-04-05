@@ -179,7 +179,8 @@
     &lt;/script&#62;
 &lt;/head&#62;</pre>
 			
-			<h3><a name="further">4. Taking It a Step Further</a></h3>
+			<a name="further"></a>
+			<h3>4. Taking It a Step Further</h3>
 			<h4>Using HTML tags inside your tooltips</h4>
 			<p>Tooltipster allows you to use any HTML markup you can think of inside your tooltips. This means you can insert things like images and text formatting tags. To achieve this, the recommended method is a little different : provide your content as a jQuery object in the script rather than in the title attribute :</p>
 			<pre class="prettyprint">
@@ -319,22 +320,22 @@ $('.tooltip').tooltipster({
 				<tr>
 					<td><h4>functionInit</h4></td>
 					<td>function</td>
-					<td>Create a custom function to be fired only once at instantiation. If the function returns a value, this value will become the content of the tooltip. See the <a href="#advanced">advanced section</a> to learn more. <strong>Default: function(origin, content) {}</strong></td>
+					<td>A custom function to be fired only once at instantiation. If the function returns a value, this value will become the content of the tooltip. See the <a href="#advanced">advanced section</a> to learn more. <strong>Default: function(origin) {}</strong></td>
 				</tr>
 				<tr>
 					<td><h4>functionBefore</h4></td>
 					<td>function</td>
-					<td>Create a custom function to be fired before the tooltip opens. This function may prevent or hold off the opening. See the <a href="#advanced">advanced section</a> to learn more. <strong>Default: function(origin, continueTooltip) { continueTooltip(); }</strong></td>
+					<td>A custom function to be fired before the tooltip opens. This function may prevent the opening if it returns false. See the <a href="#advanced">advanced section</a> to learn more. <strong>Default: function(origin) {}</strong></td>
 				</tr>
 				<tr>
 					<td><h4>functionReady</h4></td>
 					<td>function</td>
-					<td>Create a custom function to be fired when the tooltip and its contents have been added to the DOM. <strong>Default: function(origin, tooltip) {}</strong></td>
+					<td>A custom function to be fired when the tooltip and its contents have been added to the DOM. <strong>Default: function(origin) {}</strong></td>
 				</tr>
 				<tr>
 					<td><h4>functionAfter</h4></td>
 					<td>function</td>
-					<td>Create a custom function to be fired once the tooltip has been closed and removed from the DOM. <strong>Default: function(origin) {}</strong></td>
+					<td>A custom function to be fired once the tooltip has been closed and removed from the DOM. <strong>Default: function(origin) {}</strong></td>
 				</tr>
 				<tr>
 					<td><h4>icon</h4></td>
@@ -447,10 +448,10 @@ $.fn.tooltipster('setDefaults', {
   position: 'bottom'
 });
 
-// show a tooltip (the 'callback' argument is optional)
+// show a tooltip (the 'callback' argument is optional and gets the origin as first parameter)
 $(...).tooltipster('show', callback);
 
-// hide a tooltip (the 'callback' argument is optional)
+// hide a tooltip (the 'callback' argument is optional and gets the origin as first parameter)
 $(...).tooltipster('hide', callback);
 
 // temporarily disable a tooltip from being able to open
@@ -468,10 +469,13 @@ $(...).tooltipster('content');
 // update tooltip content
 $(...).tooltipster('content', myNewContent);
 
-// reposition and resize the tooltip
+// resize and reposition the tooltip
 $(...).tooltipster('reposition');
 
-// return the HTML root element of the tooltip
+// return the HTML element which has been tooltipped
+$(...).tooltipster('elementOrigin');
+
+// return the HTML root element of the tooltip if it is open, 'undefined' otherwise
 $(...).tooltipster('elementTooltip');
 
 // return the HTML root element of the icon if there is one, 'undefined' otherwise
@@ -479,51 +483,32 @@ $(...).tooltipster('elementIcon');</pre>
 			
 			<a name="ajax"></a>
 			<h3>Using AJAX to generate your tooltip content</h3>
-			<p>Tooltipster gives you the ability to fire a custom synchronous or asynchronous function everytime before the tooltip launches (<a href="#functionBeforeExample">functionBefore</a>) or just once upon instantiation (<a href="#functionInitExample">functionInit</a>). One great use for this is to grab dynamic content for your tooltips via AJAX.</p>
-			<p id="functionBeforeExample">Here is an example of using functionBefore() asynchronously to replace a loading notification with our AJAX call. Once the content has been retrieved and updated, we'll take advantage of setting $.data() to keep our content cached for the next time the tooltip is opened:</p>
+			<p>Tooltipster gives you the ability to fire a custom synchronous or asynchronous function everytime before the tooltip launches (<a href="#functionBeforeExample">functionBefore</a>) or just once upon instantiation (<a href="#functionInitExample">functionInit</a>). The functions get an 'origin' parameter which is the HTML element that has been tooltipped.</p>
+			<p id="functionBeforeExample">One great use for this is to grab dynamic content for your tooltips via AJAX. In this example we will use functionBefore() to load data the first time the tooltip is opened. Until the data has been loaded, we will display a "Loading..." notification:</p>
 			<pre class="prettyprint">
 $('.tooltip').tooltipster({
     content: 'Loading...',
-    functionBefore: function(origin, continueTooltip) {
-
-        // we'll make this function asynchronous and allow the tooltip to go ahead and show the loading notification while fetching our data
-        continueTooltip();
+    functionBefore: function(origin) {
         
-        // next, we want to check if our data has already been cached
-        if (origin.data('ajax') !== 'cached') {
+        // we set a variable so the data is only loaded once via Ajax, not everytime the tooltip opens
+        if ($(origin).data('loaded') !== true) {
             $.ajax({
                 type: 'POST',
                 url: 'example.php',
                 success: function(data) {
                     // update our tooltip content with our returned data and cache it
-                    origin.tooltipster('content', data).data('ajax', 'cached');
+                    $(origin).tooltipster('content', data).data('loaded', true);
                 }
             });
         }
     }
 });</pre>
-			<p id="functionInitExample">However, maybe you just need to make one call and only need it to fire once instead of everytime the tooltip opens. This is where you could use functionInit(). This function will fire only once - right at the beginning of the instantiation process. You'll have the ability to do things like check the current content and set new content. Since the fancy API methods for returning and setting the value aren't instantiated yet, the way we go about this is a little different than functionBefore():
+			<p id="functionInitExample">On the other hand, maybe you just need to do something once when the tooltip is instantiated, not everytime it opens. In this example we will make sure the content is entirely put to lower case:
 			<pre class="prettyprint">
 $('.tooltip').tooltipster({
-    functionInit: function(origin, content) {
-		
-        if (content === 'This is bad content') {
-            
-            // when the request has finished loading, we will change the tooltip's content
-            $.ajax({
-                type: 'POST',
-                url: 'example.php',
-                success: function(data) {
-                    origin.tooltipster('content', 'New content has been loaded : ' + data);
-                }
-            });
-			
-            // this returned string will overwrite the content of the tooltip for the time being
-            return 'Wait while we load new content...';
-        }
-        else {
-            // return nothing : the initialization continues normally with its content unchanged.
-        }
+    functionInit: function(origin) {
+        var content = $(origin).tooltipster('content');
+        $(origin).tooltipster('content', content.toLowerCase());
     }
 });</pre>
 			
@@ -550,21 +535,21 @@ $(document).ready(function() {
    });
 });
 </pre>
-			<p>You may also provide a function as the callback parameter of the show/hide methods. The callback functions are called in the context of the tooltipstered element. If the tooltip is already in the state you are asking for (open/closed), the callback is executed immediately. Please note that if the show/hide action is somehow cancelled before it has completed its animation, the callback function will never be called.</p>
+			<p>You may also provide a function as the callback parameter of the show/hide methods. The callback functions are called in the context of the Tooltipster instance. If the tooltip is already in the state you are asking for (open/closed), the callback is executed immediately. Please note that if the show/hide action is somehow cancelled before it has completed its animation, the callback function will never be called.</p>
 			<pre class="prettyprint">
 $(document).ready(function() {
    
-   $('.tooltip').tooltipster();
-   
-   $('#example').tooltipster('show', function() {
-       alert('The tooltip is now fully open. The content is: ' + this.tooltipster('content'));
-   });
-   
-   $(window).keypress(function() {
-      $('#example').tooltipster('hide', function() {
-         alert('The tooltip is now fully closed');
-      });
-   });
+    $('.tooltip').tooltipster();
+
+    $('#example').tooltipster('show', function(origin) {
+        alert('The tooltip is now fully open. The content is: ' + $(origin).tooltipster('content'));
+    });
+    
+    $(window).keypress(function() {
+        $('#example').tooltipster('hide', function(origin) {
+            alert('The tooltip is now fully closed');
+        });
+    });
 });
 </pre>
 			
@@ -578,8 +563,8 @@ $('#my-special-element').tooltipster('content', 'My new content');</pre>
 			<a name="multiple"></a>
 			<h3>Using several tooltips on a single element</h3>
 			<p>Several independant tooltips can be set on a single element, each one having its own triggers and options. Just set the 'multiple' option to true when you initialize your tooltip. This will only change two things that you might want to be aware of.</p>
-			<p>Firstly, the instantiation call will now return an array of Tooltipster objects generated by the call, instead of the tooltipped jQuery-wrapped elements.</p>
-			<p>Secondly, you will have to use the Tooltipster object of a tooltip to make any API method calls on it. All methods documented on this page remain available, only the way to call them changes.</p>
+			<p>Firstly, the instantiation call will now return an array of Tooltipster instances generated by the call, instead of the tooltipped jQuery-wrapped elements.</p>
+			<p>Secondly, you will have to use the Tooltipster instance of a tooltip to make any API method calls on it. All methods documented on this page remain available, only the way to call them changes.</p>
 			
 			<pre class="prettyprint">
 // create a first tooltip as usual. The multiple option is actually optional for the first tooltip
@@ -588,8 +573,8 @@ $('#my-element').tooltipster({
 	position: 'top'
 });
 
-// instantiate a second tooltip and keep the returned Tooltipster objects array for later use of the API
-var tooltipsterObjects = $('#my-element').tooltipster({
+// instantiate a second tooltip and keep the returned Tooltipster instances array for later use of the API
+var tooltipsterInstances = $('#my-element').tooltipster({
 	// don't forget to provide content here as the 1st tooltip will have deleted the original title attribute of the element
 	content: 'My second tooltip',
 	multiple: true,
@@ -598,27 +583,39 @@ var tooltipsterObjects = $('#my-element').tooltipster({
 
 // since the jQuery selector matches only one element, the array will contain only one Tooltipster object.
 // Otherwise the array would contain one object for each matched element, in the same order as them
-var tooltip2 = tooltipsterObjects[0];
+var tooltip2 = tooltipsterInstances[0];
 
 // use this Tooltipster object to make any API method call on the tooltip
 tooltip2.content('New content for my second tooltip').show();
 // all documented methods can be called that way
 var element = tooltip2.elementTooltip();
 
-// calling the API methods in the usual way only affects the first tooltip that was created on the element
+// WARNING : calling the API methods in the usual way only affects the first tooltip that was created on the element
 $('#my-element').tooltipster('content', 'New content for my first tooltip')
 </pre>
 
 <pre class="prettyprint">
 // You may use the 'multiple' option on the first tooltip as well, it will return an array of objects too
-var tooltipsterObjects = $('#my-element').tooltipster({
+var tooltipsterInstances = $('#my-element').tooltipster({
 	content: 'My first tooltip',
 	multiple: true
 });
 
 // this is also a way to call API methods on the first tooltip
-var tooltip1 = tooltipsterObjects[0];
+var tooltip1 = tooltipsterInstances[0];
 tooltip1.content('New content for my first tooltip').show();</pre>
+
+<p>When you specify callbacks (functionInit, functionBefore, the show and hide methods, etc.) options, they get the origin element as first parameter when they are called. But if you paid attention to the warning in the example above, you now know that calling $(origin).tooltipster('someMethodName') will only let you interact with the first tooltip, which may not be the tooltip you are currently dealing with. Fortunately for advanced users like you, these functions are called in the context of the Tooltipster instance they relate to. This lets you easily call the API methods on the right tooltip using the "this" keyword. Let's take the same example as we previously gave for functionInit and let's rewrite it for a multiple-tooltips use case:</p>
+
+<pre class="prettyprint">
+$('.tooltip').tooltipster({
+    content: 'Hello',
+    functionInit: function(origin) {
+        var content = this.content();
+        this.content(content.toLowerCase());
+    },
+    multiple: true
+});</pre>
 
 <p>Note : if you have multiple tooltips and destroy them, only the last destroyed tooltip will transfer its content back to the title attribute of the tooltipped element.</p>
 	
