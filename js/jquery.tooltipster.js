@@ -1211,7 +1211,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					}
 					else {
 						if(multiple) go = true;
-						else throw new Error('One or more tooltips are already attached to this element, use the "multiple" option to attach more tooltips.');
+						else console.log('Tooltipster: one or more tooltips are already attached to this element: ignoring. Use the "multiple" option to attach more tooltips.');
 					}
 					
 					if(go) {
