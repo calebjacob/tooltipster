@@ -17,7 +17,7 @@ content
 contentAsHTML  
 contentCloning  
 delay  
-fixedWidth  
+minWidth  
 maxWidth  
 functionInit  
 functionBefore  

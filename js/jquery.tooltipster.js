@@ -1,6 +1,6 @@
 /*
 
-Tooltipster 4.0.0rc1 | 2014-04-05
+Tooltipster 4.0.0rc2 | 2014-05-02
 A rockin' custom tooltip jQuery plugin
 
 Developed by Caleb Jacob under the MIT license http://opensource.org/licenses/MIT
@@ -21,7 +21,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			contentAsHTML: false,
 			contentCloning: true,
 			delay: 200,
-			fixedWidth: 0,
+			minWidth: 0,
 			maxWidth: 0,
 			functionInit: function(origin) {},
 			functionBefore: function(origin) {},
@@ -304,12 +304,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						// get some other settings related to building the tooltip
 						var animation = 'tooltipster-' + self.options.animation,
 							animationSpeed = '-webkit-transition-duration: '+ self.options.speed +'ms; -webkit-animation-duration: '+ self.options.speed +'ms; -moz-transition-duration: '+ self.options.speed +'ms; -moz-animation-duration: '+ self.options.speed +'ms; -o-transition-duration: '+ self.options.speed +'ms; -o-animation-duration: '+ self.options.speed +'ms; -ms-transition-duration: '+ self.options.speed +'ms; -ms-animation-duration: '+ self.options.speed +'ms; transition-duration: '+ self.options.speed +'ms; animation-duration: '+ self.options.speed +'ms;',
-							fixedWidth = self.options.fixedWidth > 0 ? 'width:'+ Math.round(self.options.fixedWidth) +'px;' : '',
-							maxWidth = self.options.maxWidth > 0 ? 'max-width:'+ Math.round(self.options.maxWidth) +'px;' : '',
+							minWidth = self.options.minWidth ? 'min-width:'+ Math.round(self.options.minWidth) +'px;' : '',
+							maxWidth = self.options.maxWidth ? 'max-width:'+ Math.round(self.options.maxWidth) +'px;' : '',
 							pointerEvents = self.options.interactive ? 'pointer-events: auto;' : '';
 						
 						// build the base of our tooltip
-						self.$tooltip = $('<div class="tooltipster-base '+ self.options.theme +'" style="'+ fixedWidth +' '+ maxWidth +' '+ pointerEvents +' '+ animationSpeed +'"><div class="tooltipster-content"></div></div>');
+						self.$tooltip = $('<div class="tooltipster-base '+ self.options.theme +'" style="'+ minWidth +' '+ maxWidth +' '+ pointerEvents +' '+ animationSpeed +'"><div class="tooltipster-content"></div></div>');
 						
 						// only add the animation class if the user has a browser that supports animations
 						if (supportsTransitions()) self.$tooltip.addClass(animation);
@@ -807,15 +807,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						proxy.offset.top = mapOffsetTop;
 						proxy.offset.left = mapOffsetLeft;
 					}
-				}
-				
-				// hardcoding the width and removing the padding fixed an issue with the tooltip width collapsing when the window size is small
-				if(self.options.fixedWidth === 0) {
-					self.$tooltip.css({
-						'width': Math.round(tooltipInnerWidth) + 'px',
-						'padding-left': '0px',
-						'padding-right': '0px'
-					});
 				}
 				
 				// our function and global vars for positioning our tooltip
