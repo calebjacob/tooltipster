@@ -22,8 +22,7 @@ $(function() {
 	$('#demo-callback').tooltipster({
 		content: 'Loading...',
 		updateAnimation: false,
-		functionBefore: function(origin, continueTooltip) {
-			continueTooltip();
+		functionBefore: function(origin) {
 			
 			if (origin.data('ajax') !== 'cached') {
 				

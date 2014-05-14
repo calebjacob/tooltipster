@@ -1096,10 +1096,15 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 		},
 		
 		// public methods but for internal use only
-		option: function(o) {
-			return this.options[o];
+		// getter if val is ommitted, setter otherwise
+		option: function(o, val) {
+			if (typeof val == 'undefined') return this.options[o];
+			else {
+				this.options[o] = val;
+				return this;
+			}
 		},
-		status: function(o) {
+		status: function() {
 			return this.Status;
 		}
 	};
@@ -1161,7 +1166,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					if(self){
 						
 						if (typeof self[args[0]] === 'function') {
-							var resp = self[args[0]](args[1]);
+							// note : args[1] and args[2] may not be defined
+							var resp = self[args[0]](args[1], args[2]);
 						}
 						else {
 							throw new Error('Unknown method .tooltipster("' + args[0] + '")');
