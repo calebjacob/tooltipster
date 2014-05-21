@@ -724,6 +724,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				// find variables to determine placement
 				self.elProxyPosition = self._repositionInfo(self.$elProxy);
 				var arrowReposition = null,
+					arrowRepositionY = null,
 					windowWidth = $(window).width(),
 					// shorthand
 					proxy = self.elProxyPosition,
@@ -843,6 +844,22 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				
 				// a function to detect if the tooltip is going off the screen vertically. If so, switch to the opposite!
 				function dontGoOffScreenY(switchTo, switchFrom) {
+					// check for tooltip being pushed off the window in case where we do not switch to anything else, but rather fix the Y position.
+					if (switchTo == null) {
+						var windowTop = $(window).scrollTop();
+						var windowHeight = $(window).height()
+						// if the tooltip goes off the top side of the screen, line it up with the top side of the window
+						if((myTop - windowTop) < 0) {
+							arrowRepositionY = myTop - windowTop;
+							myTop = windowTop;
+						}
+						// if the tooltip goes off the bottom of the screen, line it up with the bottom side of the window
+						if (((myTop + tooltipHeight) - windowTop) > windowHeight) {
+							arrowRepositionY = myTop - ((windowHeight + windowTop) - tooltipHeight);
+							myTop = (windowHeight + windowTop) - tooltipHeight;
+						}
+						return
+					}
 					// if it goes off the top off the page
 					if(((proxy.offset.top - $(window).scrollTop() - tooltipHeight - offsetY - 12) < 0) && (switchFrom.indexOf('top') > -1)) {
 						practicalPosition = switchTo;
@@ -922,6 +939,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						myLeft = proxy.offset.left + offsetX + proxy.dimension.width + 12;
 						arrowReposition = 'left';
 					}
+					dontGoOffScreenY(null, 'left');
 				}
 				
 				if(practicalPosition == 'right') {
@@ -946,6 +964,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						myLeft = proxy.offset.left - offsetX - tooltipWidth - 12;
 						arrowReposition = 'right';
 					}
+					dontGoOffScreenY(null, 'right');
 				}
 				
 				// if arrow is set true, style it and append it
@@ -975,6 +994,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					}
 					else {
 						arrowReposition = 'left:'+ Math.round(arrowReposition) +'px;';
+					}
+					if (arrowRepositionY) {
+						arrowReposition = arrowReposition + 'top:' + Math.round(arrowRepositionY) + 'px;';
 					}
 					
 					// building the logic to create the border around the arrow of the tooltip
