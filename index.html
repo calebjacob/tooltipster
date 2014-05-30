@@ -619,6 +619,48 @@ $('.tooltip').tooltipster({
 
 <p>Note : if you have multiple tooltips and destroy them, only the last destroyed tooltip will transfer its content back to the title attribute of the tooltipped element.</p>
 	
+			<a name="accessibility"></a>
+			<h3>Make tooltips accessible to persons with disabilities</h3>
+			<p>The W3C issued a recommendation to make websites more accessible to persons with disabilities. This recommendation is known as WAI-ARIA (or simply ARIA), which stands for Web Accessibility Initiative - Accessible Rich Internet Applications.</p>
+			<p>Accessible tooltips can be powered by Tooltipster. To do this, one solution is to actually manipulate in parallel two tooltips which will share the same content :<br />
+				- the ARIA tooltip, which is invisible on the screen but readable by ARIA-compatible software<br />
+				- the Tooltipster tooltip, which is visible on the screen but does not appear as an ARIA-compatible element
+			</p>
+			<p>A basic example : imagine that we want to put a tooltip on a text input field. As for the HTML part, you would write :</p>
+			<pre class="prettyprint">
+&lt;input id="myfield" type="text" aria-describedby="myfield_description" /&gt;
+&lt;span id="myfield_description" role="tooltip"&gt;Please insert your name here&lt;/span&gt;
+</pre>
+			<p>As for the CSS part, write this :</p>
+			<pre class="prettyprint">
+#myfield_description {
+	display: none;
+}
+</pre>
+			<p>And finally, you could initiate Tooltipster like this :</p>
+			<pre class="prettyprint">
+$('#myfield').tooltipster({
+    functionInit: function(){
+        return $('#myfield_description').html();
+    },
+    functionReady: function(){
+        $('#myfield_description').attr('aria-hidden', false);
+    },
+    functionAfter: function(){
+        $('#myfield_description').attr('aria-hidden', true);
+    }
+});
+
+// if in addition you want the tooltip to be displayed when the field gets focus, add these custom triggers :
+$('#myfield')
+    .focus(function(){
+        $(this).tooltipster('show');
+    })
+    .blur(function(){
+        $(this).tooltipster('hide');
+    });
+</pre>
+			
 			<h3>Community submitted use cases</h3>
 			<p><a href="http://stackoverflow.com/questions/14741688/how-to-display-messages-from-jquery-validate-plugin-inside-of-tooltipster-toolti">Using Tooltipster alongside jQuery Validate</a> by <a href="https://github.com/sparky672">sparky672</a></p>
 			<p>Did you do something awesome with Tooltipster? <a href="#talk">Tell me</a> and I'll post it up here!</p>
