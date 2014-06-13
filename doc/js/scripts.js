@@ -12,7 +12,9 @@ $(function() {
 	});
 	$('#demo-html').tooltipster({
 		content: $('<img src="doc/images/spiderman.png" width="50" height="50" /><p style="text-align:left;"><strong>Soufflé chocolate cake powder.</strong> Applicake lollipop oat cake gingerbread.</p>'),
-		fixedWidth: 300,
+		// setting a same value to minWidth and maxWidth will result in a fixed width
+		minWidth: 300,
+		maxWidth: 300,
 		position: 'right'
 	});
 	$('#demo-theme').tooltipster({
