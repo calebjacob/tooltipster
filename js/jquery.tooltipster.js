@@ -21,6 +21,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			contentAsHTML: false,
 			contentCloning: true,
 			delay: 200,
+			debug: true,
 			minWidth: 0,
 			maxWidth: null,
 			functionInit: function(origin, content) {},
@@ -1209,7 +1210,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					}
 					else {
 						if(multiple) go = true;
-						else console.log('Tooltipster: one or more tooltips are already attached to this element: ignoring. Use the "multiple" option to attach more tooltips.');
+						else self.options.debug&&console.log('Tooltipster: one or more tooltips are already attached to this element: ignoring. Use the "multiple" option to attach more tooltips.');
 					}
 					
 					if(go) {
