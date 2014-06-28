@@ -1,6 +1,7 @@
 /*
 
-Tooltipster 4.0.0rc2 | 2014-05-02
+Tooltipster 4.0.0rc3 | 2014-06-28
+
 A rockin' custom tooltip jQuery plugin
 
 Developed by Caleb Jacob under the MIT license http://opensource.org/licenses/MIT
@@ -20,6 +21,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			content: null,
 			contentAsHTML: false,
 			contentCloning: true,
+			debug: true,
 			delay: 200,
 			minWidth: 0,
 			maxWidth: 0,
@@ -1163,7 +1165,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						self = ns ? $(this).data(ns[0]) : null;
 					
 					// if the current element holds a tooltipster instance
-					if(self){
+					if (self) {
 						
 						if (typeof self[args[0]] === 'function') {
 							// note : args[1] and args[2] may not be defined
@@ -1206,12 +1208,14 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					if (!ns) {
 						go = true;
 					}
-					else {
-						if(multiple) go = true;
-						else console.log('Tooltipster: one or more tooltips are already attached to this element: ignoring. Use the "multiple" option to attach more tooltips.');
+					else if (multiple) {
+						go = true;
+					}
+					else if (self.options.debug) {
+						console.log('Tooltipster: one or more tooltips are already attached to this element: ignoring. Use the "multiple" option to attach more tooltips.');
 					}
 					
-					if(go) {
+					if (go) {
 						instance = new Plugin(this, args[0]);
 						
 						// save the reference of the new instance
@@ -1229,7 +1233,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					instances.push(instance);
 				});
 				
-				if(multiple) return instances;
+				if (multiple) return instances;
 				else return this;
 			}
 		}
