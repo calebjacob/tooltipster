@@ -16,6 +16,7 @@ autoClose
 content  
 contentAsHTML  
 contentCloning  
+debug  
 delay  
 minWidth  
 maxWidth  
