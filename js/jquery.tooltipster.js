@@ -44,6 +44,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			position: 'top',
 			positionTracker: false,
 			speed: 350,
+      removeDelay: 0,
 			timer: 0,
 			theme: 'tooltipster-default',
 			touchDevices: true,
@@ -640,7 +641,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						self.Content.detach();
 					}
 
-					self.$tooltip.remove();
+          // Remove the tooltip from the DOM after `removeDelay`
+          var $tooltip = self.$tooltip;
+          setTimeout(function(){
+            $tooltip.remove();
+          }, self.options.removeDelay || 0);
+
 					self.$tooltip = null;
 
 					// unbind orientationchange, scroll and resize listeners
