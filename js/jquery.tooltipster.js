@@ -1,7 +1,9 @@
+<<<<<<< HEAD
 /*
 
-Tooltipster 4.0.0rc3 | 2014-06-28
+Tooltipster 4.0.0rc4 | 2014-07-16
 
+=======
 A rockin' custom tooltip jQuery plugin
 
 Developed by Caleb Jacob under the MIT license http://opensource.org/licenses/MIT
@@ -1195,8 +1197,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				var instances = [],
 					// is there a defined value for the multiple option in the options object ?
 					multipleIsSet = args[0] && typeof args[0].multiple !== 'undefined',
-					// if the multople option is set to true, or if it's not defined but set to true in the defaults
-					multiple = (multipleIsSet && args[0].multiple) || (!multipleIsSet && defaults.multiple);
+					// if the multiple option is set to true, or if it's not defined but set to true in the defaults
+					multiple = (multipleIsSet && args[0].multiple) || (!multipleIsSet && defaults.multiple),
+					// same for debug
+					debugIsSet = args[0] && typeof args[0].debug !== 'undefined',
+					debug = (debugIsSet && args[0].debug) || (!debugIsSet && defaults.debug);
 				
 				// initialize a tooltipster instance for each element if it doesn't already have one or if the multiple option is set, and attach the object to it
 				this.each(function () {
@@ -1211,7 +1216,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					else if (multiple) {
 						go = true;
 					}
-					else if (self.options.debug) {
+					else if (debug) {
 						console.log('Tooltipster: one or more tooltips are already attached to this element: ignoring. Use the "multiple" option to attach more tooltips.');
 					}
 					
