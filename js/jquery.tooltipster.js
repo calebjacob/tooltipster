@@ -386,14 +386,14 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 									// as for mouse interaction, we get rid of the tooltip only after the mouse has spent some time out of it
 									var tolerance = null;
 
-                  self.$elProxy
-                    // hide after some time out of the proxy
-                    .on('click.'+ self.namespace + '-autoClose', function() {
-                      clearTimeout(tolerance);
-                      tolerance = setTimeout(function(){
-                        self.hide();
-                      }, self.options.interactiveTolerance);
-                    });
+									self.$elProxy
+										// hide after some time out of the proxy
+										.on('click.'+ self.namespace + '-autoClose', function() {
+											clearTimeout(tolerance);
+											tolerance = setTimeout(function(){
+												self.hide();
+											}, self.options.interactiveTolerance);
+										});
 									self.$elProxy.add(self.$tooltip)
 										// hide after some time out of the proxy and the tooltip
 										.on('mouseleave.'+ self.namespace + '-autoClose', function() {
@@ -640,7 +640,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				self.Status = 'disappearing';
 				
 				var finish = function() {
-					
+
 					self.Status = 'hidden';
 					
 					// detach our content object first, so the next jQuery's remove() call does not unbind its event handlers
