@@ -1,0 +1,28 @@
+{
+    "name": "components/tooltipster",
+    "type": "component",
+    "authors": [
+        {
+            "name": "Caleb Jacob",
+            "email": "hello@calebjacob.com"
+        }
+    ],
+    "require": {
+        "robloach/component-installer": "*"
+    },
+    "extra": {
+        "component": {
+            "scripts": [
+                "js/jquery.tooltipster.js",
+                "js/jquery.tooltipster.min.js"
+            ],
+            "styles": [
+                "css/tooltipster.css",
+                "css/themes/tooltipster-light.css",
+                "css/themes/tooltipster-noir.css",
+                "css/themes/tooltipster-punk.css",
+                "css/themes/tooltipster-shadow.css"
+            ]
+        }
+    }
+}
