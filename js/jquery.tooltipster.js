@@ -502,7 +502,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						
 						if(!identical){
 							self.reposition();
-							self.options.positionTrackerCallback.call(self.$el, self.$el);
+							self.options.positionTrackerCallback.call(self, self.$el);
 						}
 					}
 				}
