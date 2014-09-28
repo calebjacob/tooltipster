@@ -17,7 +17,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			arrow: true,
 			arrowColor: '',
 			autoClose: true,
-			closeOnClick: false,
 			content: null,
 			contentAsHTML: false,
 			contentCloning: true,
@@ -31,6 +30,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			},
 			functionReady: function(origin, tooltip) {},
 			functionAfter: function(origin) {},
+			hideOnClick: false,
 			icon: '(?)',
 			iconCloning: true,
 			iconDesktop: false,
@@ -415,7 +415,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 								}
 								
 								// close the tooltip when the proxy gets a click (common behavior of native tooltips)
-								if (self.options.closeOnClick) {
+								if (self.options.hideOnClick) {
 									
 									self.$elProxy.on('click.'+ self.namespace + '-autoClose', function() {
 										self.hide();
