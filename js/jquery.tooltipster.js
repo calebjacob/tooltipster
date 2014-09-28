@@ -1,6 +1,6 @@
 /*
 
-Tooltipster 3.2.6 | 2014-07-16
+Tooltipster 3.3.0 | 2014-09-28
 A rockin' custom tooltip jQuery plugin
 
 Developed by Caleb Jacob under the MIT license http://opensource.org/licenses/MIT
@@ -17,6 +17,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			arrow: true,
 			arrowColor: '',
 			autoClose: true,
+			closeOnClick: false,
 			content: null,
 			contentAsHTML: false,
 			contentCloning: true,
@@ -43,6 +44,13 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			onlyOne: false,
 			position: 'top',
 			positionTracker: false,
+			positionTrackerCallback: function(origin){
+				// the default tracker callback will close the tooltip when the trigger is
+				// 'hover' (see https://github.com/iamceege/tooltipster/pull/253)
+				if(this.option('trigger') == 'hover' && this.option('autoClose')) {
+					this.close();
+				}
+			},
 			speed: 350,
 			timer: 0,
 			theme: 'tooltipster-default',
@@ -405,6 +413,14 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 										self.hide();
 									});
 								}
+								
+								// close the tooltip when the proxy gets a click (common behavior of native tooltips)
+								if (self.options.closeOnClick) {
+									
+									self.$elProxy.on('click.'+ self.namespace + '-autoClose', function() {
+										self.hide();
+									});
+								}
 							}
 							// here we'll set the same bindings for both clicks and touch on the body to hide the tooltip
 							else if(self.options.trigger == 'click'){
@@ -486,6 +502,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						
 						if(!identical){
 							self.reposition();
+							self.options.positionTrackerCallback.call(self.$el, self.$el);
 						}
 					}
 				}
