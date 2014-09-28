@@ -48,7 +48,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				// the default tracker callback will close the tooltip when the trigger is
 				// 'hover' (see https://github.com/iamceege/tooltipster/pull/253)
 				if(this.option('trigger') == 'hover' && this.option('autoClose')) {
-					this.close();
+					this.hide();
 				}
 			},
 			speed: 350,
