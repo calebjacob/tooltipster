@@ -285,7 +285,7 @@ $('.tooltip').tooltipster({
 				<tr>
 					<td><h4>autoClose</h4></td>
 					<td>boolean</td>
-					<td>If autoClose is set to false, the tooltip will never close unless you call the 'close' method yourself. <strong>Default: true</strong></td>
+					<td>If autoClose is set to false, the tooltip will never close unless you call the 'hide' method yourself. <strong>Default: true</strong></td>
 				</tr>
 				<tr>
 					<td><h4>content</h4></td>
@@ -341,6 +341,11 @@ $('.tooltip').tooltipster({
 					<td><h4>functionAfter</h4></td>
 					<td>function</td>
 					<td>A custom function to be fired once the tooltip has been closed and removed from the DOM. <strong>Default: function(origin) {}</strong></td>
+				</tr>
+				<tr>
+					<td><h4>hideOnClick</h4></td>
+					<td>boolean</td>
+					<td>If true, the tooltip will close if its origin is clicked. This option only applies when 'trigger' is 'hover' and 'autoClose' is false. <strong>Default: false</strong></td>
 				</tr>
 				<tr>
 					<td><h4>icon</h4></td>
@@ -406,6 +411,11 @@ $('.tooltip').tooltipster({
 					<td><h4>positionTracker</h4></td>
 					<td>boolean</td>
 					<td>Will reposition the tooltip if the origin moves. As this option may have an impact on performance, we suggest you enable it only if you need to. <strong>Default: false</strong></td>
+				</tr>
+				<tr>
+					<td><h4>positionTrackerCallback</h4></td>
+					<td>function</td>
+					<td>Called after the tooltip has been repositioned by the position tracker (if enabled). <strong>Default:</strong> A function that will close the tooltip if the trigger is 'hover' and autoClose is false.</td>
 				</tr>
 				<tr>
 					<td><h4>speed</h4></td>
