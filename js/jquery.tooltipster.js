@@ -1272,7 +1272,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 	}
 	
 	// detect if this device can trigger touch events
-	var deviceHasTouchCapability = !!window.ontouchstart;
+	var deviceHasTouchCapability = !!('ontouchstart' in window);
 	
 	// we'll assume the device has no mouse until we detect any mouse movement
 	var deviceHasMouse = false;
