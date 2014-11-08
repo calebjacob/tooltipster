@@ -1,6 +1,6 @@
 /*
 
-Tooltipster 4.0.0rc5 | 2014-09-28
+Tooltipster 4.0.0rc6 | 2014-11-08
 
 A rockin' custom tooltip jQuery plugin
 
@@ -50,6 +50,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					this.hide();
 				}
 			},
+			restoration: 'none',
 			speed: 350,
 			timer: 0,
 			theme: 'tooltipster-default',
@@ -109,16 +110,27 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				
 				// note : the content is null (empty) by default and can stay that way if the plugin remains initialized but not fed any content. The tooltip will just not appear.
 				
-				// if content is provided in the options, its has precedence over the title attribute. Remark : an empty string is considered content, only 'null' represents the absence of content.
+				// let's save the initial value of the title attribute for later restoration if need be.
+				var initialTitle = null;
+				// it will already have been saved in case of multiple tooltips
+				if (self.$el.data('tooltipster-initialTitle') === undefined) {
+					
+					initialTitle = self.$el.attr('title');
+					
+					// we do not want initialTitle to have the value "undefined" because of how jQuery's .data() method works
+					if (initialTitle === undefined) initialTitle = null;
+					
+					self.$el.data('tooltipster-initialTitle', initialTitle);
+				}
+				
+				// if content is provided in the options, its has precedence over the title attribute.
+				// Note : an empty string is considered content, only 'null' represents the absence of content.
+				// Also, an existing title="" attribute will result in an empty string content
 				if (self.options.content !== null){
 					self._content_set(self.options.content);
 				}
 				else {
-					// the same remark as above applies : empty strings (like title="") are considered content and will be shown. Do not define any attribute at all if you want to initialize the plugin without content at start.
-					var t = self.$el.attr('title');
-					if(typeof t === 'undefined') t = null;
-					
-					self._content_set(t);
+					self._content_set(initialTitle);
 				}
 				
 				self.$el
@@ -1070,7 +1082,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			self.hide();
 			
 			// remove the icon, if any
-			if(self.$el[0] !== self.$elProxy[0]) self.$elProxy.remove();
+			if (self.$el[0] !== self.$elProxy[0]) {
+				self.$elProxy.remove();
+			}
 			
 			self.$el
 				.removeData(self.namespace)
@@ -1081,15 +1095,29 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			// if there are no more tooltips on this element
 			if(ns.length === 1){
 				
-				// old school technique when outerHTML is not supported
-				var stringifiedContent = (typeof self.Content === 'string') ? self.Content : $('<div></div>').append(self.Content).html();
+				// optional restoration of a title attribute
+				var title = null;
+				if (self.options.restoration === 'previous'){
+					title = self.$el.data('tooltipster-initialTitle');
+				}
+				else if(self.options.restoration === 'current'){
+					
+					// old school technique to stringify when outerHTML is not supported
+					title =
+						(typeof self.Content === 'string') ?
+						self.Content :
+						$('<div></div>').append(self.Content).html();
+				}
 				
+				if (title) {
+					self.$el.attr('title', title);
+				}
+				
+				// final cleaning
 				self.$el
 					.removeClass('tooltipstered')
-					.attr('title', stringifiedContent)
-					.removeData(self.namespace)
 					.removeData('tooltipster-ns')
-					.off('.'+ self.namespace);
+					.removeData('tooltipster-initialTitle');
 			}
 			else {
 				// remove the instance namespace from the list of namespaces of tooltips present on the element
