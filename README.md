@@ -37,6 +37,7 @@ offsetY
 onlyOne  
 position  
 positionTracker  
+restoration  
 speed  
 timer  
 theme  
@@ -55,6 +56,8 @@ $(...).tooltipster('enable')
 $(...).tooltipster('destroy')  
 $(...).tooltipster('content')  
 $(...).tooltipster('content', myNewContent)  
+$(...).tooltipster('option', optionName)  
+$(...).tooltipster('option', optionName, optionValue)  
 $(...).tooltipster('reposition')  
 $(...).tooltipster('elementTooltip')  
 $(...).tooltipster('elementIcon')  
