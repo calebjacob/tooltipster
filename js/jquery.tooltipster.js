@@ -184,7 +184,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 								self._show();
 							}
 						})
-						.on('mouseleave.'+ self.namespace, function() {
+						.on('mouseleave.'+ self.namespace+ ' click.'+ self.namespace, function() {
 							if (!deviceIsPureTouch() || self.options.touchDevices) {
 								self.mouseIsOverProxy = false;
 							}
@@ -405,7 +405,15 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 									
 									// as for mouse interaction, we get rid of the tooltip only after the mouse has spent some time out of it
 									var tolerance = null;
-									
+
+									self.$elProxy
+										// hide after some time out of the proxy
+										.on('click.'+ self.namespace + '-autoClose', function() {
+											clearTimeout(tolerance);
+											tolerance = setTimeout(function(){
+												self.hide();
+											}, self.options.interactiveTolerance);
+										});
 									self.$elProxy.add(self.$tooltip)
 										// hide after some time out of the proxy and the tooltip
 										.on('mouseleave.'+ self.namespace + '-autoClose', function() {
@@ -419,9 +427,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 											clearTimeout(tolerance);
 										});
 								}
-								// if this is a non-interactive tooltip, get rid of it if the mouse leaves
+								// if this is a non-interactive tooltip, get rid of it if the mouse leaves or on click
 								else {
-									self.$elProxy.on('mouseleave.'+ self.namespace + '-autoClose', function() {
+									self.$elProxy.on('mouseleave.'+ self.namespace + '-autoClose click.'+ self.namespace + '-autoClose', function() {
 										self.hide();
 									});
 								}
@@ -661,7 +669,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				self.Status = 'disappearing';
 				
 				var finish = function() {
-					
+
 					self.Status = 'hidden';
 					
 					// detach our content object first, so the next jQuery's remove() call does not unbind its event handlers
