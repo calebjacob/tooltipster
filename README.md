@@ -24,6 +24,7 @@ functionInit
 functionBefore  
 functionReady  
 functionAfter  
+hideOnClick  
 icon  
 iconCloning  
 iconDesktop  
@@ -37,6 +38,7 @@ offsetY
 onlyOne  
 position  
 positionTracker  
+positionTrackerCallback  
 restoration  
 speed  
 timer  
