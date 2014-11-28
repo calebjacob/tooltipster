@@ -1,12 +1,47 @@
-.tooltipster-noir {
+/* This theme was made for Tooltipster's default display plugin */
+
+.tooltipster-noir .tooltipster-box {
 	border-radius: 0px; 
 	border: 3px solid #2c2c2c;
 	background: #fff;
-	color: #2c2c2c;
 }
 .tooltipster-noir .tooltipster-content {
+	color: #2c2c2c;
 	font-family: 'Georgia', serif;
-	font-size: 14px;
-	line-height: 16px;
-	padding: 8px 10px;
+}
+
+.tooltipster-noir.tooltipster-bottom .tooltipster-box {
+	margin-top: 7px;
+}
+
+.tooltipster-noir.tooltipster-left .tooltipster-box {
+	margin-right: 7px;
+}
+
+.tooltipster-noir.tooltipster-right .tooltipster-box {
+	margin-left: 7px;
+}
+
+.tooltipster-noir.tooltipster-top .tooltipster-box {
+	margin-bottom: 7px;
+}
+
+.tooltipster-noir.tooltipster-bottom .tooltipster-arrow-background {
+	border-bottom-color: white;
+	top: 2px;
+}
+
+.tooltipster-noir.tooltipster-left .tooltipster-arrow-background {
+	border-left-color: white;
+	left: -2px;
+}
+
+.tooltipster-noir.tooltipster-right .tooltipster-arrow-background {
+	border-right-color: white;
+	left: 2px;
+}
+
+.tooltipster-noir.tooltipster-top .tooltipster-arrow-background {
+	border-top-color: white;
+	top: -2px;
 }

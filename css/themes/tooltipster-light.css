@@ -1,12 +1,70 @@
-.tooltipster-light {
-	border-radius: 5px; 
+/* This theme was made for Tooltipster's default display plugin */
+
+.tooltipster-light .tooltipster-box {
+	border-radius: 3px; 
 	border: 1px solid #cccccc;
 	background: #ededed;
-	color: #666666;
 }
+
 .tooltipster-light .tooltipster-content {
+	color: #666666;
 	font-family: Arial, sans-serif;
-	font-size: 14px;
-	line-height: 16px;
-	padding: 8px 10px;
+}
+
+.tooltipster-light.tooltipster-bottom .tooltipster-box {
+	margin-top: 9px;
+}
+
+.tooltipster-light.tooltipster-left .tooltipster-box {
+	margin-right: 9px;
+}
+
+.tooltipster-light.tooltipster-right .tooltipster-box {
+	margin-left: 9px;
+}
+
+.tooltipster-light.tooltipster-top .tooltipster-box {
+	margin-bottom: 9px;
+}
+
+.tooltipster-light .tooltipster-arrow-background {
+	border: 10px solid transparent;
+	left: 0px;
+	top: 0px;
+}
+
+.tooltipster-light.tooltipster-bottom .tooltipster-arrow-background {
+	border-bottom: 10px solid #ededed;
+	top: 1px;
+}
+
+.tooltipster-light.tooltipster-left .tooltipster-arrow-background {
+	border-left: 10px solid #ededed;
+	left: -1px;
+}
+
+.tooltipster-light.tooltipster-right .tooltipster-arrow-background {
+	border-right: 10px solid #ededed;
+	left: 1px;
+}
+
+.tooltipster-light.tooltipster-top .tooltipster-arrow-background {
+	border-top: 10px solid #ededed;
+	top: -1px;
+}
+
+.tooltipster-light.tooltipster-bottom .tooltipster-arrow-border {
+	border-bottom: 10px solid #cccccc;
+}
+
+.tooltipster-light.tooltipster-left .tooltipster-arrow-border {
+	border-left: 10px solid #cccccc;
+}
+
+.tooltipster-light.tooltipster-right .tooltipster-arrow-border {
+	border-right: 10px solid #cccccc;
+}
+
+.tooltipster-light.tooltipster-top .tooltipster-arrow-border {
+	border-top: 10px solid #cccccc;
 }

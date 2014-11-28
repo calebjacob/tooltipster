@@ -1,147 +1,32 @@
-/* This is the default Tooltipster theme (feel free to modify or duplicate and create multiple themes!): */
-.tooltipster-default {
-	border-radius: 5px; 
-	border: 2px solid #000;
-	background: #4c4c4c;
-	color: #fff;
-}
+/* Basics */
 
-/* Use this next selector to style things like font-size and line-height: */
-.tooltipster-default .tooltipster-content {
-	font-family: Arial, sans-serif;
-	font-size: 14px;
-	line-height: 16px;
-	padding: 8px 10px;
-	overflow: hidden;
-}
-
-/* This next selector defines the color of the border on the outside of the arrow. This will automatically match the color and size of the border set on the main tooltip styles. Set display: none; if you would like a border around the tooltip but no border around the arrow */
-.tooltipster-default .tooltipster-arrow .tooltipster-arrow-border {
-	/* border-color: ... !important; */
-}
-
-
-/* If you're using the icon option, use this next selector to style them */
-.tooltipster-icon {
-	cursor: help;
-	margin-left: 4px;
-}
-
-
-
-
-
-
-
-
-/* This is the base styling required to make all Tooltipsters work */
 .tooltipster-base {
-	padding: 0;
-	font-size: 0;
-	line-height: 0;
-	position: absolute;
-	left: 0;
-	top: 0;
-	z-index: 9999999;
+	box-sizing: border-box;
 	pointer-events: none;
-	width: auto;
-	overflow: visible;
+	position: absolute;
 }
-.tooltipster-base .tooltipster-content {
+
+.tooltipster-content {
+	/* these make sure we'll be able to detect any overflow */
+	max-height: 100%;
+	max-width: 100%;
+	overflow: auto;
+}
+
+.tooltipster-sizer {
+	/* these let us test the size of the tooltip without overflowing the window */
+	bottom: 0;
+	left: 0;
 	overflow: hidden;
-}
-
-
-/* These next classes handle the styles for the little arrow attached to the tooltip. By default, the arrow will inherit the same colors and border as what is set on the main tooltip itself. */
-.tooltipster-arrow {
-	display: block;
-	text-align: center;
-	width: 100%;
-	height: 100%;
-	position: absolute;
-	top: 0;
-	left: 0;
-	z-index: -1;
-}
-.tooltipster-arrow span, .tooltipster-arrow-border {
-	display: block;
-	width: 0; 
-	height: 0;
-	position: absolute;
-}
-.tooltipster-arrow-top span, .tooltipster-arrow-top-right span, .tooltipster-arrow-top-left span {
-	border-left: 8px solid transparent !important;
-	border-right: 8px solid transparent !important;
-	border-top: 8px solid;
-	bottom: -7px;
-}
-.tooltipster-arrow-top .tooltipster-arrow-border, .tooltipster-arrow-top-right .tooltipster-arrow-border, .tooltipster-arrow-top-left .tooltipster-arrow-border {
-	border-left: 9px solid transparent !important;
-	border-right: 9px solid transparent !important;
-	border-top: 9px solid;
-	bottom: -7px;
-}
-
-.tooltipster-arrow-bottom span, .tooltipster-arrow-bottom-right span, .tooltipster-arrow-bottom-left span {
-	border-left: 8px solid transparent !important;
-	border-right: 8px solid transparent !important;
-	border-bottom: 8px solid;
-	top: -7px;
-}
-.tooltipster-arrow-bottom .tooltipster-arrow-border, .tooltipster-arrow-bottom-right .tooltipster-arrow-border, .tooltipster-arrow-bottom-left .tooltipster-arrow-border {
-	border-left: 9px solid transparent !important;
-	border-right: 9px solid transparent !important;
-	border-bottom: 9px solid;
-	top: -7px;
-}
-.tooltipster-arrow-top span, .tooltipster-arrow-top .tooltipster-arrow-border, .tooltipster-arrow-bottom span, .tooltipster-arrow-bottom .tooltipster-arrow-border {
-	left: 0;
+	position: fixed;
 	right: 0;
-	margin: 0 auto;
-}
-.tooltipster-arrow-top-left span, .tooltipster-arrow-bottom-left span {
-	left: 6px;
-}
-.tooltipster-arrow-top-left .tooltipster-arrow-border, .tooltipster-arrow-bottom-left .tooltipster-arrow-border {
-	left: 5px;
-}
-.tooltipster-arrow-top-right span,  .tooltipster-arrow-bottom-right span {
-	right: 6px;
-}
-.tooltipster-arrow-top-right .tooltipster-arrow-border, .tooltipster-arrow-bottom-right .tooltipster-arrow-border {
-	right: 5px;
-}
-.tooltipster-arrow-left span, .tooltipster-arrow-left .tooltipster-arrow-border {
-	border-top: 8px solid transparent !important;
-	border-bottom: 8px solid transparent !important; 
-	border-left: 8px solid;
-	top: 50%;
-	margin-top: -7px;
-	right: -7px;
-}
-.tooltipster-arrow-left .tooltipster-arrow-border {
-	border-top: 9px solid transparent !important;
-	border-bottom: 9px solid transparent !important; 
-	border-left: 9px solid;
-	margin-top: -8px;
-}
-.tooltipster-arrow-right span, .tooltipster-arrow-right .tooltipster-arrow-border {
-	border-top: 8px solid transparent !important;
-	border-bottom: 8px solid transparent !important; 
-	border-right: 8px solid;
-	top: 50%;
-	margin-top: -7px;
-	left: -7px;
-}
-.tooltipster-arrow-right .tooltipster-arrow-border {
-	border-top: 9px solid transparent !important;
-	border-bottom: 9px solid transparent !important; 
-	border-right: 9px solid;
-	margin-top: -8px;
+	top: 0;
+	visibility: hidden;
 }
 
+/* Animations */
 
-/* Some CSS magic for the awesome animations - feel free to make your own custom animations and reference it in your Tooltipster settings! */
+/* fade */
 
 .tooltipster-fade {
 	opacity: 0;
@@ -151,9 +36,11 @@
 	-ms-transition-property: opacity;
 	transition-property: opacity;
 }
-.tooltipster-fade-show {
+.tooltipster-fade.tooltipster-show {
 	opacity: 1;
 }
+
+/* grow */
 
 .tooltipster-grow {
 	-webkit-transform: scale(0,0);
@@ -168,7 +55,7 @@
 	transition-property: transform;
 	-webkit-backface-visibility: hidden;
 }
-.tooltipster-grow-show {
+.tooltipster-grow.tooltipster-show {
 	-webkit-transform: scale(1,1);
 	-moz-transform: scale(1,1);
 	-o-transform: scale(1,1);
@@ -181,6 +68,8 @@
 	-o-transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.15); 
 	transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.15);
 }
+
+/* swing */
 
 .tooltipster-swing {
 	opacity: 0;
@@ -195,7 +84,7 @@
 	-ms-transition-property: -ms-transform;
 	transition-property: transform;
 }
-.tooltipster-swing-show {
+.tooltipster-swing.tooltipster-show {
 	opacity: 1;
 	-webkit-transform: rotateZ(0deg);
 	-moz-transform: rotateZ(0deg);
@@ -210,8 +99,9 @@
 	transition-timing-function: cubic-bezier(0.230, 0.635, 0.495, 2.4);
 }
 
+/* fall */
+
 .tooltipster-fall {
-	top: 0;
 	-webkit-transition-property: top;
 	-moz-transition-property: top;
 	-o-transition-property: top;
@@ -224,7 +114,10 @@
 	-o-transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.15); 
 	transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.15); 
 }
-.tooltipster-fall-show {
+.tooltipster-fall.tooltipster-initial {
+	top: 0 !important;
+}
+.tooltipster-fall.tooltipster-show {
 }
 .tooltipster-fall.tooltipster-dying {
 	-webkit-transition-property: all;
@@ -232,12 +125,13 @@
 	-o-transition-property: all;
 	-ms-transition-property: all;
 	transition-property: all;
-	top: 0px !important;
+	top: 0 !important;
 	opacity: 0;
 }
 
+/* slide */
+
 .tooltipster-slide {
-	left: -40px;
 	-webkit-transition-property: left;
 	-moz-transition-property: left;
 	-o-transition-property: left;
@@ -250,7 +144,10 @@
 	-o-transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.15); 
 	transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.15);
 }
-.tooltipster-slide.tooltipster-slide-show {
+.tooltipster-slide.tooltipster-initial {
+	left: -40px !important;
+}
+.tooltipster-slide.tooltipster-show {
 }
 .tooltipster-slide.tooltipster-dying {
 	-webkit-transition-property: all;
@@ -258,12 +155,14 @@
 	-o-transition-property: all;
 	-ms-transition-property: all;
 	transition-property: all;
-	left: 0px !important;
+	left: 0 !important;
 	opacity: 0;
 }
 
+/* changing content : CSS transition for when content is changing in a tooltip
+that is still open. The only properties that will NOT transition are:
+width, height, top, and left */
 
-/* CSS transition for when contenting is changing in a tooltip that is still open. The only properties that will NOT transition are: width, height, top, and left */
 .tooltipster-content-changing {
 	opacity: 0.5;
 	-webkit-transform: scale(1.1, 1.1);
@@ -271,4 +170,179 @@
 	-o-transform: scale(1.1, 1.1);
 	-ms-transform: scale(1.1, 1.1);
 	transform: scale(1.1, 1.1);
+}
+
+
+
+
+
+
+
+
+/* Default theme of the default display plugin */
+
+/* .tooltipster-box */
+
+.tooltipster-box {
+	background: #4c4c4c;
+	border: 2px solid black;
+	border-radius: 4px;
+	position: relative;
+}
+
+.tooltipster-bottom .tooltipster-box {
+	margin-top: 8px;
+}
+
+.tooltipster-left .tooltipster-box {
+	margin-right: 8px;
+}
+
+.tooltipster-right .tooltipster-box {
+	margin-left: 8px;
+}
+
+.tooltipster-top .tooltipster-box {
+	margin-bottom: 8px;
+}
+/*
+.tooltipster-bottom {
+	padding-top: 8px;
+}
+
+.tooltipster-left {
+	padding-right: 8px;
+}
+
+.tooltipster-right {
+	padding-left: 8px;
+}
+
+.tooltipster-top {
+	padding-bottom: 8px;
+}
+*/
+
+
+/* .tooltipster-content */
+
+.tooltipster-content {
+	color: white;
+	padding: 4px 10px;
+}
+
+/* .tooltipster-arrow : will keep only the zone of .tooltipster-arrow-uncropped that
+corresponds to the arrow we want to display */
+
+.tooltipster-arrow {
+	height: 10px;
+	overflow: hidden;
+	position: absolute;
+	width: 20px;
+}
+
+.tooltipster-bottom .tooltipster-arrow {
+	/* half the width, for centering */
+	margin-left: -10px;
+	top: 0;
+}
+
+.tooltipster-left .tooltipster-arrow {
+	height: 20px;
+	margin-top: -10px;
+	right: 0;
+	/* top 0 to keep the arrow from overflowing .tooltipster-base when it has not
+	been positioned yet */
+	top: 0;
+	width: 10px;
+}
+
+.tooltipster-right .tooltipster-arrow {
+	height: 20px;
+	margin-top: -10px;
+	left: 0;
+	/* same as .tooltipster-left .tooltipster-arrow */
+	top: 0;
+	width: 10px;
+}
+
+.tooltipster-top .tooltipster-arrow {
+	margin-left: -10px;
+	bottom: 0;
+}
+
+/* tooltipster-arrow-uncropped */
+
+.tooltipster-arrow-uncropped {
+	position: relative;
+}
+
+.tooltipster-bottom .tooltipster-arrow-uncropped {
+	top: -10px;
+}
+
+.tooltipster-right .tooltipster-arrow-uncropped {
+	left: -10px;
+}
+
+/* common rules between .tooltipster-arrow-background and .tooltipster-arrow-border */
+
+.tooltipster-arrow-background, .tooltipster-arrow-border {
+	height: 0;
+	position: absolute;
+	width: 0;
+}
+
+/* .tooltipster-arrow-background */
+
+.tooltipster-arrow-background {
+	border: 8px solid transparent;
+}
+
+.tooltipster-bottom .tooltipster-arrow-background {
+	border-bottom: 8px solid #4c4c4c;
+	left: 2px;
+	top: 5px;
+}
+
+.tooltipster-left .tooltipster-arrow-background {
+	border-left: 8px solid #4c4c4c;
+	left: -1px;
+	top: 2px;
+}
+
+.tooltipster-right .tooltipster-arrow-background {
+	border-right: 8px solid #4c4c4c;
+	left: 5px;
+	top: 2px;
+}
+
+.tooltipster-top .tooltipster-arrow-background {
+	border-top: 8px solid #4c4c4c;
+	left: 2px;
+	top: -1px;
+}
+
+/* .tooltipster-arrow-border */
+
+.tooltipster-arrow-border {
+	border: 10px solid transparent;
+	left: 0;
+	top: 0;
+}
+
+.tooltipster-bottom .tooltipster-arrow-border {
+	border-bottom: 10px solid black;
+}
+
+.tooltipster-left .tooltipster-arrow-border {
+	border-left: 10px solid black;
+}
+
+.tooltipster-right .tooltipster-arrow-border {
+	border-right: 10px solid black;
+}
+
+.tooltipster-top .tooltipster-arrow-border {
+	border-top: 10px solid black;
 }
