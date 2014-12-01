@@ -5,7 +5,7 @@ $(function() {
 	});
 	$('#welcome .tooltip').tooltipster({
 		offsetY: 2,
-		theme: 'tooltipster-white'
+		theme: 'tooltipster-light'
 	});
 	$('#demo-default').tooltipster({
 		//trigger: 'click'
@@ -117,6 +117,4 @@ $(function() {
 	});
 	
 	prettyPrint();
-	
-	
 });

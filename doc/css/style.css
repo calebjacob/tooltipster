@@ -427,7 +427,7 @@ Tooltips
 .tooltipster-default .tooltipster-content img {
 	float: left;
 	margin-right: 10px;
-	border: 2px solid #000;
+	border: 1px solid white;
 }
 .tooltipster-default .tooltipster-content p {
 	margin: 0;
@@ -441,57 +441,95 @@ Tooltips
 	border-bottom: 1px solid rgba(255,255,255,1);
 }
 
-.tooltipster-blue {
-	background: #0078c9;
-	color: #fff;
-	border-radius: 5px;
-}
-.tooltipster-blue .tooltipster-content {
-	font-family: 'Open Sans', sans-serif;
-	font-size: 14px;
-	line-height: 16px;
-	padding: 8px 10px;
-}
-
-.tooltipster-white {
-	background: #fff;
-	color: #0078c9;
-	border-radius: 5px; 
-}
-.tooltipster-white .tooltipster-content {
-	font-family: 'Open Sans', sans-serif;
-	font-size: 14px;
-	line-height: 16px;
-	padding: 8px 10px;
-}
+/* Pink theme */
 
 .tooltipster-pink .tooltipster-box {
 	background: url(../images/pattern-navy.png);
-	background-color: #ff3c70;
 	border: none;
 	color: #fff; 
 	border-radius: 5px;	
 	box-shadow: inset -3px -3px 0 #ff3c70;
 }
-.tooltipster-pink .tooltipster-arrow-background {
-	display: none;
-}
-.tooltipster-pink.tooltipster-bottom .tooltipster-arrow-border {
-	border-bottom-color: #ff3c70;
+
+.tooltipster-pink.tooltipster-bottom .tooltipster-box {
+	margin-top: 20px;
 }
 
-.tooltipster-pink.tooltipster-left .tooltipster-arrow-border {
-	border-left-color: #ff3c70;
+.tooltipster-pink.tooltipster-left .tooltipster-box {
+	margin-right: 20px;
 }
-.tooltipster-pink.tooltipster-right .tooltipster-arrow-border {
-	border-right-color: #ff3c70;
+
+.tooltipster-pink.tooltipster-right .tooltipster-box {
+	margin-left: 20px;
 }
-.tooltipster-pink.tooltipster-top .tooltipster-arrow-border {
-	border-top-color: #ff3c70;
+
+.tooltipster-pink.tooltipster-top .tooltipster-box {
+	margin-bottom: 20px;
 }
+
 .tooltipster-pink .tooltipster-content {
 	font-family: 'Courier', monospace;
 	padding: 15px 18px;
+}
+
+.tooltipster-pink .tooltipster-arrow {
+}
+
+.tooltipster-pink.tooltipster-bottom .tooltipster-arrow {
+	height: 20px;
+	margin-left: -6px;
+	width: 12px;
+}
+
+.tooltipster-pink.tooltipster-left .tooltipster-arrow {
+	height: 12px;
+	margin-top: -6px;
+	width: 20px;
+}
+
+.tooltipster-pink.tooltipster-right .tooltipster-arrow {
+	height: 12px;
+	margin-top: -6px;
+	width: 20px;
+}
+
+.tooltipster-pink.tooltipster-top .tooltipster-arrow {
+	height: 20px;
+	margin-left: -6px;
+	width: 12px;
+}
+
+.tooltipster-pink.tooltipster-bottom .tooltipster-arrow-uncropped {
+	top: -20px;
+}
+
+.tooltipster-pink.tooltipster-right .tooltipster-arrow-uncropped {
+	left: -20px;
+}
+
+.tooltipster-pink .tooltipster-arrow-background {
+	display: none;
+}
+
+.tooltipster-pink .tooltipster-arrow-border {
+	border: 6px solid transparent;
+}
+
+.tooltipster-pink.tooltipster-bottom .tooltipster-arrow-border {
+	border-bottom: 20px solid #2a2a2a;
+	border-top: 20px solid transparent;
+}
+.tooltipster-pink.tooltipster-left .tooltipster-arrow-border {
+	border-left: 20px solid #ff3c70;
+	border-right: 20px solid transparent;
+}
+.tooltipster-pink.tooltipster-right .tooltipster-arrow-border {
+	border-left: 20px solid transparent;
+	border-right: 20px solid #2a2a2a;
+}
+.tooltipster-pink.tooltipster-top .tooltipster-arrow-border {
+	border-bottom: 20px solid transparent;
+	border-top: 20px solid #ff3c70;
 }
 
 
