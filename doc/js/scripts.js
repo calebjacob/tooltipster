@@ -11,10 +11,19 @@ $(function() {
 		//trigger: 'click'
 	});
 	$('#demo-html').tooltipster({
-		content: $('<img src="doc/images/spiderman.png" width="50" height="50" /><p style="text-align:left;"><strong>Soufflé chocolate cake powder.</strong> Applicake lollipop oat cake gingerbread.</p>'),
+		content: $(
+			'<div>' +
+				'<img src="doc/images/spiderman.png" width="50" height="50" />' +
+				'<p style="text-align:left;">' +
+					'<strong>Lorem ipsum dolor sit amet</strong>' +
+					'<br />' +
+					'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu.' +
+				'</p>' +
+			'</div>'
+		),
 		// setting a same value to minWidth and maxWidth will result in a fixed width
-		minWidth: 300,
-		maxWidth: 300,
+		minWidth: 400,
+		maxWidth: 400,
 		position: 'right'
 	});
 	$('#demo-theme').tooltipster({
@@ -98,6 +107,9 @@ $(function() {
 	});	
 	$('.tooltipster-light-preview').tooltipster({
 		theme: 'tooltipster-light'
+	});
+	$('.tooltipster-borderless-preview').tooltipster({
+		theme: 'tooltipster-borderless'
 	});
 	$('.tooltipster-punk-preview').tooltipster({
 		theme: 'tooltipster-punk'

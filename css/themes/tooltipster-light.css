@@ -8,63 +8,70 @@
 
 .tooltipster-light .tooltipster-content {
 	color: #666666;
-	font-family: Arial, sans-serif;
 }
 
-.tooltipster-light.tooltipster-bottom .tooltipster-box {
-	margin-top: 9px;
+.tooltipster-light .tooltipster-arrow {
+	height: 9px;
+	margin-left: -9px;
+	width: 18px;
 }
 
-.tooltipster-light.tooltipster-left .tooltipster-box {
-	margin-right: 9px;
-}
-
-.tooltipster-light.tooltipster-right .tooltipster-box {
-	margin-left: 9px;
-}
-
-.tooltipster-light.tooltipster-top .tooltipster-box {
-	margin-bottom: 9px;
+.tooltipster-light.tooltipster-left .tooltipster-arrow,
+.tooltipster-light.tooltipster-right .tooltipster-arrow {
+	height: 18px;
+	margin-left: 0;
+	margin-top: -9px;
+	width: 9px;
 }
 
 .tooltipster-light .tooltipster-arrow-background {
-	border: 10px solid transparent;
-	left: 0px;
-	top: 0px;
+	border: 9px solid transparent;
 }
 
 .tooltipster-light.tooltipster-bottom .tooltipster-arrow-background {
-	border-bottom: 10px solid #ededed;
+	border-bottom-color: #ededed;
 	top: 1px;
 }
 
 .tooltipster-light.tooltipster-left .tooltipster-arrow-background {
-	border-left: 10px solid #ededed;
+	border-left-color: #ededed;
 	left: -1px;
 }
 
 .tooltipster-light.tooltipster-right .tooltipster-arrow-background {
-	border-right: 10px solid #ededed;
+	border-right-color: #ededed;
 	left: 1px;
 }
 
 .tooltipster-light.tooltipster-top .tooltipster-arrow-background {
-	border-top: 10px solid #ededed;
+	border-top-color: #ededed;
 	top: -1px;
 }
 
+.tooltipster-light .tooltipster-arrow-border {
+	border: 9px solid transparent;
+}
+
 .tooltipster-light.tooltipster-bottom .tooltipster-arrow-border {
-	border-bottom: 10px solid #cccccc;
+	border-bottom-color: #cccccc;
 }
 
 .tooltipster-light.tooltipster-left .tooltipster-arrow-border {
-	border-left: 10px solid #cccccc;
+	border-left-color: #cccccc;
 }
 
 .tooltipster-light.tooltipster-right .tooltipster-arrow-border {
-	border-right: 10px solid #cccccc;
+	border-right-color: #cccccc;
 }
 
 .tooltipster-light.tooltipster-top .tooltipster-arrow-border {
-	border-top: 10px solid #cccccc;
+	border-top-color: #cccccc;
+}
+
+.tooltipster-light.tooltipster-bottom .tooltipster-arrow-uncropped {
+	top: -9px;
+}
+
+.tooltipster-light.tooltipster-right .tooltipster-arrow-uncropped {
+	left: -9px;
 }

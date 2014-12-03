@@ -25,7 +25,6 @@
 
 .tooltipster-shadow .tooltipster-content {
 	color: #8d8d8d;
-	font-family: 'Arial', sans-serif;
 }
 
 .tooltipster-shadow .tooltipster-arrow {
@@ -42,14 +41,6 @@
 	width: 6px;
 }
 
-.tooltipster-shadow.tooltipster-bottom .tooltipster-arrow-uncropped {
-	top: -6px;
-}
-
-.tooltipster-shadow.tooltipster-right .tooltipster-arrow-uncropped {
-	left: -6px;
-}
-
 .tooltipster-shadow .tooltipster-arrow-background {
 	display: none;
 }
@@ -59,17 +50,25 @@
 }
 
 .tooltipster-shadow.tooltipster-bottom .tooltipster-arrow-border {
-	border-bottom: 6px solid white;
+	border-bottom-color: white;
 }
 
 .tooltipster-shadow.tooltipster-left .tooltipster-arrow-border {
-	border-left: 6px solid white;
+	border-left-color: white;
 }
 
 .tooltipster-shadow.tooltipster-right .tooltipster-arrow-border {
-	border-right: 6px solid white;
+	border-right-color: white;
 }
 
 .tooltipster-shadow.tooltipster-top .tooltipster-arrow-border {
-	border-top: 6px solid white;
+	border-top-color: white;
+}
+
+.tooltipster-shadow.tooltipster-bottom .tooltipster-arrow-uncropped {
+	top: -6px;
+}
+
+.tooltipster-shadow.tooltipster-right .tooltipster-arrow-uncropped {
+	left: -6px;
 }

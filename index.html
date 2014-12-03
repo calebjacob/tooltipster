@@ -22,6 +22,7 @@
 	<link rel="stylesheet" type="text/css" href="doc/css/prettify.css" />
 	<link rel="stylesheet" type="text/css" href="doc/css/style.css" />
 	<link rel="stylesheet" type="text/css" href="css/tooltipster.css" />
+	<link rel="stylesheet" type="text/css" href="css/themes/tooltipster-borderless.css" />
 	<link rel="stylesheet" type="text/css" href="css/themes/tooltipster-light.css" />
 	<link rel="stylesheet" type="text/css" href="css/themes/tooltipster-noir.css" />
 	<link rel="stylesheet" type="text/css" href="css/themes/tooltipster-punk.css" />
@@ -108,7 +109,7 @@
 					<span id="demo-default" title="Hi! This is a tooltip.">Hover</span> Default settings
 				</li>
 				<li>
-					<span id="demo-html">Hover</span> Fixed width, position, &amp; HTML
+					<span id="demo-html">Hover</span> Fixed width, position &amp; HTML
 				</li>
 				<li>
 					<span id="demo-events" title="Press any key on your keyboard or click anywhere in the page to close this">Click</span> Custom show / hide triggers
@@ -229,7 +230,7 @@
 			
 			<h4>Customizing Your Tooltipster's Style</h4>
 			<p>The style of your Tooltipsters can be easily changed by editing/overriding the default Tooltipster theme, located in the <strong>css/tooltipster.css</strong> file.</p>
-			<p>Tooltipster is also packaged with 4 alternative themes to choose from. They are demonstrated at the bottom of this page. To use a theme, just include its css file (located in the css/themes folder) in your page and specify its name in Tooltipster's settings :</p>
+			<p>Tooltipster is also packaged with 5 alternative themes to choose from. They are demonstrated at the bottom of this page. To use a theme, just include its css file (located in the css/themes folder) in your page and specify its name in Tooltipster's settings :</p>
 			<pre class="prettyprint">
 $('.tooltip').tooltipster({
     theme: 'tooltipster-noir'
@@ -694,19 +695,20 @@ $('#myfield')
 		
 		<section id="themes">
 			<h2>Themes</h2>
-			<p>Tired of the same old? Four other rocking themes are available for your tooltips, and you can always create yours ! Share them with us on GitHub !</p>
+			<p>Tired of the same old? Five other rocking themes are available for your tooltips, and you can always create yours ! Share them with us on GitHub !</p>
 			<div class="themes">
-				<span class="tooltipster-default-preview tooltip" title="The default theme" target="_blank">Default</span>
-				<span class="tooltipster-light-preview" title="Light and frisky!" target="_blank">Light</span>
-				<span class="tooltipster-punk-preview" title="I will not conform to your old fart ways!" target="_blank">Punk</span>
-				<span class="tooltipster-noir-preview" title="Hipsterific!" target="_blank">Noir</span>
-				<span class="tooltipster-shadow-preview" title="Check out my shadow" target="_blank">Shadow</span>
+				<div class="tooltipster-default-preview tooltip" title="The default theme" target="_blank">Default</div>
+				<div class="tooltipster-light-preview" title="Light and frisky!" target="_blank">Light</div>
+				<div class="tooltipster-borderless-preview" title="Let's travel!" target="_blank">Borderless</div>
+				<div class="tooltipster-punk-preview" title="I will not conform to your old fart ways!" target="_blank">Punk</div>
+				<div class="tooltipster-noir-preview" title="Hipsterific!" target="_blank">Noir</div>
+				<div class="tooltipster-shadow-preview" title="Hey, I have a smaller arrow" target="_blank">Shadow</div>
 			</div>
 		</section>
 				
 		<section id="talk">
 			<h2>Talk</h2>
-			<h3>You think you may have found a bug ?</h3>
+			<h3>You think maybe you've found a bug ?</h3>
 			<p>Head on over to Tooltipster's issue tracker on GitHub: <a href="https://github.com/iamceege/tooltipster/issues">https://github.com/iamceege/tooltipster/issues</a></p>
 			<p>Before opening a new issue, please be sure to search through the backlog to see if your question or bug has been / is being resolved.</p>
 			<p>For help on how to use Tooltipster, please head on to Stackoverflow or other programming help forums.</p>

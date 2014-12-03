@@ -1,4 +1,4 @@
-/* Basics */
+/* GENERAL STRUCTURE RULES (do not edit this section) */
 
 .tooltipster-base {
 	box-sizing: border-box;
@@ -24,7 +24,7 @@
 	visibility: hidden;
 }
 
-/* Animations */
+/* ANIMATIONS */
 
 /* fade */
 
@@ -179,12 +179,12 @@ width, height, top, and left */
 
 
 
-/* Default theme of the default display plugin */
+/* DEFAULT THEME OF THE DEFAULT DISPLAY PLUGIN */
 
 /* .tooltipster-box */
 
 .tooltipster-box {
-	background: #4c4c4c;
+	background: #565656;
 	border: 2px solid black;
 	border-radius: 4px;
 }
@@ -210,7 +210,8 @@ width, height, top, and left */
 
 .tooltipster-content {
 	color: white;
-	padding: 4px 10px;
+	line-height: 18px;
+	padding: 6px 14px;
 }
 
 /* .tooltipster-arrow : will keep only the zone of .tooltipster-arrow-uncropped that
@@ -255,6 +256,68 @@ corresponds to the arrow we want to display */
 	width: 20px;
 }
 
+/* common rules between .tooltipster-arrow-background and .tooltipster-arrow-border */
+
+.tooltipster-arrow-background, .tooltipster-arrow-border {
+	height: 0;
+	position: absolute;
+	width: 0;
+}
+
+/* .tooltipster-arrow-background */
+
+.tooltipster-arrow-background {
+	border: 10px solid transparent;
+}
+
+.tooltipster-bottom .tooltipster-arrow-background {
+	border-bottom-color: #565656;
+	left: 0px;
+	top: 3px;
+}
+
+.tooltipster-left .tooltipster-arrow-background {
+	border-left-color: #565656;
+	left: -3px;
+	top: 0px;
+}
+
+.tooltipster-right .tooltipster-arrow-background {
+	border-right-color: #565656;
+	left: 3px;
+	top: 0px;
+}
+
+.tooltipster-top .tooltipster-arrow-background {
+	border-top-color: #565656;
+	left: 0px;
+	top: -3px;
+}
+
+/* .tooltipster-arrow-border */
+
+.tooltipster-arrow-border {
+	border: 10px solid transparent;
+	left: 0;
+	top: 0;
+}
+
+.tooltipster-bottom .tooltipster-arrow-border {
+	border-bottom-color: black;
+}
+
+.tooltipster-left .tooltipster-arrow-border {
+	border-left-color: black;
+}
+
+.tooltipster-right .tooltipster-arrow-border {
+	border-right-color: black;
+}
+
+.tooltipster-top .tooltipster-arrow-border {
+	border-top-color: black;
+}
+
 /* tooltipster-arrow-uncropped */
 
 .tooltipster-arrow-uncropped {
@@ -267,66 +330,4 @@ corresponds to the arrow we want to display */
 
 .tooltipster-right .tooltipster-arrow-uncropped {
 	left: -10px;
-}
-
-/* common rules between .tooltipster-arrow-background and .tooltipster-arrow-border */
-
-.tooltipster-arrow-background, .tooltipster-arrow-border {
-	height: 0;
-	position: absolute;
-	width: 0;
-}
-
-/* .tooltipster-arrow-background */
-
-.tooltipster-arrow-background {
-	border: 8px solid transparent;
-}
-
-.tooltipster-bottom .tooltipster-arrow-background {
-	border-bottom: 8px solid #4c4c4c;
-	left: 2px;
-	top: 5px;
-}
-
-.tooltipster-left .tooltipster-arrow-background {
-	border-left: 8px solid #4c4c4c;
-	left: -1px;
-	top: 2px;
-}
-
-.tooltipster-right .tooltipster-arrow-background {
-	border-right: 8px solid #4c4c4c;
-	left: 5px;
-	top: 2px;
-}
-
-.tooltipster-top .tooltipster-arrow-background {
-	border-top: 8px solid #4c4c4c;
-	left: 2px;
-	top: -1px;
-}
-
-/* .tooltipster-arrow-border */
-
-.tooltipster-arrow-border {
-	border: 10px solid transparent;
-	left: 0;
-	top: 0;
-}
-
-.tooltipster-bottom .tooltipster-arrow-border {
-	border-bottom: 10px solid black;
-}
-
-.tooltipster-left .tooltipster-arrow-border {
-	border-left: 10px solid black;
-}
-
-.tooltipster-right .tooltipster-arrow-border {
-	border-right: 10px solid black;
-}
-
-.tooltipster-top .tooltipster-arrow-border {
-	border-top: 10px solid black;
 }

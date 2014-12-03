@@ -50,7 +50,7 @@
 			restoration: 'none',
 			speed: 350,
 			timer: 0,
-			theme: 'tooltipster-default',
+			theme: [],
 			touchDevices: true,
 			trigger: 'hover',
 			updateAnimation: true,
@@ -78,7 +78,7 @@
 		// hover/click/custom events. It will be the same as this.$el if icons are not
 		// used (see in the options), otherwise it will correspond to the created icon
 		this.$elProxy;
-		this.elProxyPosition;
+		this.geometry;
 		this.enabled = true;
 		this.mouseIsOverProxy = false;
 		// a unique namespace per instance, for easy selective unbinding
@@ -98,7 +98,10 @@
 			this.options.autoHide = this.options.autoClose;
 		}
 		this.options.iconTheme = this.options.iconTheme.replace('.', '');
-		this.options.theme = this.options.theme.replace('.', '');
+		
+		if (typeof this.options.theme == 'string') {
+			this.options.theme = [this.options.theme];
+		}
 		
 		// launch
 		
@@ -271,84 +274,82 @@
 		// gather all information about dimensions and available space
 		_geometry: function() {
 			
-			var	bcr = this.$el[0].getBoundingClientRect(),
+			var	bcr = this.$elProxy[0].getBoundingClientRect(),
 				$document = $(document),
 				$window = $(window),
 				// some useful properties of important elements
-				helper = {
+				geo = {
 					document: {
-						height: $document.height(),
-						width: $document.width()
+						size: {
+							height: $document.height(),
+							width: $document.width()
+						}
 					},
 					window: {
-						height: $window.height(),
-						width: $window.width(),
-						scrollX: window.scrollX,
-						scrollY: window.scrollY
+						size: {
+							height: $window.height(),
+							width: $window.width()
+						},
+						scroll: {
+							left: window.scrollX,
+							top: window.scrollY
+						}
 					},
 					origin: {
-						height: bcr.bottom - bcr.top,
-						width: bcr.right - bcr.left,
+						size: {
+							height: bcr.bottom - bcr.top,
+							width: bcr.right - bcr.left
+						},
+						offset: {
+							left: bcr.left + window.scrollX,
+							top: bcr.top + window.scrollY
+						},
 						windowOffset: bcr
 					}
 				};
 			
 			// the space that is available to display the tooltip, relatively to the viewport
 			// and to the document
-			helper.available = {
+			geo.available = {
 				window: {
 					bottom: {
-						height: helper.window.height - bcr.bottom,
-						width: helper.window.width
+						height: geo.window.size.height - bcr.bottom,
+						width: geo.window.size.width
 					},
 					left: {
-						height: helper.window.height,
+						height: geo.window.size.height,
 						width: bcr.left
 					},
 					right: {
-						height: helper.window.height,
-						width: helper.window.width - bcr.right
+						height: geo.window.size.height,
+						width: geo.window.size.width - bcr.right
 					},
 					top: {
 						height: bcr.top,
-						width:  helper.window.width
+						width:  geo.window.size.width
 					}
 				},
 				document: {
 					bottom: {
-						height: helper.document.height - helper.window.scrollY - bcr.bottom,
-						width: helper.document.width
+						height: geo.document.size.height - geo.window.scroll.top - bcr.bottom,
+						width: geo.document.size.width
 					},
 					left: {
-						height: helper.document.height,
-						width: bcr.left + window.scrollX
+						height: geo.document.size.height,
+						width: bcr.left + geo.window.scroll.left
 					},
 					right: {
-						height: helper.document.height,
-						width: helper.document.width - helper.window.scrollX - bcr.right
+						height: geo.document.size.height,
+						width: geo.document.size.width - geo.window.scroll.left - bcr.right
 					},
 					top: {
-						height: bcr.top + window.scrollY,
-						width: helper.document.width
+						height: bcr.top + geo.window.scroll.top,
+						width: geo.document.size.width
 					}
 				}
 			};
 			
-			return helper;
-			
-			/*
-			return {
-				dimension: {
-					height: $el.outerHeight(false),
-					width: $el.outerWidth(false)
-				},
-				offset: $el.offset(),
-				position: {
-					left: parseInt($el.css('left')),
-					top: parseInt($el.css('top'))
-				}
-			};
-			*/
+			return geo;
 		},
 		
 		_interval_set: function() {
@@ -380,22 +381,22 @@
 					// the tooltip if need be
 					if (self.options.positionTracker) {
 						
-						var p = self._geometry(self.$elProxy),
+						var g = self._geometry(),
 							identical = false;
 						
 						// compare size first (a change requires repositioning too)
-						if (areEqual(p.dimension, self.elProxyPosition.dimension)) {
+						if (areEqual(g.origin.size, self.geometry.origin.size)) {
 							
 							// for elements with a fixed position, we track the top and left
 							// properties (relative to window)
 							if (self.$elProxy.css('position') === 'fixed') {
-								if (areEqual(p.position, self.elProxyPosition.position)) {
+								if (areEqual(g.origin.windowOffset, self.geometry.origin.windowOffset)) {
 									identical = true;
 								}
 							}
 							// otherwise, track total offset (relative to document)
 							else {
-								if (areEqual(p.offset, self.elProxyPosition.offset)) {
+								if (areEqual(g.origin.offset, self.geometry.origin.offset)) {
 									identical = true;
 								}
 							}
@@ -569,8 +570,11 @@
 						// build the base of our tooltip
 						self.$tooltip = self.displayPlugin.build();
 						
+						for (var i=0; i < self.options.theme.length; i++) {
+							self.$tooltip.addClass(self.options.theme[i]);
+						}
+						
 						self.$tooltip
-							.addClass(self.options.theme)
 							.css({
 								// must not overflow the window until the positioning method
 								// is called
@@ -1131,10 +1135,12 @@
 			// in case the tooltip has been removed from DOM manually
 			if ($('body').find(self.$tooltip).length !== 0) {
 				
+				// refresh the geometry object before passing it as a helper
+				self.geometry = self._geometry();
+				
 				// call the display plugin
 				this.displayPlugin.reposition({
-					// the geometry helper
-					geometry: self._geometry(),
+					geo: self.geometry,
 					tooltipster: self
 				});
 			}
@@ -1307,7 +1313,7 @@
 	// will collect plugins
 	$.fn.tooltipster.displayPlugin = {};
 	
-	// quick & dirty compare function(not bijective nor multidimensional)
+	// quick & dirty compare function, not bijective nor multidimensional
 	function areEqual(a,b) {
 		var same = true;
 		$.each(a, function(i, el) {
@@ -1355,38 +1361,52 @@
 ;(function($) {
 	
 	var pluginName = 'default',
-		defaults = {
-			distance: 10,
-			minHeight: 0,
-			minWidth: 0,
-			maxHeight: null,
-			maxWidth: null,
-			position: ['top', 'bottom', 'right', 'left']
-			/*
-			// TODO: these rules let the user choose what to do when the tooltip content
-			// overflows. Right now the order of fallbacks is fixed :
-			// - we're looking for a spot where the size is natural
-			// - if it does not work, we check if setting a size on the tooltip could
-			//   solve the problem without having the content overflowing
-			// - in that's not enough, we let the tooltip overflow the window
-			// - and if that's not enough, we just let the tooltip as much space as
-			//   possible in the current document, and set scrollbars for the overflow
-			positioningRules: [
-				'window.switch',
-				'window.constrain',
-				'window.overflow',
-				// we could imagine to allow document overflow instead
-				'document.scroll'
-			]
-			*/
-		},
 		plugin = function(options) {
 			this.init(options);
 		};
 	
 	plugin.prototype = {
 		
+		/**
+		 * Defaults are provided as a function for an easy override by inheritance
+		 * 
+		 * @return {object} An object with the defaults options
+		 */
+		defaults: function() {
+			
+			return {
+				arrow: true,
+				easyTheming: true,
+				distance: 10,
+				minHeight: 0,
+				minWidth: 0,
+				position: ['top', 'bottom', 'right', 'left']
+				/*
+				// TODO: these rules let the user choose what to do when the tooltip content
+				// overflows. Right now the order of fallbacks is fixed :
+				// - we're looking for a spot where the size is natural
+				// - if it does not work, we check if setting a size on the tooltip could
+				//   solve the problem without having the content overflowing
+				// - in that's not enough, we let the tooltip overflow the window
+				// - and if that's not enough, we just let the tooltip as much space as
+				//   possible in the current document, and set scrollbars for the overflow
+				positioningRules: [
+					'window.switch',
+					'window.constrain',
+					'window.overflow',
+					// we could imagine to allow document overflow instead
+					'document.scroll'
+				]
+				*/
+			};
+		},
+		
+		/**
+		 * Run at instantiation
+		 */
 		init: function(options) {
+			
+			var defaults = this.defaults();
 			
 			// list of instance variables
 			
@@ -1420,6 +1440,9 @@
 			}
 		},
 		
+		/**
+		 * @return {object} The tooltips, as a jQuery-wrapped HTML element
+		 */
 		build: function() {
 			
 			// note: we wrap with a .tooltipster-box div to be able to set a margin on it
@@ -1438,6 +1461,17 @@
 				'</div>'
 			);
 			
+			// hide arrow if asked
+			if (!this.options.arrow) {
+				$html
+					.find('.tooltipster-box')
+						.css('margin', 0)
+						.end()
+					.find('.tooltipster-arrow')
+						.hide();
+			}
+			
+			// apply min/max width if asked
 			if (this.options.minWidth) {
 				$html.css('min-width', this.options.minWidth + 'px');
 			}
@@ -1446,6 +1480,15 @@
 			}
 			
 			return $html;
+		},
+		
+		/**
+		 * This will change the background color and border size and color of
+		 * the arrow if the corresponding values were not hardcoded in the theme
+		 */
+		theme: function($tooltip) {
+			
+			
 		},
 		
 		reposition: function(helper) {
@@ -1490,6 +1533,11 @@
 						.removeClass('tooltipster-top')
 						.addClass('tooltipster-' + pos);
 					
+					// easyTheming
+					if (self.options.easyTheming) {
+						self.theme(helper.tooltipster.$tooltip);
+					}
+					
 					// now we get the size of the tooltip when it does not have any size
 					// constraints set
 					naturalSize = helper.tooltipster._sizerNatural();
@@ -1511,8 +1559,8 @@
 					// if the tooltip can fit without any adjustment
 					fits = false;
 					
-					if (	helper.geometry.available[container][pos].width >= outerNaturalSize.width
-						&&	helper.geometry.available[container][pos].height >= outerNaturalSize.height
+					if (	helper.geo.available[container][pos].width >= outerNaturalSize.width
+						&&	helper.geo.available[container][pos].height >= outerNaturalSize.height
 					) {
 						fits = true;
 					}
@@ -1535,8 +1583,8 @@
 						
 						// let's try to use size constraints to fit
 						result = helper.tooltipster._sizerConstrained(
-							helper.geometry.available[container][pos].width - margin.horizontal,
-							helper.geometry.available[container][pos].height - margin.vertical
+							helper.geo.available[container][pos].width - margin.horizontal,
+							helper.geo.available[container][pos].height - margin.vertical
 						);
 						
 						testResults[container][pos].constrained = {
@@ -1589,31 +1637,31 @@
 				
 				case 'left':
 				case 'right':
-					tooltipWindowOffset.top = helper.geometry.origin.windowOffset.top - (result.size.height / 2) + (helper.geometry.origin.height / 2);
+					tooltipWindowOffset.top = helper.geo.origin.windowOffset.top - (result.size.height / 2) + (helper.geo.origin.size.height / 2);
 					break;
 				
 				case 'bottom':
 				case 'top':
-					tooltipWindowOffset.left = helper.geometry.origin.windowOffset.left - (result.size.width / 2) + (helper.geometry.origin.width / 2);
+					tooltipWindowOffset.left = helper.geo.origin.windowOffset.left - (result.size.width / 2) + (helper.geo.origin.size.width / 2);
 					break;
 			}
 			
 			switch (result.position) {
 				
 				case 'left':
-					tooltipWindowOffset.left = helper.geometry.origin.windowOffset.left - result.outerSize.width;
+					tooltipWindowOffset.left = helper.geo.origin.windowOffset.left - result.outerSize.width;
 					break;
 				
 				case 'right':
-					tooltipWindowOffset.left = helper.geometry.origin.windowOffset.left + helper.geometry.origin.width + result.margin.horizontal;
+					tooltipWindowOffset.left = helper.geo.origin.windowOffset.left + helper.geo.origin.size.width + result.margin.horizontal;
 					break;
 				
 				case 'top':
-					tooltipWindowOffset.top = helper.geometry.origin.windowOffset.top - result.outerSize.height;
+					tooltipWindowOffset.top = helper.geo.origin.windowOffset.top - result.outerSize.height;
 					break;
 				
 				case 'bottom':
-					tooltipWindowOffset.top = helper.geometry.origin.windowOffset.top + helper.geometry.origin.height + result.margin.vertical;
+					tooltipWindowOffset.top = helper.geo.origin.windowOffset.top + helper.geo.origin.size.height + result.margin.vertical;
 					break;
 			}
 			
@@ -1639,9 +1687,9 @@
 					tooltipWindowOffset.left = 0;
 				}
 				// or an overflow on the right
-				else if (tooltipWindowOffset.left + result.size.width > helper.geometry.window.width) {
+				else if (tooltipWindowOffset.left + result.size.width > helper.geo.window.size.width) {
 					
-					overflowAdjustment = helper.geometry.window.width - (tooltipWindowOffset.left + result.size.width);
+					overflowAdjustment = helper.geo.window.size.width - (tooltipWindowOffset.left + result.size.width);
 					tooltipWindowOffset.left += overflowAdjustment;
 				}
 			}
@@ -1658,9 +1706,9 @@
 					tooltipWindowOffset.top = 0;
 				}
 				// or at bottom
-				else if (tooltipWindowOffset.top + result.size.height > helper.geometry.window.height) {
+				else if (tooltipWindowOffset.top + result.size.height > helper.geo.window.size.height) {
 					
-					overflowAdjustment = helper.geometry.window.height - (tooltipWindowOffset.top + result.size.height);
+					overflowAdjustment = helper.geo.window.size.height - (tooltipWindowOffset.top + result.size.height);
 					tooltipWindowOffset.top += overflowAdjustment;
 				}
 			}
@@ -1674,8 +1722,8 @@
 			
 			if (helper.tooltipster.$parent[0].tagName.toLowerCase() == 'body') {
 				var originParentOffset = {
-					left: helper.geometry.origin.windowOffset.left + helper.geometry.window.scrollX,
-					top: helper.geometry.origin.windowOffset.top + helper.geometry.window.scrollY
+					left: helper.geo.origin.windowOffset.left + helper.geo.window.scroll.left,
+					top: helper.geo.origin.windowOffset.top + helper.geo.window.scroll.top
 				};
 			}
 			else {
@@ -1685,8 +1733,8 @@
 			}
 			
 			result.coord = {
-				left: originParentOffset.left + (tooltipWindowOffset.left - helper.geometry.origin.windowOffset.left),
-				top: originParentOffset.top + (tooltipWindowOffset.top - helper.geometry.origin.windowOffset.top)
+				left: originParentOffset.left + (tooltipWindowOffset.left - helper.geo.origin.windowOffset.left),
+				top: originParentOffset.top + (tooltipWindowOffset.top - helper.geo.origin.windowOffset.top)
 			};
 			
 			// set position values
@@ -1733,7 +1781,7 @@
 		},
 		
 		/**
-		 * Get or set options. For internal use and advanced users only.
+		 * Get or set options. Provided for advanced users.
 		 * @param {string} o Option name
 		 * @param {mixed} val optional A new value for the option
 		 * @return {mixed} If val is omitted, the value of the option is returned, otherwise

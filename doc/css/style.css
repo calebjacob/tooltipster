@@ -421,22 +421,22 @@ Tooltips
 	margin: 2em 0 0 -3em;
 }
 
-.tooltipster-default .tooltipster-content {
+.tooltipster-content {
 	font-family: 'Open Sans', sans-serif;
 }
-.tooltipster-default .tooltipster-content img {
+.tooltipster-content img {
 	float: left;
-	margin-right: 10px;
-	border: 1px solid white;
+	margin: 2px 12px 0 0;
+	border: 2px solid black;
 }
-.tooltipster-default .tooltipster-content p {
+.tooltipster-content p {
 	margin: 0;
 }
-.tooltipster-default .tooltipster-content a {
+.tooltipster-content a {
 	color: #fff;
 	border-bottom: 1px solid rgba(255,255,255,0.4);
 }
-.tooltipster-default .tooltipster-content a:hover {
+.tooltipster-content a:hover {
 	color: #fff;
 	border-bottom: 1px solid rgba(255,255,255,1);
 }
@@ -563,22 +563,20 @@ Themes
 -------------------------------------
 */
 
-#themes .themes span {
+#themes .themes div {
 	display: inline-block;
-	padding: 1em;
+	height: 60px;
+	line-height: 60px;
 	margin-right: 1em;
-	margin-bottom: 1em;
-	opacity: 0.8;
+	padding: 0px 20px;
+	vertical-align: top;
 }
 
 .tooltipster-default-preview {
 	border-radius: 5px; 
 	border: 2px solid #000;
-	background: #4c4c4c;
+	background: #565656;
 	color: #fff;
-	font-family: Arial, sans-serif;
-	box-sizing: border-box;
-	-moz-box-sizing: border-box;
 }
 
 .tooltipster-light-preview {
@@ -586,8 +584,13 @@ Themes
 	border: 1px solid #cccccc;
 	background: #ededed;
 	color: #666666;
-	font-family: Arial, sans-serif;
-	padding: 8px 10px;
+}
+
+.tooltipster-borderless-preview {
+	border-radius: 5px;
+	background: #1b1b1b;
+	background: rgba(10,10,10,0.90);
+	color: white;
 }
 
 .tooltipster-punk-preview {
@@ -595,26 +598,20 @@ Themes
 	border-bottom: 3px solid #f71169;
 	background: #2a2a2a;
 	color: #fff;
-	font-family: 'Courier', monospace;
-	padding: 8px 10px;
 }
 
 .tooltipster-noir-preview {
 	border-radius: 0px;
 	border: 3px solid black;
 	background: #fff;
-	color: #2c2c2c;
-	font-family: 'Georgia', serif;
-	padding: 8px 10px;
+	color: black;
 }
 
 .tooltipster-shadow-preview {
 	border-radius: 5px;
 	background: #fff;
 	box-shadow: 0px 0px 14px rgba(0,0,0,0.3);
-	color: #2c2c2c;
-	font-family: 'Arial', sans-serif;
-	padding: 8px 10px;
+	color: #8d8d8d;
 }
 
 

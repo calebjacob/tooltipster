@@ -2,46 +2,60 @@
 
 .tooltipster-noir .tooltipster-box {
 	border-radius: 0px; 
-	border: 3px solid #2c2c2c;
+	border: 3px solid black;
 	background: #fff;
 }
+
 .tooltipster-noir .tooltipster-content {
-	color: #2c2c2c;
-	font-family: 'Georgia', serif;
+	color: black;
 }
 
-.tooltipster-noir.tooltipster-bottom .tooltipster-box {
-	margin-top: 7px;
+.tooltipster-noir .tooltipster-arrow {
+	height: 11px;
+	margin-left: -11px;
+	width: 22px;
 }
 
-.tooltipster-noir.tooltipster-left .tooltipster-box {
-	margin-right: 7px;
+.tooltipster-noir.tooltipster-left .tooltipster-arrow,
+.tooltipster-noir.tooltipster-right .tooltipster-arrow {
+	height: 22px;
+	margin-left: 0;
+	margin-top: -11px;
+	width: 11px;
 }
 
-.tooltipster-noir.tooltipster-right .tooltipster-box {
-	margin-left: 7px;
-}
-
-.tooltipster-noir.tooltipster-top .tooltipster-box {
-	margin-bottom: 7px;
+.tooltipster-noir .tooltipster-arrow-background {
+	border: 11px solid transparent;
 }
 
 .tooltipster-noir.tooltipster-bottom .tooltipster-arrow-background {
 	border-bottom-color: white;
-	top: 2px;
+	top: 4px;
 }
 
 .tooltipster-noir.tooltipster-left .tooltipster-arrow-background {
 	border-left-color: white;
-	left: -2px;
+	left: -4px;
 }
 
 .tooltipster-noir.tooltipster-right .tooltipster-arrow-background {
 	border-right-color: white;
-	left: 2px;
+	left: 4px;
 }
 
 .tooltipster-noir.tooltipster-top .tooltipster-arrow-background {
 	border-top-color: white;
-	top: -2px;
+	top: -4px;
+}
+
+.tooltipster-noir .tooltipster-arrow-border {
+	border-width: 11px;
+}
+
+.tooltipster-noir.tooltipster-bottom .tooltipster-arrow-uncropped {
+	top: -11px;
+}
+
+.tooltipster-noir.tooltipster-right .tooltipster-arrow-uncropped {
+	left: -11px;
 }

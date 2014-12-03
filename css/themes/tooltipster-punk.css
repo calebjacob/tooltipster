@@ -7,9 +7,13 @@
 	background: #2a2a2a;
 }
 
+.tooltipster-punk.tooltipster-top .tooltipster-box {
+	margin-bottom: 7px;
+}
+
 .tooltipster-punk .tooltipster-content {
 	color: white;
-	font-family: 'Courier', monospace;
+	padding: 8px 16px;
 }
 
 .tooltipster-punk .tooltipster-arrow-background {
