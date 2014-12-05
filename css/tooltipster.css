@@ -1,7 +1,6 @@
 /* GENERAL STRUCTURE RULES (do not edit this section) */
 
 .tooltipster-base {
-	box-sizing: border-box;
 	pointer-events: none;
 	position: absolute;
 }

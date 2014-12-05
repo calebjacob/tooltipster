@@ -19,7 +19,7 @@
 			autoHide: true,
 			content: null,
 			contentAsHTML: false,
-			contentCloning: true,
+			contentCloning: false,
 			debug: true,
 			delay: 200,
 			displayPlugin: 'default',
@@ -48,6 +48,7 @@
 				}
 			},
 			restoration: 'none',
+			returnObjects: false,
 			speed: 350,
 			timer: 0,
 			theme: [],
@@ -271,7 +272,29 @@
 			}
 		},
 		
-		// gather all information about dimensions and available space
+		/**
+		 * Force the browser to redraw (re-render) the tooltip immediately. This is required
+		 * when you changed some CSS properties and need to make something with it
+		 * immediately, without waiting for the browser to redraw at the end of instructions.
+		 * 
+		 * @see http://stackoverflow.com/questions/3485365/how-can-i-force-webkit-to-redraw-repaint-to-propagate-style-changes
+		 */
+		_forceRedraw: function(){
+			
+			// note : this would work but for Webkit only
+			//this.$tooltip.hide();
+			//this.$tooltip[0].offsetHeight;
+			//this.$tooltip.show();
+			
+			// works in FF too
+			var $p = this.$tooltip.parent();
+			this.$tooltip.detach();
+			this.$tooltip.appendTo($p);
+		},
+		
+		/**
+		 * Gather all information about dimensions and available space
+		 */
 		_geometry: function() {
 			
 			var	bcr = this.$elProxy[0].getBoundingClientRect(),
@@ -415,26 +438,6 @@
 			clearInterval(this.checkInterval);
 			// clean delete
 			this.checkInterval = null;
-		},
-		
-		/**
-		 * Force the browser to redraw (re-render) the tooltip immediately. This is required
-		 * when you changed some CSS properties and need to make something with it
-		 * immediately, without waiting for the browser to redraw at the end of instructions.
-		 * 
-		 * @see http://stackoverflow.com/questions/3485365/how-can-i-force-webkit-to-redraw-repaint-to-propagate-style-changes
-		 */
-		_forceRedraw: function(){
-			
-			// note : this would work but for Webkit only
-			//this.$tooltip.hide();
-			//this.$tooltip[0].offsetHeight;
-			//this.$tooltip.show();
-			
-			// works in FF too
-			var $p = this.$tooltip.parent();
-			this.$tooltip.detach();
-			this.$tooltip.appendTo($p);
 		},
 		
 		// this function will schedule the opening of the tooltip after the delay, if
@@ -794,6 +797,8 @@
 			// reset to natural size
 			this.$tooltip.css({
 				height: '',
+				left: 0,
+				top: 0,
 				width: ''
 			});
 			
@@ -813,6 +818,8 @@
 		 * Check if a tooltip can fit in the provided dimensions when we restrain its width.
 		 * The idea is to see if the new height is small enough and if the content does not
 		 * overflow horizontally.
+		 * This method does not reset the position values to what they were when the
+		 * test is over, do it yourself if need be.
 		 * 
 		 * @param {int} width
 		 * @param {int} height
@@ -821,7 +828,11 @@
 		 */
 		_sizerConstrained: function(width, height) {
 			
-			this.$tooltip.width(width);
+			this.$tooltip.css({
+				left: 0,
+				top: 0,
+				width: width
+			});
 			
 			this._forceRedraw();
 			
@@ -934,7 +945,7 @@
 		
 		content: function(c) {
 			// getter method
-			if (typeof c === 'undefined') {
+			if (c === undefined) {
 				return this.Content;
 			}
 			// setter method
@@ -1121,7 +1132,7 @@
 		 * the instance itself is returned
 		 */ 
 		option: function(o, val) {
-			if (typeof val == 'undefined') return this.options[o];
+			if (val === undefined) return this.options[o];
 			else {
 				this.options[o] = val;
 				return this;
@@ -1169,7 +1180,9 @@
 	$.fn.tooltipster = function() {
 		
 		// for using in closures
-		var args = arguments;
+		var args = arguments,
+			// common mistake : an HTML element can't be in several tooltips at the same time
+			contentCloningWarning = 'You are using a single HTML element as content for several tooltips. You should probably be using the contentCloning option.';
 		
 		// if we are not in the context of jQuery wrapped HTML element(s) :
 		// this happens when calling static methods in the form $.fn.tooltipster('methodName')
@@ -1231,6 +1244,17 @@
 					if (self) {
 						
 						if (typeof self[args[0]] === 'function') {
+							
+							if (	this.length > 1
+								&&	args[0] == 'content'
+								&&	typeof args[1] == 'object'
+								&&	args[1] !== null
+								&&	!self.options.contentCloning
+								&&	debug
+							) {
+								console.log(contentCloningWarning);
+							}
+							
 							// note : args[1] and args[2] may not be defined
 							var resp = self[args[0]](args[1], args[2]);
 						}
@@ -1257,24 +1281,42 @@
 			// first argument is undefined or an object : the tooltip is initializing
 			else {
 				
-				var instances = [],
+				var objects = [],
 					// is there a defined value for the multiple option in the options object ?
-					multipleIsSet = args[0] && typeof args[0].multiple !== 'undefined',
+					multipleIsSet = args[0] && args[0].multiple !== undefined,
 					// if the multiple option is set to true, or if it's not defined but
 					// set to true in the defaults
 					multiple = (multipleIsSet && args[0].multiple) || (!multipleIsSet && defaults.multiple),
+					// same for content
+					contentIsSet = args[0] && args[0].content !== undefined,
+					content = (contentIsSet && args[0].content) || (!contentIsSet && defaults.content);
+					// same for contentCloning
+					contentCloningIsSet = args[0] && args[0].contentCloning !== undefined,
+					contentCloning = (contentCloningIsSet && args[0].contentCloning) || (!contentCloningIsSet && defaults.contentCloning);
 					// same for debug
-					debugIsSet = args[0] && typeof args[0].debug !== 'undefined',
+					debugIsSet = args[0] && args[0].debug !== undefined,
 					debug = (debugIsSet && args[0].debug) || (!debugIsSet && defaults.debug);
+					// same for returnObjects
+					roIsSet = args[0] && args[0].returnObjects !== undefined,
+					returnObjects = (roIsSet && args[0].returnObjects) || (!roIsSet && defaults.returnObjects);
 				
-				// initialize a tooltipster instance for each element if it doesn't
+				if (	this.length > 1
+					&&	typeof content == 'object'
+					&&	content !== null
+					&&	!contentCloning
+					&&	debug
+				) {
+					console.log(contentCloningWarning);
+				}
+				
+				// create a tooltipster instance for each element if it doesn't
 				// already have one or if the multiple option is set, and attach the
 				// object to it
 				this.each(function() {
 					
 					var go = false,
 						ns = $(this).data('tooltipster-ns'),
-						instance = null;
+						obj = null;
 					
 					if (!ns) {
 						go = true;
@@ -1283,28 +1325,28 @@
 						go = true;
 					}
 					else if (debug) {
-						console.log('Tooltipster: one or more tooltips are already attached to this element: ignoring. Use the "multiple" option to attach more tooltips.');
+						console.log('Tooltipster: one or more tooltips are already attached to this element: ignoring. You might want to check out the "multiple" option.');
 					}
 					
 					if (go) {
-						instance = new Plugin(this, args[0]);
+						obj = new Plugin(this, args[0]);
 						
 						// save the reference of the new instance
 						if (!ns) ns = [];
-						ns.push(instance.namespace);
+						ns.push(obj.namespace);
 						$(this).data('tooltipster-ns', ns)
 						
 						// save the instance itself
-						$(this).data(instance.namespace, instance);
+						$(this).data(obj.namespace, obj);
 						
 						// call our constructor custom function
-						instance.options.functionInit.call(instance, this);
+						obj.options.functionInit.call(obj, this);
 					}
 					
-					instances.push(instance);
+					objects.push(obj);
 				});
 				
-				if (multiple) return instances;
+				if (multiple || returnObjects) return objects;
 				else return this;
 			}
 		}
@@ -1317,7 +1359,7 @@
 	function areEqual(a,b) {
 		var same = true;
 		$.each(a, function(i, el) {
-			if (typeof b[i] === 'undefined' || a[i] !== b[i]) {
+			if (b[i] === undefined || a[i] !== b[i]) {
 				same = false;
 				return false;
 			}
@@ -1376,25 +1418,31 @@
 			
 			return {
 				arrow: true,
-				easyTheming: true,
-				distance: 10,
+				distance: 6,
 				minHeight: 0,
 				minWidth: 0,
 				position: ['top', 'bottom', 'right', 'left']
 				/*
 				// TODO: these rules let the user choose what to do when the tooltip content
 				// overflows. Right now the order of fallbacks is fixed :
-				// - we're looking for a spot where the size is natural
-				// - if it does not work, we check if setting a size on the tooltip could
+				// - we're looking for a spot where the natural size of the tooltip can fit
+				// - if can't find one, we check if setting a size on the tooltip could
 				//   solve the problem without having the content overflowing
-				// - in that's not enough, we let the tooltip overflow the window
-				// - and if that's not enough, we just let the tooltip as much space as
-				//   possible in the current document, and set scrollbars for the overflow
+				// - if it does not work, we let the tooltip overflow the window in its
+				//   natural size, in the limits of the document
+				// - if it does not work, we see if a constrained size could make the
+				//   tooltip fit in the document without its content overflowing
+				// - and if that can't be done, we just let the tooltip as much space as
+				//   possible in the current document, and set scrollbars for the overflow.
+				// It would look like this :
 				positioningRules: [
 					'window.switch',
 					'window.constrain',
-					'window.overflow',
-					// we could imagine to allow document overflow instead
+					// window.scroll should be a possible last step, rather than fall back
+					// to document.switch
+					'document.switch',
+					'document.constrain',
+					// we could imagine to allow document overflow
 					'document.scroll'
 				]
 				*/
@@ -1482,15 +1530,6 @@
 			return $html;
 		},
 		
-		/**
-		 * This will change the background color and border size and color of
-		 * the arrow if the corresponding values were not hardcoded in the theme
-		 */
-		theme: function($tooltip) {
-			
-			
-		},
-		
 		reposition: function(helper) {
 			
 			var self = this;
@@ -1506,14 +1545,14 @@
 			
 			// find which position can contain the tooltip without overflow.
 			// We'll compute things relatively to window, then document if need be.
-			// TODO: run the document-relative positions only if need be, to optimize
 			$.each(['window', 'document'], function(i, container) {
 				
-				var margin,
-					pos,
+				var fits,
+					constrainedFits = false,
+					margin,
 					naturalSize,
 					outerNaturalSize,
-					fits,
+					pos,
 					result;
 				
 				for (var i=0; i < self.options.position.length; i++) {
@@ -1532,11 +1571,6 @@
 						.removeClass('tooltipster-right')
 						.removeClass('tooltipster-top')
 						.addClass('tooltipster-' + pos);
-					
-					// easyTheming
-					if (self.options.easyTheming) {
-						self.theme(helper.tooltipster.$tooltip);
-					}
 					
 					// now we get the size of the tooltip when it does not have any size
 					// constraints set
@@ -1576,7 +1610,7 @@
 					
 					if (fits) {
 						
-						// we don't need to compute more positions, this one is fine
+						// we don't need to compute more positions, a natural one is fine
 						return false;
 					}
 					else {
@@ -1598,7 +1632,16 @@
 							size: result.size,
 							sizeMode: 'constrained'
 						};
+						
+						if (result.fits) {
+							constrainedFits = true;
+						}
 					}
+				}
+				
+				// if a constrained size fits, don't run tests against the document
+				if (constrainedFits) {
+					return false;
 				}
 			});
 			
@@ -1788,7 +1831,7 @@
 		 * the instance itself is returned
 		 */
 		option: function(o, val) {
-			if (typeof val == 'undefined') return this.options[o];
+			if (val === undefined) return this.options[o];
 			else {
 				this.options[o] = val;
 				return this;
