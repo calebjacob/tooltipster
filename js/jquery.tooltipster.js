@@ -22,6 +22,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			contentCloning: true,
 			debug: true,
 			delay: 200,
+			fixOverflow: true,
 			minWidth: 0,
 			maxWidth: null,
 			functionInit: function(origin, content) {},
@@ -324,8 +325,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 						var extraTime = self.options.speed;
 						
 						// disable horizontal scrollbar to keep overflowing tooltips from jacking with it and then restore it to its previous value
-						self.bodyOverflowX = $('body').css('overflow-x');
-						$('body').css('overflow-x', 'hidden');
+						if (self.options.fixOverflow) {
+							self.bodyOverflowX = $('body').css('overflow-x');
+							$('body').css('overflow-x', 'hidden');
+						}
 						
 						// get some other settings related to building the tooltip
 						var animation = 'tooltipster-' + self.options.animation,
@@ -675,13 +678,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					// unbind orientationchange, scroll and resize listeners
 					$(window).off('.'+ self.namespace);
 					
-					$('body')
-						// unbind any auto-closing click/touch listeners
-						.off('.'+ self.namespace)
-						.css('overflow-x', self.bodyOverflowX);
-					
 					// unbind any auto-closing click/touch listeners
 					$('body').off('.'+ self.namespace);
+
+					if (self.options.fixOverflow && self.bodyOverflowX) {
+						$('body').css('overflow-x', self.bodyOverflowX);
+					}
 					
 					// unbind any auto-closing hover listeners
 					self.$elProxy.off('.'+ self.namespace + '-autoClose');
