@@ -20,7 +20,7 @@ debug
 delay  
 minWidth  
 maxWidth  
-fixOverflow
+fixOverflow  
 functionInit  
 functionBefore  
 functionReady  
