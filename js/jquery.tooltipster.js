@@ -1,6 +1,8 @@
+/*! Tooltipster 4.0.0rc7 */
+
 /**
- * Tooltipster 4.0.0rc7 | 2014-11-27
- *
+ * Released on 2014-11-27
+ * 
  * A rockin' custom tooltip jQuery plugin
  * Developed by Caleb Jacob under the MIT license http://opensource.org/licenses/MIT
  * 
@@ -616,11 +618,8 @@
 							this.$parent = self.options.parent;
 						}
 						
-						// attach to the parent
-						self.$tooltip.appendTo(this.$parent);
-						
-						// reposition the tooltip
-						self.reposition();
+						// reposition the tooltip and attach to the DOM
+						self.reposition(true);
 						
 						// animate in the tooltip
 						if (supportsTransitions()) {
@@ -773,7 +772,8 @@
 		},
 		
 		/**
-		 * Move the tooltip back to its parent after the size tests are over
+		 * Append the tooltip to its parent after the size tests are over and get rid
+		 * of the test container.
 		 */
 		_sizerEnd: function() {
 			
@@ -809,7 +809,7 @@
 				height: this.$tooltip.outerHeight(),
 				// an unknown bug in Chrome and FF forces us to count 1 more pixel, otherwise
 				// the text can be broken to a new line after being appended back to the parent
-				// (whereas it's just fine at this moment)
+				// (whereas it's just fine at the time of this test)
 				width: this.$tooltip.outerWidth() + 1
 			};
 		},
@@ -857,7 +857,9 @@
 		},
 		
 		/**
-		 * Move the tooltip in an invisible div to make size tests
+		 * Move the tooltip into an invisible div that does not allow overflow to make
+		 * size tests. Note : the tooltip may or may not be attached to the DOM at the
+		 * moment this method is called, it does not matter.
 		 */
 		_sizerStart: function() {
 			
@@ -1139,18 +1141,34 @@
 			}
 		},
 		
-		reposition: function() {
+		/**
+		 * This method is in charge of setting the position and size properties of the tooltip.
+		 * All the hard work is delegated to the display plugin.
+		 * Note: The tooltip may be detached from the DOM at the moment the method is called 
+		 * but must be attached by the end of the method call.
+		 * 
+		 * @param {boolean} tooltipIsDetached For internal use only. Set this to true if you
+		 * know that the tooltip not being in the DOM is not an issue (typically when the
+		 * tooltip element has just been created but has not been added to the DOM yet).
+		 */
+		reposition: function(tooltipIsDetached) {
 			
 			var self = this;
 			
 			// in case the tooltip has been removed from DOM manually
-			if ($('body').find(self.$tooltip).length !== 0) {
+			if (tooltipIsDetached || $('body').find(self.$tooltip).length !== 0) {
+				
+				if (!tooltipIsDetached) {
+					// detach in case the tooltip overflows the window and adds scrollbars
+					// to it, so _geometry can be accurate
+					self.$tooltip.detach();
+				}
 				
 				// refresh the geometry object before passing it as a helper
 				self.geometry = self._geometry();
 				
 				// call the display plugin
-				this.displayPlugin.reposition({
+				this.displayPlugin.reposition(self.$tooltip, self.$parent, {
 					geo: self.geometry,
 					tooltipster: self
 				});
@@ -1397,6 +1415,7 @@
 	}
 })(jQuery);
 
+
 /**
  * The default display plugin
  */
@@ -1419,6 +1438,7 @@
 			return {
 				arrow: true,
 				distance: 6,
+				functionPosition: function(){},
 				minHeight: 0,
 				minWidth: 0,
 				position: ['top', 'bottom', 'right', 'left']
@@ -1426,31 +1446,44 @@
 				// TODO: these rules let the user choose what to do when the tooltip content
 				// overflows. Right now the order of fallbacks is fixed :
 				// - we're looking for a spot where the natural size of the tooltip can fit
-				// - if can't find one, we check if setting a size on the tooltip could
-				//   solve the problem without having the content overflowing
+				//   ('window.switch')
+				// - if can't find one, we check if setting a constrained width on the
+				//   tooltip could solve the problem without having the content overflowing
+				//   ('window.constrain')
 				// - if it does not work, we let the tooltip overflow the window in its
-				//   natural size, in the limits of the document
-				// - if it does not work, we see if a constrained size could make the
+				//   natural size, in the limits of the document ('document.switch')
+				// - if it does not work, we see if a constrained width could make the
 				//   tooltip fit in the document without its content overflowing
-				// - and if that can't be done, we just let the tooltip as much space as
-				//   possible in the current document, and set scrollbars for the overflow.
-				// It would look like this :
+				//   ('document.constrain')
+				// - and if that can't be done, we just let the tooltip in the preferred
+				//   position with a natural size, overflowing the document
+				//   ('document.overflow')
 				positioningRules: [
 					'window.switch',
+					// or try to see if the tooltip could be displayed somewhere with a
+					// constrained width without its content overflowing
 					'window.constrain',
-					// window.scroll should be a possible last step, rather than fall back
-					// to document.switch
+					// TODO : window.scroll should be a possible rule, rather than fall
+					// back to overflowing in the rest of the document. The content would
+					// have horizontal and/or vertical scrollbars but the tooltip would not
+					// overflow the window. It would require to set a max-height on the
+					// content div, etc.
+					//'window.scroll',
 					'document.switch',
 					'document.constrain',
-					// we could imagine to allow document overflow
-					'document.scroll'
+					// TODO - similar to 'window.scroll'
+					//'document.scroll'
+					'document.overflow'
 				]
 				*/
 			};
 		},
 		
 		/**
-		 * Run at instantiation
+		 * Run at instantiation of the display plugin (when the tooltip is shown for
+		 * the first time).
+		 * 
+		 * @param {object} options Options, @see self::defaults()
 		 */
 		init: function(options) {
 			
@@ -1489,12 +1522,14 @@
 		},
 		
 		/**
-		 * @return {object} The tooltips, as a jQuery-wrapped HTML element
+		 * Contains the HTML markup of the tooltip.
+		 *
+		 * @return {object} The tooltip, as a jQuery-wrapped HTML element
 		 */
 		build: function() {
 			
 			// note: we wrap with a .tooltipster-box div to be able to set a margin on it
-			// (.tooltipster-base must not)
+			// (.tooltipster-base must not have one)
 			var $html = $(
 				'<div class="tooltipster-base">' +
 					'<div class="tooltipster-box">' +
@@ -1530,14 +1565,41 @@
 			return $html;
 		},
 		
-		reposition: function(helper) {
+		/**
+		 * This method must compute and set the positioning properties of the tooltip
+		 * (might be left, top, width, height, etc.). It must also make sure the
+		 * tooltip is eventually appended to its parent (since the element may be
+		 * detached from the DOM at the moment the method is called).
+		 * 
+		 * @param {object} $tooltip The jQuery-wrapped HTML root element of the tooltip
+		 * @param {object} $parent The jQuery-wrapped HTML element that tooltip must be
+		 * appended to at the end of the call
+		 * @param {object} helper An object that contains variables that plugin
+		 * creators may find useful (see below)
+		 * @param {object} helper.geo An object with many properties (size, positioning)
+		 * about objects of interest (window, document, origin). This should help plugin
+		 * users to compute the optimal position of the tooltip
+		 * @param {object} helper.tooltipster The Tooltipster instance which calls this
+		 * method. Some of its methods may help plugin creators, especially its _sizer
+		 * internal methods that help measure the size of the tooltip in various
+		 * conditions.
+		 */
+		reposition: function($tooltip, $parent, helper) {
 			
 			var self = this;
 			
 			// start position tests session
 			helper.tooltipster._sizerStart();
 			
-			var 
+			var finalResult,
+				positionChange = function(position){
+					$tooltip
+						.removeClass('tooltipster-bottom')
+						.removeClass('tooltipster-left')
+						.removeClass('tooltipster-right')
+						.removeClass('tooltipster-top')
+						.addClass('tooltipster-' + position);
+				},
 				testResults = {
 					document: {},
 					window: {}
@@ -1549,43 +1611,38 @@
 				
 				var fits,
 					constrainedFits = false,
-					margin,
+					distance,
 					naturalSize,
 					outerNaturalSize,
 					pos,
-					result;
+					sizerResult;
 				
 				for (var i=0; i < self.options.position.length; i++) {
 					
-					margin = {
+					distance = {
 						horizontal: 0,
 						vertical: 0
 					};
 					pos = self.options.position[i];
 					
-					// this may have an effect on the size of the tooltip if there is an
-					// arrow or something else
-					helper.tooltipster.$tooltip
-						.removeClass('tooltipster-bottom')
-						.removeClass('tooltipster-left')
-						.removeClass('tooltipster-right')
-						.removeClass('tooltipster-top')
-						.addClass('tooltipster-' + pos);
+					// this may have an effect on the size of the tooltip if there are css
+					// rules for the arrow or something else
+					positionChange(pos);
 					
 					// now we get the size of the tooltip when it does not have any size
 					// constraints set
 					naturalSize = helper.tooltipster._sizerNatural();
 					
 					if (pos == 'top' || pos == 'bottom') {
-						margin.vertical = self.options.distance[pos];
+						distance.vertical = self.options.distance[pos];
 					}
 					else {
-						margin.horizontal = self.options.distance[pos];
+						distance.horizontal = self.options.distance[pos];
 					}
 					
 					outerNaturalSize = {
-						height: naturalSize.height + margin.vertical,
-						width: naturalSize.width + margin.horizontal
+						height: naturalSize.height + distance.vertical,
+						width: naturalSize.width + distance.horizontal
 					};
 					
 					testResults[container][pos] = {};
@@ -1601,7 +1658,7 @@
 					
 					testResults[container][pos].natural = {
 						fits: fits,
-						margin: margin,
+						distance: distance,
 						outerSize: outerNaturalSize,
 						position: pos,
 						size: naturalSize,
@@ -1616,24 +1673,24 @@
 					else {
 						
 						// let's try to use size constraints to fit
-						result = helper.tooltipster._sizerConstrained(
-							helper.geo.available[container][pos].width - margin.horizontal,
-							helper.geo.available[container][pos].height - margin.vertical
+						sizerResult = helper.tooltipster._sizerConstrained(
+							helper.geo.available[container][pos].width - distance.horizontal,
+							helper.geo.available[container][pos].height - distance.vertical
 						);
 						
 						testResults[container][pos].constrained = {
-							fits: result.fits,
-							margin: margin,
+							fits: sizerResult.fits,
+							distance: distance,
 							outerSize: {
-								height: result.size.height + margin.vertical,
-								width: result.size.width + margin.horizontal
+								height: sizerResult.size.height + distance.vertical,
+								width: sizerResult.size.width + distance.horizontal
 							},
 							position: pos,
-							size: result.size,
+							size: sizerResult.size,
 							sizeMode: 'constrained'
 						};
 						
-						if (result.fits) {
+						if (sizerResult.fits) {
 							constrainedFits = true;
 						}
 					}
@@ -1645,8 +1702,9 @@
 				}
 			});
 			
-			// TODO : let the user choose his positioning rules
-			var result;
+			
+			// Based on test, pick the position we'll use.
+			// TODO : let the user choose the order of the positioning rules
 			$.each(['window', 'document'], function(i, container) {
 				for (var i=0; i < self.options.position.length; i++) {
 					
@@ -1657,174 +1715,192 @@
 						if (	testResults[container][pos][mode]
 							&&	testResults[container][pos][mode].fits
 						) {
-							result = testResults[container][pos][mode];
+							finalResult = testResults[container][pos][mode];
 							return false;
 						}
 					});
 					
-					if (result) {
+					if (finalResult) {
 						return false;
 					}
 				}
 			});
-			// if everything failed, fall back on the preferred position, in the document,
-			// with scrollbars
-			if (!result) {
-				result = testResults.document[self.options.position[0]].constrained;
+			// if everything failed, this falls back on the preferred position but the
+			// tooltip will overflow the document
+			if (!finalResult) {
+				finalResult = testResults.document[self.options.position[0]].natural;
 			}
 			
-			// first, let's find the position of the tooltip relatively to the window
-			var tooltipWindowOffset = {};
+			// first, let's find the coordinates of the tooltip relatively to the window,
+			// centering it on the middle of the origin
+			finalResult.coord = {};
 			
-			switch (result.position) {
+			switch (finalResult.position) {
 				
 				case 'left':
 				case 'right':
-					tooltipWindowOffset.top = helper.geo.origin.windowOffset.top - (result.size.height / 2) + (helper.geo.origin.size.height / 2);
+					finalResult.coord.top = Math.floor(helper.geo.origin.windowOffset.top - (finalResult.size.height / 2) + (helper.geo.origin.size.height / 2));
 					break;
 				
 				case 'bottom':
 				case 'top':
-					tooltipWindowOffset.left = helper.geo.origin.windowOffset.left - (result.size.width / 2) + (helper.geo.origin.size.width / 2);
+					finalResult.coord.left = Math.floor(helper.geo.origin.windowOffset.left - (finalResult.size.width / 2) + (helper.geo.origin.size.width / 2));
 					break;
 			}
 			
-			switch (result.position) {
+			switch (finalResult.position) {
 				
 				case 'left':
-					tooltipWindowOffset.left = helper.geo.origin.windowOffset.left - result.outerSize.width;
+					finalResult.coord.left = helper.geo.origin.windowOffset.left - finalResult.outerSize.width;
 					break;
 				
 				case 'right':
-					tooltipWindowOffset.left = helper.geo.origin.windowOffset.left + helper.geo.origin.size.width + result.margin.horizontal;
+					finalResult.coord.left = helper.geo.origin.windowOffset.left + helper.geo.origin.size.width + finalResult.distance.horizontal;
 					break;
 				
 				case 'top':
-					tooltipWindowOffset.top = helper.geo.origin.windowOffset.top - result.outerSize.height;
+					finalResult.coord.top = helper.geo.origin.windowOffset.top - finalResult.outerSize.height;
 					break;
 				
 				case 'bottom':
-					tooltipWindowOffset.top = helper.geo.origin.windowOffset.top + helper.geo.origin.size.height + result.margin.vertical;
+					finalResult.coord.top = helper.geo.origin.windowOffset.top + helper.geo.origin.size.height + finalResult.distance.vertical;
 					break;
 			}
 			
-			// then if the tooltip overflows the viewport, we'll move it a little (the arrow will
-			// not be at the center of the tooltip anymore). However we can only move horizontally
-			// for top and bottom tooltips and vice versa. We'll take this opportunity to compute
-			// the arrow position.
-			
-			var arrowMiddle = {},
-				overflowAdjustment = 0;
-			
-			if (result.position == 'top' || result.position == 'bottom') {
-				
-				arrowMiddle = {
-					prop: 'left',
-					val: result.size.width / 2
-				};
+			// then if the tooltip overflows the viewport, we'll move it accordingly (it will
+			// not be centered on the middle of the origin anymore). We only move horizontally
+			// for top and bottom tooltips and vice versa.
+			if (finalResult.position == 'top' || finalResult.position == 'bottom') {
 				
 				// if there is an overflow on the left
-				if (tooltipWindowOffset.left < 0) {
-					
-					overflowAdjustment = -tooltipWindowOffset.left;
-					tooltipWindowOffset.left = 0;
+				if (finalResult.coord.left < 0) {
+					finalResult.coord.left = 0;
 				}
 				// or an overflow on the right
-				else if (tooltipWindowOffset.left + result.size.width > helper.geo.window.size.width) {
-					
-					overflowAdjustment = helper.geo.window.size.width - (tooltipWindowOffset.left + result.size.width);
-					tooltipWindowOffset.left += overflowAdjustment;
+				else if (finalResult.coord.left + finalResult.size.width > helper.geo.window.size.width) {
+					finalResult.coord.left += helper.geo.window.size.width - (finalResult.coord.left + finalResult.size.width);
 				}
 			}
 			else {
 				
-				arrowMiddle = {
-					prop: 'top',
-					val: result.size.height / 2
-				};
-				
 				// overflow on top
-				if (tooltipWindowOffset.top < 0) {
-					overflowAdjustment = -tooltipWindowOffset.top;
-					tooltipWindowOffset.top = 0;
+				if (finalResult.coord.top < 0) {
+					finalResult.coord.top = 0;
 				}
 				// or at bottom
-				else if (tooltipWindowOffset.top + result.size.height > helper.geo.window.size.height) {
-					
-					overflowAdjustment = helper.geo.window.size.height - (tooltipWindowOffset.top + result.size.height);
-					tooltipWindowOffset.top += overflowAdjustment;
+				else if (finalResult.coord.top + finalResult.size.height > helper.geo.window.size.height) {
+					finalResult.coord.top += helper.geo.window.size.height - (finalResult.coord.top + finalResult.size.height);
 				}
 			}
 			
-			if (overflowAdjustment) {
-				arrowMiddle.val -= overflowAdjustment;
+			// submit the positioning proposal to the user function which may choose to change
+			// the position, size and/or the coordinates
+			
+			// first, set the rules that corresponds to the proposed position : it may change
+			// the size of the tooltip, and the custom functionPosition may want to detect the
+			// size of some things before making a decision. So let's make things easier for the
+			// implementor
+			positionChange(finalResult.position);
+			
+			var customResult = self.options.functionPosition.call(self, helper, $.extend(true, {}, finalResult));
+			if (customResult) {
+				finalResult = customResult;
 			}
 			
-			// now let's convert the window offset into a position relative to the positioned
-			// parent that the tooltip will be appended to
+			// now let's compute the position of the arrow
+			if (finalResult.position == 'top' || finalResult.position == 'bottom') {
+				
+				var arrowCoord = {
+					prop: 'left',
+					val: helper.geo.origin.windowOffset.left + Math.floor(helper.geo.origin.size.width / 2) - finalResult.coord.left
+				};
+				
+				if (arrowCoord.val < 0) {
+					arrowCoord.val = 0;
+				}
+				else if (arrowCoord.val > finalResult.size.width) {
+					arrowCoord.val = finalResult.size.width;
+				}
+			}
+			else {
+				
+				var arrowCoord = {
+					prop: 'top',
+					val: helper.geo.origin.windowOffset.top + Math.floor(helper.geo.origin.size.height / 2) - finalResult.coord.top
+				};
+				
+				if (arrowCoord.val < 0) {
+					arrowCoord.val = 0;
+				}
+				else if (arrowCoord.val > finalResult.size.height) {
+					arrowCoord.val = finalResult.size.height;
+				}
+			}
 			
-			if (helper.tooltipster.$parent[0].tagName.toLowerCase() == 'body') {
+			// let's convert the window-relative coordinates into coordinates relative to the
+			// future positioned parent that the tooltip will be appended to
+			
+			if ($parent[0].tagName.toLowerCase() == 'body') {
 				var originParentOffset = {
 					left: helper.geo.origin.windowOffset.left + helper.geo.window.scroll.left,
 					top: helper.geo.origin.windowOffset.top + helper.geo.window.scroll.top
 				};
 			}
 			else {
-				// TODO : right now $parent cannot be something other than <body>.
+				// TODO. right now $parent cannot be something other than <body>.
 				// when we do this, .tooltipster-sizer will have to be appended to the parent
 				// to inherit css style values that affect the display of the text and such
 			}
 			
-			result.coord = {
-				left: originParentOffset.left + (tooltipWindowOffset.left - helper.geo.origin.windowOffset.left),
-				top: originParentOffset.top + (tooltipWindowOffset.top - helper.geo.origin.windowOffset.top)
+			finalResult.coord = {
+				left: originParentOffset.left + (finalResult.coord.left - helper.geo.origin.windowOffset.left),
+				top: originParentOffset.top + (finalResult.coord.top - helper.geo.origin.windowOffset.top)
 			};
 			
 			// set position values
-			helper.tooltipster.$tooltip
+			$tooltip
 				.removeClass('tooltipster-bottom')
 				.removeClass('tooltipster-left')
 				.removeClass('tooltipster-right')
 				.removeClass('tooltipster-top')
-				.addClass('tooltipster-' + result.position)
+				.addClass('tooltipster-' + finalResult.position)
 				.css({
-					left: result.coord.left,
-					top: result.coord.top
+					left: finalResult.coord.left,
+					top: finalResult.coord.top
 				})
 				.find('.tooltipster-arrow')
 					.css({
 						'left': '',
 						'top': ''
 					})
-					.css(arrowMiddle.prop, arrowMiddle.val);
+					.css(arrowCoord.prop, arrowCoord.val);
 			
-			// we do not need to set a size if the size is natural. It would be ok in Chrome
-			// but it creates a bug in Firefox (a box which is 30px high on screen can return
-			// an outerHeight of 29px, probably an issue with rounded values, maybe box-sizing),
-			// so we just don't do it
-			if (result.size.sizeMode == 'constrained') {
+			// we don't need to set a size if the size is natural. It would be harmless in Chrome
+			// but it creates a bug in Firefox, so we just don't do it
+			if (finalResult.size.sizeMode == 'constrained') {
 				
-				helper.tooltipster.$tooltip
+				$tooltip
 					.css({
-						height: result.size.height,
-						width: result.size.width
+						height: finalResult.size.height,
+						width: finalResult.size.width
 					});
 			}
 			else {
 			
-				helper.tooltipster.$tooltip
+				$tooltip
 					.css({
 						height: '',
 						width: ''
 					});
 			}
 			
-			// end position tests session and append the tooltip HTML element back to its parent
+			// end position tests session and append the tooltip HTML element to its parent
 			helper.tooltipster._sizerEnd();
 		},
 		
 		/**
 		 * Get or set options. Provided for advanced users.
+		 * 
 		 * @param {string} o Option name
 		 * @param {mixed} val optional A new value for the option
 		 * @return {mixed} If val is omitted, the value of the option is returned, otherwise
