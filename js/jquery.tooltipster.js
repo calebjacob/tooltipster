@@ -107,7 +107,6 @@
 		}
 		
 		// launch
-		
 		this._init();
 	}
 	
@@ -477,9 +476,9 @@
 					
 					// init the display plugin if it has not been initiated yet
 					if (!this.displayPlugin) {
-						var plugin = $.fn.tooltipster.displayPlugin[self.options.displayPlugin];
-						if (plugin) {
-							this.displayPlugin = new plugin(self.options);
+						var pluginClass = $.fn.tooltipster.displayPlugin[self.options.displayPlugin];
+						if (pluginClass) {
+							this.displayPlugin = new pluginClass(self, self.options);
 						}
 						else {
 							throw new Error('The "' + self.options.displayPlugin + '" plugin is not defined');
@@ -545,7 +544,9 @@
 									.removeClass('tooltipster-dying')
 									.addClass('tooltipster-show');
 								
-								if (self.options.speed > 0) self.$tooltip.delay(self.options.speed);
+								if (self.options.speed > 0) {
+									self.$tooltip.delay(self.options.speed);
+								}
 								
 								self.$tooltip.queue(finish);
 							}
@@ -1168,9 +1169,8 @@
 				self.geometry = self._geometry();
 				
 				// call the display plugin
-				this.displayPlugin.reposition(self.$tooltip, self.$parent, {
-					geo: self.geometry,
-					tooltipster: self
+				this.displayPlugin.reposition({
+					geo: self.geometry
 				});
 			}
 			
@@ -1422,8 +1422,19 @@
 ;(function($) {
 	
 	var pluginName = 'default',
-		plugin = function(options) {
-			this.init(options);
+		/** 
+		 * @param {object} tooltipster The tooltipster instance that instantiated this plugin
+		 * @param {object} options Options, @see self::defaults()
+		 */
+		plugin = function(tooltipster, options) {
+			
+			// list of instance variables
+			
+			this.options = $.extend(true, this.defaults(), options);
+			this.tooltipster = tooltipster;
+			
+			// initialize
+			this.init(tooltipster, options);
 		};
 	
 	plugin.prototype = {
@@ -1480,18 +1491,12 @@
 		},
 		
 		/**
-		 * Run at instantiation of the display plugin (when the tooltip is shown for
+		 * Run once: at instantiation of the display plugin (when the tooltip is shown for
 		 * the first time).
-		 * 
-		 * @param {object} options Options, @see self::defaults()
 		 */
-		init: function(options) {
+		init: function() {
 			
 			var defaults = this.defaults();
-			
-			// list of instance variables
-			
-			this.options = $.extend(true, {}, defaults, options);
 			
 			// option formatting
 			
@@ -1566,6 +1571,37 @@
 		},
 		
 		/**
+		 * Get or set options. Provided for advanced users.
+		 * 
+		 * @param {string} o Option name
+		 * @param {mixed} val optional A new value for the option
+		 * @return {mixed} If val is omitted, the value of the option is returned, otherwise
+		 * the instance itself is returned
+		 */
+		option: function(o, val) {
+			if (val === undefined) return this.options[o];
+			else {
+				this.options[o] = val;
+				return this;
+			}
+		},
+		
+		/**
+		 * Make whatever modifications are needed when the position is changed. This has
+		 * been made an independant method for easy inheritance in custom plugins based
+		 * on this default plugin.
+		 */
+		position_change: function(position) {
+			
+			this.tooltipster.$tooltip
+				.removeClass('tooltipster-bottom')
+				.removeClass('tooltipster-left')
+				.removeClass('tooltipster-right')
+				.removeClass('tooltipster-top')
+				.addClass('tooltipster-' + position);
+		},
+		
+		/**
 		 * This method must compute and set the positioning properties of the tooltip
 		 * (might be left, top, width, height, etc.). It must also make sure the
 		 * tooltip is eventually appended to its parent (since the element may be
@@ -1580,26 +1616,19 @@
 		 * about objects of interest (window, document, origin). This should help plugin
 		 * users to compute the optimal position of the tooltip
 		 * @param {object} helper.tooltipster The Tooltipster instance which calls this
-		 * method. Some of its methods may help plugin creators, especially its _sizer
-		 * internal methods that help measure the size of the tooltip in various
-		 * conditions.
+		 * method. Plugin creators will at least have to use tooltipster.$tooltip and
+		 * tooltipster.$parent. Also, some of its methods may help plugin creators,
+		 * especially its _sizer internal methods that help measure the size of the
+		 * tooltip in various conditions.
 		 */
-		reposition: function($tooltip, $parent, helper) {
+		reposition: function(helper) {
 			
 			var self = this;
 			
 			// start position tests session
-			helper.tooltipster._sizerStart();
+			self.tooltipster._sizerStart();
 			
 			var finalResult,
-				positionChange = function(position){
-					$tooltip
-						.removeClass('tooltipster-bottom')
-						.removeClass('tooltipster-left')
-						.removeClass('tooltipster-right')
-						.removeClass('tooltipster-top')
-						.addClass('tooltipster-' + position);
-				},
 				testResults = {
 					document: {},
 					window: {}
@@ -1627,11 +1656,11 @@
 					
 					// this may have an effect on the size of the tooltip if there are css
 					// rules for the arrow or something else
-					positionChange(pos);
+					self.position_change(pos);
 					
 					// now we get the size of the tooltip when it does not have any size
 					// constraints set
-					naturalSize = helper.tooltipster._sizerNatural();
+					naturalSize = self.tooltipster._sizerNatural();
 					
 					if (pos == 'top' || pos == 'bottom') {
 						distance.vertical = self.options.distance[pos];
@@ -1673,7 +1702,7 @@
 					else {
 						
 						// let's try to use size constraints to fit
-						sizerResult = helper.tooltipster._sizerConstrained(
+						sizerResult = self.tooltipster._sizerConstrained(
 							helper.geo.available[container][pos].width - distance.horizontal,
 							helper.geo.available[container][pos].height - distance.vertical
 						);
@@ -1798,9 +1827,13 @@
 			
 			// first, set the rules that corresponds to the proposed position : it may change
 			// the size of the tooltip, and the custom functionPosition may want to detect the
-			// size of some things before making a decision. So let's make things easier for the
+			// size of something before making a decision. So let's make things easier for the
 			// implementor
-			positionChange(finalResult.position);
+			self.position_change(finalResult.position);
+			
+			// include the tooltip and parent in the helper for the custom function
+			helper.$tooltip = self.tooltipster.$tooltip;
+			helper.$parent = self.tooltipster.$parent;
 			
 			var customResult = self.options.functionPosition.call(self, helper, $.extend(true, {}, finalResult));
 			if (customResult) {
@@ -1840,7 +1873,7 @@
 			// let's convert the window-relative coordinates into coordinates relative to the
 			// future positioned parent that the tooltip will be appended to
 			
-			if ($parent[0].tagName.toLowerCase() == 'body') {
+			if (self.tooltipster.$parent[0].tagName.toLowerCase() == 'body') {
 				var originParentOffset = {
 					left: helper.geo.origin.windowOffset.left + helper.geo.window.scroll.left,
 					top: helper.geo.origin.windowOffset.top + helper.geo.window.scroll.top
@@ -1858,12 +1891,11 @@
 			};
 			
 			// set position values
-			$tooltip
-				.removeClass('tooltipster-bottom')
-				.removeClass('tooltipster-left')
-				.removeClass('tooltipster-right')
-				.removeClass('tooltipster-top')
-				.addClass('tooltipster-' + finalResult.position)
+			
+			// again, in case positionFunction changed the position
+			self.position_change(finalResult.position);
+			
+			self.tooltipster.$tooltip
 				.css({
 					left: finalResult.coord.left,
 					top: finalResult.coord.top
@@ -1879,7 +1911,7 @@
 			// but it creates a bug in Firefox, so we just don't do it
 			if (finalResult.size.sizeMode == 'constrained') {
 				
-				$tooltip
+				self.tooltipster.$tooltip
 					.css({
 						height: finalResult.size.height,
 						width: finalResult.size.width
@@ -1887,7 +1919,7 @@
 			}
 			else {
 			
-				$tooltip
+				self.tooltipster.$tooltip
 					.css({
 						height: '',
 						width: ''
@@ -1895,24 +1927,8 @@
 			}
 			
 			// end position tests session and append the tooltip HTML element to its parent
-			helper.tooltipster._sizerEnd();
-		},
-		
-		/**
-		 * Get or set options. Provided for advanced users.
-		 * 
-		 * @param {string} o Option name
-		 * @param {mixed} val optional A new value for the option
-		 * @return {mixed} If val is omitted, the value of the option is returned, otherwise
-		 * the instance itself is returned
-		 */
-		option: function(o, val) {
-			if (val === undefined) return this.options[o];
-			else {
-				this.options[o] = val;
-				return this;
-			}
-		},
+			self.tooltipster._sizerEnd();
+		}
 	};
 	
 	$.fn.tooltipster.displayPlugin[pluginName] = plugin;
