@@ -1,7 +1,7 @@
-/*! Tooltipster 4.0.0rc7 */
+/*! Tooltipster 4.0.0rc8 */
 
 /**
- * Released on 2014-11-27
+ * Released on 2015-01-22
  * 
  * A rockin' custom tooltip jQuery plugin
  * Developed by Caleb Jacob under the MIT license http://opensource.org/licenses/MIT
@@ -116,134 +116,130 @@
 			
 			var self = this;
 			
-			// disable the plugin on old browsers (including IE7 and lower)
-			if (document.querySelector) {
+			// note : the content is null (empty) by default and can stay that
+			// way if the plugin remains initialized but not fed any content. The
+			// tooltip will just not appear.
+			
+			// let's save the initial value of the title attribute for later
+			// restoration if need be.
+			var initialTitle = null;
+			// it will already have been saved in case of multiple tooltips
+			if (self.$el.data('tooltipster-initialTitle') === undefined) {
 				
-				// note : the content is null (empty) by default and can stay that
-				// way if the plugin remains initialized but not fed any content. The
-				// tooltip will just not appear.
+				initialTitle = self.$el.attr('title');
 				
-				// let's save the initial value of the title attribute for later
-				// restoration if need be.
-				var initialTitle = null;
-				// it will already have been saved in case of multiple tooltips
-				if (self.$el.data('tooltipster-initialTitle') === undefined) {
-					
-					initialTitle = self.$el.attr('title');
-					
-					// we do not want initialTitle to have the value "undefined" because
-					// of how jQuery's .data() method works
-					if (initialTitle === undefined) initialTitle = null;
-					
-					self.$el.data('tooltipster-initialTitle', initialTitle);
-				}
+				// we do not want initialTitle to have the value "undefined" because
+				// of how jQuery's .data() method works
+				if (initialTitle === undefined) initialTitle = null;
 				
-				// If content is provided in the options, its has precedence over the
-				// title attribute.
-				// Note : an empty string is considered content, only 'null' represents
-				// the absence of content.
-				// Also, an existing title="" attribute will result in an empty string
-				// content
-				if (self.options.content !== null) {
-					self._content_set(self.options.content);
-				}
-				else {
-					self._content_set(initialTitle);
-				}
-				
-				self.$el
-					// strip the title off of the element to prevent the default tooltips
-					// from popping up
-					.removeAttr('title')
-					// to be able to find all instances on the page later (upon window
-					// events in particular)
-					.addClass('tooltipstered');
+				self.$el.data('tooltipster-initialTitle', initialTitle);
+			}
+			
+			// If content is provided in the options, its has precedence over the
+			// title attribute.
+			// Note : an empty string is considered content, only 'null' represents
+			// the absence of content.
+			// Also, an existing title="" attribute will result in an empty string
+			// content
+			if (self.options.content !== null) {
+				self._content_set(self.options.content);
+			}
+			else {
+				self._content_set(initialTitle);
+			}
+			
+			self.$el
+				// strip the title off of the element to prevent the default tooltips
+				// from popping up
+				.removeAttr('title')
+				// to be able to find all instances on the page later (upon window
+				// events in particular)
+				.addClass('tooltipstered');
 
-				// detect if we're changing the tooltip origin to an icon
-				// note about this condition : if the device has touch capability and
-				// self.options.iconTouch is false, you'll have no icons event though you
-				// may consider your device as a desktop if it also has a mouse. Not sure
-				// why someone would have this use case though.
-				if ((!deviceHasTouchCapability && self.options.iconDesktop) || (deviceHasTouchCapability && self.options.iconTouch)) {
-					
-					// TODO : the tooltip should be automatically be given an absolute
-					// position to be near the origin. Otherwise, when the origin is floating
-					// or what, it's going to be nowhere near it and disturb the position
-					// flow of the page elements. It will imply that the icon also detects
-					// when its origin moves, to follow it : not trivial.
-					// Until it's done, the icon feature does not really make sense since
-					// the user still has most of the work to do by himself
-					
-					// if the icon provided is in the form of a string
-					if (typeof self.options.icon === 'string') {
-						// wrap it in a span with the icon class
-						self.$elProxy = $('<span class="'+ self.options.iconTheme +'"></span>');
-						self.$elProxy.text(self.options.icon);
-					}
-					// if it is an object (sensible choice)
-					else {
-						// (deep) clone the object if iconCloning == true, to make sure
-						// every instance has its own proxy. We use the icon without
-						// wrapping, no need to. We do not give it a class either, as the
-						// user will undoubtedly style the object on his own and since our
-						// css properties may conflict with his own
-						if (self.options.iconCloning) self.$elProxy = self.options.icon.clone(true);
-						else self.$elProxy = self.options.icon;
-					}
-					
-					self.$elProxy.insertAfter(self.$el);
+			// detect if we're changing the tooltip origin to an icon
+			// note about this condition : if the device has touch capability and
+			// self.options.iconTouch is false, you'll have no icons event though you
+			// may consider your device as a desktop if it also has a mouse. Not sure
+			// why someone would have this use case though.
+			if ((!deviceHasTouchCapability && self.options.iconDesktop) || (deviceHasTouchCapability && self.options.iconTouch)) {
+				
+				// TODO : the tooltip should be automatically be given an absolute
+				// position to be near the origin. Otherwise, when the origin is floating
+				// or what, it's going to be nowhere near it and disturb the position
+				// flow of the page elements. It will imply that the icon also detects
+				// when its origin moves, to follow it : not trivial.
+				// Until it's done, the icon feature does not really make sense since
+				// the user still has most of the work to do by himself
+				
+				// if the icon provided is in the form of a string
+				if (typeof self.options.icon === 'string') {
+					// wrap it in a span with the icon class
+					self.$elProxy = $('<span class="'+ self.options.iconTheme +'"></span>');
+					self.$elProxy.text(self.options.icon);
 				}
+				// if it is an object (sensible choice)
 				else {
-					self.$elProxy = self.$el;
+					// (deep) clone the object if iconCloning == true, to make sure
+					// every instance has its own proxy. We use the icon without
+					// wrapping, no need to. We do not give it a class either, as the
+					// user will undoubtedly style the object on his own and since our
+					// css properties may conflict with his own
+					if (self.options.iconCloning) self.$elProxy = self.options.icon.clone(true);
+					else self.$elProxy = self.options.icon;
 				}
 				
-				// for 'click' and 'hover' triggers : bind on events to open the tooltip.
-				// Closing is now handled in _showNow() because of its bindings.
-				// Notes about touch events :
-					// - mouseenter, mouseleave and clicks happen even on pure touch devices
-					//   because they are emulated. deviceIsPureTouch() is a simple attempt
-					//   to detect them.
-					// - on hybrid devices, we do not prevent touch gesture from opening
-					//   tooltips. It would be too complex to differentiate real mouse events
-					//   from emulated ones.
-					// - we check deviceIsPureTouch() at each event rather than prior to
-					//   binding because the situation may change during browsing
-				if (self.options.trigger == 'hover') {
-					
-					// these binding are for mouse interaction only
-					self.$elProxy
-						.on('mouseenter.'+ self.namespace, function() {
-							if (!deviceIsPureTouch() || self.options.touchDevices) {
-								self.mouseIsOverProxy = true;
-								self._show();
-							}
-						})
-						.on('mouseleave.'+ self.namespace, function() {
-							if (!deviceIsPureTouch() || self.options.touchDevices) {
-								self.mouseIsOverProxy = false;
-							}
-						});
-					
-					// for touch interaction only
-					if (deviceHasTouchCapability && self.options.touchDevices) {
-						
-						// for touch devices, we immediately display the tooltip because we
-						// cannot rely on mouseleave to handle the delay
-						self.$elProxy.on('touchstart.'+ self.namespace, function() {
-							self._showNow();
-						});
-					}
-				}
-				else if (self.options.trigger == 'click') {
-					
-					// note : for touch devices, we do not bind on touchstart, we only rely
-					// on the emulated clicks (triggered by taps)
-					self.$elProxy.on('click.'+ self.namespace, function() {
+				self.$elProxy.insertAfter(self.$el);
+			}
+			else {
+				self.$elProxy = self.$el;
+			}
+			
+			// for 'click' and 'hover' triggers : bind on events to open the tooltip.
+			// Closing is now handled in _showNow() because of its bindings.
+			// Notes about touch events :
+				// - mouseenter, mouseleave and clicks happen even on pure touch devices
+				//   because they are emulated. deviceIsPureTouch() is a simple attempt
+				//   to detect them.
+				// - on hybrid devices, we do not prevent touch gesture from opening
+				//   tooltips. It would be too complex to differentiate real mouse events
+				//   from emulated ones.
+				// - we check deviceIsPureTouch() at each event rather than prior to
+				//   binding because the situation may change during browsing
+			if (self.options.trigger == 'hover') {
+				
+				// these binding are for mouse interaction only
+				self.$elProxy
+					.on('mouseenter.'+ self.namespace, function() {
 						if (!deviceIsPureTouch() || self.options.touchDevices) {
+							self.mouseIsOverProxy = true;
 							self._show();
 						}
+					})
+					.on('mouseleave.'+ self.namespace, function() {
+						if (!deviceIsPureTouch() || self.options.touchDevices) {
+							self.mouseIsOverProxy = false;
+						}
+					});
+				
+				// for touch interaction only
+				if (deviceHasTouchCapability && self.options.touchDevices) {
+					
+					// for touch devices, we immediately display the tooltip because we
+					// cannot rely on mouseleave to handle the delay
+					self.$elProxy.on('touchstart.'+ self.namespace, function() {
+						self._showNow();
 					});
 				}
+			}
+			else if (self.options.trigger == 'click') {
+				
+				// note : for touch devices, we do not bind on touchstart, we only rely
+				// on the emulated clicks (triggered by taps)
+				self.$elProxy.on('click.'+ self.namespace, function() {
+					if (!deviceIsPureTouch() || self.options.touchDevices) {
+						self._show();
+					}
+				});
 			}
 		},
 		
@@ -316,8 +312,9 @@
 							width: $window.width()
 						},
 						scroll: {
-							left: window.scrollX,
-							top: window.scrollY
+							// the second ones is for IE compatibility
+							left: window.scrollX || document.documentElement.scrollLeft,
+							top: window.scrollY || document.documentElement.scrollTop
 						}
 					},
 					origin: {
@@ -676,11 +673,16 @@
 							// shown
 							self._interval_set();
 							
-							// reposition on scroll (otherwise position:fixed element's tooltips
-							// will move away form their origin) and on resize (in case position
-							// can/has to be changed)
-							$(window).on('scroll.'+ self.namespace +' resize.'+ self.namespace, function() {
+							// reposition on resize (in case position can/has to be changed)
+							$(window).on('resize.'+ self.namespace, function() {
 								self.reposition();
+							});
+							// reposition on scroll when the origin has a fixed lineage (otherwise the
+							// tooltips on position:fixed element will move away from their origin)
+							$(window).on('scroll.'+ self.namespace, function() {
+								if (self.geometry.origin.fixedLineage) {
+									self.reposition();
+								}
 							});
 							
 							// autoHide bindings
