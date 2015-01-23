@@ -1,7 +1,7 @@
-/*! Tooltipster 4.0.0rc8 */
+/*! Tooltipster 4.0.0rc9 */
 
 /**
- * Released on 2015-01-22
+ * Released on 2015-01-23
  * 
  * A rockin' custom tooltip jQuery plugin
  * Developed by Caleb Jacob under the MIT license http://opensource.org/licenses/MIT
@@ -102,6 +102,7 @@
 		}
 		this.options.iconTheme = this.options.iconTheme.replace('.', '');
 		
+		// option formatting
 		if (typeof this.options.theme == 'string') {
 			this.options.theme = [this.options.theme];
 		}
@@ -1452,6 +1453,14 @@
 			
 			this.options = $.extend(true, this.defaults(), options);
 			this.tooltipster = tooltipster;
+			
+			// disable the arrow in IE6 unless the arrow option was explicitly set to true
+			var $d = $('<i><!--[if IE 6]><i></i><![endif]--></i>');
+			if (	$d.children().length > 0
+				&&	options.arrow !== true
+			) {
+				this.options.arrow = false;
+			}
 			
 			// initialize
 			this.init(tooltipster, options);
