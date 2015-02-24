@@ -30,11 +30,6 @@
 			functionReady: function(origin) {},
 			functionAfter: function(origin) {},
 			hideOnClick: false,
-			icon: '(?)',
-			iconCloning: true,
-			iconDesktop: false,
-			iconTouch: false,
-			iconTheme: 'tooltipster-icon',
 			interactive: false,
 			interactiveTolerance: 350,
 			multiple: false,
@@ -75,15 +70,11 @@
 		this.Content;
 		// an instance of the chosen display plugin
 		this.displayPlugin;
-		// this is the original element which is being applied the tooltipster plugin
+		// this is the element which gets one or more tooltips, also called "origin"
 		this.$el = $(element);
-		// this will be the element which triggers the appearance of the tooltip on
-		// hover/click/custom events. It will be the same as this.$el if icons are not
-		// used (see in the options), otherwise it will correspond to the created icon
-		this.$elProxy;
 		this.geometry;
 		this.enabled = true;
-		this.mouseIsOverProxy = false;
+		this.mouseIsOverOrigin = false;
 		// a unique namespace per instance, for easy selective unbinding
 		this.namespace = 'tooltipster-'+ Math.round(Math.random()*100000);
 		// Status (capital S) can be either : appearing, shown, disappearing, hidden
@@ -100,7 +91,6 @@
 		if (this.options.autoClose !== undefined) {
 			this.options.autoHide = this.options.autoClose;
 		}
-		this.options.iconTheme = this.options.iconTheme.replace('.', '');
 		
 		// option formatting
 		if (typeof this.options.theme == 'string') {
@@ -156,44 +146,6 @@
 				// to be able to find all instances on the page later (upon window
 				// events in particular)
 				.addClass('tooltipstered');
-
-			// detect if we're changing the tooltip origin to an icon
-			// note about this condition : if the device has touch capability and
-			// self.options.iconTouch is false, you'll have no icons event though you
-			// may consider your device as a desktop if it also has a mouse. Not sure
-			// why someone would have this use case though.
-			if ((!deviceHasTouchCapability && self.options.iconDesktop) || (deviceHasTouchCapability && self.options.iconTouch)) {
-				
-				// TODO : the tooltip should be automatically be given an absolute
-				// position to be near the origin. Otherwise, when the origin is floating
-				// or what, it's going to be nowhere near it and disturb the position
-				// flow of the page elements. It will imply that the icon also detects
-				// when its origin moves, to follow it : not trivial.
-				// Until it's done, the icon feature does not really make sense since
-				// the user still has most of the work to do by himself
-				
-				// if the icon provided is in the form of a string
-				if (typeof self.options.icon === 'string') {
-					// wrap it in a span with the icon class
-					self.$elProxy = $('<span class="'+ self.options.iconTheme +'"></span>');
-					self.$elProxy.text(self.options.icon);
-				}
-				// if it is an object (sensible choice)
-				else {
-					// (deep) clone the object if iconCloning == true, to make sure
-					// every instance has its own proxy. We use the icon without
-					// wrapping, no need to. We do not give it a class either, as the
-					// user will undoubtedly style the object on his own and since our
-					// css properties may conflict with his own
-					if (self.options.iconCloning) self.$elProxy = self.options.icon.clone(true);
-					else self.$elProxy = self.options.icon;
-				}
-				
-				self.$elProxy.insertAfter(self.$el);
-			}
-			else {
-				self.$elProxy = self.$el;
-			}
 			
 			// for 'click' and 'hover' triggers : bind on events to open the tooltip.
 			// Closing is now handled in _showNow() because of its bindings.
@@ -209,16 +161,16 @@
 			if (self.options.trigger == 'hover') {
 				
 				// these binding are for mouse interaction only
-				self.$elProxy
+				self.$el
 					.on('mouseenter.'+ self.namespace, function() {
 						if (!deviceIsPureTouch() || self.options.touchDevices) {
-							self.mouseIsOverProxy = true;
+							self.mouseIsOverOrigin = true;
 							self._show();
 						}
 					})
 					.on('mouseleave.'+ self.namespace, function() {
 						if (!deviceIsPureTouch() || self.options.touchDevices) {
-							self.mouseIsOverProxy = false;
+							self.mouseIsOverOrigin = false;
 						}
 					});
 				
@@ -227,7 +179,7 @@
 					
 					// for touch devices, we immediately display the tooltip because we
 					// cannot rely on mouseleave to handle the delay
-					self.$elProxy.on('touchstart.'+ self.namespace, function() {
+					self.$el.on('touchstart.'+ self.namespace, function() {
 						self._showNow();
 					});
 				}
@@ -236,7 +188,7 @@
 				
 				// note : for touch devices, we do not bind on touchstart, we only rely
 				// on the emulated clicks (triggered by taps)
-				self.$elProxy.on('click.'+ self.namespace, function() {
+				self.$el.on('click.'+ self.namespace, function() {
 					if (!deviceIsPureTouch() || self.options.touchDevices) {
 						self._show();
 					}
@@ -295,10 +247,10 @@
 		 */
 		_geometry: function() {
 			
-			var	bcr = this.$elProxy[0].getBoundingClientRect(),
+			var	bcr = this.$el[0].getBoundingClientRect(),
 				$document = $(document),
 				$window = $(window),
-				$parent = this.$elProxy,
+				$parent = this.$el,
 				// some useful properties of important elements
 				geo = {
 					document: {
@@ -313,7 +265,7 @@
 							width: $window.width()
 						},
 						scroll: {
-							// the second ones is for IE compatibility
+							// the second ones are for IE compatibility
 							left: window.scrollX || document.documentElement.scrollLeft,
 							top: window.scrollY || document.documentElement.scrollTop
 						}
@@ -398,8 +350,8 @@
 				if (
 						// if the origin has been removed
 						$('body').find(self.$el).length === 0
-						// if the elProxy has been removed
-					||	$('body').find(self.$elProxy).length === 0
+						// if the origin has been removed
+					||	$('body').find(self.$el).length === 0
 						// if the tooltip has been closed
 					||	self.Status == 'hidden'
 						// if the tooltip has somehow been removed
@@ -413,7 +365,7 @@
 				}
 				// if everything is alright
 				else {
-					// compare the former and current positions of the elProxy to reposition
+					// compare the former and current positions of the origin to reposition
 					// the tooltip if need be
 					if (self.options.positionTracker) {
 						
@@ -465,8 +417,10 @@
 					self.timerShow = setTimeout(function() {
 						
 						// for hover trigger, we check if the mouse is still over the
-						// proxy, otherwise we do not show anything
-						if (self.options.trigger == 'click' || (self.options.trigger == 'hover' && self.mouseIsOverProxy)) {
+						// origin, otherwise we do not show anything
+						if (	self.options.trigger == 'click'
+							||	(self.options.trigger == 'hover' && self.mouseIsOverOrigin)
+						) {
 							self._showNow();
 						}
 					}, self.options.delay);
@@ -481,7 +435,7 @@
 			var self = this;
 			
 			// check that the origin is still in the DOM
-			if ($('body').find(self.$elProxy).length !== 0) {
+			if ($('body').find(self.$el).length !== 0) {
 				
 				// call our constructor custom function before continuing
 				if (self.options.functionBefore.call(self, self.$el[0]) !== false) {
@@ -724,32 +678,32 @@
 										// after the mouse has spent some time out of it
 										var tolerance = null;
 										
-										self.$elProxy.add(self.$tooltip)
-											// hide after some time out of the proxy and the tooltip
+										self.$el.add(self.$tooltip)
+											// hide after some time out of the origin and the tooltip
 											.on('mouseleave.'+ self.namespace + '-autoHide', function() {
 												clearTimeout(tolerance);
 												tolerance = setTimeout(function() {
 													self.hide();
 												}, self.options.interactiveTolerance);
 											})
-											// suspend timeout when the mouse is over the proxy or
-											//the tooltip
+											// suspend timeout when the mouse is over the origin or
+											// the tooltip
 											.on('mouseenter.'+ self.namespace + '-autoHide', function() {
 												clearTimeout(tolerance);
 											});
 									}
 									// if this is a non-interactive tooltip, get rid of it if the mouse leaves
 									else {
-										self.$elProxy.on('mouseleave.'+ self.namespace + '-autoHide', function() {
+										self.$el.on('mouseleave.'+ self.namespace + '-autoHide', function() {
 											self.hide();
 										});
 									}
 									
-									// close the tooltip when the proxy gets a click (common behavior of
+									// close the tooltip when the origin gets a click (common behavior of
 									// native tooltips)
 									if (self.options.hideOnClick) {
 										
-										self.$elProxy.on('click.'+ self.namespace + '-autoHide', function() {
+										self.$el.on('click.'+ self.namespace + '-autoHide', function() {
 											self.hide();
 										});
 									}
@@ -985,11 +939,6 @@
 			
 			self.hide();
 			
-			// remove the icon, if any
-			if (self.$el[0] !== self.$elProxy[0]) {
-				self.$elProxy.remove();
-			}
-			
 			self.$el
 				.removeData(self.namespace)
 				.off('.'+ self.namespace);
@@ -1045,10 +994,6 @@
 			this.hide();
 			this.enabled = false;
 			return this;
-		},
-		
-		elementIcon: function() {
-			return (this.$el[0] !== this.$elProxy[0]) ? this.$elProxy[0] : undefined;
 		},
 		
 		elementOrigin: function() {
@@ -1112,7 +1057,7 @@
 					$('body').off('.'+ self.namespace);
 					
 					// unbind any auto-closing hover listeners
-					self.$elProxy.off('.'+ self.namespace + '-autoHide');
+					self.$el.off('.'+ self.namespace + '-autoHide');
 					
 					// call our constructor custom callback function
 					self.options.functionAfter.call(self, self.$el[0]);
@@ -1221,7 +1166,7 @@
 		// for using in closures
 		var args = arguments,
 			// common mistake : an HTML element can't be in several tooltips at the same time
-			contentCloningWarning = 'You are using a single HTML element as content for several tooltips. You should probably be using the contentCloning option.';
+			contentCloningWarning = 'You are using a single HTML element as content for several tooltips. You probably want to set the contentCloning option to TRUE.';
 		
 		// if we are not in the context of jQuery wrapped HTML element(s) :
 		// this happens when calling static methods in the form $.fn.tooltipster('methodName')
@@ -1364,7 +1309,7 @@
 						go = true;
 					}
 					else if (debug) {
-						console.log('Tooltipster: one or more tooltips are already attached to this element: ignoring. You might want to check out the "multiple" option.');
+						console.log('Tooltipster: one or more tooltips are already attached to this element: ignoring.');
 					}
 					
 					if (go) {
@@ -1479,7 +1424,7 @@
 				arrow: true,
 				distance: 6,
 				functionPosition: function(){},
-				minHeight: 0,
+				maxWidth: null,
 				minWidth: 0,
 				position: ['top', 'bottom', 'right', 'left']
 				/*
@@ -1938,7 +1883,7 @@
 			
 			// we don't need to set a size if the size is natural. It would be harmless in Chrome
 			// but it creates a bug in Firefox, so we just don't do it
-			if (finalResult.size.sizeMode == 'constrained') {
+			if (finalResult.sizeMode == 'constrained') {
 				
 				self.tooltipster.$tooltip
 					.css({

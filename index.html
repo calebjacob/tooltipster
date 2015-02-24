@@ -94,7 +94,7 @@
 					<img src="doc/images/browser-firefox.png" alt="FireFox" class="tooltip" title="FireFox Support" />
 				</li>
 				<li>
-					<img src="doc/images/browser-ie.png" alt="Internet Explorer" class="tooltip" title="IE10, IE9, &amp; IE8 Support + Graceful Degradation" />
+					<img src="doc/images/browser-ie.png" alt="Internet Explorer" class="tooltip" title="IE6+ support + Graceful degradation" />
 				</li>
 			</ul>
 			<div id="download">
@@ -279,11 +279,6 @@ $('.tooltip').tooltipster({
 					<td>Adds the "speech bubble arrow" to the tooltip. <strong>Default: true</strong></td>
 				</tr>
 				<tr>
-					<td><h4>arrowColor</h4></td>
-					<td>hex code / rgb</td>
-					<td>Select a specific color for the "speech bubble arrow". <strong>Default: will inherit the tooltip's background color</strong></td>
-				</tr>
-				<tr>
 					<td><h4>autoClose</h4></td>
 					<td>boolean</td>
 					<td>If autoClose is set to false, the tooltip will never close unless you call the 'hide' method yourself. <strong>Default: true</strong></td>
@@ -301,17 +296,27 @@ $('.tooltip').tooltipster({
 				<tr>
 					<td><h4>contentCloning</h4></td>
 					<td>boolean</td>
-					<td>If you provide a jQuery object to the 'content' option, this sets if it is a clone of this object that should actually be used. <strong>Default: true</strong></td>
+					<td>If you provide a jQuery object to the 'content' option, this sets if it is a clone of this object that should actually be used. <strong>Default: false</strong></td>
 				</tr>
 				<tr>
 					<td><h4>debug</h4></td>
 					<td>boolean</td>
-					<td>Tooltipster logs notices into the console when you're doing something you ideally shouldn't be doing. Set to false to disable logging. <strong>Default: true</strong></td>
+					<td>Tooltipster logs hints and notices into the console when you're doing something you ideally shouldn't be doing. Set to false to disable logging. <strong>Default: true</strong></td>
 				</tr>
 				<tr>
 					<td><h4>delay</h4></td>
 					<td>integer</td>
 					<td>Delay how long it takes (in milliseconds) for the tooltip to start animating in. <strong>Default: 200</strong></td>
+				</tr>
+				<tr>
+					<td><h4>displayPlugin</h4></td>
+					<td>string</td>
+					<td>The name of the display plugin that should be used (see examples). <strong>Default: 'default'</strong></td>
+				</tr>
+				<tr>
+					<td><h4>distance</h4></td>
+					<td>integer, array</td>
+					<td>The distance between the origin and the tooltip, in pixels. The value may be an integer or an array of integers if you wish to specify a different distance for each side. <strong>Default: 6</strong></td>
 				</tr>
 				<tr>
 					<td><h4>minWidth</h4></td>
@@ -342,6 +347,11 @@ $('.tooltip').tooltipster({
 					<td><h4>functionAfter</h4></td>
 					<td>function</td>
 					<td>A custom function to be fired once the tooltip has been closed and removed from the DOM. <strong>Default: function(origin) {}</strong></td>
+				</tr>
+				<tr>
+					<td><h4>functionPosition</h4></td>
+					<td>function</td>
+					<td>A custom function fired when the tooltip is repositioned. It gives you the ability to slightly or completely modify the position that Tooltipster is about to give to the tooltip (see examples). <strong>Default: function(data) {}</strong></td>
 				</tr>
 				<tr>
 					<td><h4>hideOnClick</h4></td>
@@ -386,17 +396,7 @@ $('.tooltip').tooltipster({
 				<tr>
 					<td><h4>multiple</h4></td>
 					<td>boolean</td>
-					<td>Allows you to put multiple tooltips on a single element. Read further instructions down this page. <strong>Default: false</strong></td>
-				</tr>
-				<tr>
-					<td><h4>offsetX</h4></td>
-					<td>integer</td>
-					<td>Offsets the tooltip (in pixels) farther left/right from the origin. <strong>Default: 0</strong></td>
-				</tr>
-				<tr>
-					<td><h4>offsetY</h4></td>
-					<td>integer</td>
-					<td>Offsets the tooltip (in pixels) farther up/down from the origin. <strong>Default: 0</strong></td>
+					<td>Allows you to put multiple tooltips on a single element (see examples). When set to true, the returnObjects option is automatically set to true as well. <strong>Default: false</strong></td>
 				</tr>
 				<tr>
 					<td><h4>onlyOne</h4></td>
@@ -405,8 +405,8 @@ $('.tooltip').tooltipster({
 				</tr>
 				<tr>
 					<td><h4>position</h4></td>
-					<td>right, left, top, top-right, top-left, bottom, bottom-right, bottom-left</td>
-					<td>Set the position of the tooltip. <strong>Default: 'top'</strong></td>
+					<td>string, array</td>
+					<td>Set the position of the tooltip. The value may one or a combination of the following: 'top', 'bottom', 'left', 'right'. When using an array, the order of values is taken into account when the position must be adapted. Besides, the absence of a position disables it (see examples). <strong>Default: ['top', 'bottom', 'right', 'left']</strong></td>
 				</tr>
 				<tr>
 					<td><h4>positionTracker</h4></td>
@@ -424,6 +424,11 @@ $('.tooltip').tooltipster({
 					<td>Specify if a TITLE attribute should be restored on the HTML element after a call to the 'destroy' method. This attribute may be omitted, or be restored with the value that existed before Tooltipster was initialized, or be restored with the stringified value of the current content. Note: in case of multiple tooltips on a single element, only the last destroyed tooltip may trigger a restoration. <strong>Default: 'none'</strong></td>
 				</tr>
 				<tr>
+					<td><h4>returnObjects</h4></td>
+					<td>boolean</td>
+					<td>Set to true if the instantiation call should return the array of created Tooltipster objects rather than the origin (see examples). <strong>Default: false</strong></td>
+				</tr>
+				<tr>
 					<td><h4>speed</h4></td>
 					<td>integer</td>
 					<td>Set the speed of the animation. <strong>Default: 350</strong></td>
@@ -435,8 +440,8 @@ $('.tooltip').tooltipster({
 				</tr>
 				<tr>
 					<td><h4>theme</h4></td>
-					<td>CSS class</td>
-					<td>Set the theme used for your tooltip. <strong>Default: 'tooltipster-default'</strong></td>
+					<td>string, array</td>
+					<td>Set a theme that will override the default tooltip appearance. You may provide an array of strings to apply several themes at once (see examples). <strong>Default: empty array</strong></td>
 				</tr>
 				<tr>
 					<td><h4>touchDevices</h4></td>
@@ -452,6 +457,11 @@ $('.tooltip').tooltipster({
 					<td><h4>updateAnimation</h4></td>
 					<td>boolean</td>
 					<td>If a tooltip is open while its content is updated, play a subtle animation when the content changes. <strong>Default: true</strong></td>
+				</tr>
+				<tr>
+					<td><h4>zIndex</h4></td>
+					<td>integer</td>
+					<td>Set the z-index of the tooltip. <strong>Default: 9999999</strong></td>
 				</tr>
 			</table>
 		</section>

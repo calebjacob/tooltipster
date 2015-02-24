@@ -1,51 +1,52 @@
 Tooltipster
 ===========
 
-A jQuery tooltip plugin by Caleb Jacob under MIT license.  
-Compatible with Mozilla Firefox, Google Chrome, IE8+ and others. Requires jQuery 1.7+
+An extensible jQuery tooltip plugin by Caleb Jacob under MIT license.  
+Compatible with Mozilla Firefox, Google Chrome, IE6+ and others. Requires jQuery 1.7+
 
 A reminder of options/methods lies below. For detailed documentation, visit http://iamceege.github.io/tooltipster/
 
-Options
+Standard options
 -------------------------
 
 animation  
-arrow  
-arrowColor  
-autoClose  
+autoHide  
 content  
 contentAsHTML  
 contentCloning  
 debug  
 delay  
-minWidth  
-maxWidth  
+displayPlugin  
 functionInit  
 functionBefore  
 functionReady  
 functionAfter  
 hideOnClick  
-icon  
-iconCloning  
-iconDesktop  
-iconTheme  
-iconTouch  
 interactive  
 interactiveTolerance  
 multiple  
-offsetX  
-offsetY  
 onlyOne  
-position  
 positionTracker  
 positionTrackerCallback  
 restoration  
+returnObjects  
 speed  
 timer  
 theme  
 touchDevices  
 trigger  
 updateAnimation  
+zIndex  
+
+Other options (available with the default display plugin)
+-------------------------
+
+arrow  
+distance  
+functionPosition  
+maxWidth  
+minWidth  
+position  
 
 Methods
 -------------------------
@@ -54,6 +55,8 @@ $.fn.tooltipster('setDefaults', {})
 $(...).tooltipster('show' [, callback])  
 $(...).tooltipster('hide' [, callback])  
 $(...).tooltipster('disable')  
+$(...).tooltipster('elementOrigin')  
+$(...).tooltipster('elementTooltip')  
 $(...).tooltipster('enable')  
 $(...).tooltipster('destroy')  
 $(...).tooltipster('content')  
@@ -61,6 +64,3 @@ $(...).tooltipster('content', myNewContent)
 $(...).tooltipster('option', optionName)  
 $(...).tooltipster('option', optionName, optionValue)  
 $(...).tooltipster('reposition')  
-$(...).tooltipster('elementOrigin')  
-$(...).tooltipster('elementTooltip')  
-$(...).tooltipster('elementIcon')  
