@@ -39,6 +39,7 @@ onlyOne
 position  
 positionTracker  
 positionTrackerCallback  
+repositionOffscreen
 restoration  
 speed  
 timer  

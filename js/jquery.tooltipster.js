@@ -51,6 +51,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					this.hide();
 				}
 			},
+			repositionOffscreen: true,
 			restoration: 'current',
 			speed: 350,
 			timer: 0,
@@ -889,44 +890,56 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					var leftDifference = (proxy.offset.left + tooltipWidth) - (proxy.offset.left + proxy.dimension.width);
 					myLeft = (proxy.offset.left + offsetX) - (leftDifference / 2);
 					myTop = (proxy.offset.top - tooltipHeight) - offsetY - 12;
-					dontGoOffScreenX();
-					dontGoOffScreenY('bottom', 'top');
-				}
+						if(self.options.repositionOffscreen) {
+							dontGoOffScreenX();
+							dontGoOffScreenY('bottom', 'top');
+						}
+					}
 				
 				if(practicalPosition == 'top-left') {
 					myLeft = proxy.offset.left + offsetX;
 					myTop = (proxy.offset.top - tooltipHeight) - offsetY - 12;
-					dontGoOffScreenX();
-					dontGoOffScreenY('bottom-left', 'top-left');
+					if(self.options.repositionOffscreen) {
+						dontGoOffScreenX();
+						dontGoOffScreenY('bottom-left', 'top-left');
+					}
 				}
 				
 				if(practicalPosition == 'top-right') {
 					myLeft = (proxy.offset.left + proxy.dimension.width + offsetX) - tooltipWidth;
 					myTop = (proxy.offset.top - tooltipHeight) - offsetY - 12;
-					dontGoOffScreenX();
-					dontGoOffScreenY('bottom-right', 'top-right');
+					if(self.options.repositionOffscreen) {
+						dontGoOffScreenX();
+						dontGoOffScreenY('bottom-right', 'top-right');
+					}
 				}
 				
 				if(practicalPosition == 'bottom') {
 					var leftDifference = (proxy.offset.left + tooltipWidth) - (proxy.offset.left + proxy.dimension.width);
 					myLeft = proxy.offset.left - (leftDifference / 2) + offsetX;
 					myTop = (proxy.offset.top + proxy.dimension.height) + offsetY + 12;
-					dontGoOffScreenX();
-					dontGoOffScreenY('top', 'bottom');
+					if(self.options.repositionOffscreen) {
+						dontGoOffScreenX();
+						dontGoOffScreenY('top', 'bottom');
+					}
 				}
 				
 				if(practicalPosition == 'bottom-left') {
 					myLeft = proxy.offset.left + offsetX;
 					myTop = (proxy.offset.top + proxy.dimension.height) + offsetY + 12;
-					dontGoOffScreenX();
-					dontGoOffScreenY('top-left', 'bottom-left');
+					if(self.options.repositionOffscreen) {
+						dontGoOffScreenX();
+						dontGoOffScreenY('top-left', 'bottom-left');
+					}
 				}
 				
 				if(practicalPosition == 'bottom-right') {
 					myLeft = (proxy.offset.left + proxy.dimension.width + offsetX) - tooltipWidth;
 					myTop = (proxy.offset.top + proxy.dimension.height) + offsetY + 12;
-					dontGoOffScreenX();
-					dontGoOffScreenY('top-right', 'bottom-right');
+					if(self.options.repositionOffscreen) {
+						dontGoOffScreenX();
+						dontGoOffScreenY('top-right', 'bottom-right');
+					}
 				}
 				
 				if(practicalPosition == 'left') {
