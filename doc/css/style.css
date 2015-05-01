@@ -395,6 +395,11 @@ Demos
 	margin: -1.4em 1em 0 0;
 	text-transform: uppercase;
 	float: left;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	-o-user-select: none;
+	user-select: none;
 }
 #demos span:hover {
 	background: #fff !important;
