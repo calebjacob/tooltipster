@@ -387,22 +387,17 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 									// timeout 0 : explanation below in click section
 									setTimeout(function() {
 										// we don't want to bind on click here because the initial touchstart event has not yet triggered its click event, which is thus about to happen
-										$('body').on('touchstart.'+ self.namespace, function() {
-											self.hide();
+										$('body').on('touchstart.'+ self.namespace, function(e) {
+											if (!self.options.interactive || $(e.target).closest('.tooltipster-base').length === 0)
+											{
+												self.hide();
+											}
 										});
 									}, 0);
 								}
 								
 								// if we have to allow interaction
 								if (self.options.interactive) {
-									
-									// touch events inside the tooltip must not close it
-									if (deviceHasTouchCapability) {
-										self.$tooltip.on('touchstart.'+ self.namespace, function(event) {
-											event.stopPropagation();
-										});
-									}
-									
 									// as for mouse interaction, we get rid of the tooltip only after the mouse has spent some time out of it
 									var tolerance = null;
 									
@@ -439,19 +434,13 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 								
 								// use a timeout to prevent immediate closing if the method was called on a click event and if options.delay == 0 (because of bubbling)
 								setTimeout(function() {
-									$('body').on('click.'+ self.namespace +' touchstart.'+ self.namespace, function() {
-										self.hide();
+									$('body').on('click.'+ self.namespace +' touchstart.'+ self.namespace, function(e) {
+										if (!self.options.interactive || $(e.target).closest('.tooltipster-base').length === 0)
+										{
+											self.hide();
+										}
 									});
 								}, 0);
-								
-								// if interactive, we'll stop the events that were emitted from inside the tooltip to stop autoClosing
-								if (self.options.interactive) {
-									
-									// note : the touch events will just not be used if the plugin is not enabled on touch devices
-									self.$tooltip.on('click.'+ self.namespace +' touchstart.'+ self.namespace, function(event) {
-										event.stopPropagation();
-									});
-								}
 							}
 						}
 					}
