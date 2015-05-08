@@ -57,7 +57,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			theme: 'tooltipster-default',
 			touchDevices: true,
 			trigger: 'hover',
-			updateAnimation: true
+			updateAnimation: true,
 		};
 	
 	function Plugin(element, options) {
