@@ -57,7 +57,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 			theme: 'tooltipster-default',
 			touchDevices: true,
 			trigger: 'hover',
-			updateAnimation: true
+			updateAnimation: true,
+			useVerticalReposition: true
 		};
 	
 	function Plugin(element, options) {
@@ -873,6 +874,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				
 				// a function to detect if the tooltip is going off the screen vertically. If so, switch to the opposite!
 				function dontGoOffScreenY(switchTo, switchFrom) {
+					// if we don't need this functionality - return
+					if (self.options.useVerticalReposition === false){
+						return;
+					}
 					// if it goes off the top off the page
 					if(((proxy.offset.top - $(window).scrollTop() - tooltipHeight - offsetY - 12) < 0) && (switchFrom.indexOf('top') > -1)) {
 						practicalPosition = switchTo;
