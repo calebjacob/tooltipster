@@ -285,8 +285,8 @@ $('.tooltip').tooltipster({
 				</tr>
 				<tr>
 					<td><h4>content</h4></td>
-					<td>string, jQuery object</td>
-					<td>If set, this will override the content of the tooltip. <strong>Default: null</strong></td>
+					<td>string, jQuery object, any</td>
+					<td>If set, this will override the content of the tooltip. If you provide something else than a string or jQuery-wrapped HTML element, you will want to use the 'functionFormat' option to format your content for display. <strong>Default: null</strong></td>
 				</tr>
 				<tr>
 					<td><h4>contentAsHTML</h4></td>
@@ -331,27 +331,32 @@ $('.tooltip').tooltipster({
 				<tr>
 					<td><h4>functionInit</h4></td>
 					<td>function</td>
-					<td>A custom function to be fired only once at instantiation. <strong>Default: function(origin) {}</strong></td>
+					<td>A custom function to be fired only once at instantiation. It gets the origin as first parameter. <strong>Default: none (null)</strong></td>
 				</tr>
 				<tr>
 					<td><h4>functionBefore</h4></td>
 					<td>function</td>
-					<td>A custom function to be fired before the tooltip opens. This function may prevent the opening if it returns false. See the <a href="#advanced">advanced section</a> to learn more. <strong>Default: function(origin) {}</strong></td>
+					<td>A custom function to be fired before the tooltip opens. This function may prevent the opening if it returns false. It gets the origin as first parameter. See the <a href="#advanced">advanced section</a> to learn more. <strong>Default: null (no function)</strong></td>
 				</tr>
 				<tr>
 					<td><h4>functionReady</h4></td>
 					<td>function</td>
-					<td>A custom function to be fired when the tooltip and its contents have been added to the DOM. <strong>Default: function(origin) {}</strong></td>
+					<td>A custom function to be fired when the tooltip and its contents have been added to the DOM. It gets the origin as first parameter. <strong>Default: null (no function)</strong></td>
 				</tr>
 				<tr>
 					<td><h4>functionAfter</h4></td>
 					<td>function</td>
-					<td>A custom function to be fired once the tooltip has been closed and removed from the DOM. <strong>Default: function(origin) {}</strong></td>
+					<td>A custom function to be fired once the tooltip has been closed and removed from the DOM. It gets the origin as first parameter. <strong>Default: null (no function)</strong></td>
+				</tr>
+				<tr>
+					<td><h4>functionFormat</h4></td>
+					<td>function</td>
+					<td>A custom function that can format the content of the tooltip before it is displayed. It gets the actual content (passed through the title attribute or the 'content' method) as first parameter and the value it returns (a string or a jQuery-wrapped HTML element) will be displayed in the tooltip. The actual content value is not affected by this formatting function, it only affects the way it is displayed. <strong>Default: null (no function)</strong></td>
 				</tr>
 				<tr>
 					<td><h4>functionPosition</h4></td>
 					<td>function</td>
-					<td>A custom function fired when the tooltip is repositioned. It gives you the ability to slightly or completely modify the position that Tooltipster is about to give to the tooltip (see examples). <strong>Default: function(data) {}</strong></td>
+					<td>A custom function fired when the tooltip is repositioned. It gives you the ability to slightly or completely modify the position that Tooltipster is about to give to the tooltip (see examples). It gets a helper as first argument and the proposed set of placement values as second argument. The function must return the set of placement values, which you may have edited. <strong>Default: null (no function)</strong></td>
 				</tr>
 				<tr>
 					<td><h4>hideOnClick</h4></td>

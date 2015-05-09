@@ -1,7 +1,7 @@
-/*! Tooltipster 4.0.0rc9 */
+/*! Tooltipster 4.0.0rc10 */
 
 /**
- * Released on 2015-01-23
+ * Released on 2015-05-09
  * 
  * A rockin' custom tooltip jQuery plugin
  * Developed by Caleb Jacob under the MIT license http://opensource.org/licenses/MIT
@@ -17,45 +17,47 @@
 ;(function($) {
 	
 	var defaults = {
-			animation: 'fade',
-			autoHide: true,
-			content: null,
-			contentAsHTML: false,
-			contentCloning: false,
-			debug: true,
-			delay: 200,
-			displayPlugin: 'default',
-			functionInit: function(origin) {},
-			functionBefore: function(origin) {},
-			functionReady: function(origin) {},
-			functionAfter: function(origin) {},
-			hideOnClick: false,
-			interactive: false,
-			interactiveTolerance: 350,
-			multiple: false,
-			onlyOne: false,
-			// must be 'body' for now
-			parent: 'body',
-			positionTracker: false,
-			positionTrackerCallback: function(origin) {
-				// the default tracker callback will close the tooltip when the trigger is
-				// 'hover' (see https://github.com/iamceege/tooltipster/pull/253)
-				if (this.option('trigger') == 'hover' && this.option('autoHide')) {
-					this.hide();
-				}
-			},
-			restoration: 'none',
-			returnObjects: false,
-			speed: 350,
-			timer: 0,
-			theme: [],
-			touchDevices: true,
-			trigger: 'hover',
-			updateAnimation: true,
-			zIndex: 9999999
-		};
+		animation: 'fade',
+		autoHide: true,
+		content: null,
+		contentAsHTML: false,
+		contentCloning: false,
+		debug: true,
+		delay: 200,
+		displayPlugin: 'default',
+		functionInit: null,
+		functionBefore: null,
+		functionReady: null,
+		functionAfter: null,
+		functionFormat: null,
+		hideOnClick: false,
+		interactive: false,
+		interactiveTolerance: 350,
+		multiple: false,
+		onlyOne: false,
+		// must be 'body' for now
+		parent: 'body',
+		positionTracker: false,
+		positionTrackerCallback: function(origin) {
+			// the default tracker callback will close the tooltip when the trigger
+			// is 'hover' (see https://github.com/iamceege/tooltipster/pull/253)
+			if (this.option('trigger') == 'hover' && this.option('autoHide')) {
+				this.hide();
+			}
+		},
+		restoration: 'none',
+		returnObjects: false,
+		speed: 350,
+		theme: [],
+		timer: 0,
+		touchDevices: true,
+		trigger: 'hover',
+		updateAnimation: true,
+		zIndex: 9999999
+	};
 	
-	function Plugin(element, options) {
+	// the Tooltipster class
+	$.tooltipster = function(element, options) {
 		
 		// list of instance variables
 		
@@ -99,9 +101,9 @@
 		
 		// launch
 		this._init();
-	}
+	};
 	
-	Plugin.prototype = {
+	$.tooltipster.prototype = {
 		
 		_init: function() {
 			
@@ -196,30 +198,36 @@
 			}
 		},
 		
+		_content_insert: function() {
+			
+			var self = this,
+				$el = self.$tooltip.find('.tooltipster-content'),
+				formattedContent =
+					self.options.functionFormat ?
+					self.options.functionFormat(self.Content) :
+						self.Content;
+			
+			if (typeof formattedContent === 'string' && !self.options.contentAsHTML) {
+				$el.text(formattedContent);
+			}
+			else {
+				$el
+					.empty()
+					.append(formattedContent);
+			}
+		},
+		
 		_content_set: function(content) {
+			
 			// clone if asked. Cloning the object makes sure that each instance has its
 			// own version of the content (in case a same object were provided for several
 			// instances)
 			// reminder : typeof null === object
-			if (typeof content === 'object' && content !== null && this.options.contentCloning) {
+			if (content instanceof $ && this.options.contentCloning) {
 				content = content.clone(true);
 			}
+			
 			this.Content = content;
-		},
-		
-		_content_insert: function() {
-			
-			var self = this,
-				$d = this.$tooltip.find('.tooltipster-content');
-			
-			if (typeof self.Content === 'string' && !self.options.contentAsHTML) {
-				$d.text(self.Content);
-			}
-			else {
-				$d
-					.empty()
-					.append(self.Content);
-			}
 		},
 		
 		/**
@@ -340,25 +348,33 @@
 			return geo;
 		},
 		
+		_interval_cancel: function() {
+			clearInterval(this.checkInterval);
+			// clean delete
+			this.checkInterval = null;
+		},
+		
 		_interval_set: function() {
 			
 			var self = this;
 			
 			self.checkInterval = setInterval(function() {
 				
+				var $body = $('body');
+				
 				// if the tooltip and/or its interval should be stopped
 				if (
 						// if the origin has been removed
-						$('body').find(self.$el).length === 0
-						// if the origin has been removed
-					||	$('body').find(self.$el).length === 0
+						!$.contains(document.body, self.$el[0])
 						// if the tooltip has been closed
 					||	self.Status == 'hidden'
 						// if the tooltip has somehow been removed
-					||	$('body').find(self.$tooltip).length === 0
+					||	!$.contains(document.body, self.$tooltip[0])
 				) {
 					// remove the tooltip if it's still here
-					if (self.Status == 'shown' || self.Status == 'appearing') self.hide();
+					if (self.Status == 'shown' || self.Status == 'appearing') {
+						self.hide();
+					}
 					
 					// clear this interval as it is no longer necessary
 					self._interval_cancel();
@@ -399,12 +415,6 @@
 			}, 200);
 		},
 		
-		_interval_cancel: function() {
-			clearInterval(this.checkInterval);
-			// clean delete
-			this.checkInterval = null;
-		},
-		
 		// this function will schedule the opening of the tooltip after the delay, if
 		// there is one
 		_show: function() {
@@ -435,17 +445,17 @@
 			var self = this;
 			
 			// check that the origin is still in the DOM
-			if ($('body').find(self.$el).length !== 0) {
+			if ($.contains(document.body, self.$el[0])) {
 				
 				// call our constructor custom function before continuing
-				if (self.options.functionBefore.call(self, self.$el[0]) !== false) {
+				if (!self.options.functionBefore || self.options.functionBefore.call(self, self.$el[0]) !== false) {
 					
 					// continue only if the tooltip is enabled and has any content
 					if (self.enabled && self.Content !== null) {
 						
 						// init the display plugin if it has not been initiated yet
 						if (!this.displayPlugin) {
-							var pluginClass = $.fn.tooltipster.displayPlugin[self.options.displayPlugin];
+							var pluginClass = $.tooltipster.displayPlugin[self.options.displayPlugin];
 							if (pluginClass) {
 								this.displayPlugin = new pluginClass(self, self.options);
 							}
@@ -455,7 +465,9 @@
 						}
 						
 						// save the method callback and cancel hide method callbacks
-						if (callback) self.callbacks.show.push(callback);
+						if (callback) {
+							self.callbacks.show.push(callback);
+						}
 						self.callbacks.hide = [];
 						
 						//get rid of any appearance timer
@@ -622,7 +634,9 @@
 							
 							// call our custom callback since the content of the tooltip is now
 							// part of the DOM
-							self.options.functionReady.call(self, self.$el[0]);
+							if (self.options.functionReady) {
+								self.options.functionReady.call(self, self.$el[0]);
+							}
 							
 							// will check if our tooltip origin is removed while the tooltip is
 							// shown
@@ -632,6 +646,7 @@
 							$(window).on('resize.'+ self.namespace, function() {
 								self.reposition();
 							});
+							
 							// reposition on scroll when the origin has a fixed lineage (otherwise the
 							// tooltips on position:fixed element will move away from their origin)
 							$(window).on('scroll.'+ self.namespace, function() {
@@ -653,26 +668,27 @@
 									
 									// if the user touches the body, hide
 									if (deviceHasTouchCapability) {
-										// timeout 0 : explanation below in click section
+										
+										// timeout 0 : to prevent immediate closing if the method was called
+										// on a click event and if options.delay == 0 (because of bubbling)
 										setTimeout(function() {
+											
 											// we don't want to bind on click here because the
 											// initial touchstart event has not yet triggered its
 											// click event, which is thus about to happen
-											$('body').on('touchstart.'+ self.namespace, function() {
-												self.hide();
+											$('body').on('touchstart.'+ self.namespace, function(event) {
+												
+												// if the tooltip is not interactive or if the click was made
+												// outside of the tooltip
+												if (!self.options.interactive || !$.contains(self.$tooltip[0], event.target)) {
+													self.hide();
+												}
 											});
 										}, 0);
 									}
 									
 									// if we have to allow interaction
 									if (self.options.interactive) {
-										
-										// touch events inside the tooltip must not close it
-										if (deviceHasTouchCapability) {
-											self.$tooltip.on('touchstart.'+ self.namespace, function(event) {
-												event.stopPropagation();
-											});
-										}
 										
 										// as for mouse interaction, we get rid of the tooltip only
 										// after the mouse has spent some time out of it
@@ -681,7 +697,9 @@
 										self.$el.add(self.$tooltip)
 											// hide after some time out of the origin and the tooltip
 											.on('mouseleave.'+ self.namespace + '-autoHide', function() {
+												
 												clearTimeout(tolerance);
+												
 												tolerance = setTimeout(function() {
 													self.hide();
 												}, self.options.interactiveTolerance);
@@ -712,24 +730,14 @@
 								// to hide the tooltip
 								else if (self.options.trigger == 'click') {
 									
-									// use a timeout to prevent immediate closing if the method was called
-									// on a click event and if options.delay == 0 (because of bubbling)
+									// explanations : same as above
 									setTimeout(function() {
-										$('body').on('click.'+ self.namespace +' touchstart.'+ self.namespace, function() {
-											self.hide();
+										$('body').on('click.'+ self.namespace +' touchstart.'+ self.namespace, function(event) {
+											if (!self.options.interactive || !$.contains(self.$tooltip[0], event.target)) {
+												self.hide();
+											}
 										});
 									}, 0);
-									
-									// if interactive, we'll stop the events that were emitted from inside
-									// the tooltip to stop autoClosing
-									if (self.options.interactive) {
-										
-										// note : the touch events will just not be used if the plugin is
-										// not enabled on touch devices
-										self.$tooltip.on('click.'+ self.namespace +' touchstart.'+ self.namespace, function(event) {
-											event.stopPropagation();
-										});
-									}
 								}
 							}
 						}
@@ -745,6 +753,48 @@
 					}
 				}
 			}
+		},
+		
+		/**
+		 * Check if a tooltip can fit in the provided dimensions when we restrain its width.
+		 * The idea is to see if the new height is small enough and if the content does not
+		 * overflow horizontally.
+		 * This method does not reset the position values to what they were when the
+		 * test is over, do it yourself if need be.
+		 *
+		 * @param {int} width
+		 * @param {int} height
+		 * @return {object} An object with `height` and `width` properties. Either of these
+		 * will be true if the content overflows in that dimension, false if it fits.
+		 */
+		_sizerConstrained: function(width, height) {
+			
+			this.$tooltip.css({
+				left: 0,
+				top: 0,
+				width: width
+			});
+			
+			this._forceRedraw();
+			
+			var $content = this.$tooltip.find('.tooltipster-content'),
+				newHeight = this.$tooltip.outerHeight(),
+				fits = {
+					height: newHeight <= height,
+					width: (
+						// this condition accounts for a min-width property that could apply
+					this.$tooltip[0].offsetWidth <= width
+					&&	$content[0].offsetWidth >= $content[0].scrollWidth
+					)
+				};
+			
+			return {
+				fits: fits.height && fits.width,
+				size: {
+					height: newHeight,
+					width: $content[0].offsetWidth
+				}
+			};
 		},
 		
 		/**
@@ -787,48 +837,6 @@
 				// the text can be broken to a new line after being appended back to the parent
 				// (whereas it's just fine at the time of this test)
 				width: this.$tooltip.outerWidth() + 1
-			};
-		},
-		
-		/**
-		 * Check if a tooltip can fit in the provided dimensions when we restrain its width.
-		 * The idea is to see if the new height is small enough and if the content does not
-		 * overflow horizontally.
-		 * This method does not reset the position values to what they were when the
-		 * test is over, do it yourself if need be.
-		 * 
-		 * @param {int} width
-		 * @param {int} height
-		 * @return {object} An object with `height` and `width` properties. Either of these
-		 * will be true if the content overflows in that dimension, false if it fits.
-		 */
-		_sizerConstrained: function(width, height) {
-			
-			this.$tooltip.css({
-				left: 0,
-				top: 0,
-				width: width
-			});
-			
-			this._forceRedraw();
-			
-			var $content = this.$tooltip.find('.tooltipster-content'),
-				newHeight = this.$tooltip.outerHeight(),
-				fits = {
-					height: newHeight <= height,
-					width: (
-							// this condition accounts for a min-width property that could apply
-							this.$tooltip[0].offsetWidth <= width
-						&&	$content[0].offsetWidth >= $content[0].scrollWidth
-					)
-				};
-			
-			return {
-				fits: fits.height && fits.width,
-				size: {
-					height: newHeight,
-					width: $content[0].offsetWidth
-				}
 			};
 		},
 		
@@ -1053,14 +1061,13 @@
 					// unbind any auto-closing click/touch listeners
 					$('body').off('.'+ self.namespace);
 					
-					// unbind any auto-closing click/touch listeners
-					$('body').off('.'+ self.namespace);
-					
 					// unbind any auto-closing hover listeners
 					self.$el.off('.'+ self.namespace + '-autoHide');
 					
 					// call our constructor custom callback function
-					self.options.functionAfter.call(self, self.$el[0]);
+					if (self.options.functionAfter) {
+						self.options.functionAfter.call(self, self.$el[0]);
+					}
 					
 					// call our method custom callbacks functions
 					finishCallbacks();
@@ -1122,8 +1129,9 @@
 			
 			var self = this;
 			
-			// in case the tooltip has been removed from DOM manually
-			if (tooltipIsDetached || $('body').find(self.$tooltip).length !== 0) {
+			// if the tooltip has not been removed from DOM manually (or if it
+			// has been detached on purpose)
+			if (tooltipIsDetached || $.contains(document.body, self.$tooltip[0])) {
 				
 				if (!tooltipIsDetached) {
 					// detach in case the tooltip overflows the window and adds scrollbars
@@ -1273,13 +1281,15 @@
 					multiple = (multipleIsSet && args[0].multiple) || (!multipleIsSet && defaults.multiple),
 					// same for content
 					contentIsSet = args[0] && args[0].content !== undefined,
-					content = (contentIsSet && args[0].content) || (!contentIsSet && defaults.content);
+					content = (contentIsSet && args[0].content) || (!contentIsSet && defaults.content),
 					// same for contentCloning
 					contentCloningIsSet = args[0] && args[0].contentCloning !== undefined,
-					contentCloning = (contentCloningIsSet && args[0].contentCloning) || (!contentCloningIsSet && defaults.contentCloning);
+					contentCloning =
+							(contentCloningIsSet && args[0].contentCloning)
+						||	(!contentCloningIsSet && defaults.contentCloning),
 					// same for debug
 					debugIsSet = args[0] && args[0].debug !== undefined,
-					debug = (debugIsSet && args[0].debug) || (!debugIsSet && defaults.debug);
+					debug = (debugIsSet && args[0].debug) || (!debugIsSet && defaults.debug),
 					// same for returnObjects
 					roIsSet = args[0] && args[0].returnObjects !== undefined,
 					returnObjects = (roIsSet && args[0].returnObjects) || (!roIsSet && defaults.returnObjects);
@@ -1313,18 +1323,20 @@
 					}
 					
 					if (go) {
-						obj = new Plugin(this, args[0]);
+						obj = new $.tooltipster(this, args[0]);
 						
 						// save the reference of the new instance
 						if (!ns) ns = [];
 						ns.push(obj.namespace);
-						$(this).data('tooltipster-ns', ns)
+						$(this).data('tooltipster-ns', ns);
 						
 						// save the instance itself
 						$(this).data(obj.namespace, obj);
 						
 						// call our constructor custom function
-						obj.options.functionInit.call(obj, this);
+						if (obj.options.functionInit) {
+							obj.options.functionInit.call(obj, this);
+						}
 					}
 					
 					objects.push(obj);
@@ -1337,12 +1349,12 @@
 	};
 	
 	// will collect plugins
-	$.fn.tooltipster.displayPlugin = {};
+	$.tooltipster.displayPlugin = {};
 	
 	// quick & dirty compare function, not bijective nor multidimensional
 	function areEqual(a,b) {
 		var same = true;
-		$.each(a, function(i, el) {
+		$.each(a, function(i, _) {
 			if (b[i] === undefined || a[i] !== b[i]) {
 				same = false;
 				return false;
@@ -1351,14 +1363,14 @@
 		return same;
 	}
 	
-	// detect if this device can trigger touch events
-	var deviceHasTouchCapability = !!('ontouchstart' in window);
-	
 	// we'll assume the device has no mouse until we detect any mouse movement
 	var deviceHasMouse = false;
 	$('body').one('mousemove', function() {
 		deviceHasMouse = true;
 	});
+	
+	// detect if this device can trigger touch events
+	var deviceHasTouchCapability = !!('ontouchstart' in window);
 	
 	function deviceIsPureTouch() {
 		return (!deviceHasMouse && deviceHasTouchCapability);
@@ -1368,13 +1380,13 @@
 	function supportsTransitions() {
 		var b = document.body || document.documentElement,
 			s = b.style,
-			p = 'transition';
+			p = 'transition',
+			v = ['Moz', 'Webkit', 'Khtml', 'O', 'ms'];
 		
-		if (typeof s[p] == 'string') {return true; }
-
-		v = ['Moz', 'Webkit', 'Khtml', 'O', 'ms'],
+		if (typeof s[p] == 'string') { return true; }
+		
 		p = p.charAt(0).toUpperCase() + p.substr(1);
-		for(var i=0; i<v.length; i++) {
+		for (var i=0; i<v.length; i++) {
 			if (typeof s[v[i] + p] == 'string') { return true; }
 		}
 		return false;
@@ -1385,7 +1397,7 @@
 /**
  * The default display plugin
  */
-;(function($) {
+(function($) {
 	
 	var pluginName = 'default',
 		/** 
@@ -1423,7 +1435,7 @@
 			return {
 				arrow: true,
 				distance: 6,
-				functionPosition: function(){},
+				functionPosition: null,
 				maxWidth: null,
 				minWidth: 0,
 				position: ['top', 'bottom', 'right', 'left']
@@ -1809,9 +1821,8 @@
 			helper.$tooltip = self.tooltipster.$tooltip;
 			helper.$parent = self.tooltipster.$parent;
 			
-			var customResult = self.options.functionPosition.call(self, helper, $.extend(true, {}, finalResult));
-			if (customResult) {
-				finalResult = customResult;
+			if(self.options.functionPosition){
+				finalResult = self.options.functionPosition.call(self, helper, $.extend(true, {}, finalResult));
 			}
 			
 			// now let's compute the position of the arrow
@@ -1905,5 +1916,6 @@
 		}
 	};
 	
-	$.fn.tooltipster.displayPlugin[pluginName] = plugin;
+	$.tooltipster.displayPlugin[pluginName] = plugin;
+	
 })(jQuery);

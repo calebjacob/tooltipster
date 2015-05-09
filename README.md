@@ -21,6 +21,7 @@ functionInit
 functionBefore  
 functionReady  
 functionAfter  
+functionFormat  
 hideOnClick  
 interactive  
 interactiveTolerance  
