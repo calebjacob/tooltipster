@@ -1,7 +1,7 @@
-/*! Tooltipster 4.0.0rc10 */
+/*! Tooltipster 4.0.0rc11 */
 
 /**
- * Released on 2015-05-09
+ * Released on 2015-06-04
  * 
  * A rockin' custom tooltip jQuery plugin
  * Developed by Caleb Jacob under the MIT license http://opensource.org/licenses/MIT
@@ -1609,16 +1609,15 @@
 		 */
 		reposition: function(helper) {
 			
-			var self = this;
-			
-			// start position tests session
-			self.tooltipster._sizerStart();
-			
-			var finalResult,
+			var self = this,
+				finalResult,
 				testResults = {
 					document: {},
 					window: {}
 				};
+			
+			// start position tests session
+			self.tooltipster._sizerStart();
 			
 			// find which position can contain the tooltip without overflow.
 			// We'll compute things relatively to window, then document if need be.
@@ -1855,19 +1854,29 @@
 				}
 			}
 			
+			var originParentOffset;
+			
 			// let's convert the window-relative coordinates into coordinates relative to the
 			// future positioned parent that the tooltip will be appended to
-			
-			if (self.tooltipster.$parent[0].tagName.toLowerCase() == 'body') {
-				var originParentOffset = {
-					left: helper.geo.origin.windowOffset.left + helper.geo.window.scroll.left,
-					top: helper.geo.origin.windowOffset.top + helper.geo.window.scroll.top
-				};
+			if (helper.geo.origin.fixedLineage) {
+				
+				// same as windowOffset when the position is fixed
+				originParentOffset = helper.geo.origin.windowOffset;
 			}
 			else {
-				// TODO. right now $parent cannot be something other than <body>.
-				// when we do this, .tooltipster-sizer will have to be appended to the parent
-				// to inherit css style values that affect the display of the text and such
+				
+				if (self.tooltipster.$parent[0].tagName.toLowerCase() == 'body') {
+					
+					originParentOffset = {
+						left: helper.geo.origin.windowOffset.left + helper.geo.window.scroll.left,
+						top: helper.geo.origin.windowOffset.top + helper.geo.window.scroll.top
+					};
+				}
+				else {
+					// TODO. right now $parent cannot be something other than <body>.
+					// when we do this, .tooltipster-sizer will have to be appended to the parent
+					// to inherit css style values that affect the display of the text and such
+				}
 			}
 			
 			finalResult.coord = {
@@ -1877,8 +1886,18 @@
 			
 			// set position values
 			
-			// again, in case positionFunction changed the position
+			// again, in case functionPosition changed the position (left/right etc)
 			self.position_change(finalResult.position);
+			
+			if (helper.geo.origin.fixedLineage) {
+				self.tooltipster.$tooltip
+					.css('position', 'fixed');
+			}
+			else {
+				// CSS default
+				self.tooltipster.$tooltip
+					.css('position', '');
+			}
 			
 			self.tooltipster.$tooltip
 				.css({
