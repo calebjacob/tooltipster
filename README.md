@@ -29,6 +29,7 @@ multiple
 onlyOne  
 positionTracker  
 positionTrackerCallback  
+repositionOnScroll  
 restoration  
 returnObjects  
 speed  

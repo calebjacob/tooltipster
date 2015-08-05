@@ -2,6 +2,7 @@
 
 .tooltipster-base {
 	pointer-events: none;
+	/* this may be overriden in JS for fixed position origins */
 	position: absolute;
 }
 

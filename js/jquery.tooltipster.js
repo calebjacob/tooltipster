@@ -1,7 +1,7 @@
-/*! Tooltipster 4.0.0rc11 */
+/*! Tooltipster 4.0.0rc12 */
 
 /**
- * Released on 2015-06-04
+ * Released on 2015-08-05
  * 
  * A rockin' custom tooltip jQuery plugin
  * Developed by Caleb Jacob under the MIT license http://opensource.org/licenses/MIT
@@ -45,6 +45,7 @@
 				this.hide();
 			}
 		},
+		repositionOnScroll: false,
 		restoration: 'none',
 		returnObjects: false,
 		speed: 350,
@@ -650,7 +651,7 @@
 							// reposition on scroll when the origin has a fixed lineage (otherwise the
 							// tooltips on position:fixed element will move away from their origin)
 							$(window).on('scroll.'+ self.namespace, function() {
-								if (self.geometry.origin.fixedLineage) {
+								if (self.options.repositionOnScroll || self.geometry.origin.fixedLineage) {
 									self.reposition();
 								}
 							});
@@ -1433,8 +1434,11 @@
 		defaults: function() {
 			
 			return {
+				// if the tooltip should display an arrow that points to the origin
 				arrow: true,
+				// the distance in pixels between the tooltip and the origin
 				distance: 6,
+				// allows to easily change the position of the tooltip
 				functionPosition: null,
 				maxWidth: null,
 				minWidth: 0,
