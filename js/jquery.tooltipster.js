@@ -1320,7 +1320,8 @@
 						go = true;
 					}
 					else if (debug) {
-						console.log('Tooltipster: one or more tooltips are already attached to this element: ignoring.');
+						console.log('Tooltipster: one or more tooltips are already attached to the element below. Ignoring.');
+						console.log(this);
 					}
 					
 					if (go) {
