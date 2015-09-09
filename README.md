@@ -18,6 +18,7 @@ contentAsHTML
 contentCloning  
 debug  
 delay  
+distance  
 minWidth  
 maxWidth  
 functionInit  
