@@ -851,7 +851,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					myTop = 0,
 					offsetY = parseInt(self.options.offsetY),
 					offsetX = parseInt(self.options.offsetX),
-					distance = parseInt(self.options.distance),
 					// this is the arrow position that will eventually be used. It may differ from the position option if the tooltip cannot be displayed in this position
 					practicalPosition = self.options.position;
 				
