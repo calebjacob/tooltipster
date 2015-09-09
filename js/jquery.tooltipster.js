@@ -1059,6 +1059,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 					var arrowConstruct = '<div class="'+ arrowClass +' tooltipster-arrow" style="'+ arrowReposition +'">'+ arrowBorder +'<span style="border-color:'+ arrowColor +';"></span></div>';
 					self.$tooltip.append(arrowConstruct);
 				}
+				// add class indicating which is the actual position with the tooltip container.
+				self.$tooltip.addClass("tooltipster-" + practicalPosition)
 				
 				// position the tooltip
 				self.$tooltip.css({'top': Math.round(myTop) + 'px', 'left': Math.round(myLeft) + 'px'});
