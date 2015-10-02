@@ -397,10 +397,44 @@ Demos
 	float: left;
 }
 #demos span:hover {
-	background: #fff !important;
+	background: #fff;
 	color: #5d6365;
-	border: 3px solid #5d6365 !important;
+	border: 3px solid #5d6365;
 	cursor: pointer;
+}
+
+#demo-complex {
+	position: absolute;
+}
+
+#demo-complex.complex {
+	position: fixed;
+	
+}
+
+#demo-complex-placeholder {
+	visibility: hidden;
+}
+
+#demo-imagemap {
+	position: relative;
+}
+
+#demo-imagemap:hover {
+	background: #ff5e3c !important;
+	border: 3px solid #ff5e3c !important;
+	cursor: auto !important;
+}
+
+#demo-imagemaparea {
+	cursor: pointer;
+}
+
+#demo-imagemapped {
+	left: 50%;
+	margin: -23px 0 0 -23px;
+	position: absolute;
+	top: 50%;
 }
 
 

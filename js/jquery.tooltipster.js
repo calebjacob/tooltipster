@@ -1,7 +1,7 @@
-/*! Tooltipster 4.0.0rc12 */
+/*! Tooltipster 4.0.0rc13 */
 
 /**
- * Released on 2015-08-05
+ * Released on 2015-10-03
  * 
  * A rockin' custom tooltip jQuery plugin
  * Developed by Caleb Jacob under the MIT license http://opensource.org/licenses/MIT
@@ -256,10 +256,24 @@
 		 */
 		_geometry: function() {
 			
-			var	bcr = this.$el[0].getBoundingClientRect(),
+			var	self = this,
+				$target = self.$el,
+				originIsArea = self.$el.is('area');
+			
+			// if this.$el is a map area, the target we'll need
+			// the dimensions of is actually the image using the map,
+			// not the area itself
+			if (originIsArea) {
+				
+				var mapName = self.$el.parent().attr('name');
+				
+				$target = $('img[usemap="#'+ mapName +'"]');
+			}
+			
+			var bcr = $target[0].getBoundingClientRect(),
 				$document = $(document),
 				$window = $(window),
-				$parent = this.$el,
+				$parent = $target,
 				// some useful properties of important elements
 				geo = {
 					document: {
@@ -269,34 +283,162 @@
 						}
 					},
 					window: {
-						size: {
-							height: $window.height(),
-							width: $window.width()
-						},
 						scroll: {
 							// the second ones are for IE compatibility
 							left: window.scrollX || document.documentElement.scrollLeft,
 							top: window.scrollY || document.documentElement.scrollTop
+						},
+						size: {
+							height: $window.height(),
+							width: $window.width()
 						}
 					},
 					origin: {
-						// the origin has a fixed lineage if itself or one of its ancestors has
-						// a fixed position
+						// the origin has a fixed lineage if itself or one of its
+						// ancestors has a fixed position
 						fixedLineage: false,
-						size: {
-							height: bcr.bottom - bcr.top,
-							width: bcr.right - bcr.left
-						},
 						offset: {
 							left: bcr.left + window.scrollX,
 							top: bcr.top + window.scrollY
 						},
-						windowOffset: bcr
+						size: {
+							height: bcr.bottom - bcr.top,
+							width: bcr.right - bcr.left
+						},
+						usemapImage: originIsArea ? $target[0] : null,
+						windowOffset: {
+							bottom: bcr.bottom,
+							left: bcr.left,
+							right: bcr.right,
+							top: bcr.top
+						}
 					}
 				};
 			
-			// the space that is available to display the tooltip, relatively to the viewport
-			// and to the document
+			// if the element is a map area, some properties may need
+			// to be recalculated
+			if (originIsArea) {
+				
+				var shape = self.$el.attr('shape'),
+					coords = self.$el.attr('coords');
+				
+				if (coords) {
+					
+					coords = coords.split(',');
+					
+					$.map(coords, function(val, i) {
+						coords[i] = parseInt(val);
+					});
+				}
+				
+				switch(shape){
+					
+					case 'circle':
+						
+						var areaLeft = coords[0],
+							areaTop = coords[1],
+							areaWidth = coords[2],
+							areaTopOffset = areaTop - areaWidth,
+							areaLeftOffset = areaLeft - areaWidth;
+						
+						geo.origin.size.height = areaWidth * 2;
+						geo.origin.size.width = geo.origin.size.height;
+						
+						geo.origin.offset.left += areaLeftOffset;
+						geo.origin.windowOffset.left += areaLeftOffset;
+						
+						geo.origin.offset.top += areaTopOffset;
+						geo.origin.windowOffset.top += areaTopOffset;
+						
+						break;
+					
+					case 'rect':
+						
+						var areaLeft = coords[0],
+							areaTop = coords[1],
+							areaRight = coords[2],
+							areaBottom = coords[3],
+							areaTopOffset = areaBottom - areaTop,
+							areaLeftOffset = areaRight - areaLeft;
+						
+						geo.origin.size.height = areaBottom - areaTop;
+						geo.origin.size.width = areaRight - areaLeft;
+						
+						geo.origin.offset.top += areaTopOffset;
+						geo.origin.windowOffset.top += areaTopOffset;
+						
+						geo.origin.offset.left += areaLeftOffset;
+						geo.origin.windowOffset.left += areaLeftOffset;
+						
+						break;
+					
+					case 'poly':
+						
+						var areaSmallestX = 0,
+							areaSmallestY = 0,
+							areaGreatestX = 0,
+							areaGreatestY = 0,
+							arrayAlternate = 'even';
+						
+						for (var i = 0; i < coords.length; i++) {
+							
+							var areaNumber = coords[i];
+							
+							if (arrayAlternate == 'even') {
+								
+								if (areaNumber > areaGreatestX) {
+									
+									areaGreatestX = areaNumber;
+									
+									if (i === 0) {
+										areaSmallestX = areaGreatestX;
+									}
+								}
+								
+								if (areaNumber < areaSmallestX) {
+									areaSmallestX = areaNumber;
+								}
+								
+								arrayAlternate = 'odd';
+							}
+							else {
+								if (areaNumber > areaGreatestY) {
+									
+									areaGreatestY = areaNumber;
+									
+									if (i == 1) {
+										areaSmallestY = areaGreatestY;
+									}
+								}
+								
+								if (areaNumber < areaSmallestY) {
+									areaSmallestY = areaNumber;
+								}
+								
+								arrayAlternate = 'even';
+							}
+						}
+						
+						geo.origin.size.height = areaGreatestY - areaSmallestY;
+						geo.origin.size.width = areaGreatestX - areaSmallestX;
+						
+						geo.origin.offset.top += areaSmallestY;
+						geo.origin.windowOffset.top += areaSmallestY;
+						
+						geo.origin.offset.left += areaSmallestX;
+						geo.origin.windowOffset.left += areaSmallestX;
+						
+						break;
+					
+					case 'default':
+						
+						// the image itself is the area, nothing more to do
+						break;
+				}
+			}
+			
+			// the space that is available to display the tooltip, relatively
+			// to the viewport and to the document
 			geo.available = {
 				window: {
 					bottom: {
@@ -1310,7 +1452,8 @@
 				this.each(function() {
 					
 					var go = false,
-						ns = $(this).data('tooltipster-ns'),
+						$this = $(this),
+						ns = $this.data('tooltipster-ns'),
 						obj = null;
 					
 					if (!ns) {
@@ -1330,10 +1473,10 @@
 						// save the reference of the new instance
 						if (!ns) ns = [];
 						ns.push(obj.namespace);
-						$(this).data('tooltipster-ns', ns);
+						$this.data('tooltipster-ns', ns);
 						
 						// save the instance itself
-						$(this).data(obj.namespace, obj);
+						$this.data(obj.namespace, obj);
 						
 						// call our constructor custom function
 						if (obj.options.functionInit) {
@@ -1605,7 +1748,7 @@
 		 * creators may find useful (see below)
 		 * @param {object} helper.geo An object with many properties (size, positioning)
 		 * about objects of interest (window, document, origin). This should help plugin
-		 * users to compute the optimal position of the tooltip
+		 * users compute the optimal position of the tooltip
 		 * @param {object} helper.tooltipster The Tooltipster instance which calls this
 		 * method. Plugin creators will at least have to use tooltipster.$tooltip and
 		 * tooltipster.$parent. Also, some of its methods may help plugin creators,

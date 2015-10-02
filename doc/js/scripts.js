@@ -74,10 +74,7 @@ $(function() {
 	$('#demo-touch').tooltipster({
 		touchDevices: false
 	});
-	$('#demo-icon').tooltipster({
-		iconDesktop: true,
-		iconTouch: true
-	});
+	$('#demo-imagemaparea').tooltipster();
 	$('#demo-multiple').tooltipster({
 		animation: 'swing',
 		content: 'North',
@@ -104,7 +101,57 @@ $(function() {
 		multiple: true,
 		position: 'left',
 		theme: 'tooltipster-shadow'
-	});	
+	});
+	
+	var complexInterval;
+	
+	$('#demo-complex')
+		.tooltipster({
+			positionTracker: true,
+			trigger: 'custom'
+		})
+		.click(function(){
+			
+			var $this = $(this);
+			
+			if($this.hasClass('complex')){
+				
+				$this
+					.removeClass('complex')
+					.tooltipster('hide')
+					.css({
+						left: '',
+						top: ''
+					});
+				
+				clearInterval(complexInterval);
+			}
+			else {
+				
+				var bcr = this.getBoundingClientRect(),
+					odd = true;
+				
+				$this
+					.addClass('complex')
+					.css({
+						left: bcr.left + 'px',
+						top: bcr.top + 'px'
+					})
+					.tooltipster('show');
+				
+				complexInterval = setInterval(function(){
+					
+					var offset = odd ? 200 : -200;
+					
+					$this.css({
+						left: bcr.left + offset
+					});
+					
+					odd = !odd;
+				}, 2000);
+			}
+		});
+	
 	$('.tooltipster-light-preview').tooltipster({
 		theme: 'tooltipster-light'
 	});

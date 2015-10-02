@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+	<meta charset="UTF-8">
+	<title></title>
+	<script src='//code.jquery.com/jquery-2.1.0.js'></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.2/raphael-min.js"></script>
+	<script src="js/jquery.tooltipster.js"></script>
+	<script type='text/javascript'>//<![CDATA[ 
+	$(function(){
+		var gender1 = new Raphael(document.getElementById('genderChart1'), 300, 300);
+		
+		gender1.customAttributes.arc = function (xloc, yloc, value, total, R) {
+			var alpha = 360 / total * value,
+				a = (90 - alpha) * Math.PI / 180,
+				x = xloc + R * Math.cos(a),
+				y = yloc - R * Math.sin(a),
+				path;
+			if (total == value) {
+				path = [
+					["M", xloc, yloc - R],
+					["A", R, R, 0, 1, 1, xloc - 0.01, yloc - R]
+				];
+			} else {
+				path = [
+					["M", xloc, yloc - R],
+					["A", R, R, 0, +(alpha > 180), 1, x, y]
+				];
+			}
+			return {
+				path: path
+			};
+		};
+
+// base light grey circle
+		var baseCircle1 = gender1.circle(150, 150, 150);
+		baseCircle1.attr({
+			stroke: 'none',
+			fill: '#66cca6',
+		})
+
+// arcs
+		var maleArc1 = gender1.path().attr({
+			"stroke": "#3ea9f5",
+			"stroke-width": 40,
+			arc: [0, 0, 0, 360, 100],
+			transform: "t150,150", // translate to center of canvas, then rotate by degrees
+		});
+
+//maleArc1.node.setAttribute("class","tooltip");
+		
+		var genderlessArc1 = gender1.path().attr({
+			"stroke": "#fff",
+			"stroke-width": 40,
+			arc: [0, 0, 0, 360, 100],
+			transform: "t150,150r240", // rotate to 200 degrees, where last arc ended
+		});
+		
+		var customArc1 = gender1.path().attr({
+			"stroke": "#662c91",
+			"stroke-width": 40,
+			arc: [0, 0, 0, 360, 100],
+			transform: "t150,150r248",
+		});
+		
+		var femaleArc1 = gender1.path().attr({
+			"stroke": "#ff7aac",
+			"stroke-width": 40,
+			arc: [0, 0, 0, 360, 100],
+			transform: "t150,150r266",
+		});
+		
+		
+		maleArc1.animate({
+			arc: [0, 0, 240, 360, 100]
+		}, 1000, "easeIn", function () { // callback so next arc animates
+			genderlessArc1.animate({
+				arc: [0, 0, 8, 360, 100]
+			}, 200, "easeIn", function () {
+				customArc1.animate({
+					arc: [0, 0, 18, 360, 100]
+				}, 200, "easeIn", function () {
+					femaleArc1.animate({
+						arc: [0, 0, 94, 360, 100]
+					}, 500, "backOut");
+				});
+			});
+		});
+
+
+
+// top dark grey circle
+		var topCircle1 = gender1.circle(150, 150, 85);
+		topCircle1.attr({
+			stroke: 'none',
+			fill: '#b9e1d2',
+		})
+		
+		$(maleArc1.node).tooltipster({
+			content: 'Male characters',
+			theme: 'tooltipster-shadow'
+		});
+		$(genderlessArc1.node).tooltipster({
+			content: 'Genderless characters',
+			theme: 'tooltipster-shadow'
+		});
+		$(customArc1.node).tooltipster({
+			content: 'Custom gender characters',
+			theme: 'tooltipster-shadow'
+		});
+		$(femaleArc1.node).tooltipster({
+			content: 'Female characters',
+			theme: 'tooltipster-shadow'
+		});
+
+
+// END GENDER CHART 1
+	});//]]>  
+	
+	</script>
+	
+	<link type="text/css" rel="stylesheet" href="css/tooltipster.css" />
+	<style type="text/css">
+		#genderChart1 {
+			height: 300px;
+			width: 300px;
+			margin: 0 auto;
+		}
+	
+	</style>
+</head>
+<body>
+	<div id="genderChart1"></div>
+</body>
+</html>

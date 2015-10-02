@@ -127,10 +127,19 @@
 					<span id="demo-interact" title="Try clicking &lt;a href='http://google.com/' target='_blank'&gt;this link&lt;/a&gt;">Hover</span> Interaction with tooltips
 				</li>
 				<li>
-					<span id="demo-icon" title="Use separate icons to launch your tooltips on either desktops or touch devices - or both!"></span> Attach tooltips to icons
+					<span id="demo-imagemap">
+						<img id="demo-imagemapped" src="./doc/images/star.png" usemap="#imagemap" />
+						<map name="imagemap">
+							<area id="demo-imagemaparea" title="The tooltip triggers only on a given image area" shape="poly" coords="20,17,26,0,32,17,48,16,36,29,40,45,27,36,11,45,16,29,2,17" />
+						</map>
+					</span> Compatible with image maps
 				</li>
 				<li>
 					<span id="demo-multiple">Hover</span> Multiple tooltips on a single element
+				</li>
+				<li>
+					<span id="demo-complex-placeholder"></span>
+					<span id="demo-complex" title="I stick to fixed-positioned and moving elements! Try scrolling !">Click</span> Position tracking system
 				</li>
 				<li>...&amp; more!</li>
 			</ul>
@@ -426,7 +435,7 @@ $('.tooltip').tooltipster({
 				<tr>
 					<td><h4>repositionOnScroll</h4></td>
 					<td>boolean</td>
-					<td>Will reposition the tooltip if the user scrolls the page, in order to keep it visible as much as possible. <strong>Default: false</strong></td>
+					<td>Will reposition the tooltip if the user scrolls the page, in order to keep it visible as long as possible. <strong>Default: false</strong></td>
 				</tr>
 				<tr>
 					<td><h4>restoration</h4></td>
@@ -436,7 +445,7 @@ $('.tooltip').tooltipster({
 				<tr>
 					<td><h4>returnObjects</h4></td>
 					<td>boolean</td>
-					<td>Set to true if the instantiation call should return the array of created Tooltipster objects rather than the origin (see examples). <strong>Default: false</strong></td>
+					<td>Set to true if the instantiation call should return the array of created Tooltipster objects instead of the origin (see examples). <strong>Default: false</strong></td>
 				</tr>
 				<tr>
 					<td><h4>speed</h4></td>
@@ -728,10 +737,10 @@ $('#myfield')
 				
 		<section id="talk">
 			<h2>Talk</h2>
-			<h3>You think maybe you've found a bug ?</h3>
+			<h3>Did you find a bug?</h3>
 			<p>Head on over to Tooltipster's issue tracker on GitHub: <a href="https://github.com/iamceege/tooltipster/issues">https://github.com/iamceege/tooltipster/issues</a></p>
 			<p>Before opening a new issue, please be sure to search through the backlog to see if your question or bug has been / is being resolved.</p>
-			<p>For help on how to use Tooltipster, please head on to Stackoverflow or other programming help forums.</p>
+			<p>For further help on how to implement Tooltipster, please head on to Stackoverflow or other programming help forums.</p>
 			<p>Thank you! :)</p>
 		</section>
 		
