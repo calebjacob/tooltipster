@@ -583,13 +583,16 @@ tr:nth-child(odd) {
 	background: #f4f5f7;
 }
 td {
-	padding: 2em;
+	padding: 1em;
 }
 td h4 {
 	font-family: 'Courier', monospace;
 	color: #0078c9;
 }
 
+#table_options td:nth-child(2) {
+	width: 150px;
+}
 
 /* 
 -------------------------------------
@@ -597,7 +600,11 @@ Themes
 -------------------------------------
 */
 
-#themes .themes div {
+#themes {
+	margin: 60px 0;
+}
+
+#themes div {
 	display: inline-block;
 	height: 60px;
 	line-height: 60px;
