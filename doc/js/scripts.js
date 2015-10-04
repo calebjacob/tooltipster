@@ -1,12 +1,25 @@
 $(function() {
 	
-	$('.tooltip').not('#welcome .tooltip').tooltipster({
-		offsetY: 2
+	// menu
+	
+	$('header select').change(function() {
+		var goTo = $(this).val();
+		var section = $('#'+goTo);
+		var offset = section.offset().top;
+		$('html, body').scrollTop(offset);
 	});
+	
+	// usual tooltips
+	
+	$('.tooltip').not('#welcome .tooltip').tooltipster();
+	
 	$('#welcome .tooltip').tooltipster({
-		offsetY: 2,
 		theme: 'tooltipster-light'
 	});
+	
+	
+	// demos
+	
 	$('#demo-default').tooltipster({
 		//trigger: 'click'
 	});
@@ -152,6 +165,22 @@ $(function() {
 			}
 		});
 	
+	// nested demo
+	$('#nesting').tooltipster({
+		content: $('<span>Hover me too!</span>'),
+		functionReady: function(){
+			
+			// the nested tooltip must be initialized once the first tooltip is open, that's why we do this inside functionReady()
+			this.content().tooltipster({
+				content: 'I am a nested tooltip!',
+				distance: 0
+			});
+		},
+		interactive: true
+	});
+	
+	// themes
+	
 	$('.tooltipster-light-preview').tooltipster({
 		theme: 'tooltipster-light'
 	});
@@ -166,13 +195,6 @@ $(function() {
 	});
 	$('.tooltipster-shadow-preview').tooltipster({
 		theme: 'tooltipster-shadow'
-	});
-	
-	$('header select').change(function() {
-		var goTo = $(this).val();
-		var section = $('#'+goTo);
-		var offset = section.offset().top;
-		$('html, body').scrollTop(offset);
 	});
 	
 	prettyPrint();

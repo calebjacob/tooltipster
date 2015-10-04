@@ -241,6 +241,14 @@ nav a:hover {
 	color: #fff;
 }
 
+.code {
+	background: #e6eff1;
+	border-radius: 4px;
+	display: inline-block;
+	font-family: monospace;
+	padding: 0 6px;
+}
+
 #mobile-nav {
 	display: none;
 }
