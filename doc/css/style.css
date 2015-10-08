@@ -577,7 +577,7 @@ Tooltips
 
 /* 
 -------------------------------------
-Options
+Options and methods
 -------------------------------------
 */
 
@@ -599,6 +599,10 @@ td h4 {
 }
 
 #table_options td:nth-child(2) {
+	width: 150px;
+}
+
+#table_methods td:nth-child(2) {
 	width: 150px;
 }
 

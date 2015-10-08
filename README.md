@@ -10,7 +10,8 @@ Standard options
 -------------------------
 
 animation  
-autoHide  
+autoClose  
+closeOnClick  
 content  
 contentAsHTML  
 contentCloning  
@@ -22,7 +23,6 @@ functionBefore
 functionReady  
 functionAfter  
 functionFormat  
-hideOnClick  
 interactive  
 interactiveTolerance  
 multiple  
@@ -31,7 +31,6 @@ positionTracker
 positionTrackerCallback  
 repositionOnScroll  
 restoration  
-returnObjects  
 speed  
 timer  
 theme  
@@ -53,16 +52,21 @@ position
 Methods
 -------------------------
 
-$.fn.tooltipster('setDefaults', {})  
-$(...).tooltipster('show' [, callback])  
-$(...).tooltipster('hide' [, callback])  
+$(...).tooltipster('close' [, callback])  
+$(...).tooltipster('content')  
+$(...).tooltipster('content', myNewContent)  
+$(...).tooltipster('destroy')  
 $(...).tooltipster('disable')  
 $(...).tooltipster('elementOrigin')  
 $(...).tooltipster('elementTooltip')  
 $(...).tooltipster('enable')  
-$(...).tooltipster('destroy')  
-$(...).tooltipster('content')  
-$(...).tooltipster('content', myNewContent)  
+$(...).tooltipster('instance')  
+$(...).tooltipster('open' [, callback])  
 $(...).tooltipster('option', optionName)  
 $(...).tooltipster('option', optionName, optionValue)  
 $(...).tooltipster('reposition')  
+
+$.fn.tooltipster('setDefaults', {})  
+$.fn.tooltipster('instances' [, selector || element])  
+$.fn.tooltipster('instancesLatest')  
+$.fn.tooltipster('origins')  

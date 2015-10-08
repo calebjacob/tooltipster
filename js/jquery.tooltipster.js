@@ -1,7 +1,7 @@
-/*! Tooltipster 4.0.0rc13 */
+/*! Tooltipster 4.0.0rc14 */
 
 /**
- * Released on 2015-10-03
+ * Released on 2015-10-08
  * 
  * A rockin' custom tooltip jQuery plugin
  * Developed by Caleb Jacob under the MIT license http://opensource.org/licenses/MIT
@@ -17,45 +17,45 @@
 ;(function($) {
 	
 	var defaults = {
-		animation: 'fade',
-		autoHide: true,
-		content: null,
-		contentAsHTML: false,
-		contentCloning: false,
-		debug: true,
-		delay: 200,
-		displayPlugin: 'default',
-		functionInit: null,
-		functionBefore: null,
-		functionReady: null,
-		functionAfter: null,
-		functionFormat: null,
-		hideOnClick: false,
-		interactive: false,
-		interactiveTolerance: 350,
-		multiple: false,
-		onlyOne: false,
-		// must be 'body' for now
-		parent: 'body',
-		positionTracker: false,
-		positionTrackerCallback: function(origin) {
-			// the default tracker callback will close the tooltip when the trigger
-			// is 'hover' (see https://github.com/iamceege/tooltipster/pull/253)
-			if (this.option('trigger') == 'hover' && this.option('autoHide')) {
-				this.hide();
-			}
+			animation: 'fade',
+			autoClose: true,
+			closeOnClick: false,
+			content: null,
+			contentAsHTML: false,
+			contentCloning: false,
+			debug: true,
+			delay: 200,
+			displayPlugin: 'default',
+			functionInit: null,
+			functionBefore: null,
+			functionReady: null,
+			functionAfter: null,
+			functionFormat: null,
+			interactive: false,
+			interactiveTolerance: 350,
+			multiple: false,
+			onlyOne: false,
+			// must be 'body' for now
+			parent: 'body',
+			positionTracker: false,
+			positionTrackerCallback: function(origin) {
+				// the default tracker callback will close the tooltip when the trigger
+				// is 'hover' (see https://github.com/iamceege/tooltipster/pull/253)
+				if (this.option('trigger') == 'hover' && this.option('autoClose')) {
+					this.close();
+				}
+			},
+			repositionOnScroll: false,
+			restoration: 'none',
+			speed: 350,
+			theme: [],
+			timer: 0,
+			touchDevices: true,
+			trigger: 'hover',
+			updateAnimation: true,
+			zIndex: 9999999
 		},
-		repositionOnScroll: false,
-		restoration: 'none',
-		returnObjects: false,
-		speed: 350,
-		theme: [],
-		timer: 0,
-		touchDevices: true,
-		trigger: 'hover',
-		updateAnimation: true,
-		zIndex: 9999999
-	};
+		instancesLatest = [];
 	
 	// the Tooltipster class
 	$.tooltipster = function(element, options) {
@@ -64,8 +64,8 @@
 		
 		// stack of custom callbacks provided as parameters to API methods
 		this.callbacks = {
-			hide: [],
-			show: []
+			close: [],
+			open: []
 		};
 		this.checkInterval = null;
 		// this will be the user content shown in the tooltip. A capital "C" is used
@@ -80,19 +80,19 @@
 		this.mouseIsOverOrigin = false;
 		// a unique namespace per instance, for easy selective unbinding
 		this.namespace = 'tooltipster-'+ Math.round(Math.random()*100000);
-		// Status (capital S) can be either : appearing, shown, disappearing, hidden
 		this.options = $.extend(true, {}, defaults, options);
 		// the element the tooltip will be appended to
 		this.$parent;
+		// Status (capital S) can be either : appearing, shown, disappearing, hidden
 		this.Status = 'hidden';
-		this.timerHide = null;
-		this.timerShow = null;
+		this.timerClose = null;
+		this.timerOpen = null;
 		// this will be the tooltip element (jQuery wrapped HTML element)
 		this.$tooltip;
 		
 		// for backward compatibility
-		if (this.options.autoClose !== undefined) {
-			this.options.autoHide = this.options.autoClose;
+		if (this.options.hideOnClick !== undefined) {
+			this.options.closeOnClick = this.options.hideOnClick;
 		}
 		
 		// option formatting
@@ -129,7 +129,7 @@
 				self.$el.data('tooltipster-initialTitle', initialTitle);
 			}
 			
-			// If content is provided in the options, its has precedence over the
+			// If content is provided in the options, it has precedence over the
 			// title attribute.
 			// Note : an empty string is considered content, only 'null' represents
 			// the absence of content.
@@ -151,7 +151,7 @@
 				.addClass('tooltipstered');
 			
 			// for 'click' and 'hover' triggers : bind on events to open the tooltip.
-			// Closing is now handled in _showNow() because of its bindings.
+			// Closing is now handled in _openNow() because of its bindings.
 			// Notes about touch events :
 				// - mouseenter, mouseleave and clicks happen even on pure touch devices
 				//   because they are emulated. deviceIsPureTouch() is a simple attempt
@@ -168,7 +168,7 @@
 					.on('mouseenter.'+ self.namespace, function() {
 						if (!deviceIsPureTouch() || self.options.touchDevices) {
 							self.mouseIsOverOrigin = true;
-							self._show();
+							self._open();
 						}
 					})
 					.on('mouseleave.'+ self.namespace, function() {
@@ -183,7 +183,7 @@
 					// for touch devices, we immediately display the tooltip because we
 					// cannot rely on mouseleave to handle the delay
 					self.$el.on('touchstart.'+ self.namespace, function() {
-						self._showNow();
+						self._openNow();
 					});
 				}
 			}
@@ -193,7 +193,7 @@
 				// on the emulated clicks (triggered by taps)
 				self.$el.on('click.'+ self.namespace, function() {
 					if (!deviceIsPureTouch() || self.options.touchDevices) {
-						self._show();
+						self._open();
 					}
 				});
 			}
@@ -241,9 +241,9 @@
 		_forceRedraw: function(){
 			
 			// note : this would work but for Webkit only
-			//this.$tooltip.hide();
+			//this.$tooltip.close();
 			//this.$tooltip[0].offsetHeight;
-			//this.$tooltip.show();
+			//this.$tooltip.open();
 			
 			// works in FF too
 			var $p = this.$tooltip.parent();
@@ -516,7 +516,7 @@
 				) {
 					// remove the tooltip if it's still here
 					if (self.Status == 'shown' || self.Status == 'appearing') {
-						self.hide();
+						self.close();
 					}
 					
 					// clear this interval as it is no longer necessary
@@ -560,30 +560,30 @@
 		
 		// this function will schedule the opening of the tooltip after the delay, if
 		// there is one
-		_show: function() {
+		_open: function() {
 			
 			var self = this;
 			
 			if (self.Status != 'shown' && self.Status != 'appearing') {
 				
 				if (self.options.delay) {
-					self.timerShow = setTimeout(function() {
+					self.timerOpen = setTimeout(function() {
 						
 						// for hover trigger, we check if the mouse is still over the
-						// origin, otherwise we do not show anything
+						// origin, otherwise we do not open anything
 						if (	self.options.trigger == 'click'
 							||	(self.options.trigger == 'hover' && self.mouseIsOverOrigin)
 						) {
-							self._showNow();
+							self._openNow();
 						}
 					}, self.options.delay);
 				}
-				else self._showNow();
+				else self._openNow();
 			}
 		},
 		
 		// this function will open the tooltip right away
-		_showNow: function(callback) {
+		_openNow: function(callback) {
 			
 			var self = this;
 			
@@ -607,17 +607,17 @@
 							}
 						}
 						
-						// save the method callback and cancel hide method callbacks
+						// save the method callback and cancel close method callbacks
 						if (callback) {
-							self.callbacks.show.push(callback);
+							self.callbacks.open.push(callback);
 						}
-						self.callbacks.hide = [];
+						self.callbacks.close = [];
 						
 						//get rid of any appearance timer
-						clearTimeout(self.timerShow);
-						self.timerShow = null;
-						clearTimeout(self.timerHide);
-						self.timerHide = null;
+						clearTimeout(self.timerOpen);
+						self.timerOpen = null;
+						clearTimeout(self.timerClose);
+						self.timerClose = null;
 						
 						// if we only want one tooltip open at a time, close all auto-closing
 						// tooltips currently open and not already disappearing
@@ -632,10 +632,10 @@
 									var instance = $el.data(ns),
 										// we have to use the public methods here
 										s = instance.status(),
-										ac = instance.option('autoHide');
+										ac = instance.option('autoClose');
 									
 									if (s !== 'hidden' && s !== 'disappearing' && ac) {
-										instance.hide();
+										instance.close();
 									}
 								});
 							});
@@ -645,9 +645,9 @@
 							finish = function() {
 								self.Status = 'shown';
 								
-								// trigger any show method custom callbacks and reset them
-								$.each(self.callbacks.show, function(i,c) { c.call(self, self.$el[0]); });
-								self.callbacks.show = [];
+								// trigger any open method custom callbacks and reset them
+								$.each(self.callbacks.open, function(i,c) { c.call(self, self.$el[0]); });
+								self.callbacks.open = [];
 							};
 						
 						// if this origin already has its tooltip open
@@ -798,8 +798,8 @@
 								}
 							});
 							
-							// autoHide bindings
-							if (self.options.autoHide) {
+							// autoClose bindings
+							if (self.options.autoClose) {
 								
 								// in case a listener is already bound for autoclosing (mouse or
 								// touch, hover or click), unbind it first
@@ -809,7 +809,7 @@
 								// and mouse
 								if (self.options.trigger == 'hover') {
 									
-									// if the user touches the body, hide
+									// if the user touches the body, close
 									if (deviceHasTouchCapability) {
 										
 										// timeout 0 : to prevent immediate closing if the method was called
@@ -824,7 +824,7 @@
 												// if the tooltip is not interactive or if the click was made
 												// outside of the tooltip
 												if (!self.options.interactive || !$.contains(self.$tooltip[0], event.target)) {
-													self.hide();
+													self.close();
 												}
 											});
 										}, 0);
@@ -838,46 +838,46 @@
 										var tolerance = null;
 										
 										self.$el.add(self.$tooltip)
-											// hide after some time out of the origin and the tooltip
-											.on('mouseleave.'+ self.namespace + '-autoHide', function() {
+											// close after some time out of the origin and the tooltip
+											.on('mouseleave.'+ self.namespace + '-autoClose', function() {
 												
 												clearTimeout(tolerance);
 												
 												tolerance = setTimeout(function() {
-													self.hide();
+													self.close();
 												}, self.options.interactiveTolerance);
 											})
 											// suspend timeout when the mouse is over the origin or
 											// the tooltip
-											.on('mouseenter.'+ self.namespace + '-autoHide', function() {
+											.on('mouseenter.'+ self.namespace + '-autoClose', function() {
 												clearTimeout(tolerance);
 											});
 									}
 									// if this is a non-interactive tooltip, get rid of it if the mouse leaves
 									else {
-										self.$el.on('mouseleave.'+ self.namespace + '-autoHide', function() {
-											self.hide();
+										self.$el.on('mouseleave.'+ self.namespace + '-autoClose', function() {
+											self.close();
 										});
 									}
 									
 									// close the tooltip when the origin gets a click (common behavior of
 									// native tooltips)
-									if (self.options.hideOnClick) {
+									if (self.options.closeOnClick) {
 										
-										self.$el.on('click.'+ self.namespace + '-autoHide', function() {
-											self.hide();
+										self.$el.on('click.'+ self.namespace + '-autoClose', function() {
+											self.close();
 										});
 									}
 								}
 								// here we'll set the same bindings for both clicks and touch on the body
-								// to hide the tooltip
+								// to close the tooltip
 								else if (self.options.trigger == 'click') {
 									
 									// explanations : same as above
 									setTimeout(function() {
 										$('body').on('click.'+ self.namespace +' touchstart.'+ self.namespace, function(event) {
 											if (!self.options.interactive || !$.contains(self.$tooltip[0], event.target)) {
-												self.hide();
+												self.close();
 											}
 										});
 									}, 0);
@@ -888,9 +888,9 @@
 						// if we have a timer set, let the countdown begin
 						if (self.options.timer > 0) {
 							
-							self.timerHide = setTimeout(function() {
-								self.timerHide = null;
-								self.hide();
+							self.timerClose = setTimeout(function() {
+								self.timerClose = null;
+								self.close();
 							}, self.options.timer + extraTime);
 						}
 					}
@@ -1068,8 +1068,91 @@
 				}
 			}
 			else {
-				self.hide();
+				self.close();
 			}
+		},
+		
+		close: function(callback) {
+			
+			var self = this;
+			
+			// save the method custom callback and cancel any open method custom callbacks
+			if (callback) self.callbacks.close.push(callback);
+			self.callbacks.open = [];
+			
+			// get rid of any appearance timeout
+			clearTimeout(self.timerOpen);
+			self.timerOpen = null;
+			clearTimeout(self.timerClose);
+			self.timerClose = null;
+			
+			var finishCallbacks = function() {
+				// trigger any close method custom callbacks and reset them
+				$.each(self.callbacks.close, function(i,c) { c.call(self, self.$el[0]); });
+				self.callbacks.close = [];
+			};
+			
+			// close
+			if (self.Status == 'shown' || self.Status == 'appearing') {
+				
+				self.Status = 'disappearing';
+				
+				var finish = function() {
+					
+					self.Status = 'hidden';
+					
+					// detach our content object first, so the next jQuery's remove()
+					// call does not unbind its event handlers
+					if (typeof self.Content == 'object' && self.Content !== null) {
+						self.Content.detach();
+					}
+					
+					self.$tooltip.remove();
+					self.$tooltip = null;
+					
+					// unbind orientationchange, scroll and resize listeners
+					$(window).off('.'+ self.namespace);
+					
+					// unbind any auto-closing click/touch listeners
+					$('body').off('.'+ self.namespace);
+					
+					// unbind any auto-closing hover listeners
+					self.$el.off('.'+ self.namespace + '-autoClose');
+					
+					// call our constructor custom callback function
+					if (self.options.functionAfter) {
+						self.options.functionAfter.call(self, self.$el[0]);
+					}
+					
+					// call our method custom callbacks functions
+					finishCallbacks();
+				};
+				
+				if (supportsTransitions()) {
+					
+					self.$tooltip
+						.clearQueue()
+						.removeClass('tooltipster-show')
+						// for transitions only
+						.addClass('tooltipster-dying');
+					
+					if (self.options.speed > 0) self.$tooltip.delay(self.options.speed);
+					
+					self.$tooltip.queue(finish);
+				}
+				else {
+					self.$tooltip
+						.stop()
+						.fadeOut(self.options.speed, finish);
+				}
+			}
+			// if the tooltip is already hidden, we still need to trigger
+			// the method custom callback
+			else if (self.Status == 'hidden') {
+				finishCallbacks();
+			}
+			
+			return self;
 		},
 		
 		content: function(c) {
@@ -1088,7 +1171,7 @@
 			
 			var self = this;
 			
-			self.hide();
+			self.close();
 			
 			self.$el
 				.removeData(self.namespace)
@@ -1137,12 +1220,19 @@
 				}
 			}
 			
+			// make sure the object is no longer referenced in there to prevent
+			// memory leaks
+			instancesLatest = $.grep(instancesLatest, function(el, i) {
+				return self !== el;
+			});
+			
 			return self;
 		},
 		
 		disable: function() {
-			// hide first, in case the tooltip would not disappear on its own (autoHide false)
-			this.hide();
+			// close first, in case the tooltip would not disappear on
+			// its own (autoClose false)
+			this.close();
 			this.enabled = false;
 			return this;
 		},
@@ -1160,87 +1250,26 @@
 			return this;
 		},
 		
+		/**
+		 * Alias, deprecated in 4.0.0
+		 * 
+		 * @param callback
+		 */
 		hide: function(callback) {
-			
-			var self = this;
-			
-			// save the method custom callback and cancel any show method custom callbacks
-			if (callback) self.callbacks.hide.push(callback);
-			self.callbacks.show = [];
-			
-			// get rid of any appearance timeout
-			clearTimeout(self.timerShow);
-			self.timerShow = null;
-			clearTimeout(self.timerHide);
-			self.timerHide = null;
-			
-			var finishCallbacks = function() {
-				// trigger any hide method custom callbacks and reset them
-				$.each(self.callbacks.hide, function(i,c) { c.call(self, self.$el[0]); });
-				self.callbacks.hide = [];
-			};
-			
-			// hide
-			if (self.Status == 'shown' || self.Status == 'appearing') {
-				
-				self.Status = 'disappearing';
-				
-				var finish = function() {
-					
-					self.Status = 'hidden';
-					
-					// detach our content object first, so the next jQuery's remove()
-					// call does not unbind its event handlers
-					if (typeof self.Content == 'object' && self.Content !== null) {
-						self.Content.detach();
-					}
-					
-					self.$tooltip.remove();
-					self.$tooltip = null;
-					
-					// unbind orientationchange, scroll and resize listeners
-					$(window).off('.'+ self.namespace);
-					
-					// unbind any auto-closing click/touch listeners
-					$('body').off('.'+ self.namespace);
-					
-					// unbind any auto-closing hover listeners
-					self.$el.off('.'+ self.namespace + '-autoHide');
-					
-					// call our constructor custom callback function
-					if (self.options.functionAfter) {
-						self.options.functionAfter.call(self, self.$el[0]);
-					}
-					
-					// call our method custom callbacks functions
-					finishCallbacks();
-				};
-				
-				if (supportsTransitions()) {
-					
-					self.$tooltip
-						.clearQueue()
-						.removeClass('tooltipster-show')
-						// for transitions only
-						.addClass('tooltipster-dying');
-					
-					if (self.options.speed > 0) self.$tooltip.delay(self.options.speed);
-					
-					self.$tooltip.queue(finish);
-				}
-				else {
-					self.$tooltip
-						.stop()
-						.fadeOut(self.options.speed, finish);
-				}
-			}
-			// if the tooltip is already hidden, we still need to trigger
-			// the method custom callback
-			else if (self.Status == 'hidden') {
-				finishCallbacks();
-			}
-			
-			return self;
+			this.close(callback);
+		},
+		
+		instance: function(){
+			return this;
+		},
+		
+		/**
+		 * The public open() method is actually an alias for the private _openNow() method
+		 * @see self::_openNow
+		 */
+		open: function(callback) {
+			this._openNow(callback);
+			return this;
 		},
 		
 		/**
@@ -1295,12 +1324,12 @@
 		},
 		
 		/**
-		 * The public show() method is actually an alias for the private _showNow() method
-		 * @see self::_showNow
+		 * Alias, deprecated in 4.0.0
+		 *
+		 * @param callback
 		 */
 		show: function(callback) {
-			this._showNow(callback);
-			return this;
+			this.open(callback);
 		},
 		
 		/**
@@ -1328,30 +1357,72 @@
 			// if the first argument is a method name
 			if (typeof args[0] === 'string') {
 				
-				var methodIsStatic = true;
+				var methodIsStatic = true,
+					ret;
 				
-				// list static methods here (usable by calling $.fn.tooltipster('methodName');)
+				// list static methods here, usable by calling $.fn.tooltipster('methodName')
 				switch (args[0]) {
 					
+					case 'origins':
+						
+						ret = $('.tooltipstered').toArray();
+						
+						break;
+					
+					// return instances of all tooltips in the page or an a given element
+					case 'instances':
+						
+						ret = [];
+						
+						var selector = args[1] || '.tooltipstered';
+						
+						$(selector).each(function(i) {
+								
+							var ns = $(this).data('tooltipster-ns');
+							
+							if (ns) {
+								
+								$.each(ns, function(i, namespace) {
+									ret.push($el.data(namespace));
+								})
+							}
+						});
+						
+						break;
+					
+					// return an array that contains the last Tooltipster objects
+					// generated by the last initializing call
+					case 'instancesLatest':
+						
+						ret = instancesLatest;
+						
+						break;
+					
+					// change default options for all future instances
 					case 'setDefaults':
-						// change default options for all future instances
+						
 						$.extend(defaults, args[1]);
+						
+						ret = true;
+						
 						break;
 					
 					default:
+						
 						methodIsStatic = false;
+						
 						break;
 				}
 				
 				// $.fn.tooltipster('methodName') calls will return true
-				if (methodIsStatic) return true;
-				// $(sel).tooltipster('methodName') calls will return the list of
-				// objects event though it's empty because chaining should work on
-				// empty lists
+				if (methodIsStatic) return ret;
+				// $(sel).tooltipster('methodName') calls will return the collection
+				// of objects event though it's empty because chaining is sometimes
+				// expected when working on empty collections.
 				else return this;
 			}
 			// the first argument is undefined or an object of options : we are
-			// initalizing but there is no element matched by selector
+			// initializing but there are no elements matched by selector
 			else {
 				// still chainable : same as above
 				return this;
@@ -1398,9 +1469,11 @@
 						}
 						
 						// if the function returned anything other than the instance
-						// itself (which implies chaining)
-						if (resp !== self) {
+						// itself (which implies chaining, except for the `instance` method)
+						if (resp !== self || args[0] === 'instance') {
+							
 							v = resp;
+							
 							// return false to stop .each iteration on the first element
 							// matched by the selector
 							return false;
@@ -1416,9 +1489,11 @@
 			// first argument is undefined or an object : the tooltip is initializing
 			else {
 				
-				var objects = [],
-					// is there a defined value for the multiple option in the options object ?
-					multipleIsSet = args[0] && args[0].multiple !== undefined,
+				// reset the array of last initialized objects
+				instancesLatest = [];
+				
+				// is there a defined value for the multiple option in the options object ?
+				var	multipleIsSet = args[0] && args[0].multiple !== undefined,
 					// if the multiple option is set to true, or if it's not defined but
 					// set to true in the defaults
 					multiple = (multipleIsSet && args[0].multiple) || (!multipleIsSet && defaults.multiple),
@@ -1432,10 +1507,7 @@
 						||	(!contentCloningIsSet && defaults.contentCloning),
 					// same for debug
 					debugIsSet = args[0] && args[0].debug !== undefined,
-					debug = (debugIsSet && args[0].debug) || (!debugIsSet && defaults.debug),
-					// same for returnObjects
-					roIsSet = args[0] && args[0].returnObjects !== undefined,
-					returnObjects = (roIsSet && args[0].returnObjects) || (!roIsSet && defaults.returnObjects);
+					debug = (debugIsSet && args[0].debug) || (!debugIsSet && defaults.debug);
 				
 				if (	this.length > 1
 					&&	typeof content == 'object'
@@ -1484,11 +1556,10 @@
 						}
 					}
 					
-					objects.push(obj);
+					instancesLatest.push(obj);
 				});
 				
-				if (multiple || returnObjects) return objects;
-				else return this;
+				return this;
 			}
 		}
 	};
