@@ -1,0 +1,18 @@
+{
+  "name": "tooltipster",
+  "version": "3.2.5",
+  "description": "A powerful, flexible jQuery plugin enabling you to easily create semantic, modern tooltips enhanced with the power of CSS.",
+  "main": "js/jquery.tooltipster.min.js",
+  "keywords": ["jquery", "tooltip"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/iamceege/tooltipster"
+  },
+  "bugs": {
+    "url": "https://github.com/iamceege/tooltipster/issues"
+  },
+  "dependencies": {
+    "jquery": ">=1.7"
+  },
+  "license": "MIT"
+}
