@@ -1191,6 +1191,8 @@
 					self.$originParents.each(function(i, el){
 						$(el).off('scroll.'+ self.namespace);
 					});
+					// clear the array to prevent memory leaks
+					self.$originParents = null;
 					
 					// unbind any auto-closing click/touch listeners
 					$('body').off('.'+ self.namespace +'-autoClose');
