@@ -17,12 +17,12 @@ $(function() {
 		theme: 'tooltipster-light'
 	});
 	
-	
 	// demos
 	
 	$('#demo-default').tooltipster({
 		//trigger: 'click'
 	});
+	
 	$('#demo-html').tooltipster({
 		content: $(
 			'<div>' +
@@ -39,10 +39,12 @@ $(function() {
 		maxWidth: 400,
 		position: 'right'
 	});
+	
 	$('#demo-theme').tooltipster({
 		animation: 'grow',
 		theme: 'tooltipster-pink'
 	});
+	
 	$('#demo-callback').tooltipster({
 		content: 'Loading...',
 		updateAnimation: false,
@@ -74,24 +76,28 @@ $(function() {
 			alert('The tooltip has closed!');
 		}
 	});
+	
 	$('#demo-events').tooltipster({
 		trigger: 'click'
 	});
+	
 	$(window).keypress(function() {
 		$('#demo-events').tooltipster('hide');
 	});
+	
 	$('#demo-interact').tooltipster({
 		contentAsHTML: true,
 		interactive: true
 	});
+	
 	$('#demo-touch').tooltipster({
 		touchDevices: false
 	});
 	$('#demo-imagemaparea').tooltipster();
+	
 	$('#demo-multiple').tooltipster({
 		animation: 'swing',
 		content: 'North',
-		multiple: true,
 		position: 'top'
 	});
 	$('#demo-multiple').tooltipster({

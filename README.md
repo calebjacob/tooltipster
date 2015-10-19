@@ -26,9 +26,7 @@ functionFormat
 interactive  
 interactiveTolerance  
 multiple  
-onlyOne  
 positionTracker  
-positionTrackerCallback  
 repositionOnScroll  
 restoration  
 speed  
