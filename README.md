@@ -47,24 +47,34 @@ maxWidth
 minWidth  
 position  
 
-Methods
+Instance methods
 -------------------------
 
-$(...).tooltipster('close' [, callback])  
-$(...).tooltipster('content')  
-$(...).tooltipster('content', myNewContent)  
-$(...).tooltipster('destroy')  
-$(...).tooltipster('disable')  
-$(...).tooltipster('elementOrigin')  
-$(...).tooltipster('elementTooltip')  
-$(...).tooltipster('enable')  
-$(...).tooltipster('instance')  
-$(...).tooltipster('open' [, callback])  
-$(...).tooltipster('option', optionName)  
-$(...).tooltipster('option', optionName, optionValue)  
-$(...).tooltipster('reposition')  
+close([callback])  
+content()  
+content(myNewContent)  
+destroy()  
+disable()  
+elementOrigin()  
+elementTooltip()  
+enable()  
+instance()  
+open([callback])  
+option(optionName)  
+option(optionName, optionValue)  
+reposition()  
 
-$.fn.tooltipster('setDefaults', {})  
-$.fn.tooltipster('instances' [, selector || element])  
-$.fn.tooltipster('instancesLatest')  
-$.fn.tooltipster('origins')  
+on()  
+once()  
+off()  
+trigger()  
+triggerHandler()  
+
+Static methods
+-------------------------
+
+setDefaults({})  
+instances([, selector || element])  
+instancesLatest()  
+origins()  
+

@@ -1,7 +1,7 @@
-/*! Tooltipster 4.0.0rc15 */
+/*! Tooltipster 4.0.0rc16 */
 
 /**
- * Released on 2015-10-19
+ * Released on 2015-10-20
  * 
  * A rockin' custom tooltip jQuery plugin
  * Developed by Caleb Jacob under the MIT license http://opensource.org/licenses/MIT
@@ -46,8 +46,7 @@
 				click: false,
 				mouseleave: false,
 				originClick: false,
-				scroll: false,
-				scrollOffScreen: false
+				scroll: false
 			},
 			triggerOpen: {
 				hover: false,
@@ -76,9 +75,10 @@
 		this.displayPlugin;
 		// this is the element which gets one or more tooltips, also called "origin"
 		this.$el = $(element);
+		this.$emitter = $({});
+		this.enabled = true;
 		// various position and size data recomputed before each repositioning
 		this.geometry;
-		this.enabled = true;
 		this.mouseIsOverOrigin = false;
 		// a unique namespace per instance
 		this.namespace = 'tooltipster-'+ Math.round(Math.random()*100000);
@@ -350,109 +350,118 @@
 					});
 				}
 				
-				switch(shape) {
+				// if the image itself is the area, nothing more to do
+				if (shape != 'default') {
 					
-					case 'circle':
+					switch(shape) {
 						
-						var areaLeft = coords[0],
-							areaTop = coords[1],
-							areaWidth = coords[2],
-							areaTopOffset = areaTop - areaWidth,
-							areaLeftOffset = areaLeft - areaWidth;
-						
-						geo.origin.size.height = areaWidth * 2;
-						geo.origin.size.width = geo.origin.size.height;
-						
-						geo.origin.offset.left += areaLeftOffset;
-						geo.origin.windowOffset.left += areaLeftOffset;
-						
-						geo.origin.offset.top += areaTopOffset;
-						geo.origin.windowOffset.top += areaTopOffset;
-						
-						break;
-					
-					case 'rect':
-						
-						var areaLeft = coords[0],
-							areaTop = coords[1],
-							areaRight = coords[2],
-							areaBottom = coords[3],
-							areaTopOffset = areaBottom - areaTop,
-							areaLeftOffset = areaRight - areaLeft;
-						
-						geo.origin.size.height = areaBottom - areaTop;
-						geo.origin.size.width = areaRight - areaLeft;
-						
-						geo.origin.offset.top += areaTopOffset;
-						geo.origin.windowOffset.top += areaTopOffset;
-						
-						geo.origin.offset.left += areaLeftOffset;
-						geo.origin.windowOffset.left += areaLeftOffset;
-						
-						break;
-					
-					case 'poly':
-						
-						var areaSmallestX = 0,
-							areaSmallestY = 0,
-							areaGreatestX = 0,
-							areaGreatestY = 0,
-							arrayAlternate = 'even';
-						
-						for (var i = 0; i < coords.length; i++) {
+						case 'circle':
 							
-							var areaNumber = coords[i];
+							var areaLeft = coords[0],
+								areaTop = coords[1],
+								areaWidth = coords[2],
+								areaTopOffset = areaTop - areaWidth,
+								areaLeftOffset = areaLeft - areaWidth;
 							
-							if (arrayAlternate == 'even') {
-								
-								if (areaNumber > areaGreatestX) {
-									
-									areaGreatestX = areaNumber;
-									
-									if (i === 0) {
-										areaSmallestX = areaGreatestX;
-									}
-								}
-								
-								if (areaNumber < areaSmallestX) {
-									areaSmallestX = areaNumber;
-								}
-								
-								arrayAlternate = 'odd';
-							}
-							else {
-								if (areaNumber > areaGreatestY) {
-									
-									areaGreatestY = areaNumber;
-									
-									if (i == 1) {
-										areaSmallestY = areaGreatestY;
-									}
-								}
-								
-								if (areaNumber < areaSmallestY) {
-									areaSmallestY = areaNumber;
-								}
-								
+							geo.origin.size.height = areaWidth * 2;
+							geo.origin.size.width = geo.origin.size.height;
+							
+							geo.origin.offset.left += areaLeftOffset;
+							geo.origin.windowOffset.left += areaLeftOffset;
+							
+							geo.origin.offset.top += areaTopOffset;
+							geo.origin.windowOffset.top += areaTopOffset;
+							
+							break;
+						
+						case 'rect':
+							
+							var areaLeft = coords[0],
+								areaTop = coords[1],
+								areaRight = coords[2],
+								areaBottom = coords[3],
+								areaTopOffset = areaBottom - areaTop,
+								areaLeftOffset = areaRight - areaLeft;
+							
+							geo.origin.size.height = areaBottom - areaTop;
+							geo.origin.size.width = areaRight - areaLeft;
+							
+							geo.origin.offset.left += areaLeftOffset;
+							geo.origin.windowOffset.left += areaLeftOffset;
+							
+							geo.origin.offset.top += areaTopOffset;
+							geo.origin.windowOffset.top += areaTopOffset;
+							
+							break;
+						
+						case 'poly':
+							
+							var areaSmallestX = 0,
+								areaSmallestY = 0,
+								areaGreatestX = 0,
+								areaGreatestY = 0,
 								arrayAlternate = 'even';
+							
+							for (var i = 0; i < coords.length; i++) {
+								
+								var areaNumber = coords[i];
+								
+								if (arrayAlternate == 'even') {
+									
+									if (areaNumber > areaGreatestX) {
+										
+										areaGreatestX = areaNumber;
+										
+										if (i === 0) {
+											areaSmallestX = areaGreatestX;
+										}
+									}
+									
+									if (areaNumber < areaSmallestX) {
+										areaSmallestX = areaNumber;
+									}
+									
+									arrayAlternate = 'odd';
+								}
+								else {
+									if (areaNumber > areaGreatestY) {
+										
+										areaGreatestY = areaNumber;
+										
+										if (i == 1) {
+											areaSmallestY = areaGreatestY;
+										}
+									}
+									
+									if (areaNumber < areaSmallestY) {
+										areaSmallestY = areaNumber;
+									}
+									
+									arrayAlternate = 'even';
+								}
 							}
-						}
-						
-						geo.origin.size.height = areaGreatestY - areaSmallestY;
-						geo.origin.size.width = areaGreatestX - areaSmallestX;
-						
-						geo.origin.offset.top += areaSmallestY;
-						geo.origin.windowOffset.top += areaSmallestY;
-						
-						geo.origin.offset.left += areaSmallestX;
-						geo.origin.windowOffset.left += areaSmallestX;
-						
-						break;
+							
+							geo.origin.size.height = areaGreatestY - areaSmallestY;
+							geo.origin.size.width = areaGreatestX - areaSmallestX;
+							
+							geo.origin.offset.left += areaSmallestX;
+							geo.origin.windowOffset.left += areaSmallestX;
+							
+							geo.origin.offset.top += areaSmallestY;
+							geo.origin.windowOffset.top += areaSmallestY;
+							
+							break;
+					}
 					
-					case 'default':
-						
-						// the image itself is the area, nothing more to do
-						break;
+					// save this before we overwrite it
+					var mappedOffsetRight = geo.origin.offset.right,
+						mappedOffsetBottom = geo.origin.offset.bottom;
+					
+					geo.origin.offset.right = geo.origin.offset.left + geo.origin.size.width;
+					geo.origin.offset.bottom = geo.origin.offset.top + geo.origin.size.height;
+					
+					geo.origin.windowOffset.right -= mappedOffsetRight - geo.origin.offset.right;
+					geo.origin.windowOffset.bottom -= mappedOffsetBottom - geo.origin.offset.bottom;
 				}
 			}
 			
@@ -521,22 +530,13 @@
 			
 			self.checkInterval = setInterval(function() {
 				
-				// if the tooltip and/or its interval should be stopped
-				if (
-						// if the origin has been removed
-						!bodyContains(self.$el)
-						// if the tooltip has been closed
-					||	self.Status == 'closed'
-						// if the tooltip has somehow been removed
-					||	!bodyContains(self.namespace)
-				) {
-					// remove the tooltip if it's still here
-					if (self.Status == 'ready' || self.Status == 'appearing') {
-						self.close();
-					}
-					
-					// clear this interval as it is no longer necessary
-					self._interval_cancel();
+				// if the origin has been removed
+				if (!bodyContains(self.$el)) {
+					self.destroy();
+				}
+				// if the tooltip element has somehow been removed
+				else if (!bodyContains(self.namespace)) {
+					self.close();
 				}
 				// if everything is alright
 				else {
@@ -570,7 +570,7 @@
 							// close the tooltip when using the mouseleave close trigger
 							// (see https://github.com/iamceege/tooltipster/pull/253)
 							if (self.options.triggerClose.mouseleave) {
-								this.close();
+								self.close();
 							}
 							else {
 								self.reposition();
@@ -913,24 +913,6 @@
 		},
 		
 		/**
-		 * A function that may adjust the left/top offset of the tooltip when a scroll
-		 * event is caught but that it should not trigger a complete repositioning.
-		 */
-		_scrollFixer: function() {
-			
-			var self = this,
-				g = self._geometry(),
-				offsetLeft = g.origin.windowOffset.left - self.geometry.origin.windowOffset.left,
-				offsetTop = g.origin.windowOffset.top - self.geometry.origin.windowOffset.top;
-			
-			// add the offset to the position initially computed by the display plugin
-			self.$tooltip.css({
-				left: self.tooltipPosition.left + offsetLeft,
-				top: self.tooltipPosition.top + offsetTop
-			});
-		},
-		
-		/**
 		 * Handles the scroll on any of the parents of the origin (when the
 		 * tooltip is open)
 		 * 
@@ -963,14 +945,67 @@
 				// if the scroll happened on another parent of the tooltip, it means
 				// that it's in a scrollable area and now needs to have its position
 				// adjusted or recomputed, depending ont the repositionOnScroll
-				// option
+				// option. Also, if the origin is partly hidden due to a parent that
+				// hides its overflow, we'll just hide (not close) the tooltip.
 				else {
 					
-					if (self.options.repositionOnScroll) {
-						self.reposition();
+					var g = self._geometry(),
+						overflows = false;
+					
+					self.$originParents.each(function(i, el) {
+						
+						var $el = $(el),
+							overflowX = $el.css('overflow-x'),
+							overflowY = $el.css('overflow-y');
+						
+						if (overflowX != 'visible' || overflowY != 'visible') {
+							
+							var bcr = el.getBoundingClientRect();
+							
+							if (overflowX != 'visible') {
+								
+								if (	g.origin.windowOffset.left < bcr.left
+									||	g.origin.windowOffset.right > bcr.right
+								) {
+									overflows = true;
+									return false;
+								}
+							}
+							
+							if (overflowY != 'visible') {
+								
+								if (	g.origin.windowOffset.top < bcr.top
+									||	g.origin.windowOffset.bottom > bcr.bottom
+								) {
+									overflows = true;
+									return false;
+								}
+							}
+						}
+					});
+					
+					if (overflows) {
+						self.$tooltip.hide();
 					}
 					else {
-						self._scrollFixer();
+						self.$tooltip.show();
+						
+						// reposition
+						if (self.options.repositionOnScroll) {
+							self.reposition();
+						}
+						// or just adjust offset
+						else {
+							
+							var offsetLeft = g.origin.windowOffset.left - self.geometry.origin.windowOffset.left,
+								offsetTop = g.origin.windowOffset.top - self.geometry.origin.windowOffset.top;
+							
+							// add the offset to the position initially computed by the display plugin
+							self.$tooltip.css({
+								left: self.tooltipPosition.left + offsetLeft,
+								top: self.tooltipPosition.top + offsetTop
+							});
+						}
 					}
 				}
 				
@@ -1199,7 +1234,8 @@
 				
 				var finish = function() {
 					
-					self._status('closed');
+					// clear the interval as it is no longer necessary
+					self._interval_cancel();
 					
 					// detach our content object first, so the next jQuery's remove()
 					// call does not unbind its event handlers
@@ -1225,6 +1261,8 @@
 					
 					// unbind any auto-closing hover listeners
 					self.$el.off('.'+ self.namespace +'-autoClose');
+					
+					self._status('closed');
 					
 					// trigger event
 					self.trigger('after');
@@ -1377,17 +1415,21 @@
 		},
 		
 		/**
-		 * On, off and trigger proxy to the jQuery event emitter
+		 * Off, on, once, trigger and triggerHandler proxy to the jQuery
+		 * event emitter
 		 */
 		off: function(){
-			var $this = $(this);
-			$this.off.apply($this, Array.prototype.slice.apply(arguments));
+			this.$emitter.off.apply(this.$emitter, Array.prototype.slice.apply(arguments));
 			return this;
 		},
 		
 		on: function(){
-			var $this = $(this);
-			$this.on.apply($this, Array.prototype.slice.apply(arguments));
+			this.$emitter.on.apply(this.$emitter, Array.prototype.slice.apply(arguments));
+			return this;
+		},
+		
+		once: function(){
+			this.$emitter.once.apply(this.$emitter, Array.prototype.slice.apply(arguments));
 			return this;
 		},
 		
@@ -1472,14 +1514,12 @@
 		},
 		
 		trigger: function(){
-			var $this = $(this);
-			$this.trigger.apply($this, Array.prototype.slice.apply(arguments));
+			this.$emitter.trigger.apply(this.$emitter, Array.prototype.slice.apply(arguments));
 			return this;
 		},
 		
 		triggerHandler: function(){
-			var $this = $(this);
-			$this.triggerHandler.apply($this, Array.prototype.slice.apply(arguments));
+			this.$emitter.triggerHandler.apply(this.$emitter, Array.prototype.slice.apply(arguments));
 			return this;
 		}
 	};
