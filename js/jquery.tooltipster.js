@@ -979,7 +979,7 @@
 								// if this is a non-interactive tooltip, get rid of it if the mouse leaves
 								else {
 									self.$el.on('mouseleave.'+ self.namespace + '-autoClose', function(event) {
-										self_.close(event);
+										self._close(event);
 									});
 								}
 							}
