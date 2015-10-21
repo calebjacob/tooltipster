@@ -62,13 +62,7 @@ instance()
 open([callback])  
 option(optionName)  
 option(optionName, optionValue)  
-reposition()  
-
-on()  
-once()  
-off()  
-trigger()  
-triggerHandler()  
+reposition()   
 
 Static methods
 -------------------------

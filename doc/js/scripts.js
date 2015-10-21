@@ -48,31 +48,33 @@ $(function() {
 	$('#demo-callback').tooltipster({
 		content: 'Loading...',
 		updateAnimation: false,
-		functionBefore: function(origin) {
+		functionBefore: function(instance, helper) {
 			
-			var $origin = $(origin);
+			var $origin = $(helper.origin);
 			
 			if ($origin.data('ajax') !== 'cached') {
 				
-				$.jGFeed('http://ws.audioscrobbler.com/2.0/user/ce3ge/recenttracks.rss?',
+				$.jGFeed(
+					'http://ws.audioscrobbler.com/2.0/user/ce3ge/recenttracks.rss?',
 					function(feeds){
-						var content = '';
+						
 						if(!feeds){
-							content = 'Woops - there was an error retrieving my last.fm RSS feed';
-							$origin.tooltipster('content', content);
+							instance.content('Woops - there was an error retrieving my last.fm RSS feed');
 						}
 						else {
-							content = $('<span>I last listened to: <strong>' + feeds.entries[0].title + '</strong></span>');
-							$origin
-								.tooltipster('content', content)
-								.data('ajax', 'cached');
+							
+							instance.content($('<span>I last listened to: <strong>' + feeds.entries[0].title + '</strong></span>'));
+							
+							$origin.data('ajax', 'cached');
 						}
-				}, 10);
+					},
+					10
+				);
 				
 				$origin.data('ajax', 'cached');
 			}
 		},
-		functionAfter: function(origin) {
+		functionAfter: function(instance) {
 			alert('The tooltip has closed!');
 		}
 	});
@@ -174,10 +176,12 @@ $(function() {
 	// nested demo
 	$('#nesting').tooltipster({
 		content: $('<span>Hover me too!</span>'),
-		functionReady: function(){
+		functionReady: function(instance){
 			
-			// the nested tooltip must be initialized once the first tooltip is open, that's why we do this inside functionReady()
-			this.content().tooltipster({
+			// the nested tooltip must be initialized once the first
+			// tooltip is open, that's why we do this inside
+			// functionReady()
+			instance.content().tooltipster({
 				content: 'I am a nested tooltip!',
 				distance: 0
 			});
