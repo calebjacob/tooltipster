@@ -329,9 +329,19 @@
 			
 			var self = this,
 				$el = self.$tooltip.find('.tooltipster-content'),
-				formattedContent = self.options.functionFormat ?
-					self.options.functionFormat(self.Content) :
-					self.Content;
+				formattedContent = self.Content;
+			
+			if (self.options.functionFormat) {
+				
+				formattedContent = self.options.functionFormat.call(
+					self,
+					self,
+					{
+						origin: self.$el[0]
+					},
+					self.Content
+				);
+			}
 			
 			if (typeof formattedContent === 'string' && !self.options.contentAsHTML) {
 				$el.text(formattedContent);
@@ -2306,12 +2316,13 @@
 			// implementor
 			self.position_change(finalResult.position);
 			
-			// include the tooltip and parent into the helper for the custom function
-			helper.$tooltip = self.instance.$tooltip;
-			helper.$tooltipParent = self.instance.$tooltipParent;
+			// add some variables to the helper for the custom function
+			helper.origin = self.instance.$el[0];
+			helper.tooltip = self.instance.$tooltip[0];
+			helper.tooltipParent = self.instance.$tooltipParent[0];
 			
 			if (self.options.functionPosition) {
-				finalResult = self.options.functionPosition.call(self, helper, $.extend(true, {}, finalResult));
+				finalResult = self.options.functionPosition.call(self, self.instance, helper, $.extend(true, {}, finalResult));
 			}
 			
 			// now let's compute the position of the arrow

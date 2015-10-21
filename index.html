@@ -367,12 +367,12 @@ $('.tooltip').tooltipster({
 				<tr>
 					<td><h4>functionFormat</h4></td>
 					<td>function</td>
-					<td>A custom function that can format the content of the tooltip for display. It gets the actual content as first argument and must return a value (either a string or a jQuery-wrapped HTML element) that will be displayed in the tooltip. The actual content value is not affected by this formatting function, it only affects the way it is displayed (<a href="#formatting">see example</a>). <strong>Default: none (null)</strong></td>
+					<td>A custom function that can format the content of the tooltip for display. It gets the actual content as third argument and must return the value (either a string or a jQuery-wrapped HTML element) that will be displayed in the tooltip. The actual content value is not affected by this formatting function, it only affects the way it is displayed (<a href="#formatting">see example</a>). <strong>Default: none (null)</strong></td>
 				</tr>
 				<tr>
 					<td><h4>functionPosition</h4></td>
 					<td>function</td>
-					<td>A custom function fired when the tooltip is repositioned. It gives you the ability to slightly or completely modify the position that Tooltipster is about to give to the tooltip. It gets a helper as first argument and the proposed set of placement values as second argument. The function must return the set of placement values, which you may have edited. <strong>Default: none (null)</strong></td>
+					<td>A custom function fired when the tooltip is repositioned. It gives you the ability to slightly or completely modify the position that Tooltipster is about to give to the tooltip. It gets the proposed set of placement values as third argument. The function must return the set of placement values, which you may have edited. <strong>Default: none (null)</strong></td>
 				</tr>
 				<tr>
 					<td><h4>interactive</h4></td>
@@ -498,10 +498,12 @@ $('.tooltip').tooltipster({
 			
 			<h3 id="callback_arguments">Arguments passed to callback functions</h3>
 			
-			<p>All user callbacks (except <span class="code">functionFormat</span>) have the same input signature. The arguments passed to <span class="code">functionInit</span>, <span class="code">functionBefore</span>, <span class="code">functionReady</span>, <span class="code">functionAfter</span> option callbacks and the <span class="code">open</span> and <span class="code">close</span> method callbacks are:</p>
+			<p>Almost all user callbacks have the same input signature. It means that <span class="code">functionInit</span>, <span class="code">functionBefore</span>, <span class="code">functionReady</span>, <span class="code">functionAfter</span>, <span class="code">functionFormat</span>, <span class="code">functionPosition</span> and the <span class="code">open</span> and <span class="code">close</span> callbacks all get these parameters:</p>
 			
 			<pre class="prettyprint">
 callback(instance, helper);</pre>
+			
+			<p>Small exception, <span class="code">functionFormat</span>, <span class="code">functionPosition</span> get an extra third parameter (documented above).</p>
 			
 			<p><span class="code">instance</span> is the Tooltipster object that called the method and is described in <a href="#object-oriented">this section</a>.</p>
 			
@@ -531,7 +533,7 @@ $('#my-tooltip').tooltipster(methodName [, argument1] [, argument2]);</pre>
 			
 			<pre class="prettyprint">
 // initialize your tooltip as usual:
-$('#my-tooltip').tooltipster();
+$('#my-tooltip').tooltipster({});
 // ...at some point, you may decide to open the tooltip:
 $('#my-tooltip').tooltipster('open');
 // ...and update its content:
@@ -543,10 +545,19 @@ $('#my-other-tooltip')
     .tooltipster('open')
     .tooltipster('content', 'My new content');</pre>
 			
-			<p>There is another way to call instance methods which will be discussed in <a href="#object-oriented">another section below</a>. At this point, most users just need to know that we'll use it inside <span class="code">functionInit</span>, <span class="code">functionBefore</span> and the like. It goes like this:</p>
+			<p>There is another way to call instance methods which will be discussed in <a href="#object-oriented">another section below</a>. Most users just need to know that it's the recommended way of calling methods when you are inside <span class="code">functionInit</span>, <span class="code">functionBefore</span> and the like. It goes like this:</p>
 			
 			<pre class="prettyprint">
 instance.methodName([argument1] [, argument2]);</pre>
+			
+			<p>Example:</p>
+			
+			<pre class="prettyprint">
+$('.tooltip').tooltipster({
+    functionBefore: function(instance, helper) {
+        instance.content('My new content');
+    }
+});</pre>
 			
 			<p>Here is the list of instance methods:</p>
 			
@@ -699,6 +710,7 @@ var instances = $.fn.tooltipster('instancesLatest');
 				<li><a href="#nested">Nested tooltips</a></li>
 				<li><a href="#object-oriented">Object-oriented Tooltipster</a></li>
 				<li><a href="#multiple">Using several tooltips on a single element</a></li>
+				<li><a href="#delegation">Dynamic live binding on newly created elements</a></li>
 				<li><a href="#accessibility">Making tooltips accessible to persons with disabilities</a></li>
 			</ul>
 			
@@ -910,7 +922,7 @@ $('#example').tooltipster({
         instance.content(people);
     },
     // this formats the content on the fly for display but does not modify its value
-    functionFormat: function(content){
+    functionFormat: function(instance, helper, content){
 
         var displayedContent = 'We have ' + content.length + ' people today. Say hello to ' + content.join(', ');
         
@@ -1020,6 +1032,25 @@ $('#my-element').tooltipster({
     multiple: true
 });</pre>
 
+			<h3 id="delegation">Dynamic live binding on newly created elements</h3>
+			
+			<p>Live binding does not come out of the box with Tooltipster but is easy to implement if that's what you want.</p>
+			
+			<p>We chose not to include that option directly because there is no solution that would be both 100% reliable and fast at the same time, and we wanted you to be aware of it before you proceeded. We recommend that you initialize tooltips manually after you create elements that should be tooltipped, in order to avoid any surprises. We do not provide support for issues that might arise from live binding.</p>
+			
+			<p>If you go the delegation way, you will rely on the bubbling of events (mouseenter or click) triggered on their origin. That may be an issue if these events are stopped from bubbling at some point, and you might run into race conditions depending on how you handle things. And of course, the tooltips won't be initialized until their origin is hovered/clicked, which may be an issue if you wish to manipulate them programmatically.</p>
+			
+			<p>If you understand these caveats and are willing to proceed, the code below will do the work. You just may have to edit the selector to suit your needs and switch from <span class="code">'mouseenter'</span> to <span class="code">'click'</span> if you want a click trigger.</p>
+			
+			<pre class="prettyprint">
+$('body').on('mouseenter', '.tooltip:not(.tooltipstered)', function(){
+    $(this)
+        .tooltipster({ ... })
+        .tooltipster('open');
+});</pre>
+			
+			<p>On the other hand, using mutation observers to initialize tooltips when elements are added to the DOM should completely reliable, but is known to severely hinder the performances of the application. Should you go down this road, feel free to share your code with us and we'll publish it here.</p>
+			
 			<h3 id="accessibility">Making tooltips accessible to persons with disabilities</h3>
 			<p>The W3C issued a recommendation to make websites more accessible to persons with disabilities. This recommendation is known as WAI-ARIA (or simply ARIA), which stands for Web Accessibility Initiative - Accessible Rich Internet Applications.</p>
 			<p>Accessible tooltips can be powered by Tooltipster. To do this, one solution is to actually manipulate in parallel two tooltips which will share the same content :<br />
