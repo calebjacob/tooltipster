@@ -1,4 +1,4 @@
-/*! Tooltipster 4.0.0rc17 */
+/*! Tooltipster 4.0.0rc18 */
 
 /**
  * Released on 2015-10-20
@@ -832,20 +832,13 @@
 								self.$tooltip.addClass(self.options.theme[i]);
 							}
 							
-							self.$tooltip
-								.css({
-									// must not overflow the window until the positioning method
-									// is called
-									height: 0,
-									width: 0,
-									zIndex: self.options.zIndex,
-									'-moz-animation-duration': self.options.speed + 'ms',
-									'-ms-animation-duration': self.options.speed + 'ms',
-									'-o-animation-duration': self.options.speed + 'ms',
-									'-webkit-animation-duration': self.options.speed + 'ms',
-									'animation-duration': self.options.speed + 'ms',
-									'transition-duration': self.options.speed + 'ms'
-								});
+							self.$tooltip.css({
+								// must not overflow the window until the positioning method
+								// is called
+								height: 0,
+								width: 0,
+								zIndex: self.options.zIndex
+							});
 							
 							if (self.options.interactive) {
 								self.$tooltip.css('pointer-events', 'auto')
@@ -867,16 +860,45 @@
 								self.$tooltipParent = self.options.parent;
 							}
 							
+							if (supportsTransitions()){
+								
+								// We have to apply the classes before the element is appended
+								// to the DOM, otherwise the fadeIn animation (or whatever start
+								// animation) is randomly not played.
+								// Explanation: if the element is initially opaque, the made
+								// transparent with a CSS class, then made opaque again by
+								// removing the class, the browser will not redraw the element
+								// and will display an opaque element without animation. That's
+								// expected, but what is surprising is that even forcing
+								// a redraw (with ::_forceRedraw) after the class has been
+								// applied randomly fails, and removing the class with a
+								// timeout after 10ms also randomly fails to trigger the
+								// animation, which means that browsers tend to optimize their
+								// repaints over short periods, not only over the current
+								// microtask. Maybe there's a better way to force a redraw out
+								// there, but it seems that just applying the tooltipster-initial
+								// class before respositioning is ok for now and does not break
+								// anything.
+								self.$tooltip
+									.addClass('tooltipster-' + self.options.animation)
+									.addClass('tooltipster-initial');
+							}
+							
 							// reposition the tooltip and attach to the DOM
 							self.reposition(true);
 							
 							// animate in the tooltip
 							if (supportsTransitions()) {
 								
-								self.$tooltip
-									.addClass('tooltipster-' + self.options.animation)
-									.addClass('tooltipster-initial');
-									
+								self.$tooltip.css({
+									'-moz-animation-duration': self.options.speed + 'ms',
+									'-ms-animation-duration': self.options.speed + 'ms',
+									'-o-animation-duration': self.options.speed + 'ms',
+									'-webkit-animation-duration': self.options.speed + 'ms',
+									'animation-duration': self.options.speed + 'ms',
+									'transition-duration': self.options.speed + 'ms'
+								});
+								
 								setTimeout(
 									function() {
 										
@@ -1868,15 +1890,16 @@
 	
 	var pluginName = 'default',
 		/** 
-		 * @param {object} tooltipster The tooltipster instance that instantiated this plugin
+		 * @param {object} instance The tooltipster object that instantiated
+		 * this plugin
 		 * @param {object} options Options, @see self::defaults()
 		 */
-		plugin = function(tooltipster, options) {
+		plugin = function(instance, options) {
 			
 			// list of instance variables
 			
 			this.options = $.extend(true, this.defaults(), options);
-			this.tooltipster = tooltipster;
+			this.instance = instance;
 			
 			// disable the arrow in IE6 unless the arrow option was explicitly set to true
 			var $d = $('<i><!--[if IE 6]><i></i><![endif]--></i>');
@@ -1887,7 +1910,7 @@
 			}
 			
 			// initialize
-			this.init(tooltipster, options);
+			this.init(instance, options);
 		};
 	
 	plugin.prototype = {
@@ -2049,7 +2072,7 @@
 		 */
 		position_change: function(position) {
 			
-			this.tooltipster.$tooltip
+			this.instance.$tooltip
 				.removeClass('tooltipster-bottom')
 				.removeClass('tooltipster-left')
 				.removeClass('tooltipster-right')
@@ -2063,16 +2086,16 @@
 		 * tooltip is eventually appended to its parent (since the element may be
 		 * detached from the DOM at the moment the method is called).
 		 * 
+		 * Plugin creators will at least have to use self.instance.$tooltip and
+		 * self.instance.$tooltipParent. Also, some of its methods may help plugin
+		 * creators, especially its _sizer internal methods that help measure the size
+		 * of the tooltip in various conditions.
+		 * 
 		 * @param {object} helper An object that contains variables that plugin
 		 * creators may find useful (see below)
 		 * @param {object} helper.geo An object with many properties (size, positioning)
 		 * about objects of interest (window, document, origin). This should help plugin
 		 * users compute the optimal position of the tooltip
-		 * @param {object} helper.tooltipster The Tooltipster instance which calls this
-		 * method. Plugin creators will at least have to use tooltipster.$tooltip and
-		 * tooltipster.$tooltipParent. Also, some of its methods may help plugin creators,
-		 * especially its _sizer internal methods that help measure the size of the
-		 * tooltip in various conditions.
 		 */
 		reposition: function(helper) {
 			
@@ -2084,7 +2107,7 @@
 				};
 			
 			// start position tests session
-			self.tooltipster._sizerStart();
+			self.instance._sizerStart();
 			
 			// find which position can contain the tooltip without overflow.
 			// We'll compute things relatively to window, then document if need be.
@@ -2112,7 +2135,7 @@
 					
 					// now we get the size of the tooltip when it does not have any size
 					// constraints set
-					naturalSize = self.tooltipster._sizerNatural();
+					naturalSize = self.instance._sizerNatural();
 					
 					if (pos == 'top' || pos == 'bottom') {
 						distance.vertical = self.options.distance[pos];
@@ -2154,7 +2177,7 @@
 					else {
 						
 						// let's try to use size constraints to fit
-						sizerResult = self.tooltipster._sizerConstrained(
+						sizerResult = self.instance._sizerConstrained(
 							helper.geo.available[container][pos].width - distance.horizontal,
 							helper.geo.available[container][pos].height - distance.vertical
 						);
@@ -2284,8 +2307,8 @@
 			self.position_change(finalResult.position);
 			
 			// include the tooltip and parent into the helper for the custom function
-			helper.$tooltip = self.tooltipster.$tooltip;
-			helper.$tooltipParent = self.tooltipster.$tooltipParent;
+			helper.$tooltip = self.instance.$tooltip;
+			helper.$tooltipParent = self.instance.$tooltipParent;
 			
 			if (self.options.functionPosition) {
 				finalResult = self.options.functionPosition.call(self, helper, $.extend(true, {}, finalResult));
@@ -2332,7 +2355,7 @@
 			}
 			else {
 				
-				if (self.tooltipster.$tooltipParent[0].tagName.toLowerCase() == 'body') {
+				if (self.instance.$tooltipParent[0].tagName.toLowerCase() == 'body') {
 					
 					originParentOffset = {
 						left: helper.geo.origin.windowOffset.left + helper.geo.window.scroll.left,
@@ -2357,16 +2380,16 @@
 			self.position_change(finalResult.position);
 			
 			if (helper.geo.origin.fixedLineage) {
-				self.tooltipster.$tooltip
+				self.instance.$tooltip
 					.css('position', 'fixed');
 			}
 			else {
 				// CSS default
-				self.tooltipster.$tooltip
+				self.instance.$tooltip
 					.css('position', '');
 			}
 			
-			self.tooltipster.$tooltip
+			self.instance.$tooltip
 				.css({
 					left: finalResult.coord.left,
 					top: finalResult.coord.top
@@ -2382,7 +2405,7 @@
 			// but it creates a bug in Firefox, so we just don't do it
 			if (finalResult.sizeMode == 'constrained') {
 				
-				self.tooltipster.$tooltip
+				self.instance.$tooltip
 					.css({
 						height: finalResult.size.height,
 						width: finalResult.size.width
@@ -2390,7 +2413,7 @@
 			}
 			else {
 			
-				self.tooltipster.$tooltip
+				self.instance.$tooltip
 					.css({
 						height: '',
 						width: ''
@@ -2398,7 +2421,7 @@
 			}
 			
 			// end position tests session and append the tooltip HTML element to its parent
-			self.tooltipster._sizerEnd();
+			self.instance._sizerEnd();
 		}
 	};
 	

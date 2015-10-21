@@ -3,9 +3,9 @@
 <head lang="en">
 	<meta charset="UTF-8">
 	<title></title>
-	<script src='//code.jquery.com/jquery-2.1.0.js'></script>
+	<script src='//code.jquery.com/jquery-1.7.0.js'></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.2/raphael-min.js"></script>
-	<script src="js/jquery.tooltipster.js"></script>
+	<script src="../js/jquery.tooltipster.js"></script>
 	<script type='text/javascript'>//<![CDATA[ 
 	$(function(){
 		var gender1 = new Raphael(document.getElementById('genderChart1'), 300, 300);
@@ -119,8 +119,13 @@
 	
 	</script>
 	
-	<link type="text/css" rel="stylesheet" href="css/tooltipster.css" />
+	<link type="text/css" rel="stylesheet" href="../css/tooltipster.css" />
 	<style type="text/css">
+		
+		#cont {
+			height: 600px;
+		}
+		
 		#genderChart1 {
 			height: 300px;
 			width: 300px;
@@ -130,6 +135,8 @@
 	</style>
 </head>
 <body>
-	<div id="genderChart1"></div>
+	<div id="cont">
+		<div id="genderChart1"></div>
+	</div>
 </body>
 </html>
