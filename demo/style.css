@@ -26,3 +26,14 @@ body {
 	background: #000;
 	color: #fff;
 }
+
+#genderChart1 {
+	height: 300px;
+	width: 300px;
+	margin: 0 auto;
+}
+
+#scrollable {
+	height: 300px;
+	overflow: scroll;
+}

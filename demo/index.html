@@ -8,30 +8,165 @@
 	<link rel="stylesheet" type="text/css" href="style.css" />
 	<link rel="stylesheet" type="text/css" href="../css/tooltipster.css" />
 	
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.2/raphael-min.js"></script>
 	<script type="text/javascript" src="//code.jquery.com/jquery-1.7.0.min.js"></script>
 	<script type="text/javascript" src="../js/jquery.tooltipster.js"></script>
 	
 	<script type="text/javascript">
 		$(document).ready(function() {
-			$('.tooltip').tooltipster({
+			$('.tooltip.hover').tooltipster({
 				trigger: 'hover'
 			});
+			$('.tooltip.click').tooltipster({
+				trigger: 'click'
+			});
+		});
+		
+		
+		
+		$(function(){
+			var gender1 = new Raphael(document.getElementById('genderChart1'), 300, 300);
+			
+			gender1.customAttributes.arc = function (xloc, yloc, value, total, R) {
+				var alpha = 360 / total * value,
+					a = (90 - alpha) * Math.PI / 180,
+					x = xloc + R * Math.cos(a),
+					y = yloc - R * Math.sin(a),
+					path;
+				if (total == value) {
+					path = [
+						["M", xloc, yloc - R],
+						["A", R, R, 0, 1, 1, xloc - 0.01, yloc - R]
+					];
+				} else {
+					path = [
+						["M", xloc, yloc - R],
+						["A", R, R, 0, +(alpha > 180), 1, x, y]
+					];
+				}
+				return {
+					path: path
+				};
+			};
+
+// base light grey circle
+			var baseCircle1 = gender1.circle(150, 150, 150);
+			baseCircle1.attr({
+				stroke: 'none',
+				fill: '#66cca6',
+			})
+
+// arcs
+			var maleArc1 = gender1.path().attr({
+				"stroke": "#3ea9f5",
+				"stroke-width": 40,
+				arc: [0, 0, 0, 360, 100],
+				transform: "t150,150", // translate to center of canvas, then rotate by degrees
+			});
+
+//maleArc1.node.setAttribute("class","tooltip");
+			
+			var genderlessArc1 = gender1.path().attr({
+				"stroke": "#fff",
+				"stroke-width": 40,
+				arc: [0, 0, 0, 360, 100],
+				transform: "t150,150r240", // rotate to 200 degrees, where last arc ended
+			});
+			
+			var customArc1 = gender1.path().attr({
+				"stroke": "#662c91",
+				"stroke-width": 40,
+				arc: [0, 0, 0, 360, 100],
+				transform: "t150,150r248",
+			});
+			
+			var femaleArc1 = gender1.path().attr({
+				"stroke": "#ff7aac",
+				"stroke-width": 40,
+				arc: [0, 0, 0, 360, 100],
+				transform: "t150,150r266",
+			});
+			
+			
+			maleArc1.animate({
+				arc: [0, 0, 240, 360, 100]
+			}, 1000, "easeIn", function () { // callback so next arc animates
+				genderlessArc1.animate({
+					arc: [0, 0, 8, 360, 100]
+				}, 200, "easeIn", function () {
+					customArc1.animate({
+						arc: [0, 0, 18, 360, 100]
+					}, 200, "easeIn", function () {
+						femaleArc1.animate({
+							arc: [0, 0, 94, 360, 100]
+						}, 500, "backOut");
+					});
+				});
+			});
+
+
+
+// top dark grey circle
+			var topCircle1 = gender1.circle(150, 150, 85);
+			topCircle1.attr({
+				stroke: 'none',
+				fill: '#b9e1d2',
+			})
+			
+			$(maleArc1.node).tooltipster({
+				content: 'Male characters',
+				theme: 'tooltipster-shadow'
+			});
+			$(genderlessArc1.node).tooltipster({
+				content: 'Genderless characters',
+				theme: 'tooltipster-shadow'
+			});
+			$(customArc1.node).tooltipster({
+				content: 'Custom gender characters',
+				theme: 'tooltipster-shadow'
+			});
+			$(femaleArc1.node).tooltipster({
+				content: 'Female characters',
+				theme: 'tooltipster-shadow'
+			});
+			
+// END GENDER CHART 1
 		});
 	</script>
 </head>
 <body>
 
-	<section class="container tooltip" title="Parent container">
-		<a href="http://google.com" class="tooltip" title="Get your Google on">Google</a>
+	<section class="container tooltip hover" title="Block element">
+		<a href="http://google.com" class="tooltip hover" title="Inline element">Google</a>
 	</section>
 	
-	<div id="hi" style="width: 100px; height: 100px; margin: 0 0 0 500px; background: #f00; position: fixed; top: 100px; right: 100px;" class="tooltip" title="This is the tooltip"></div>
+	<div id="hi" style="width: 100px; height: 100px; margin: 0 0 0 500px; background: #f00; position: fixed; top: 100px; right: 100px;" class="tooltip hover" title="Fixed origin"></div>
 	
 	<section class="container">
 		<img src="map.png" usemap="#map" />
 		<map name="map">
-			<area shape="circle" coords="396,220,102" href="#" class="tooltip" title="Hello thar, mate!" />
+			<area shape="circle" coords="396,220,102" href="#" class="tooltip hover" title="Map area" />
 		</map>
+	</section>
+	
+	<section id="scrollable" class="container">
+		<b class="tooltip click" title="My origin is in a scrollable area">Heading with a tooltip</b>
+		<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo. Quisque sit amet est et sapien ullamcorper pharetra. Vestibulum erat wisi, condimentum sed, commodo vitae, ornare sit amet, wisi. Aenean fermentum, elit eget tincidunt condimentum, eros ipsum rutrum orci, sagittis tempus lacus enim ac dui. Donec non enim in turpis pulvinar facilisis. Ut felis. Praesent dapibus, neque id cursus faucibus, tortor neque egestas augue, eu vulputate magna eros eu erat. Aliquam erat volutpat. Nam dui mi, tincidunt quis, accumsan porttitor, facilisis luctus, metus</p>
+		<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.</p>
+		<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>
+		<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo. Quisque sit amet est et sapien ullamcorper pharetra. Vestibulum erat wisi, condimentum sed, commodo vitae, ornare sit amet, wisi. Aenean fermentum, elit eget tincidunt condimentum, eros ipsum rutrum orci, sagittis tempus lacus enim ac dui. Donec non enim in turpis pulvinar facilisis. Ut felis. Praesent dapibus, neque id cursus faucibus, tortor neque egestas augue, eu vulputate magna eros eu erat. Aliquam erat volutpat. Nam dui mi, tincidunt quis, accumsan porttitor, facilisis luctus, metus</p>
+		<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.</p>
+		<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>
+		<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo. Quisque sit amet est et sapien ullamcorper pharetra. Vestibulum erat wisi, condimentum sed, commodo vitae, ornare sit amet, wisi. Aenean fermentum, elit eget tincidunt condimentum, eros ipsum rutrum orci, sagittis tempus lacus enim ac dui. Donec non enim in turpis pulvinar facilisis. Ut felis. Praesent dapibus, neque id cursus faucibus, tortor neque egestas augue, eu vulputate magna eros eu erat. Aliquam erat volutpat. Nam dui mi, tincidunt quis, accumsan porttitor, facilisis luctus, metus</p>
+		<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.</p>
+		<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>
+		<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>
+		<b class="tooltip click" title="My origin is in a scrollable area">Heading with a tooltip</b>
+	</section>
+	
+	<section class="container">
+		SVG
+		<div id="genderChart1"></div>
 	</section>
 </body>
 </html>

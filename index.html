@@ -65,7 +65,7 @@
 					<li><a href="#options">Options</a></li>
 					<li><a href="#methods">Methods</a></li>
 					<li><a href="#usecases">Use cases</a></li>
-					<li><a href="#talk">Talk</a></li>
+					<li><a href="#faq">FAQ</a></li>
 				</ul>
 			</nav>
 			<select>
@@ -75,7 +75,7 @@
 				<option value="options">Options</option>
 				<option value="methods">Methods</option>
 				<option value="usecases">Use cases</option>
-				<option value="talk">Talk</option>
+				<option value="faq">FAQ</option>
 			</select>
 		</header>
 		<section id="welcome">
@@ -140,7 +140,7 @@
 				</li>
 				<li>
 					<span id="demo-complex-placeholder"></span>
-					<span id="demo-complex" title="I also stick to fixed-positioned and moving elements! Try scrolling!">Click</span> Position tracking system
+					<span id="demo-complex" title="I also stick to fixed-positioned, moving and resizing elements! Try scrolling!">Click</span> Position tracking system
 				</li>
 				<li>...&amp; more!</li>
 			</ul>
@@ -186,10 +186,10 @@
 &lt;/head&#62;</pre>
 			
 			<h3 id="theming">4. Styling your tooltips</h3>
-			<p>Tooltipster is packaged with six themes to choose from.</p>
+			<p>On top of its default style, Tooltipster is packaged with five themes to choose from.</p>
 			
 			<div id="themes">
-				<div class="tooltipster-default-preview tooltip" title="The default theme" target="_blank">Default</div>
+				<div class="tooltipster-default-preview tooltip" title="The default style" target="_blank">Default</div>
 				<div class="tooltipster-light-preview" title="Light and frisky!" target="_blank">Light</div>
 				<div class="tooltipster-borderless-preview" title="Let's travel!" target="_blank">Borderless</div>
 				<div class="tooltipster-punk-preview" title="I will not conform to your old fart ways!" target="_blank">Punk</div>
@@ -204,7 +204,7 @@ $('.tooltip').tooltipster({
     theme: 'tooltipster-noir'
 });</pre>
 			<p>
-				The easiest way to further style your tooltips is to apply a secondary custom theme that will override some properties of a Tooltipster default theme.<br />
+				The easiest way to further style your tooltips is to apply a secondary custom theme that will override some properties of a packaged theme.<br />
 				Create a new css file and include it in your page. Inside the file, declare your customized rules like this:
 			</p>
 			<pre class="prettyprint lang-css">
@@ -407,17 +407,22 @@ $('.tooltip').tooltipster({
 				<tr>
 					<td><h4>positionTracker</h4></td>
 					<td>boolean</td>
-					<td>Reposition the tooltip if the origin moves. As this option may have an impact on performance, we suggest you enable it only if you need to. <strong>Default: false</strong></td>
+					<td>Repositions the tooltip if the origin moves or is resized. As this option may have an impact on performance, we suggest you enable it only if you need to. <strong>Default: false</strong></td>
 				</tr>
 				<tr>
 					<td><h4>repositionOnScroll</h4></td>
 					<td>boolean</td>
-					<td>Reposition the tooltip if it goes out of the viewport when the user scrolls the page, in order to keep it visible as long as possible. <strong>Default: false</strong></td>
+					<td>Repositions the tooltip if it goes out of the viewport when the user scrolls the page, in order to keep it visible as long as possible. <strong>Default: false</strong></td>
 				</tr>
 				<tr>
 					<td><h4>restoration</h4></td>
 					<td>'none', 'previous' or 'current'</td>
 					<td>Specifies if a TITLE attribute should be restored on the HTML element after a call to the 'destroy' method. This attribute may be omitted, or be restored with the value that existed before Tooltipster was initialized, or be restored with the stringified value of the current content. Note: in case of multiple tooltips on a single element, only the last destroyed tooltip may trigger a restoration. <strong>Default: 'none'</strong></td>
+				</tr>
+				<tr>
+					<td><h4>sizeTracker</h4></td>
+					<td>boolean</td>
+					<td>Repositions the tooltip if its size changes. When the size change results from a call to the 'content' method, the tooltip is already repositioned without the need to enable this option. As this option may have an impact on performance, we suggest you enable it only if you need to. See <a href="#faq_sizeissue">this entry</a> of the FAQ. <strong>Default: false</strong></td>
 				</tr>
 				<tr>
 					<td><h4>speed</h4></td>
@@ -438,6 +443,11 @@ $('.tooltip').tooltipster({
 					<td><h4>touchDevices</h4></td>
 					<td>boolean</td>
 					<td>If set to false, tooltips will not open on pure-touch devices, unless you open them yourself with the 'open' method. Touch gestures on devices which also have a mouse will still open the tooltips though. <strong>Default: true</strong></td>
+				</tr>
+				<tr>
+					<td><h4>trackerInterval</h4></td>
+					<td>integer</td>
+					<td>Sets how often the positionTracker and sizeTracker should run, in milliseconds. The tracker runs even when the positionTracker and sizeTracker are disabled in case the origin were removed while the tooltip is open, so you shouldn't set too high or too low values unless you need to. <strong>Default: 500</strong></td>
 				</tr>
 				<tr>
 					<td><h4>trigger</h4></td>
@@ -709,7 +719,7 @@ var instances = $.fn.tooltipster('instancesLatest');
 				<li><a href="#formatting">Working with data sets</a></li>
 				<li><a href="#nested">Nested tooltips</a></li>
 				<li><a href="#object-oriented">Object-oriented Tooltipster</a></li>
-				<li><a href="#multiple">Using several tooltips on a single element</a></li>
+				<li><a href="#multiple">Using multiple tooltips on a single element</a></li>
 				<li><a href="#delegation">Dynamic live binding on newly created elements</a></li>
 				<li><a href="#accessibility">Making tooltips accessible to persons with disabilities</a></li>
 			</ul>
@@ -975,7 +985,7 @@ instance.open().content('My new content');</pre>
 			
 			<p>What happened here? The <span class="code">instance</span> method returns the Tooltipster instance that corresponds to the <b>first</b> tooltip set on <span class="code">#my-element</span>. Once we have the Tooltipster instance that corresponds to a tooltip, we can call any methods directly on it to manipulate the tooltip.</p>
 			
-			<p>If <b>several</b> tooltips were set on <span class="code">#my-element</span> using the <span class="code">multiple</span> option (see next section), we'd have to call <span class="code">$.fn.tooltipster('objects', '#my-element');</span> to get an array with all their instances.</pre>
+			<p>If <b>multiple</b> tooltips were set on <span class="code">#my-element</span> using the <span class="code">multiple</span> option (see next section), we'd have to call <span class="code">$.fn.tooltipster('objects', '#my-element');</span> to get an array with all their instances.</pre>
 			
 			<p>As you've seen in many previous examples involving callbacks - either <span class="code">functionInit</span>, <span class="code">functionBefore</span>, etc., open/close callbacks, they all get the Tooltipster instance that calls them as first parameter. So this works fine:</p>
 			
@@ -986,10 +996,10 @@ $('#mytooltip').tooltipster({
     }
 });</pre>
 			
-			<p>While you may feel that this is only nice to have, this notation actually becomes compulsory when you start using several tooltips on a same element.</p>
+			<p>While you may feel that this is only nice to have, this notation actually becomes compulsory when you start using multiple tooltips on a same element.</p>
 			
-			<h3 id="multiple">Using several tooltips on a single element</h3>
-			<p>Several independant tooltips can be set on a single element, each one having its own triggers and options. Just set the <span class="code">multiple</span> option to <span class="code">true</span> when you initialize your tooltip. There is just something you need to be aware of when using multiple tooltips:</p>
+			<h3 id="multiple">Using multiple tooltips on a single element</h3>
+			<p>Several independent tooltips can be set on a single element, each one having its own triggers and options. Just set the <span class="code">multiple</span> option to <span class="code">true</span> when you initialize your tooltip. There is just something you need to be aware of when using multiple tooltips:</p>
 			
 			<p>Calling a method this way: <span class="code">$(...).tooltipster(methodName [, argument])</span> ever only calls the method on the <b>first</b> tooltip that was set on the element. That's an issue when you actually want to manipulate the second or third tooltip! Make sure you read the previous section as we have to manipulate Tooltipster instances instead to solve this.</p>
 			
@@ -1099,13 +1109,40 @@ $('#myfield')
 			<p>Did you do something awesome with Tooltipster? <a href="#talk">Tell us</a> and we'll post it up here!</p>
 		</section>
 				
-		<section id="talk">
-			<h2>Talk</h2>
-			<h3>Did you find a bug?</h3>
+		<section id="faq">
+			
+			<h2>Frequently asked questions</h2>
+			
+			<h4>"I need help to implement Tooltipster"</h4>
+			
+			<p>Please head over to Stackoverflow or another help forum and let the community help you!</p>
+			
+			<h4>"I found a bug, how do I reach you ?"</h4>
+			
 			<p>Head on over to Tooltipster's issue tracker on GitHub: <a href="https://github.com/iamceege/tooltipster/issues">https://github.com/iamceege/tooltipster/issues</a></p>
-			<p>Before opening a new issue, please be sure to search through the backlog to see if your question or bug has been / is being resolved.</p>
-			<p>For further help on how to implement Tooltipster, please head on to Stackoverflow or other programming help forums.</p>
-			<p>Thank you! :)</p>
+			
+			<p>Before opening a new issue, please be sure to search through the backlog to see if your bug has already been submitted. Thank you! :)</p>
+			
+			<h4 id="faq_sizeissue">"The first time it opens, my tooltip is incorrectly positioned. After that, it's ok"</h4>
+			
+			<p>That's because the size of your content inside the tooltip changes after Tooltipster positioned the tooltip.</p>
+			
+			<p>This typically happens when you put images inside the tooltip. The first time it opens, the image is not loaded yet and thus has no size, so Tooltipster basically computes a position as if there was no images. A few milliseconds later, when the image has loaded, the tooltip gets bigger but is not automatically repositioned. The second time the tooltip opens, the image is already in cache and is ready for display, so Tooltipster can compute an appropriate position.</p>
+			
+			<p>
+				<ul>
+					<li>The best way to solve this is to give a size to your images in CSS. That way, even if they're not loaded yet, they will have a size and Tooltipster will be able to compute the appropriate position.</li>
+					<li>Another solution is to use <span class="code">.on('load', callback)</span> event listeners on your images and to call the <span class="code">reposition</span> method of the tooltip inside the callback.</li>
+					<li>The last solution is to use the <span class="code">sizeTracker</span> option. As it will check the size of the tooltip at regular intervals, this may have an impact on performance. Use this as a last resort.</li>
+				</ul>
+			</p>
+			
+			<h4>"Shouldn't Tooltipster remove &lt;script> tags from my content to prevent XSS exploits?"</h4>
+			
+			<p>No, Tooltipster will never tamper with your content in any way. Besides, &lt;script> tags are not the only possible threat (see <a href="https://www.owasp.org/index.php/XSS_(Cross_Site_Scripting)_Prevention_Cheat_Sheet">some good advice</a>).</p>
+				
+			<p>It's really up to you to decide what should be sanitized before display. You may use <span class="code">functionInit</span>, <span class="code">functionBefore</span> or <span class="code">functionFormat</span> to do so.</p>
+			
 		</section>
 		
 		<footer>

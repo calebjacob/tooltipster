@@ -1,7 +1,7 @@
-/*! Tooltipster 4.0.0rc18 */
+/*! Tooltipster 4.0.0rc19 */
 
 /**
- * Released on 2015-10-20
+ * Released on 2015-10-23
  * 
  * A rockin' custom tooltip jQuery plugin
  * Developed by Caleb Jacob under the MIT license http://opensource.org/licenses/MIT
@@ -37,10 +37,12 @@
 			positionTracker: false,
 			repositionOnScroll: false,
 			restoration: 'none',
+			sizeTracker: false,
 			speed: 350,
 			theme: [],
 			timer: 0,
 			touchDevices: true,
+			trackerInterval: 500,
 			trigger: 'hover',
 			triggerClose: {
 				click: false,
@@ -67,7 +69,7 @@
 			close: [],
 			open: []
 		};
-		this.checkInterval = null;
+		this.tracker = null;
 		// this will be the user content shown in the tooltip. A capital "C" is used
 		// because there is also a method called content()
 		this.Content;
@@ -77,6 +79,7 @@
 		this.$el = $(element);
 		this.$emitter = $({});
 		this.enabled = true;
+		this.garbageCollector;
 		// various position and size data recomputed before each repositioning
 		this.geometry;
 		this.mouseIsOverOrigin = false;
@@ -91,6 +94,8 @@
 		this.timerOpen = null;
 		// this will be the tooltip element (jQuery wrapped HTML element)
 		this.$tooltip;
+		// for the size tracker
+		this.tooltipBcr;
 		// the element the tooltip will be appended to
 		this.$tooltipParent;
 		// the tooltip left/top coordinates, saved after each repositioning
@@ -216,6 +221,12 @@
 					}
 				});
 			}
+			
+			self.garbageCollector = setInterval(function() {
+				if (!bodyContains(self.$el)) {
+					self.destroy();
+				}
+			}, 20000);
 		},
 		
 		_close: function(event, callback) {
@@ -248,13 +259,12 @@
 			// close
 			if (self.State == 'ready' || self.State == 'appearing') {
 				
-				self._state('disappearing');
+				self.state('disappearing');
 				
 				var finish = function() {
 					
-					// clear the interval as it is no longer necessary
-					clearInterval(self.checkInterval);
-					self.checkInterval = null;
+					// stop the tracker
+					clearInterval(self.tracker);
 					
 					// detach our content object first, so the next jQuery's remove()
 					// call does not unbind its event handlers
@@ -281,7 +291,7 @@
 					// unbind any auto-closing hover listeners
 					self.$el.off('.'+ self.namespace +'-autoClose');
 					
-					self._state('closed');
+					self.state('closed');
 					
 					// trigger event
 					self.trigger('after');
@@ -635,13 +645,23 @@
 			return geo;
 		},
 		
-		_interval_set: function() {
+		_tracker_start: function() {
 			
 			var self = this;
 			
-			self.checkInterval = setInterval(function() {
+			// get the initial dimensions
+			if (self.options.sizeTracker) {
+				self.tooltipBcr = self.$tooltip[0].getBoundingClientRect();
+			}
+			
+			self.tracker = setInterval(function() {
 				
-				// if the origin has been removed
+				// if the origin has been removed, destroy the instance. Our
+				// garbage collector does the same thing but at much larger
+				// intervals just to prevent memory leaks. But when the
+				// tooltip is open, it's important to do it more often so
+				// that the tooltip does not stick on screen a long time
+				// after its origin was removed
 				if (!bodyContains(self.$el)) {
 					self.destroy();
 				}
@@ -651,6 +671,7 @@
 				}
 				// if everything is alright
 				else {
+					
 					// compare the former and current positions of the origin to reposition
 					// the tooltip if need be
 					if (self.options.positionTracker) {
@@ -688,8 +709,20 @@
 							}
 						}
 					}
+					
+					if (self.options.sizeTracker) {
+						
+						var currentBcr = self.$tooltip[0].getBoundingClientRect();
+						
+						if (	currentBcr.height !== self.tooltipBcr.height
+							||	currentBcr.width !== self.tooltipBcr.width
+						){
+							self.reposition();
+							self.tooltipBcr = currentBcr;
+						}
+					}
 				}
-			}, 200);
+			}, self.options.trackerInterval);
 		},
 		
 		// this function will schedule the opening of the tooltip after the delay, if
@@ -771,7 +804,7 @@
 						var extraTime,
 							finish = function() {
 								
-								self._state('ready');
+								self.state('ready');
 								
 								// trigger any open method custom callbacks and reset them
 								$.each(self.callbacks.open, function(i,c) {
@@ -793,7 +826,7 @@
 							// if it was disappearing, cancel that
 							if (self.State === 'disappearing') {
 								
-								self._state('appearing');
+								self.state('appearing');
 								
 								if (supportsTransitions()) {
 									
@@ -825,7 +858,7 @@
 						// if the tooltip isn't already open, open that sucker up!
 						else {
 							
-							self._state('appearing');
+							self.state('appearing');
 							
 							// the timer (if any) will start when the tooltip has fully appeared
 							// after its transition
@@ -933,7 +966,7 @@
 							
 							// will check if our tooltip origin is removed while the tooltip is
 							// shown
-							self._interval_set();
+							self._tracker_start();
 							
 							$(window)
 								// reposition on resize (in case position can/has to be changed)
@@ -1145,7 +1178,6 @@
 						});
 					}
 					
-					
 					if (overflows) {
 						self.$tooltip.hide();
 					}
@@ -1276,26 +1308,6 @@
 				.css('overflow', 'auto');
 		},
 		
-		/**
-		 * @param {string} state optional Use this to use the function as a
-		 * setter
-		 * @return {string} The state of the tooltip: ready, closed, etc.
-		 */
-		_state: function(state) {
-			
-			if (state) {
-				
-				this.State = state;
-				
-				this.trigger('state', [state]);
-				
-				return this;
-			}
-			else {
-				return this.State;
-			}
-		},
-		
 		_update: function(content) {
 			
 			var self = this;
@@ -1396,8 +1408,9 @@
 			
 			var ns = self.$el.data('tooltipster-ns');
 			
-			// if the origin has been removed from DOM, we can't get its data
-			// and there is nothing to clean up
+			// if the origin has been removed from DOM, its data may
+			// well have been destroyed in the process and there would
+			// be nothing to clean up or restore
 			if (ns) {
 				
 				// if there are no more tooltips on this element
@@ -1437,7 +1450,7 @@
 				}
 			}
 			
-			/// remove external references, just in case
+			// remove external references, just in case
 			self.$el = null;
 			self.$tooltip = null;
 			self.$tooltipParent = null;
@@ -1448,7 +1461,9 @@
 				return self !== el;
 			});
 			
-			return self;
+			clearInterval(self.garbageCollector);
+			
+			return true;
 		},
 		
 		disable: function() {
@@ -1582,6 +1597,29 @@
 		 */
 		show: function(callback) {
 			return this.open(callback);
+		},
+		
+		
+		/**
+		 * Internal and maybe not very stable
+		 * 
+		 * @param {string} state optional Use this to use the function as a
+		 * setter
+		 * @return {string} The state of the tooltip: ready, closed, etc.
+		 */
+		state: function(state) {
+			
+			if (state) {
+				
+				this.State = state;
+				
+				this.trigger('state', [state]);
+				
+				return this;
+			}
+			else {
+				return this.State;
+			}
 		},
 		
 		trigger: function(){

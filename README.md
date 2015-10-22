@@ -29,10 +29,12 @@ multiple
 positionTracker  
 repositionOnScroll  
 restoration  
+sizeTracker  
 speed  
 timer  
 theme  
 touchDevices  
+trackerInterval  
 trigger  
 updateAnimation  
 zIndex  
