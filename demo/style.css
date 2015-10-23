@@ -37,3 +37,9 @@ body {
 	height: 300px;
 	overflow: scroll;
 }
+
+#scrollable2 {
+	border: 1px solid gray;
+	height: 250px;
+	overflow: scroll;
+}

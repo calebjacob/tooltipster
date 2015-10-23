@@ -1179,10 +1179,10 @@
 					}
 					
 					if (overflows) {
-						self.$tooltip.hide();
+						self.$tooltip.css('visibility', 'hidden');
 					}
 					else {
-						self.$tooltip.show();
+						self.$tooltip.css('visibility', 'visible');
 						
 						// reposition
 						if (self.options.repositionOnScroll) {
@@ -1191,8 +1191,12 @@
 						// or just adjust offset
 						else {
 							
-							var offsetLeft = g.origin.windowOffset.left - self.geometry.origin.windowOffset.left,
-								offsetTop = g.origin.windowOffset.top - self.geometry.origin.windowOffset.top;
+							// we have to use offset and not windowOffset because this way,
+							// only the scroll distance of the scrollable areas are taken into
+							// account (the scrolltop value of the main window must be
+							// ignored since the tooltip already moves with it)
+							var offsetLeft = g.origin.offset.left - self.geometry.origin.offset.left,
+								offsetTop = g.origin.offset.top - self.geometry.origin.offset.top;
 							
 							// add the offset to the position initially computed by the display plugin
 							self.$tooltip.css({
