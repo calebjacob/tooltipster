@@ -19,9 +19,7 @@ $(function() {
 	
 	// demos
 	
-	$('#demo-default').tooltipster({
-		//trigger: 'click'
-	});
+	$('#demo-default').tooltipster({});
 	
 	$('#demo-html').tooltipster({
 		content: $(
@@ -82,6 +80,14 @@ $(function() {
 	$('#demo-events').tooltipster({
 		trigger: 'click'
 	});
+	
+	/*
+	// for testing purposes
+	var instance = $('#demo-events').tooltipster('instance');
+	instance.on('reposition', function(){
+		alert('hey');
+	});
+	*/
 	
 	$(window).keypress(function() {
 		$('#demo-events').tooltipster('hide');

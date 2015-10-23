@@ -77,7 +77,14 @@
 		this.displayPlugin;
 		// this is the element which gets one or more tooltips, also called "origin"
 		this.$el = $(element);
+		// we can't emit directly on the instance because if a method with the same
+		// name as the event exists, it will be called by jQuery. Se we use a plain
+		// object as emitter. This emitter is for internal use by display plugins,
+		// if needed.
 		this.$emitter = $({});
+		// this emitter is for the user to listen to events without risking to mess
+		// with our internal listeners
+		this.$emitterPublic = $({});
 		this.enabled = true;
 		this.garbageCollector;
 		// various position and size data recomputed before each repositioning
@@ -138,6 +145,7 @@
 			// let's save the initial value of the title attribute for later
 			// restoration if need be.
 			var initialTitle = null;
+			
 			// it will already have been saved in case of multiple tooltips
 			if (self.$el.data('tooltipster-initialTitle') === undefined) {
 				
@@ -266,6 +274,19 @@
 					// stop the tracker
 					clearInterval(self.tracker);
 					
+					// a beforeClose option has been asked several times but would
+					// probably useless since the content element is still accessible
+					// via ::content(), and because people can always use listeners
+					// inside their content to track what's going on. For the sake of
+					// simplicity, this has been denied. Bur for the rare people who
+					// really need the option (for old browsers or for the case where
+					// detaching the content is actually destructive, for file or
+					// password inputs for example), this event will do the work.
+					self._trigger({
+						type: 'beforeClose',
+						event: event
+					});
+					
 					// detach our content object first, so the next jQuery's remove()
 					// call does not unbind its event handlers
 					if (typeof self.Content == 'object' && self.Content !== null) {
@@ -294,7 +315,10 @@
 					self.state('closed');
 					
 					// trigger event
-					self.trigger('after');
+					self._trigger({
+						type: 'after',
+						event: event
+					});
 					
 					// call our constructor custom callback function
 					if (self.options.functionAfter) {
@@ -725,6 +749,22 @@
 			}, self.options.trackerInterval);
 		},
 		
+		/**
+		 * For internal use by display plugins, if needed
+		 */
+		_off: function(){
+			this.$emitter.off.apply(this.$emitter, Array.prototype.slice.apply(arguments));
+			return this;
+		},
+		
+		/**
+		 * For internal use by display plugins, if needed
+		 */
+		_on: function(){
+			this.$emitter.on.apply(this.$emitter, Array.prototype.slice.apply(arguments));
+			return this;
+		},
+		
 		// this function will schedule the opening of the tooltip after the delay, if
 		// there is one
 		_open: function(event) {
@@ -732,6 +772,11 @@
 			var self = this;
 			
 			if (self.State != 'ready' && self.State != 'appearing') {
+				
+				self._trigger({
+					type: 'initOpen',
+					event: event
+				});
 				
 				if (self.options.delay) {
 					self.timerOpen = setTimeout(function() {
@@ -757,12 +802,19 @@
 			// check that the origin is still in the DOM
 			if (bodyContains(self.$el)) {
 				
-				// trigger event
-				self.trigger('before');
-				
 				var ok = true;
 				
-				if (self.options.functionBefore) {
+				// trigger an event. The event.stop function allows the callback
+				// to prevent the opening of the tooltip
+				self._trigger({
+					type: 'before',
+					event: event,
+					stop: function(){
+						ok = false;
+					}
+				});
+				
+				if (ok && self.options.functionBefore) {
 					
 					ok = self.options.functionBefore.call(self, self, {
 						event: event,
@@ -928,7 +980,7 @@
 							}
 							
 							// reposition the tooltip and attach to the DOM
-							self.reposition(true);
+							self.reposition(event, true);
 							
 							// animate in the tooltip
 							if (supportsTransitions()) {
@@ -970,8 +1022,8 @@
 							
 							$(window)
 								// reposition on resize (in case position can/has to be changed)
-								.on('resize.'+ self.namespace, function() {
-									self.reposition();
+								.on('resize.'+ self.namespace, function(e) {
+									self.reposition(e);
 								})
 								// same as below for parents
 								.on('scroll.'+ self.namespace, function(e) {
@@ -1072,7 +1124,7 @@
 								}, 0);
 							}
 							
-							self.trigger('ready');
+							self._trigger('ready');
 							
 							// call our custom callback
 							if (self.options.functionReady) {
@@ -1122,7 +1174,7 @@
 						// because the tooltip will already have moved with the window
 						// (and of course with the origin)
 						if (self.options.repositionOnScroll) {
-							self.reposition();
+							self.reposition(event);
 						}
 					}
 				}
@@ -1186,7 +1238,7 @@
 						
 						// reposition
 						if (self.options.repositionOnScroll) {
-							self.reposition();
+							self.reposition(event);
 						}
 						// or just adjust offset
 						else {
@@ -1207,7 +1259,10 @@
 					}
 				}
 				
-				self.trigger('scroll');
+				self._trigger({
+					type: 'scroll',
+					event: event
+				});
 			}
 		},
 		
@@ -1312,6 +1367,25 @@
 				.css('overflow', 'auto');
 		},
 		
+		_trigger: function(){
+			
+			var args = Array.prototype.slice.apply(arguments);
+			
+			if (typeof args[0] == 'string'){
+				args[0] = { type: args[0] };
+			}
+			
+			// add properties to the event
+			args[0].instance = this;
+			args[0].origin = this.$el ? this.$el[0] : null;
+			
+			// trigger on the private emitter first, then on the public one
+			this.$emitter.trigger.apply(this.$emitter, args);
+			this.$emitterPublic.trigger.apply(this.$emitterPublic, args);
+			
+			return this;
+		},
+		
 		_update: function(content) {
 			
 			var self = this;
@@ -1407,7 +1481,8 @@
 				.removeData(self.namespace)
 				.off('.'+ self.namespace);
 			
-			// unbind event listeners
+			// unbind private and public event listeners
+			self._off();
 			self.off();
 			
 			var ns = self.$el.data('tooltipster-ns');
@@ -1505,21 +1580,26 @@
 		},
 		
 		/**
-		 * Off, on, once, trigger and triggerHandler proxy to the jQuery
-		 * event emitter.
+		 * For public use only, not to be used by display plugins (use ::_off() instead)
 		 */
 		off: function(){
-			this.$emitter.off.apply(this.$emitter, Array.prototype.slice.apply(arguments));
+			this.$emitterPublic.off.apply(this.$emitterPublic, Array.prototype.slice.apply(arguments));
 			return this;
 		},
 		
+		/**
+		 * For public use only, not to be used by display plugins (use ::_on() instead)
+		 */
 		on: function(){
-			this.$emitter.on.apply(this.$emitter, Array.prototype.slice.apply(arguments));
+			this.$emitterPublic.on.apply(this.$emitterPublic, Array.prototype.slice.apply(arguments));
 			return this;
 		},
 		
+		/**
+		 * For public use only, not to be used by display plugins
+		 */
 		once: function(){
-			this.$emitter.once.apply(this.$emitter, Array.prototype.slice.apply(arguments));
+			this.$emitterPublic.once.apply(this.$emitterPublic, Array.prototype.slice.apply(arguments));
 			return this;
 		},
 		
@@ -1555,11 +1635,13 @@
 		 * Note: The tooltip may be detached from the DOM at the moment the method is called 
 		 * but must be attached by the end of the method call.
 		 * 
+		 * @param {object} event For internal use only. Defined if an event such as
+		 * window resizing triggered the repositioning
 		 * @param {boolean} tooltipIsDetached For internal use only. Set this to true if you
 		 * know that the tooltip not being in the DOM is not an issue (typically when the
 		 * tooltip element has just been created but has not been added to the DOM yet).
 		 */
-		reposition: function(tooltipIsDetached) {
+		reposition: function(event, tooltipIsDetached) {
 			
 			var self = this;
 			
@@ -1588,7 +1670,10 @@
 				};
 				
 				// trigger event
-				self.trigger('reposition');
+				self._trigger({
+					type: 'reposition',
+					event: event
+				});
 			}
 			
 			return self;
@@ -1603,7 +1688,6 @@
 			return this.open(callback);
 		},
 		
-		
 		/**
 		 * Internal and maybe not very stable
 		 * 
@@ -1617,7 +1701,10 @@
 				
 				this.State = state;
 				
-				this.trigger('state', [state]);
+				this._trigger({
+					type: 'state',
+					state: state
+				});
 				
 				return this;
 			}
@@ -1626,13 +1713,11 @@
 			}
 		},
 		
-		trigger: function(){
-			this.$emitter.trigger.apply(this.$emitter, Array.prototype.slice.apply(arguments));
-			return this;
-		},
-		
+		/**
+		 * For public use only, not to be used by display plugins
+		 */
 		triggerHandler: function(){
-			this.$emitter.triggerHandler.apply(this.$emitter, Array.prototype.slice.apply(arguments));
+			this.$emitterPublic.triggerHandler.apply(this.$emitterPublic, Array.prototype.slice.apply(arguments));
 			return this;
 		}
 	};
@@ -1856,14 +1941,6 @@
 								origin: this
 							});
 						}
-						
-						// trigger the event at the end of the microtask to let
-						// the user bind its init listener first, otherwise it
-						// would make no sense. Not ideal but that's probably
-						// the best we can do
-						setTimeout(function(){
-							obj.trigger('init');
-						}, 0);
 					}
 					
 					instancesLatest.push(obj);
