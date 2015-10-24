@@ -1,9 +1,18 @@
 /* GENERAL STRUCTURE RULES (do not edit this section) */
 
 .tooltipster-base {
+	/* this ensures that a constrained height set by functionPosition,
+	if greater that the natural height of the tooltip, will be enforced
+	in browsers that support display:flex */
+	display: flex;
 	pointer-events: none;
 	/* this may be overriden in JS for fixed position origins */
 	position: absolute;
+}
+
+.tooltipster-box {
+	/* see .tooltipster-base */
+	flex: 1;
 }
 
 .tooltipster-content {

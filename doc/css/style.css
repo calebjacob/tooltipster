@@ -199,6 +199,11 @@ section {
 	border-bottom: none !important;
 }
 
+h2 a, h3 a, h4 a {
+	font-size: 0.8em;
+	margin-left: 50px;
+}
+
 footer {
 	width: 100%;
 	margin: 0 auto;
@@ -222,6 +227,7 @@ nav {
 }
 nav ul {
 	display: block;
+	margin: 0;
 	width: auto;
 	float: right;
 }
@@ -351,9 +357,6 @@ Welcome
 	line-height: 1.4em;
 	width: 100%;
 }
-#download a.button {
-	margin-right: 0.6em;
-}
 #download a.button:before {
 	content: "\64";
 	padding-right: 1em;
@@ -381,6 +384,7 @@ Demos
 	overflow: hidden;
 	padding-top: 1.4em;
 	padding-right: 2em;
+	position: relative;
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	float: left;
@@ -446,18 +450,19 @@ Demos
 }
 
 #demo-position {
-	margin-bottom: 40px!important;
+	margin-bottom: 40px!i;
 }
 
 #demo-position-grid {
 	border: 2px dashed lightgrey;
 	border-bottom: none;
-	border-right: none;
+	box-sizing: border-box;
 	display: inline-block;
-	margin-left: 20px;
+	left: 100px;
 	padding: 5px 20px;
-	position: relative;
-	top: -10px;
+	position: absolute;
+	top: 20px;
+	width: 250px;
 }
 
 /* 
@@ -616,7 +621,7 @@ td h4 {
 	width: 150px;
 }
 
-#table_methods td:nth-child(2) {
+.table_methods td:nth-child(2) {
 	width: 150px;
 }
 

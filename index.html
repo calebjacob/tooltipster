@@ -16,7 +16,7 @@
 	<meta itemprop="description" content="Tooltipster is a powerful, flexible jQuery plugin enabling you to easily create clean, HTML5 validated tooltips.">
 	<meta itemprop="image" content="images/social.jpg">
 	<link rel="icon" type="image/png" href="images/favicon.png" />
-	<link rel="image_src" href="images/social.jpg" / >
+	<link rel="image_src" href="images/social.jpg" />
 	
 	<link rel="stylesheet" type="text/css" href="doc/css/reset.css" />
 	<link rel="stylesheet" type="text/css" href="doc/css/prettify.css" />
@@ -99,7 +99,7 @@
 				</li>
 			</ul>
 			<div id="download">
-				<a href="https://github.com/iamceege/tooltipster/archive/master.zip" class="button alt">Download</a> <span style="padding-right: 0.5em;">&amp;</span> <a href="#demos" class="white">get started &rsaquo;</a>
+				<a href="https://github.com/iamceege/tooltipster/archive/master.zip" class="button alt">Download</a>
 			</div>
 		</section>
 		
@@ -150,7 +150,7 @@
 		</section>
 		
 		<section id="getting-started">
-			<h2>Getting Started</h2>
+			<h2>Getting Started <a href="#">&#8657;</a></h2>
 			<h3>1. Load jQuery and include Tooltipster's plugin files</h3>
 			<p>After you <a href="https://github.com/iamceege/tooltipster/archive/master.zip">download Tooltipster</a>, load jQuery and include Tooltipster's CSS and JavaScript files in your page:</p>
 <pre class="prettyprint">
@@ -279,7 +279,7 @@ $('.tooltip').tooltipster({
 		
 		<section id="options">
 			
-			<h2>Options</h2>
+			<h2>Options <a href="#">&#8657;</a></h2>
 			
 			<p>Tooltipster's options give you a wide range of variables to tweak your tooltip to your heart's content. Here's how you declare options:</p>
 			<pre class="prettyprint">
@@ -531,7 +531,7 @@ callback(instance, helper);</pre>
 		</section>
 		
 		<section id="methods">
-			<h2>Methods</h2>
+			<h2>Methods <a href="#">&#8657;</a></h2>
 			
 			<p>For advanced use cases, Tooltipster offers a set of methods to manipulate your tooltips. They allow you to create custom triggers, update tooltip content on the fly (whether the tooltip is currently open or not), destroy Tooltipster functionality if needed, reposition tooltips and more.</p>
 			
@@ -574,7 +574,7 @@ $('.tooltip').tooltipster({
 			
 			<p>Here is the list of instance methods:</p>
 			
-			<table id="table_methods" border="0" cellpadding="0" cellspacing="0">
+			<table class="table_methods" border="0" cellpadding="0" cellspacing="0">
 				<tr>
 					<td><b>Method name</b></td>
 					<td><b>Arguments</b></td>
@@ -626,6 +626,11 @@ $('.tooltip').tooltipster({
 					<td>Returns the instance of Tooltipster associated to the tooltip. If the selector matches multiple origins, only the instance of the first will be returned.</td>
 				</tr>
 				<tr>
+					<td><h4>on, once, off, triggerHandler</h4></td>
+					<td>callback</td>
+					<td>Use Tooltipster's events (<a href="#events">see example</a>).</td>
+				</tr>
+				<tr>
 					<td><h4>open</h4></td>
 					<td>callback</td>
 					<td>Opens the tooltip. The 'callback' function argument is optional (see its <a href="#callback_arguments">input signature</a>).</td>
@@ -653,8 +658,8 @@ $('.tooltip').tooltipster({
 			
 			<pre class="prettyprint">
 $.fn.tooltipster(methodName [, argument]);</pre>
-				
-			<table id="table_methods" border="0" cellpadding="0" cellspacing="0">
+			
+			<table class="table_methods" border="0" cellpadding="0" cellspacing="0">
 				<tr>
 					<td><b>Method name</b></td>
 					<td><b>Arguments</b></td>
@@ -711,7 +716,7 @@ var instances = $.fn.tooltipster('instancesLatest');
 		
 		<section id="usecases">
 			
-			<h2>Common use cases</h2>
+			<h2>Common use cases <a href="#">&#8657;</a></h2>
 			
 			<ul>
 				<li><a href="#apicontent">Updating a tooltip's content</a></li>
@@ -725,16 +730,17 @@ var instances = $.fn.tooltipster('instancesLatest');
 				<li><a href="#object-oriented">Object-oriented Tooltipster</a></li>
 				<li><a href="#multiple">Using multiple tooltips on a single element</a></li>
 				<li><a href="#delegation">Dynamic live binding on newly created elements</a></li>
+				<li><a href="#events">Event-driven Tooltipster</a></li>
 				<li><a href="#accessibility">Making tooltips accessible to persons with disabilities</a></li>
 			</ul>
 			
-			<h3 id="apicontent">Updating a tooltip's content</h3>
+			<h3 id="apicontent">Updating a tooltip's content <a href="#usecases">&#8657;</a></h3>
 			<p>It's easy as pie to update a tooltip's content - whether it's open or closed. Depending on your selector, you can update multiple tooltips at once or just one:</p>
 			<pre class="prettyprint">
 $('#myelement').tooltipster('content', 'My new content');</pre>
 			<p>By default, Tooltipster will play a subtle animation when the content changes. To tweak the animation, override the <span class="code">.tooltipster-content-changing</span> class in your CSS. It's important to note that only CSS transforms will be animated. To disable this animation, set the <span class="code">updateAnimation</span> option to false.</p>
 			
-			<h3 id="triggers">Setting when a tooltip should open and close</h3>
+			<h3 id="triggers">Setting when a tooltip should open and close <a href="#usecases">&#8657;</a></h3>
 			
 			<h4 id="triggers_predefined">Predefined behaviors</h4>
 			
@@ -789,9 +795,9 @@ $('#example').tooltipster({
 			
 			<p>In this example, if you omitted the <span class="code">triggerClose</span> option, you would cause the tooltip to never close, unless you called its <span class="code">close</span> method yourself.<br />Omitting the <span class="code">triggerOpen</span> as well would effectively give you fully manual control over the tooltip.</p>
 			
-			<h3 id="ajax">Using AJAX to generate your tooltip content</h3>
+			<h3 id="ajax">Using AJAX to generate your tooltip content <a href="#usecases">&#8657;</a></h3>
 			
-			<p>Tooltipster gives you the ability to fire a custom function when a tooltip is initialized (<span class="code">functionInit</span>), but also everytime the tooltip starts appearing (<span class="code">functionBefore</span>), when it has fully appeared (<span class="code">functionReady</span>) or when it has disappeared (<span class="code">functionAfter</span>).</p>
+			<p>Tooltipster gives you the ability to fire a custom function when a tooltip is initialized (<span class="code">functionInit</span>), but also every time the tooltip starts appearing (<span class="code">functionBefore</span>), when it has fully appeared (<span class="code">functionReady</span>) or when it has disappeared (<span class="code">functionAfter</span>).</p>
 			
 			<p>One great use for this is to grab dynamic content for your tooltips via AJAX. In this example we will use <span class="code">functionBefore</span> to load data the first time the tooltip is opened. Until the data has been loaded, we will display a "Loading..." notification:</p>
 			
@@ -802,7 +808,7 @@ $('.tooltip').tooltipster({
         
         var $origin = $(helper.origin);
         
-        // we set a variable so the data is only loaded once via Ajax, not everytime the tooltip opens
+        // we set a variable so the data is only loaded once via Ajax, not every time the tooltip opens
         if ($origin.data('loaded') !== true) {
 
             $.ajax({
@@ -838,7 +844,7 @@ $(document).ready(function() {
 });
 </pre>
 			
-			<h3 id="sides">Forcing or disabling given sides</h3>
+			<h3 id="sides">Forcing or disabling given sides <a href="#usecases">&#8657;</a></h3>
 			
 			<p>Let's hover a little on how the <span class="code">side</span> option works.<br />You have two options: provide either a string, like <span class="code">side: 'top'</span>, or an array of strings, like <span class="code">side: ['top', 'bottom']</span> for example.</p>
 			
@@ -870,11 +876,13 @@ $(document).ready(function() {
 			<p>If there is not enough space anywhere, Tooltipster will try to see if it can overflow the viewport on your preferred sides without overflowing the document. If it's still impossible, it will overflow the document on your preferred side.</p>
 			
 			
-			<h3 id="positioning">Achieving custom positioning</h3>
+			<h3 id="positioning">Achieving custom positioning <a href="#usecases">&#8657;</a></h3>
 			
 			<p>This is for advanced users who are comfortable with Javascript.</p>
 			
-			<p>When the tooltip needs to be positioned or repositioned, Tooltipster runs all kinds of tests to find the best option. But before this computed position is applied, you have the option to edit it, using the <span class="code">functionPosition</span> option.</p>
+			<p>When the tooltip needs to be positioned or repositioned, Tooltipster runs all kinds of tests to find the best option. But before the computed position is applied, you have the option to edit it using the <span class="code">functionPosition</span> option.</p>
+			
+			<p>When you provide custom coordinates for the tooltip and its arrow, they have to be relative to the top and left edges of the viewport. This makes custom positioning in Tooltipster both very fast and very simple. Doing your calculations, <a href="https://developer.mozilla.org/fr/docs/Web/API/Element/getBoundingClientRect" target=_blank"><span class="code">element.getBoundingClientRect</span></a> will probably become your new best friend, so make sure you check it out.</p>
 			
 			<p>Your <span class="code">functionPosition</span> callback is called with three parameters. The first two ones are <span class="code">instance</span> and a <span class="code">helper</span>, <a href="#callback_arguments">as usual</a>. The third argument is an object with the position properties proposed by Tooltipster, that you may edit. <b>You must return</b> the edited third argument for the changes to get applied.</p>
 			
@@ -897,23 +905,19 @@ $(document).ready(function() {
     sizeMode: ['natural' || 'constrained']
 }</pre>
 			
-			<p>You may edit the <span class="code">arrowTarget</span>, <span class="code">coord</span>, <span class="code">distance</span>, <span class="code">side</span> and <span class="code">size</span> properties, the others are read-only.</p>
+			<p><span class="code">arrowTarget</span> tells Tooltipster where the arrow should aim at, if the arrow is enabled. Its value is the distance from the edge of the viewport to the target (left edge of the viewport if the side is "top" or "bottom", top edge if the side is "left" or "right"). By default, the arrow aims at the middle of the origin.</p>
 			
-			<p><span class="code">arrowTarget</span> Tells Tooltipster where the arrow should aim at, if the arrow is enabled. Its value is the distance from the edge of the viewport to the target (left edge of the viewport if the side is "top" or "bottom", top edge if the side is "left" or "right"). By default, the arrow aims at the middle of the origin.</p>
+			<p><span class="code">container</span> tells you if, in Tooltipster's proposition, the tooltip will be contained in the viewport, if it has to overflow into the document, or if it has to overflow the document itself. This property is for your information only, editing it will have no effect.</p>
 			
-			<p><span class="code">container</span> Tells you if the tooltip will be contained in the viewport, if it has to overflow into the document, or if it has to overflow the document itself.</p>
+			<p><span class="code">coords</span> properties determine the position of the tooltip and are relative to the viewport.</p>
 			
-			<p><span class="code">coords</span> These properties determine the position of the tooltip and are relative to the viewport.</p>
+			<p><span class="code">distance</span> is the offset that will be applied between the origin and the tooltip.</p>
 			
-			<p><span class="code">distance</span> Is the distance offset that will be applied.</p>
+			<p><span class="code">side</span> is the side Tooltipster has judged best for your tooltip, according to your requirements.</p>
 			
-			<p><span class="code">side</span> Is the side Tooltipster has judged best for your tooltip, according to your requirements.</p>
+			<p><span class="code">size</span> properties tell you the size that your tooltip will have. It is either the natural size of the tooltip, or a size that has been set by Tooltipster to have fit best on screen according to your requirements.</p>
 			
-			<p><span class="code">size</span> These properties tell you the size that your tooltip will have. It is either the natural size of the tooltip, or a size that has been set by Tooltipster to have fit best on screen according to your requirements.</p>
-			
-			<p><span class="code">sizeMode</span> This tells you if the tooltip is in its natural size, or if it has a size that was set by Tooltipster.</p>
-			
-			<p>When computing the desired coordinates of the tooltip and its arrow, <a href="https://developer.mozilla.org/fr/docs/Web/API/Element/getBoundingClientRect" target=_blank"><span class="code">element.getBoundingClientRect</span></a> will be your new best friend. Computing all coordinates relatively to the edges of the screen makes custom positioning in Tooltipster both very fast and very simple.</p>
+			<p><span class="code">sizeMode</span> sets if the tooltip is in its natural size, or is going to get size properties set by Tooltipster. Editing the <span class="code">size</span> property without having <span class="code">sizeMode</span> set to <span class="code">constrained</span> will produce unexpected results. Also, if the browser does not support <span class="code">display:flex</span>, the tooltip will not apply a height greater than its natural height.</p>
 			
 			<p>As a further help, you will also find useful precalculated data about the page layout in <span class="code">helper.geo</span>. It will help you avoid putting the tooltip accidentally off screen, for example. This object is in this form:</p>
 			
@@ -969,7 +973,7 @@ $('#my-tooltip').tooltipster({
 });
 </pre>
 			
-			<h3 id="data-attributes">Specifiying options through data-attributes</h3>
+			<h3 id="data-attributes">Specifiying options through data-attributes <a href="#usecases">&#8657;</a></h3>
 			
 			<p>You may want to write options on a per-tooltip basis, directly in your HTML. Of course, you should try to do this for options which are "inlinable" only. Anyway, that's a great opportunity to make use of the <span class="code">functionInit</span> option and the <span class="code">option</span> method, here's how it goes:</p>
 			
@@ -995,7 +999,7 @@ $('.tooltip').tooltipster({
     }
 });</pre>
 			
-			<h3 id="formatting">Working with data sets</h3>
+			<h3 id="formatting">Working with data sets <a href="#usecases">&#8657;</a></h3>
 			
 			<p>Sometimes it's easier to work with data sets that you will format before display, rather than format them on the server side. For example, what if you could turn this:</p>
 			
@@ -1044,7 +1048,7 @@ $('#example').tooltipster({
     }
 });</pre>
 			
-			<h3 id="nested">Nested tooltips</h3>
+			<h3 id="nested">Nested tooltips <a href="#usecases">&#8657;</a></h3>
 			
 			<p>The question comes frequently, so here is the answer: yes, it's possible. Here is an example:</p>
 			
@@ -1067,7 +1071,7 @@ $('#nesting').tooltipster({
 });
 </pre>
 			<p>Result : <strong id="nesting">Hover me!</strong></p>
-			<h3 id="object-oriented">Object-oriented Tooltipster</h3>
+			<h3 id="object-oriented">Object-oriented Tooltipster <a href="#usecases">&#8657;</a></h3>
 			
 			<p>So far, quite often we called instance methods like this: <span class="code">$(...).tooltipster(methodName)</span>. However, advanced users may prefer to handle objects directly rather that go through the DOM to manipulate their tooltips. That's possible with Tooltipster!</p>
 			
@@ -1102,7 +1106,7 @@ $('#mytooltip').tooltipster({
 			
 			<p>While you may feel that this is only nice to have, this notation actually becomes compulsory when you start using multiple tooltips on a same element.</p>
 			
-			<h3 id="multiple">Using multiple tooltips on a single element</h3>
+			<h3 id="multiple">Using multiple tooltips on a single element <a href="#usecases">&#8657;</a></h3>
 			<p>Several independent tooltips can be set on a single element, each one having its own triggers and options. Just set the <span class="code">multiple</span> option to <span class="code">true</span> when you initialize your tooltip. There is just something you need to be aware of when using multiple tooltips:</p>
 			
 			<p>Calling a method this way: <span class="code">$(...).tooltipster(methodName [, argument])</span> ever only calls the method on the <b>first</b> tooltip that was set on the element. That's an issue when you actually want to manipulate the second or third tooltip! Make sure you read the previous section as we have to manipulate Tooltipster instances instead to solve this.</p>
@@ -1146,7 +1150,7 @@ $('#my-element').tooltipster({
     multiple: true
 });</pre>
 
-			<h3 id="delegation">Dynamic live binding on newly created elements</h3>
+			<h3 id="delegation">Dynamic live binding on newly created elements <a href="#usecases">&#8657;</a></h3>
 			
 			<p>Live binding does not come out of the box with Tooltipster but is easy to implement if that's what you want.</p>
 			
@@ -1165,25 +1169,80 @@ $('body').on('mouseenter', '.tooltip:not(.tooltipstered)', function(){
 			
 			<p>On the other hand, using mutation observers to initialize tooltips when elements are added to the DOM should completely reliable, but is known to severely hinder the performances of the application. Should you go down this road, feel free to share your code with us and we'll publish it here.</p>
 			
-			<h3 id="accessibility">Making tooltips accessible to persons with disabilities</h3>
+			<h3 id="events">Event-driven Tooltipster <a href="#usecases">&#8657;</a></h3>
+			
+			<p>Advanced users with complex needs may take advantage of the many events that Tooltipster triggers during its tasks. You may handle your listeners using jQuery's syntax: <span class="code">instance.on()</span>, <span class="code">instance.once()</span>, <span class="code">instance.off()</span> and <span class="code">instance.triggerHandler()</span>.</p>
+			
+			<p>The best thing about these events is that instead of providing a single callback to <span class="code">functionBefore</span> and the like, you may easily bind several handlers to the event emitter. For example, instead of doing this:</p>
+			
+			<pre class="prettyprint">
+$("#my-tooltip").tooltipster({
+    functionBefore: function(instance, helper){
+        doThis(instance, helper);
+        doThat(instance, helper);
+    }
+});
+</pre>
+			
+			<p>... you can write:</p>
+			
+			
+			<pre class="prettyprint">
+var instance = $("#my-tooltip").tooltipster({}).instance();
+
+instance
+    .on('before', doThis)
+    .on('before', doThat);
+</pre>
+			
+			<p>Your listeners will get one argument, the event, which holds useful properties: <span class="code">event.type</span>, <span class="code">event.instance</span>, <span class="code">event.event</span> (when there is one, similar to the usual <span class="code">helper.event</span>), etc.</p>
+			
+			<p>The possible event types are <span class="code">openInit</span>, <span class="code">before</span>, <span class="code">ready</span>, <span class="code">beforeClose</span>, <span class="code">after</span>, <span class="code">format</span>, <span class="code">destroy</span>, <span class="code">state</span>, <span class="code">update</span>, <span class="code">scroll</span> and <span class="code">reposition</span>.</p>
+			
+			<p><span class="code">openInit</span> happens when the <span class="code">hover</span> open trigger is used and that the origin gets hovered.</p>
+			
+			<p><span class="code">before</span>, <span class="code">ready</span>, <span class="code">after</span> and <span class="code">format</span> happen at the same time as <span class="code">functionBefore</span>, etc.</p>
+			
+			<p><span class="code">before</span> has a special <span class="code">event.stop</span> property which is a function you may call to prevent the tooltip from opening.</p>
+			
+			<p><span class="code">beforeClose</span> happens upon closing just before the tooltip is removed from the DOM. If you think you need this event, you might be wrong because remember that your content is still accessible even when the tooltip is closed through the <span class="code">content</span> method.</p>
+			
+			<p><span class="code">format</span> has a special <span class="code">event.format</span> property which is a function you may use to format the content before display. Just provide your formatted content as first argument.</p>
+			
+			<p><span class="code">state</span> happens every time the tooltip enters a different state. The state value is held in <span class="code">event.state</span> and may be <span class="code">appearing</span>, <span class="code">stable</span>, <span class="code">disappearing</span> or <span class="code">closed</span>.</p>
+			
+			<p><span class="code">update</span> happens when a call to the <span class="code">content</span> method updates the content. The event has a special <span class="code">event.content</span> property.</p>
+			
+			<p><span class="code">reposition</span> happens when Tooltipster has recalculated the tooltip position. The event has a special <span class="code">event.position</span> property.</p>
+			
+			<p><span class="code">scroll</span> happens whenever a parent of the origin is scrolled.</p>
+			
+			<h3 id="accessibility">Making tooltips accessible to persons with disabilities <a href="#usecases">&#8657;</a></h3>
+			
 			<p>The W3C issued a recommendation to make websites more accessible to persons with disabilities. This recommendation is known as WAI-ARIA (or simply ARIA), which stands for Web Accessibility Initiative - Accessible Rich Internet Applications.</p>
+			
 			<p>Accessible tooltips can be powered by Tooltipster. To do this, one solution is to actually manipulate in parallel two tooltips which will share the same content :<br />
 				- the ARIA tooltip, which is invisible on the screen but readable by ARIA-compatible software<br />
 				- the Tooltipster tooltip, which is visible on the screen but does not appear as an ARIA-compatible element
 			</p>
+			
 			<p>A basic example : imagine that we want to put a tooltip on a text input field. As for the HTML part, you would write :</p>
+			
 			<pre class="prettyprint">
 &lt;input id="myfield" type="text" aria-describedby="myfield_description" /&gt;
 &lt;span id="myfield_description" role="tooltip"&gt;Please insert your name here&lt;/span&gt;
 </pre>
 			<p>As for the CSS part, write this :</p>
+			
 			<pre class="prettyprint">
 #myfield_description {
 	position: absolute;
 	visibility: hidden;
 }
 </pre>
+			
 			<p>And finally, you could initialize Tooltipster like this :</p>
+			
 			<pre class="prettyprint">
 $('#myfield').tooltipster({
     functionInit: function(instance, helper){
@@ -1208,14 +1267,14 @@ $('#myfield')
     });
 </pre>
 			
-			<h3 id="community">Community submitted use cases</h3>
+			<h3 id="community">Community submitted use cases <a href="#usecases">&#8657;</a></h3>
 			<p><a href="http://stackoverflow.com/questions/14741688/how-to-display-messages-from-jquery-validate-plugin-inside-of-tooltipster-toolti">Using Tooltipster alongside jQuery Validate</a> by <a href="https://github.com/sparky672">sparky672</a></p>
 			<p>Did you do something awesome with Tooltipster? <a href="#talk">Tell us</a> and we'll post it up here!</p>
 		</section>
 				
 		<section id="faq">
 			
-			<h2>Frequently asked questions</h2>
+			<h2>Frequently asked questions  <a href="#">&#8657;</a></h2>
 			
 			<h4>"I need help to implement Tooltipster"</h4>
 			

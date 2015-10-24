@@ -1,7 +1,7 @@
-/*! Tooltipster 4.0.0rc20 */
+/*! Tooltipster 4.0.0rc21 */
 
 /**
- * Released on 2015-10-23
+ * Released on 2015-10-24
  * 
  * A rockin' custom tooltip jQuery plugin
  * Developed by Caleb Jacob under the MIT license http://opensource.org/licenses/MIT
@@ -32,9 +32,8 @@
 			interactive: false,
 			interactiveTolerance: 350,
 			multiple: false,
-			// must be 'body' for now, or an element which is statically
-			// or relatively positioned at (0, 0) in the document,
-			// typically like very top views of an app.
+			// must be 'body' for now, or an element positioned at (0, 0)
+			// in the document, typically like very top views of an app.
 			parent: 'body',
 			positionTracker: false,
 			repositionOnScroll: false,
@@ -97,7 +96,7 @@
 		this.options = $.extend(true, {}, defaults, options);
 		// will be used to support origins in scrollable areas
 		this.$originParents;
-		// State (capital S) can be either : appearing, ready, disappearing, closed
+		// State (capital S) can be either : appearing, stable, disappearing, closed
 		this.State = 'closed';
 		this.timerClose = null;
 		this.timerOpen = null;
@@ -268,7 +267,7 @@
 			};
 			
 			// close
-			if (self.State == 'ready' || self.State == 'appearing') {
+			if (self.State == 'stable' || self.State == 'appearing') {
 				
 				self.state('disappearing');
 				
@@ -366,7 +365,15 @@
 			
 			var self = this,
 				$el = self.$tooltip.find('.tooltipster-content'),
-				formattedContent = self.Content;
+				formattedContent = self.Content,
+				format = function(content){
+					formattedContent = content;
+				};
+			
+			self._trigger({
+				type: 'format',
+				format: format
+			});
 			
 			if (self.options.functionFormat) {
 				
@@ -401,6 +408,11 @@
 			}
 			
 			this.Content = content;
+			
+			this._trigger({
+				type: 'update',
+				content: content
+			});
 		},
 		
 		/**
@@ -774,7 +786,7 @@
 			
 			var self = this;
 			
-			if (self.State != 'ready' && self.State != 'appearing') {
+			if (self.State != 'stable' && self.State != 'appearing') {
 				
 				self._trigger({
 					type: 'initOpen',
@@ -859,7 +871,7 @@
 						var extraTime,
 							finish = function() {
 								
-								self.state('ready');
+								self.state('stable');
 								
 								// trigger any open method custom callbacks and reset them
 								$.each(self.callbacks.open, function(i,c) {
@@ -906,7 +918,7 @@
 							}
 							// if the tooltip is already open, we still need to trigger the method
 							// custom callback
-							else if (self.State == 'ready') {
+							else if (self.State == 'stable') {
 								finish();
 							}
 						}
@@ -1342,10 +1354,7 @@
 			// note : the tooltip must not have margins, it would screw things up
 			return {
 				height: this.$tooltip.outerHeight(),
-				// an unknown bug in Chrome and FF forces us to count 1 more pixel, otherwise
-				// the text can be broken to a new line after being appended back to the parent
-				// (whereas it's just fine at the time of this test)
-				width: this.$tooltip.outerWidth() + 1
+				width: this.$tooltip.outerWidth()
 			};
 		},
 		
@@ -1478,6 +1487,9 @@
 			self.$el
 				.removeData(self.namespace)
 				.off('.'+ self.namespace);
+			
+			// last event
+			self._trigger('destroy');
 			
 			// unbind private and public event listeners
 			self._off();
@@ -1691,7 +1703,7 @@
 		 * 
 		 * @param {string} state optional Use this to use the function as a
 		 * setter
-		 * @return {string} The state of the tooltip: ready, closed, etc.
+		 * @return {string} The state of the tooltip: stable, closed, etc.
 		 */
 		state: function(state) {
 			

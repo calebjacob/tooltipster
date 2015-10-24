@@ -181,45 +181,25 @@ $(function() {
 		});
 	
 	$('#demo-position').tooltipster({
-		content: $('<div>Tooltipster goes like clockwork.<br /><br />A<br />B<br />C<br />D<br />E<br />F</div>'),
+		content: $('<div>Most accurate tooltips ever! Great to create menus too :)<br /><br />A<br />B<br />C<br />D<br />E<br />F</div>'),
+		// 8 extra pixels for the arrow to overflow the grid
+		maxWidth: 258,
 		side: ['right'],
 		functionPosition: function(instance, helper, data){
 			
 			// this function is pretty dumb and does not check if there is actually
 			// enough space available around the tooltip to move it, it just makes it
-			// snap to the grid.
-			// You might want to do something smarter in your application!
+			// snap to the grid. You might want to do something smarter in your app!
 			
 			var gridBcr = $('#demo-position-grid')[0].getBoundingClientRect(),
 				arrowSize = parseInt($(helper.tooltip).find('.tooltipster-box').css('margin-left'));
 			
-			// check if the grid is floating at the right of the origin or below
-			// (happens on tiny phone screens)
-			var side = 'right';
-			if (gridBcr.top - helper.geo.origin.windowOffset.top > 30) {
-				side = 'bottom';
-			}
-			
 			// override these
-			data.side = side;
-			data.coord.top = gridBcr.top;
-			data.coord.left = gridBcr.left;
-			
-			// lastly, take care of the arrow
-			if (side == 'right') {
-				
-				// move the tooltip so the tooltip borders snap to the grid
-				data.coord.left -= arrowSize;
-			}
-			else {
-				
-				// same as above
-				data.coord.top -= arrowSize;
-				
-				// we need to give the new arrow target since we override
-				// the side property
-				data.arrowTarget = helper.geo.origin.windowOffset.left + helper.geo.origin.size.width/2;
-			}
+			data.coord = {
+				// move the tooltip so the arrow overflows the grid
+				left: gridBcr.left - arrowSize,
+				top: gridBcr.top
+			};
 			
 			return data;
 		}
