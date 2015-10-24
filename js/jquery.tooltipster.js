@@ -32,7 +32,9 @@
 			interactive: false,
 			interactiveTolerance: 350,
 			multiple: false,
-			// must be 'body' for now
+			// must be 'body' for now, or an element which is statically
+			// or relatively positioned at (0, 0) in the document,
+			// typically like very top views of an app.
 			parent: 'body',
 			positionTracker: false,
 			repositionOnScroll: false,
@@ -945,12 +947,7 @@
 							
 							// determine the future parent
 							if (typeof self.options.parent == 'string') {
-								if (self.$tooltipParent == 'offsetParent') {
-									self.$tooltipParent = self.$el.offsetParent();
-								}
-								else {
-									self.$tooltipParent = $(self.options.parent);
-								}
+								self.$tooltipParent = $(self.options.parent);
 							}
 							else {
 								self.$tooltipParent = self.options.parent;
@@ -2523,18 +2520,16 @@
 			}
 			else {
 				
-				if (self.instance.$tooltipParent[0].tagName.toLowerCase() == 'body') {
-					
-					originParentOffset = {
-						left: helper.geo.origin.windowOffset.left + helper.geo.window.scroll.left,
-						top: helper.geo.origin.windowOffset.top + helper.geo.window.scroll.top
-					};
-				}
-				else {
-					// TODO. right now $tooltipParent cannot be something other than <body>.
-					// when we do this, .tooltipster-sizer will have to be appended to the parent
-					// to inherit css style values that affect the display of the text and such
-				}
+				// this assumes that the parent of the tooltip is located at
+				// (0, 0) in the document, typically like when the parent is
+				// <body>.
+				// If we ever allow other types of parent, .tooltipster-sizer
+				// will have to be appended to the parent to inherit css style
+				// values that affect the display of the text and such.
+				originParentOffset = {
+					left: helper.geo.origin.windowOffset.left + helper.geo.window.scroll.left,
+					top: helper.geo.origin.windowOffset.top + helper.geo.window.scroll.top
+				};
 			}
 			
 			finalResult.coord = {
