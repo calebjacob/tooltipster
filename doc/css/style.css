@@ -445,6 +445,20 @@ Demos
 	top: 50%;
 }
 
+#demo-position {
+	margin-bottom: 40px!important;
+}
+
+#demo-position-grid {
+	border: 2px dashed lightgrey;
+	border-bottom: none;
+	border-right: none;
+	display: inline-block;
+	margin-left: 20px;
+	padding: 5px 20px;
+	position: relative;
+	top: -10px;
+}
 
 /* 
 -------------------------------------

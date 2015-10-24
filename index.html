@@ -110,7 +110,7 @@
 					<span id="demo-default" title="Hi! This is a tooltip.">Hover</span> Default settings
 				</li>
 				<li>
-					<span id="demo-html">Hover</span> Fixed width, position &amp; HTML
+					<span id="demo-html">Hover</span> Fixed width, side &amp; HTML
 				</li>
 				<li>
 					<span id="demo-events" title="Press any key on your keyboard or click anywhere in the page to close this">Click</span> Custom open/close triggers
@@ -141,6 +141,9 @@
 				<li>
 					<span id="demo-complex-placeholder"></span>
 					<span id="demo-complex" title="I also stick to fixed-positioned, moving and resizing elements! Try scrolling!">Click</span> Position tracking system
+				</li>
+				<li>
+					<span id="demo-position">Hover</span> <div id="demo-position-grid">Custom positioning</div>
 				</li>
 				<li>...&amp; more!</li>
 			</ul>
@@ -372,7 +375,7 @@ $('.tooltip').tooltipster({
 				<tr>
 					<td><h4>functionPosition</h4></td>
 					<td>function</td>
-					<td>A custom function fired when the tooltip is repositioned. It gives you the ability to slightly or completely modify the position that Tooltipster is about to give to the tooltip. It gets the proposed set of placement values as third argument. The function must return the set of placement values, which you may have edited. <strong>Default: none (null)</strong></td>
+					<td>A custom function fired when the tooltip is repositioned. It gives you the ability to slightly or completely modify the position that Tooltipster is about to give to the tooltip. It gets the proposed set of placement values as third argument. The function must return the set of placement values, which you may have edited (<a href="#positioning">see example</a>). <strong>Default: none (null)</strong></td>
 				</tr>
 				<tr>
 					<td><h4>interactive</h4></td>
@@ -400,11 +403,6 @@ $('.tooltip').tooltipster({
 					<td>Allows you to put multiple tooltips on a single element (<a href="#multiple">see example</a>). When set to true, the returnObjects option is automatically set to true as well. <strong>Default: false</strong></td>
 				</tr>
 				<tr>
-					<td><h4>position</h4></td>
-					<td>string,<br />string[]</td>
-					<td>Sets the position of the tooltip. The value may one of the following: 'top', 'bottom', 'left', 'right'. It may also be an array containing one or more of these values. When using an array, the order of values is taken into account when the position must be adapted and the absence of a position disables it (<a href="#positioning">see example</a>). <strong>Default: ['top', 'bottom', 'right', 'left']</strong></td>
-				</tr>
-				<tr>
 					<td><h4>positionTracker</h4></td>
 					<td>boolean</td>
 					<td>Repositions the tooltip if the origin moves or is resized. As this option may have an impact on performance, we suggest you enable it only if you need to. <strong>Default: false</strong></td>
@@ -418,6 +416,11 @@ $('.tooltip').tooltipster({
 					<td><h4>restoration</h4></td>
 					<td>'none', 'previous' or 'current'</td>
 					<td>Specifies if a TITLE attribute should be restored on the HTML element after a call to the 'destroy' method. This attribute may be omitted, or be restored with the value that existed before Tooltipster was initialized, or be restored with the stringified value of the current content. Note: in case of multiple tooltips on a single element, only the last destroyed tooltip may trigger a restoration. <strong>Default: 'none'</strong></td>
+				</tr>
+				<tr>
+					<td><h4>side</h4></td>
+					<td>string,<br />string[]</td>
+					<td>Sets the side of the tooltip. The value may one of the following: 'top', 'bottom', 'left', 'right'. It may also be an array containing one or more of these values. When using an array, the order of values is taken into account when the side must be adapted and the absence of a side disables it (<a href="#sides">see example</a>). <strong>Default: ['top', 'bottom', 'right', 'left']</strong></td>
 				</tr>
 				<tr>
 					<td><h4>sizeTracker</h4></td>
@@ -685,7 +688,7 @@ $.fn.tooltipster(methodName [, argument]);</pre>
 			<pre class="prettyprint">
 // Set default options for all future tooltip instantiations
 $.fn.tooltipster('setDefaults', {
-    position: 'bottom',
+    side: 'bottom',
     ...
 });
 
@@ -714,7 +717,8 @@ var instances = $.fn.tooltipster('instancesLatest');
 				<li><a href="#apicontent">Updating a tooltip's content</a></li>
 				<li><a href="#triggers">Setting when a tooltip should open and close</a></li>
 				<li><a href="#ajax">Using AJAX to generate your tooltip content</a></li>
-				<li><a href="#positioning">Forcing or disabling given positions</a></li>
+				<li><a href="#sides">Forcing or disabling given sides</a></li>
+				<li><a href="#positioning">Achieving custom positioning</a></li>
 				<li><a href="#data-attributes">Specifiying options through data-attributes</a></li>
 				<li><a href="#formatting">Working with data sets</a></li>
 				<li><a href="#nested">Nested tooltips</a></li>
@@ -834,13 +838,13 @@ $(document).ready(function() {
 });
 </pre>
 			
-			<h3 id="positioning">Forcing or disabling given positions</h3>
+			<h3 id="sides">Forcing or disabling given sides</h3>
 			
-			<p>Let's hover a little on how the <span class="code">position</span> option works.<br />You have two options: provide either a string, like <span class="code">position: 'top'</span>, or an array of strings, like <span class="code">position: ['top', 'bottom']</span> for example.</p>
+			<p>Let's hover a little on how the <span class="code">side</span> option works.<br />You have two options: provide either a string, like <span class="code">side: 'top'</span>, or an array of strings, like <span class="code">side: ['top', 'bottom']</span> for example.</p>
 			
 			<h4>What happens when I provide a string, like <span class="code">'top'</span> ?</h4>
 			
-			<p>This tells Tooltipster that you'd prefer the tooltip to be above the tooltipped element, but allows the tooltip to be positioned differently if need be.<br />This means that if there is not enough space on top for your tooltip, the other positions may be used a fallbacks. Here is the order of fallbacks, depending on what position you chose:</p>
+			<p>This tells Tooltipster that you'd prefer the tooltip to be above the tooltipped element, but allows the tooltip to be positioned differently if need be.<br />This means that if there is not enough space on top for your tooltip, the other sides may be used a fallbacks. Here is the order of fallbacks, depending on what side you chose:</p>
 			
 			<pre class="prettyprint">
 // ... is the same as ...
@@ -853,24 +857,124 @@ $(document).ready(function() {
 			
 			<p>There are two reasons to do so.</p>
 			
-			<p>Firstly, if you are not happy with the four default orders of position fallbacks. For example you might want: <span class="code">position: ['top', 'left', 'bottom', 'right']</span>.</p>
+			<p>Firstly, if you are not happy with the four default orders of sides fallbacks. For example you might want: <span class="code">side: ['top', 'left', 'bottom', 'right']</span>.</p>
 			
-			<p>Secondly if you want to disable totally one or more positions. For example, with <span class="code">['top', 'right', 'left']</span>, the tooltip will never be positioned on the bottom. With <span class="code">['right']</span>, the tooltip will always be on the right, even if it has to overflow the document.</p>
+			<p>Secondly if you want to disable totally one or more sides. For example, with <span class="code">['top', 'right', 'left']</span>, the tooltip will never be positioned on the bottom. With <span class="code">['right']</span>, the tooltip will always be on the right, even if it has to overflow the document.</p>
 			
 			<h4>Advanced: what Tooltipster actually does</h4>
 			
-			<p>If there is not enough space in your preferred position to display your tooltip in its unrestrained size, Tooltipster first tries to see if the tooltip can be resized to fit in the available space without causing the tooltip content to overflow.</p>
+			<p>If there is not enough space on your preferred side to display your tooltip in its unrestrained size, Tooltipster first tries to see if the tooltip can be resized to fit in the available space without causing the tooltip content to overflow.</p>
 				
-			<p>If there is no way to resize the tooltip fittingly, Tooltipster falls back to the next positions and runs the same tests.</p>
+			<p>If there is no way to resize the tooltip fittingly, Tooltipster falls back to the next sides and runs the same tests.</p>
 			
-			<p>If there is not enough space anywhere, Tooltipster will try to see if it can overflow the viewport in your preferred positions without overflowing the document. If it's still impossible, it will overflow the document in your preferred position.</p>
+			<p>If there is not enough space anywhere, Tooltipster will try to see if it can overflow the viewport on your preferred sides without overflowing the document. If it's still impossible, it will overflow the document on your preferred side.</p>
+			
+			
+			<h3 id="positioning">Achieving custom positioning</h3>
+			
+			<p>This is for advanced users who are comfortable with Javascript.</p>
+			
+			<p>When the tooltip needs to be positioned or repositioned, Tooltipster runs all kinds of tests to find the best option. But before this computed position is applied, you have the option to edit it, using the <span class="code">functionPosition</span> option.</p>
+			
+			<p>Your <span class="code">functionPosition</span> callback is called with three parameters. The first two ones are <span class="code">instance</span> and a <span class="code">helper</span>, <a href="#callback_arguments">as usual</a>. The third argument is an object with the position properties proposed by Tooltipster, that you may edit. <b>You must return</b> the edited third argument for the changes to get applied.</p>
+			
+			<p>This third argument is in the form:</p>
+			
+			<pre class="prettyprint">
+{
+    arrowTarget: [number],
+    container: ['window' || 'document' || 'overflow'],
+    coord: {
+        left: [number],
+        top: [number]
+    },
+    distance: [number],
+    side: [string],
+    size: {
+        height: [number],
+        width: [number]
+    },
+    sizeMode: ['natural' || 'constrained']
+}</pre>
+			
+			<p>You may edit the <span class="code">arrowTarget</span>, <span class="code">coord</span>, <span class="code">distance</span>, <span class="code">side</span> and <span class="code">size</span> properties, the others are read-only.</p>
+			
+			<p><span class="code">arrowTarget</span> Tells Tooltipster where the arrow should aim at, if the arrow is enabled. Its value is the distance from the edge of the viewport to the target (left edge of the viewport if the side is "top" or "bottom", top edge if the side is "left" or "right"). By default, the arrow aims at the middle of the origin.</p>
+			
+			<p><span class="code">container</span> Tells you if the tooltip will be contained in the viewport, if it has to overflow into the document, or if it has to overflow the document itself.</p>
+			
+			<p><span class="code">coords</span> These properties determine the position of the tooltip and are relative to the viewport.</p>
+			
+			<p><span class="code">distance</span> Is the distance offset that will be applied.</p>
+			
+			<p><span class="code">side</span> Is the side Tooltipster has judged best for your tooltip, according to your requirements.</p>
+			
+			<p><span class="code">size</span> These properties tell you the size that your tooltip will have. It is either the natural size of the tooltip, or a size that has been set by Tooltipster to have fit best on screen according to your requirements.</p>
+			
+			<p><span class="code">sizeMode</span> This tells you if the tooltip is in its natural size, or if it has a size that was set by Tooltipster.</p>
+			
+			<p>When computing the desired coordinates of the tooltip and its arrow, <a href="https://developer.mozilla.org/fr/docs/Web/API/Element/getBoundingClientRect" target=_blank"><span class="code">element.getBoundingClientRect</span></a> will be your new best friend. Computing all coordinates relatively to the edges of the screen makes custom positioning in Tooltipster both very fast and very simple.</p>
+			
+			<p>As a further help, you will also find useful precalculated data about the page layout in <span class="code">helper.geo</span>. It will help you avoid putting the tooltip accidentally off screen, for example. This object is in this form:</p>
+			
+			<pre class="prettyprint">
+{
+    document: {
+        size: {
+            height: [integer],
+            width: [integer]
+        }
+    },
+    window: {
+        scroll: {
+            left: [integer],
+            top: [integer]
+        },
+        size: {
+            height: [integer],
+            width: [integer]
+        }
+    },
+    origin: {
+        // the origin has a fixed lineage if itself or one of its ancestors has a fixed position
+        fixedLineage: [boolean],
+        offset: {
+            left: [integer],
+            top: [integer]
+        },
+        size: {
+            height: [integer],
+            width: [integer]
+        },
+        // if the origin is a map area, this will hold the associated image element
+        usemapImage: [HTMLobject || null],
+        windowOffset: {
+            bottom: [integer],
+            left: [integer],
+            right: [integer],
+            top: [integer]
+        }
+    }
+}</pre>
+			
+			<p>You may look at the source code of this documentation to see how the positioning demo at the top of this page was made. Here is the simplest example, let's just move the tooltip by 10 pixels to the bottom-left:</p>
+			
+			<pre class="prettyprint">
+$('#my-tooltip').tooltipster({
+    functionPosition: function(instance, helper, data){
+        data.coords.top += 10;
+        data.coords.left += 10;
+        return data;
+    }
+});
+</pre>
 			
 			<h3 id="data-attributes">Specifiying options through data-attributes</h3>
 			
 			<p>You may want to write options on a per-tooltip basis, directly in your HTML. Of course, you should try to do this for options which are "inlinable" only. Anyway, that's a great opportunity to make use of the <span class="code">functionInit</span> option and the <span class="code">option</span> method, here's how it goes:</p>
 			
 			<pre class="prettyprint">
-&lt;span class="tooltip" data-tooltipster='{"position":"left","animation":"slide"}'&gt;&lt;/span&gt;
+&lt;span class="tooltip" data-tooltipster='{"side":"left","animation":"slide"}'&gt;&lt;/span&gt;
 </pre>
 
 			<pre class="prettyprint">
@@ -1009,7 +1113,7 @@ var $myElement = $('#my-element');
 // create a first tooltip as usual. The multiple option is actually optional for the first tooltip
 $myElement.tooltipster({
 	content: 'My first tooltip',
-	position: 'top'
+	side: 'top'
 });
 
 // initialize a second tooltip
@@ -1017,7 +1121,7 @@ $myElement.tooltipster({
 	// don't forget to provide content here as the first tooltip will have deleted the original title attribute of the element
 	content: 'My second tooltip',
 	multiple: true,
-	position: 'bottom'
+	side: 'bottom'
 });
 
 var instances = $.fn.tooltipster('instances', $myElement);

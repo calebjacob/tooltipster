@@ -47,7 +47,7 @@ distance
 functionPosition  
 maxWidth  
 minWidth  
-position  
+side  
 
 Instance methods
 -------------------------

@@ -35,7 +35,7 @@ $(function() {
 		// setting a same value to minWidth and maxWidth will result in a fixed width
 		minWidth: 400,
 		maxWidth: 400,
-		position: 'right'
+		side: 'right'
 	});
 	
 	$('#demo-theme').tooltipster({
@@ -106,12 +106,12 @@ $(function() {
 	$('#demo-multiple').tooltipster({
 		animation: 'swing',
 		content: 'North',
-		position: 'top'
+		side: 'top'
 	});
 	$('#demo-multiple').tooltipster({
 		content: 'East',
 		multiple: true,
-		position: 'right',
+		side: 'right',
 		theme: 'tooltipster-punk'
 	});	
 	$('#demo-multiple').tooltipster({
@@ -119,14 +119,14 @@ $(function() {
 		content: 'South',
 		delay: 200,
 		multiple: true,
-		position: 'bottom',
+		side: 'bottom',
 		theme: 'tooltipster-light'
 	});	
 	$('#demo-multiple').tooltipster({
 		animation: 'fall',
 		content: 'West',
 		multiple: true,
-		position: 'left',
+		side: 'left',
 		theme: 'tooltipster-shadow'
 	});
 	
@@ -179,6 +179,51 @@ $(function() {
 				}, 2000);
 			}
 		});
+	
+	$('#demo-position').tooltipster({
+		content: $('<div>Tooltipster goes like clockwork.<br /><br />A<br />B<br />C<br />D<br />E<br />F</div>'),
+		side: ['right'],
+		functionPosition: function(instance, helper, data){
+			
+			// this function is pretty dumb and does not check if there is actually
+			// enough space available around the tooltip to move it, it just makes it
+			// snap to the grid.
+			// You might want to do something smarter in your application!
+			
+			var gridBcr = $('#demo-position-grid')[0].getBoundingClientRect(),
+				arrowSize = parseInt($(helper.tooltip).find('.tooltipster-box').css('margin-left'));
+			
+			// check if the grid is floating at the right of the origin or below
+			// (happens on tiny phone screens)
+			var side = 'right';
+			if (gridBcr.top - helper.geo.origin.windowOffset.top > 30) {
+				side = 'bottom';
+			}
+			
+			// override these
+			data.side = side;
+			data.coord.top = gridBcr.top;
+			data.coord.left = gridBcr.left;
+			
+			// lastly, take care of the arrow
+			if (side == 'right') {
+				
+				// move the tooltip so the tooltip borders snap to the grid
+				data.coord.left -= arrowSize;
+			}
+			else {
+				
+				// same as above
+				data.coord.top -= arrowSize;
+				
+				// we need to give the new arrow target since we override
+				// the side property
+				data.arrowTarget = helper.geo.origin.windowOffset.left + helper.geo.origin.size.width/2;
+			}
+			
+			return data;
+		}
+	});
 	
 	// nested demo
 	$('#nesting').tooltipster({
