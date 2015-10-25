@@ -335,26 +335,24 @@ Welcome
 	margin-bottom: 2em;
 }
 
-#browser-support {
-	margin-bottom: 2.8em;
+#browsers {
+	
 }
-#browser-support li {
-	display: inline-block;
-	margin: 0.25em;
-	font-size: 0;
-	line-height: 0;
-}
-#browser-support li img {
+
+#browsers img {
 	height: 42px;
+	margin: 0 8px;
 	opacity: 0.5;
 }
-#browser-support li img:hover {
+
+#browsers img:hover {
 	opacity: 1;
 }
 
 #download {
 	font-size: 1.2em;
 	line-height: 1.4em;
+	margin-top: 30px;
 	width: 100%;
 }
 #download a.button:before {

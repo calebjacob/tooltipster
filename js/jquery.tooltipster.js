@@ -1,7 +1,7 @@
-/*! Tooltipster 4.0.0rc21 */
+/*! Tooltipster 4.0.0rc22 */
 
 /**
- * Released on 2015-10-24
+ * Released on 2015-10-25
  * 
  * A rockin' custom tooltip jQuery plugin
  * Developed by Caleb Jacob under the MIT license http://opensource.org/licenses/MIT
@@ -2099,13 +2099,21 @@
 		 * this plugin
 		 * @param {object} options Options, @see self::_defaults()
 		 */
-		_init: function(instance, options) {
+		_init: function(instance) {
 			
-			var defaults = this._defaults();
+			var $d = $('<i><!--[if IE 6]><i></i><![endif]--></i>');
 			
 			// list of instance variables
 			
 			this.instance = instance;
+			this.isIE6 = $d.children().length > 0;
+			this.options;
+		},
+		
+		_optionsInit: function(){
+			
+			var defaults = this._defaults(),
+				options = this.instance.options;
 			
 			// for backward compatibility, deprecated in v4.0.0
 			if (options.position) {
@@ -2127,19 +2135,28 @@
 			if (typeof this.options.distance != 'object') {
 				this.options.distance = [this.options.distance];
 			}
-			if (this.options.distance[1] === undefined) this.options.distance[1] = this.options.distance[0];
-			if (this.options.distance[2] === undefined) this.options.distance[2] = this.options.distance[0];
-			if (this.options.distance[3] === undefined) this.options.distance[3] = this.options.distance[1];
-			this.options.distance = {
-				top: this.options.distance[0],
-				right: this.options.distance[1],
-				bottom: this.options.distance[2],
-				left: this.options.distance[3]
-			};
-			
+			if (this.options.distance.length < 4) {
+				
+				if (this.options.distance[1] === undefined) this.options.distance[1] = this.options.distance[0];
+				if (this.options.distance[2] === undefined) this.options.distance[2] = this.options.distance[0];
+				if (this.options.distance[3] === undefined) this.options.distance[3] = this.options.distance[1];
+				
+				this.options.distance = {
+					top: this.options.distance[0],
+					right: this.options.distance[1],
+					bottom: this.options.distance[2],
+					left: this.options.distance[3]
+				};
+			}
+			// edit the instance distance option so we don't have to recompute
+			// it every time this method is called
+			options.distance = this.options.distance;
+				
 			// let's transform 'top' into ['top', 'bottom', 'right', 'left'] (for example)
 			if (typeof this.options.side == 'string') {
+				
 				this.options.side = [this.options.side];
+				
 				for (var i=0; i<4; i++) {
 					if (this.options.side[0] != defaults.side[i]) {
 						this.options.side.push(defaults.side[i]);
@@ -2150,12 +2167,26 @@
 			// misc
 			
 			// disable the arrow in IE6 unless the arrow option was explicitly set to true
-			var $d = $('<i><!--[if IE 6]><i></i><![endif]--></i>');
-			if (	$d.children().length > 0
+			if (	this.isIE6
 				&&	options.arrow !== true
 			) {
 				this.options.arrow = false;
 			}
+		},
+		
+		/**
+		 * Make whatever modifications are needed when the side is changed. This has
+		 * been made an independant method for easy inheritance in custom plugins based
+		 * on this default plugin.
+		 */
+		_side_change: function(side) {
+			
+			this.instance.$tooltip
+				.removeClass('tooltipster-bottom')
+				.removeClass('tooltipster-left')
+				.removeClass('tooltipster-right')
+				.removeClass('tooltipster-top')
+				.addClass('tooltipster-' + side);
 		},
 		
 		/**
@@ -2164,6 +2195,8 @@
 		 * @return {object} The tooltip, as a jQuery-wrapped HTML element
 		 */
 		build: function() {
+			
+			this._optionsInit();
 			
 			// note: we wrap with a .tooltipster-box div to be able to set a margin on it
 			// (.tooltipster-base must not have one)
@@ -2203,37 +2236,6 @@
 		},
 		
 		/**
-		 * Get or set options. Provided for advanced users.
-		 * 
-		 * @param {string} o Option name
-		 * @param {mixed} val optional A new value for the option
-		 * @return {mixed} If val is omitted, the value of the option is returned, otherwise
-		 * the instance itself is returned
-		 */
-		option: function(o, val) {
-			if (val === undefined) return this.options[o];
-			else {
-				this.options[o] = val;
-				return this;
-			}
-		},
-		
-		/**
-		 * Make whatever modifications are needed when the side is changed. This has
-		 * been made an independant method for easy inheritance in custom plugins based
-		 * on this default plugin.
-		 */
-		side_change: function(side) {
-			
-			this.instance.$tooltip
-				.removeClass('tooltipster-bottom')
-				.removeClass('tooltipster-left')
-				.removeClass('tooltipster-right')
-				.removeClass('tooltipster-top')
-				.addClass('tooltipster-' + side);
-		},
-		
-		/**
 		 * This method must compute and set the positioning properties of the tooltip
 		 * (left, top, width, height, etc.). It must also make sure the
 		 * tooltip is eventually appended to its parent (since the element may be
@@ -2258,6 +2260,10 @@
 					document: {},
 					window: {}
 				};
+			
+			// we reinit the options at each repositioning because the user may
+			// have changed them with the `option` method
+			self._optionsInit();
 			
 			// start position tests session
 			self.instance._sizerStart();
@@ -2284,7 +2290,7 @@
 					
 					// this may have an effect on the size of the tooltip if there are css
 					// rules for the arrow or something else
-					self.side_change(side);
+					self._side_change(side);
 					
 					// now we get the size of the tooltip when it does not have any size
 					// constraints set
@@ -2462,6 +2468,7 @@
 				finalResult.arrowTarget = helper.geo.origin.windowOffset.top + Math.floor(helper.geo.origin.size.height / 2);
 			}
 			
+			
 			// submit the positioning proposal to the user function which may choose to change
 			// the side, size and/or the coordinates
 			
@@ -2469,13 +2476,18 @@
 			// the size of the tooltip, and the custom functionPosition may want to detect the
 			// size of something before making a decision. So let's make things easier for the
 			// implementor
-			self.side_change(finalResult.side);
+			self._side_change(finalResult.side);
 			
 			// now unneeded, we don't want it passed to functionPosition
 			delete finalResult.fits;
 			delete finalResult.outerSize;
+			
 			// simplify this for the functionPosition callback
 			finalResult.distance = finalResult.distance.horizontal || finalResult.distance.vertical;
+			
+			// allow the user to easily prevent its content from overflowing
+			// if he constrains the size of the tooltip
+			finalResult.contentOverflow = 'initial';
 			
 			// add some variables to the helper for the custom function
 			helper.origin = self.instance.$el[0];
@@ -2488,6 +2500,7 @@
 				
 				if (r) finalResult = r; 
 			}
+			
 			
 			// compute the position of the arrow target relatively to the
 			// tooltip container and make needed adjustments
@@ -2552,7 +2565,7 @@
 			// set position values
 			
 			// again, in case functionPosition changed the side
-			self.side_change(finalResult.side);
+			self._side_change(finalResult.side);
 			
 			if (helper.geo.origin.fixedLineage) {
 				self.instance.$tooltip
@@ -2569,6 +2582,9 @@
 					left: finalResult.coord.left,
 					top: finalResult.coord.top
 				})
+				.find('.tooltipster-box')
+					.css('overflow', finalResult.contentOverflow)
+					.end()
 				.find('.tooltipster-arrow')
 					.css({
 						'left': '',
@@ -2588,7 +2604,7 @@
 					});
 			}
 			else {
-			
+				
 				self.instance.$tooltip
 					.css({
 						height: '',

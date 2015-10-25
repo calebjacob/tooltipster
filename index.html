@@ -11,7 +11,6 @@
 	<meta property="og:image" content="images/social.jpg" />
 	<meta property="og:site_name" content="Tooltipster - The jQuery Tooltip Plugin" />
 	<meta property="og:description" content="Tooltipster is a powerful, flexible jQuery plugin enabling you to easily create clean, HTML5 validated tooltips." />
-	<html itemscope itemtype="http://schema.org/CreativeWork">
 	<meta itemprop="name" content="Tooltipster - The jQuery Tooltip Plugin">
 	<meta itemprop="description" content="Tooltipster is a powerful, flexible jQuery plugin enabling you to easily create clean, HTML5 validated tooltips.">
 	<meta itemprop="image" content="images/social.jpg">
@@ -81,23 +80,15 @@
 		<section id="welcome">
 			<img src="doc/images/tooltipster.svg" alt="Tooltipster" id="tooltipster" />
 			<h1>A powerful and extensible jQuery plugin for modern tooltips.</h1>
-			<ul id="browser-support">
-				<li>
-					<img src="doc/images/browser-chrome.png" alt="Chrome" class="tooltip" title="Chrome Support" />
-				</li>
-				<li>
-					<img src="doc/images/browser-safari.png" alt="Safari" class="tooltip" title="Safari Support" />
-				</li>
-				<li>
-					<img src="doc/images/browser-opera.png" alt="Opera" class="tooltip" title="Opera Support" />
-				</li>
-				<li>
-					<img src="doc/images/browser-firefox.png" alt="FireFox" class="tooltip" title="FireFox Support" />
-				</li>
-				<li>
-					<img src="doc/images/browser-ie.png" alt="Internet Explorer" class="tooltip" title="IE6+ support + Graceful degradation" />
-				</li>
-			</ul>
+			
+			<div id="browsers">
+				<img src="doc/images/browser-chrome.png" alt="Chrome" class="tooltip" title="Chrome Support" />
+				<img src="doc/images/browser-firefox.png" alt="FireFox" class="tooltip" title="FireFox Support" />
+				<img src="doc/images/browser-opera.png" alt="Opera" class="tooltip" title="Opera Support" />
+				<img src="doc/images/browser-safari.png" alt="Safari" class="tooltip" title="Safari Support" />
+				<img src="doc/images/browser-ie.png" alt="Internet Explorer" class="tooltip" title="IE6+ support" />
+			</div>
+			
 			<div id="download">
 				<a href="https://github.com/iamceege/tooltipster/archive/master.zip" class="button alt">Download</a>
 			</div>
@@ -122,7 +113,7 @@
 					<span id="demo-theme" title="Build custom themes and CSS powered animations!">Hover</span> Custom themes &amp; animations
 				</li>
 				<li>
-					<span id="demo-callback" title="This will be populated by AJAX.">Hover</span> Custom callbacks (AJAX <3)
+					<span id="demo-callback" title="This will be populated by AJAX.">Hover</span> Custom callbacks (AJAX &lt;3)
 				</li>
 				<li>
 					<span id="demo-interact" title="Try clicking &lt;a href='http://google.com/' target='_blank'&gt;this link&lt;/a&gt;">Hover</span> Interaction with tooltips
@@ -878,11 +869,11 @@ $(document).ready(function() {
 			
 			<h3 id="positioning">Achieving custom positioning <a href="#usecases">&#8657;</a></h3>
 			
-			<p>This is for advanced users who are comfortable with Javascript.</p>
+			<p>This is for advanced users who are comfortable with Javascript and CSS.</p>
 			
 			<p>When the tooltip needs to be positioned or repositioned, Tooltipster runs all kinds of tests to find the best option. But before the computed position is applied, you have the option to edit it using the <span class="code">functionPosition</span> option.</p>
 			
-			<p>When you provide custom coordinates for the tooltip and its arrow, they have to be relative to the top and left edges of the viewport. This makes custom positioning in Tooltipster both very fast and very simple. Doing your calculations, <a href="https://developer.mozilla.org/fr/docs/Web/API/Element/getBoundingClientRect" target=_blank"><span class="code">element.getBoundingClientRect</span></a> will probably become your new best friend, so make sure you check it out.</p>
+			<p>When you provide custom coordinates for the tooltip and its arrow, they have to be relative to the top and left edges of the viewport. This makes custom positioning in Tooltipster both very fast and very simple. Doing your calculations, <a href="https://developer.mozilla.org/fr/docs/Web/API/Element/getBoundingClientRect" target="_blank"><span class="code">element.getBoundingClientRect</span></a> will probably become your new best friend, so make sure you check it out.</p>
 			
 			<p>Your <span class="code">functionPosition</span> callback is called with three parameters. The first two ones are <span class="code">instance</span> and a <span class="code">helper</span>, <a href="#callback_arguments">as usual</a>. The third argument is an object with the position properties proposed by Tooltipster, that you may edit. <b>You must return</b> the edited third argument for the changes to get applied.</p>
 			
@@ -892,6 +883,7 @@ $(document).ready(function() {
 {
     arrowTarget: [number],
     container: ['window' || 'document' || 'overflow'],
+    contentOverflow: 'initial',
     coord: {
         left: [number],
         top: [number]
@@ -908,6 +900,8 @@ $(document).ready(function() {
 			<p><span class="code">arrowTarget</span> tells Tooltipster where the arrow should aim at, if the arrow is enabled. Its value is the distance from the edge of the viewport to the target (left edge of the viewport if the side is "top" or "bottom", top edge if the side is "left" or "right"). By default, the arrow aims at the middle of the origin.</p>
 			
 			<p><span class="code">container</span> tells you if, in Tooltipster's proposition, the tooltip will be contained in the viewport, if it has to overflow into the document, or if it has to overflow the document itself. This property is for your information only, editing it will have no effect.</p>
+			
+			<p><span class="code">contentOverflow</span> sets the overflow strategy for the content in the tooltip. If you set a constrained size to the tooltip yourself, you might want to change the value to <span class="code">'auto'</span> for example.</p>
 			
 			<p><span class="code">coords</span> properties determine the position of the tooltip and are relative to the viewport.</p>
 			
@@ -1093,7 +1087,7 @@ instance.open().content('My new content');</pre>
 			
 			<p>What happened here? The <span class="code">instance</span> method returns the Tooltipster instance that corresponds to the <b>first</b> tooltip set on <span class="code">#my-element</span>. Once we have the Tooltipster instance that corresponds to a tooltip, we can call any methods directly on it to manipulate the tooltip.</p>
 			
-			<p>If <b>multiple</b> tooltips were set on <span class="code">#my-element</span> using the <span class="code">multiple</span> option (see next section), we'd have to call <span class="code">$.fn.tooltipster('objects', '#my-element');</span> to get an array with all their instances.</pre>
+			<p>If <b>multiple</b> tooltips were set on <span class="code">#my-element</span> using the <span class="code">multiple</span> option (see next section), we'd have to call <span class="code">$.fn.tooltipster('objects', '#my-element');</span> to get an array with all their instances.</p>
 			
 			<p>As you've seen in many previous examples involving callbacks - either <span class="code">functionInit</span>, <span class="code">functionBefore</span>, etc., open/close callbacks, they all get the Tooltipster instance that calls them as first parameter. So this works fine:</p>
 			
@@ -1201,7 +1195,7 @@ instance
 			
 			<p><span class="code">openInit</span> happens when the <span class="code">hover</span> open trigger is used and that the origin gets hovered.</p>
 			
-			<p><span class="code">before</span>, <span class="code">ready</span>, <span class="code">after</span> and <span class="code">format</span> happen at the same time as <span class="code">functionBefore</span>, etc.</p>
+			<p><span class="code">before</span>, <span class="code">ready</span>, <span class="code">after</span> and <span class="code">format</span> happen at the same time as their equivalent <span class="code">functionBefore</span>, etc.</p>
 			
 			<p><span class="code">before</span> has a special <span class="code">event.stop</span> property which is a function you may call to prevent the tooltip from opening.</p>
 			
@@ -1292,13 +1286,11 @@ $('#myfield')
 			
 			<p>This typically happens when you put images inside the tooltip. The first time it opens, the image is not loaded yet and thus has no size, so Tooltipster basically computes a position as if there were no images. A few milliseconds later, when the image has loaded, the tooltip gets bigger but is not automatically repositioned. The second time the tooltip opens, the image is already in cache and is ready for display, so Tooltipster can compute an appropriate position.</p>
 			
-			<p>
-				<ul>
-					<li>The best way to solve this is to give a size to your images in CSS. That way, even if they're not loaded yet, they will have a size and Tooltipster will be able to compute the appropriate position.</li>
-					<li>Another solution is to use <span class="code">.on('load', callback)</span> event listeners on your images and to call the <span class="code">reposition</span> method of the tooltip inside the callback.</li>
-					<li>The last solution is to use the <span class="code">sizeTracker</span> option. As it will check the size of the tooltip at regular intervals, this may have an impact on performance. Use this as a last resort.</li>
-				</ul>
-			</p>
+			<ul>
+				<li>The best way to solve this is to give a size to your images in CSS. That way, even if they're not loaded yet, they will have a size and Tooltipster will be able to compute the appropriate position.</li>
+				<li>Another solution is to use <span class="code">.on('load', callback)</span> event listeners on your images and to call the <span class="code">reposition</span> method of the tooltip inside the callback.</li>
+				<li>The last solution is to use the <span class="code">sizeTracker</span> option. As it will check the size of the tooltip at regular intervals, this may have an impact on performance. Use this as a last resort.</li>
+			</ul>
 			
 			<h4>"Shouldn't Tooltipster remove &lt;script> tags from my content to prevent XSS exploits?"</h4>
 			
