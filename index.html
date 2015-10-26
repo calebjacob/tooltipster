@@ -886,7 +886,7 @@ $(document).ready(function() {
 			
 			<pre class="prettyprint">
 {
-    arrowMargin: 10,
+    arrowMargin: [number],
     arrowTarget: [number],
     container: ['window' || 'document' || 'overflow'],
     contentOverflow: 'initial',
@@ -903,7 +903,7 @@ $(document).ready(function() {
     sizeMode: ['natural' || 'constrained']
 }</pre>
 			
-			<p><span class="code">arrowMargin</span> is a safety margin that will keep the arrow from overflowing the tooltip when the arrow target is outside of the viewport. This value should be equal to or greater than half of the arrow width (by width we mean the size of the side which touches the tooltip).</p>
+			<p><span class="code">arrowMargin</span> is a safety margin that will keep the target.</p>
 			
 			<p><span class="code">arrowTarget</span> tells Tooltipster where the arrow should aim at, if the arrow is enabled. Its value is the distance from the edge of the viewport to the target (left edge of the viewport if the side is "top" or "bottom", top edge if the side is "left" or "right"). By default, the arrow aims at the middle of the origin.</p>
 			
@@ -1175,7 +1175,7 @@ $('body').on('mouseenter', '.tooltip:not(.tooltipstered)', function(){
 			
 			<p>Advanced users with complex needs may take advantage of the many events that Tooltipster triggers during its tasks. You may handle your listeners using jQuery's syntax: <span class="code">instance.on()</span>, <span class="code">instance.once()</span>, <span class="code">instance.off()</span> and <span class="code">instance.triggerHandler()</span>.</p>
 			
-			<p>The best thing about these events is that instead of providing a single callback to <span class="code">functionBefore</span> and the like, you may easily bind several handlers to the event emitter. For example, instead of doing this:</p>
+			<p>The best thing about these events is that instead of having to provide a single callback to <span class="code">functionBefore</span> and the like, you may easily bind several handlers to the event emitter. For example, instead of doing this:</p>
 			
 			<pre class="prettyprint">
 $("#my-tooltip").tooltipster({
@@ -1197,13 +1197,25 @@ instance
     .on('before', doThat);
 </pre>
 			
+			<p>This is also great way to avoid overwriting a callback that was set as a default. For example, both <span class="code">doThis()</span> and <span class="code">doThat()</span> will be called here:</p>
+			
+			<pre class="prettyprint">
+$.fn.tooltipster('setDefaults', {
+    functionBefore: doThis
+});
+
+var instance = $("#my-tooltip").tooltipster({}).instance();
+
+instance.on('before', doThat);
+</pre>
+			
 			<p>Your listeners will get one argument, the event, which holds useful properties: <span class="code">event.type</span>, <span class="code">event.instance</span>, <span class="code">event.event</span> (when there is one, similar to the usual <span class="code">helper.event</span>), etc.</p>
 			
-			<p>The possible event types are <span class="code">openInit</span>, <span class="code">before</span>, <span class="code">ready</span>, <span class="code">beforeClose</span>, <span class="code">after</span>, <span class="code">format</span>, <span class="code">destroy</span>, <span class="code">state</span>, <span class="code">update</span>, <span class="code">scroll</span> and <span class="code">reposition</span>.</p>
+			<p>The possible event types are <span class="code">openInit</span>, <span class="code">before</span>, <span class="code">ready</span>, <span class="code">beforeClose</span>, <span class="code">after</span>, <span class="code">format</span>, <span class="code">position</span>, <span class="code">destroy</span>, <span class="code">state</span>, <span class="code">update</span>, <span class="code">scroll</span> and <span class="code">reposition</span>.</p>
 			
 			<p><span class="code">openInit</span> happens when the <span class="code">hover</span> open trigger is used and that the origin gets hovered.</p>
 			
-			<p><span class="code">before</span>, <span class="code">ready</span>, <span class="code">after</span> and <span class="code">format</span> happen at the same time as their equivalent <span class="code">functionBefore</span>, etc.</p>
+			<p><span class="code">before</span>, <span class="code">ready</span>, <span class="code">after</span>, <span class="code">format</span> and <span class="code">position</span> happen at the same time as their equivalent <span class="code">functionBefore</span>, etc.</p>
 			
 			<p><span class="code">before</span> has a special <span class="code">event.stop</span> property which is a function you may call to prevent the tooltip from opening.</p>
 			
@@ -1215,7 +1227,9 @@ instance
 			
 			<p><span class="code">update</span> happens when a call to the <span class="code">content</span> method updates the content. The event has a special <span class="code">event.content</span> property.</p>
 			
-			<p><span class="code">reposition</span> happens when Tooltipster has recalculated the tooltip position. The event has a special <span class="code">event.position</span> property.</p>
+			<p><span class="code">position</span> happens during the positioning process and can be used to provide a custom position (see <span class="code">functionPosition</span>). The event has a special <span class="code">event.edit</span> property which is the function you may call with your edited positioning values as first argument.</p>
+			
+			<p><span class="code">reposition</span> happens after Tooltipster repositioned of the tooltip. The event has a special <span class="code">event.position</span> with positioning information.</p>
 			
 			<p><span class="code">scroll</span> happens whenever a parent of the origin is scrolled.</p>
 			
@@ -1273,7 +1287,7 @@ $('#myfield')
 			<p><a href="http://stackoverflow.com/questions/14741688/how-to-display-messages-from-jquery-validate-plugin-inside-of-tooltipster-toolti">Using Tooltipster alongside jQuery Validate</a> by <a href="https://github.com/sparky672">sparky672</a></p>
 			<p>Did you do something awesome with Tooltipster? <a href="#talk">Tell us</a> and we'll post it up here!</p>
 		</section>
-				
+		
 		<section id="faq">
 			
 			<h2>Frequently asked questions  <a href="#">&#8657;</a></h2>
@@ -1288,7 +1302,7 @@ $('#myfield')
 			
 			<p>Before opening a new issue, please be sure to search through the backlog to see if your bug has already been submitted. Thank you! :)</p>
 			
-			<h4 id="faq_sizeissue">"The first time it opens, my tooltip is incorrectly positioned. After that, it's ok"</h4>
+			<h4 id="faq_sizeissue">"The first time it opens, the position of the tooltip is incorrect. After that, it's ok"</h4>
 			
 			<p>That's because the size of your content inside the tooltip changes after Tooltipster positioned the tooltip.</p>
 			

@@ -107,7 +107,7 @@
 		// the element the tooltip will be appended to
 		this.$tooltipParent;
 		// the tooltip left/top coordinates, saved after each repositioning
-		this.tooltipPosition;
+		this.tooltipCoord;
 		
 		// option formatting
 		
@@ -844,12 +844,12 @@
 					if (self.enabled && self.Content !== null) {
 						
 						// init the display plugin if it has not been initialized yet
-						if (!this.displayPlugin) {
+						if (!self.displayPlugin) {
 							
 							var pluginClass = $.tooltipster.displayPlugin[self.options.displayPlugin];
 							
 							if (pluginClass) {
-								this.displayPlugin = new pluginClass(self, self.options);
+								self.displayPlugin = new pluginClass(self);
 							}
 							else {
 								throw new Error('The "' + self.options.displayPlugin + '" plugin is not defined');
@@ -1264,8 +1264,8 @@
 							
 							// add the offset to the position initially computed by the display plugin
 							self.$tooltip.css({
-								left: self.tooltipPosition.left + offsetLeft,
-								top: self.tooltipPosition.top + offsetTop
+								left: self.tooltipCoord.left + offsetLeft,
+								top: self.tooltipCoord.top + offsetTop
 							});
 						}
 					}
@@ -1671,20 +1671,18 @@
 				self.geometry = self._geometry();
 				
 				// call the display plugin
-				self.displayPlugin.reposition({
+				var position = self.displayPlugin.reposition({
 					geo: self.geometry
 				});
 				
-				// remember the position for later offset adjustment
-				self.tooltipPosition = {
-					left: parseInt(self.$tooltip.css('left')),
-					top: parseInt(self.$tooltip.css('top'))
-				};
+				// remember the coordinates for later offset adjustment
+				self.tooltipCoord = position.coord;
 				
 				// trigger event
 				self._trigger({
 					type: 'reposition',
-					event: event
+					event: event,
+					position: position
 				});
 			}
 			
@@ -2501,6 +2499,17 @@
 			helper.tooltip = self.instance.$tooltip[0];
 			helper.tooltipParent = self.instance.$tooltipParent[0];
 			
+			var edit = function(result){
+				finalResult = result;
+			};
+			
+			// emit event on the instance
+			self.instance._trigger({
+				type: 'position',
+				edit: edit,
+				position: finalResult
+			});
+			
 			if (self.options.functionPosition) {
 				
 				var r = self.options.functionPosition.call(self, self.instance, helper, $.extend(true, {}, finalResult));
@@ -2621,6 +2630,8 @@
 			// end positioning tests session and append the tooltip HTML element
 			// to its parent
 			self.instance._sizerEnd();
+			
+			return finalResult;
 		}
 	};
 	
