@@ -507,7 +507,7 @@ $('.tooltip').tooltipster({
 			<pre class="prettyprint">
 callback(instance, helper);</pre>
 			
-			<p>Small exception, <span class="code">functionFormat</span>, <span class="code">functionPosition</span> get an extra third parameter (documented above).</p>
+			<p>Small exception: <span class="code">functionFormat</span> and <span class="code">functionPosition</span> get an extra third parameter (documented above).</p>
 			
 			<p><span class="code">instance</span> is the Tooltipster object that called the method and is described in <a href="#object-oriented">this section</a>.</p>
 			
@@ -574,7 +574,7 @@ $('.tooltip').tooltipster({
 				<tr>
 					<td><h4>close</h4></td>
 					<td>callback</td>
-					<td>Closes the tooltip. When the animation is over, its HTML element is destroyed (definitely removed from the DOM). The 'callback' function argument is optional (see its <a href="#callback_arguments">input signature</a>).</td>
+					<td>Closes the tooltip. When the animation is over, its HTML element is destroyed (definitely removed from the DOM). The `callback` function argument is optional (see its <a href="#callback_arguments">input signature</a>).</td>
 				</tr>
 				<tr>
 					<td><h4>content (getter)</h4></td>
@@ -624,7 +624,7 @@ $('.tooltip').tooltipster({
 				<tr>
 					<td><h4>open</h4></td>
 					<td>callback</td>
-					<td>Opens the tooltip. The 'callback' function argument is optional (see its <a href="#callback_arguments">input signature</a>).</td>
+					<td>Opens the tooltip. The `callback` function argument is optional (see its <a href="#callback_arguments">input signature</a>).</td>
 				</tr>
 				<tr>
 					<td><h4>option (getter)</h4></td>
@@ -640,6 +640,11 @@ $('.tooltip').tooltipster({
 					<td><h4>reposition</h4></td>
 					<td>None</td>
 					<td>Resizes and repositions the tooltip.</td>
+				</tr>
+				<tr>
+					<td><h4>state</h4></td>
+					<td>None</td>
+					<td>Returns the current state of the tooltip. Possible values are 'appearing', 'stable', 'disappearing', 'closed'.</td>
 				</tr>
 			</table>
 			
@@ -881,6 +886,7 @@ $(document).ready(function() {
 			
 			<pre class="prettyprint">
 {
+    arrowMargin: 10,
     arrowTarget: [number],
     container: ['window' || 'document' || 'overflow'],
     contentOverflow: 'initial',
@@ -896,6 +902,8 @@ $(document).ready(function() {
     },
     sizeMode: ['natural' || 'constrained']
 }</pre>
+			
+			<p><span class="code">arrowMargin</span> is a safety margin that will keep the arrow from overflowing the tooltip when the arrow target is outside of the viewport. This value should be equal to or greater than half of the arrow width (by width we mean the size of the side which touches the tooltip).</p>
 			
 			<p><span class="code">arrowTarget</span> tells Tooltipster where the arrow should aim at, if the arrow is enabled. Its value is the distance from the edge of the viewport to the target (left edge of the viewport if the side is "top" or "bottom", top edge if the side is "left" or "right"). By default, the arrow aims at the middle of the origin.</p>
 			

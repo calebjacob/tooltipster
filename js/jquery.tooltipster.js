@@ -1,4 +1,4 @@
-/*! Tooltipster 4.0.0rc22 */
+/*! Tooltipster 4.0.0rc23 */
 
 /**
  * Released on 2015-10-25
@@ -831,13 +831,13 @@
 				
 				if (ok && self.options.functionBefore) {
 					
+					// call our custom function before continuing
 					ok = self.options.functionBefore.call(self, self, {
 						event: event,
 						origin: self.$el[0]
 					});
 				}
 				
-				// call our constructor custom function before continuing
 				if (ok !== false) {
 					
 					// continue only if the tooltip is enabled and has any content
@@ -871,7 +871,9 @@
 						var extraTime,
 							finish = function() {
 								
-								self.state('stable');
+								if (self.State != 'stable'){
+									self.state('stable');
+								}
 								
 								// trigger any open method custom callbacks and reset them
 								$.each(self.callbacks.open, function(i,c) {
@@ -1699,10 +1701,8 @@
 		},
 		
 		/**
-		 * Internal and maybe not very stable
-		 * 
-		 * @param {string} state optional Use this to use the function as a
-		 * setter
+		 * @param {string} state optional internal Use this to use the function
+		 * as a setter
 		 * @return {string} The state of the tooltip: stable, closed, etc.
 		 */
 		state: function(state) {
@@ -2468,6 +2468,13 @@
 				finalResult.arrowTarget = helper.geo.origin.windowOffset.top + Math.floor(helper.geo.origin.size.height / 2);
 			}
 			
+			// this will be used so that the final arrow target is not too close
+			// from the edge of the tooltip so that the arrow does not overflow
+			// the tooltip. It should be equal or greater than half the width of
+			// the arrow (by width we mean the size of the side which touches the
+			// side of the tooltip). 
+			finalResult.arrowMargin = 10;
+			
 			
 			// submit the positioning proposal to the user function which may choose to change
 			// the side, size and/or the coordinates
@@ -2504,34 +2511,33 @@
 			
 			// compute the position of the arrow target relatively to the
 			// tooltip container and make needed adjustments
+			var arrowCoord,
+				maxVal;
+			
 			if (finalResult.side == 'top' || finalResult.side == 'bottom') {
 				
-				var arrowCoord = {
+				arrowCoord = {
 					prop: 'left',
 					val: finalResult.arrowTarget - finalResult.coord.left
 				};
-				
-				// cannot lie beyond the boundaries of the tooltip
-				if (arrowCoord.val < 0) {
-					arrowCoord.val = 0;
-				}
-				else if (arrowCoord.val > finalResult.size.width) {
-					arrowCoord.val = finalResult.size.width;
-				}
+				maxVal = finalResult.size.width - finalResult.arrowMargin;
 			}
 			else {
 				
-				var arrowCoord = {
+				arrowCoord = {
 					prop: 'top',
 					val: finalResult.arrowTarget - finalResult.coord.top
 				};
-				
-				if (arrowCoord.val < 0) {
-					arrowCoord.val = 0;
-				}
-				else if (arrowCoord.val > finalResult.size.height) {
-					arrowCoord.val = finalResult.size.height;
-				}
+				maxVal = finalResult.size.height - finalResult.arrowMargin;
+			}
+			
+			// cannot lie beyond the boundaries of the tooltip, minus the
+			// arrow margin
+			if (arrowCoord.val < finalResult.arrowMargin) {
+				arrowCoord.val = finalResult.arrowMargin;
+			}
+			else if (arrowCoord.val > maxVal) {
+				arrowCoord.val = maxVal;
 			}
 			
 			var originParentOffset;

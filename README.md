@@ -65,6 +65,7 @@ open([callback])
 option(optionName)  
 option(optionName, optionValue)  
 reposition()   
+state()   
 
 Static methods
 -------------------------

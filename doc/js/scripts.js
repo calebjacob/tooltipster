@@ -169,7 +169,7 @@ $(function() {
 				
 				complexInterval = setInterval(function(){
 					
-					var offset = odd ? 200 : -200;
+					var offset = odd ? 200 : 0;
 					
 					$this.css({
 						left: bcr.left + offset
