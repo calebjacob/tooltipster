@@ -1,4 +1,4 @@
-/*! Tooltipster 4.0.0rc23 */
+/*! Tooltipster 4.0.0rc24 */
 
 /**
  * Released on 2015-10-25
