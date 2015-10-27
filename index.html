@@ -129,7 +129,7 @@
 				<li>
 					<span id="demo-multiple">Hover</span> Multiple tooltips on a single element
 				</li>
-				<li>
+				<li id="demo-complex-li">
 					<span id="demo-complex-placeholder"></span>
 					<span id="demo-complex" title="I also stick to fixed-positioned, moving and resizing elements! Try scrolling!">Click</span> Position tracking system
 				</li>
@@ -394,11 +394,6 @@ $('.tooltip').tooltipster({
 					<td>Allows you to put multiple tooltips on a single element (<a href="#multiple">see example</a>). When set to true, the returnObjects option is automatically set to true as well. <strong>Default: false</strong></td>
 				</tr>
 				<tr>
-					<td><h4>positionTracker</h4></td>
-					<td>boolean</td>
-					<td>Repositions the tooltip if the origin moves or is resized. As this option may have an impact on performance, we suggest you enable it only if you need to. <strong>Default: false</strong></td>
-				</tr>
-				<tr>
 					<td><h4>repositionOnScroll</h4></td>
 					<td>boolean</td>
 					<td>Repositions the tooltip if it goes out of the viewport when the user scrolls the page, in order to keep it visible as long as possible. <strong>Default: false</strong></td>
@@ -412,11 +407,6 @@ $('.tooltip').tooltipster({
 					<td><h4>side</h4></td>
 					<td>string,<br />string[]</td>
 					<td>Sets the side of the tooltip. The value may one of the following: 'top', 'bottom', 'left', 'right'. It may also be an array containing one or more of these values. When using an array, the order of values is taken into account when the side must be adapted and the absence of a side disables it (<a href="#sides">see example</a>). <strong>Default: ['top', 'bottom', 'right', 'left']</strong></td>
-				</tr>
-				<tr>
-					<td><h4>sizeTracker</h4></td>
-					<td>boolean</td>
-					<td>Repositions the tooltip if its size changes. When the size change results from a call to the 'content' method, the tooltip is already repositioned without the need to enable this option. As this option may have an impact on performance, we suggest you enable it only if you need to. See <a href="#faq_sizeissue">this entry</a> of the FAQ. <strong>Default: false</strong></td>
 				</tr>
 				<tr>
 					<td><h4>speed</h4></td>
@@ -441,7 +431,17 @@ $('.tooltip').tooltipster({
 				<tr>
 					<td><h4>trackerInterval</h4></td>
 					<td>integer</td>
-					<td>Sets how often the positionTracker and sizeTracker should run, in milliseconds. The tracker runs even when the positionTracker and sizeTracker are disabled in case the origin were removed while the tooltip is open, so you shouldn't set too high or too low values unless you need to. <strong>Default: 500</strong></td>
+					<td>Sets how often the tracker should run (see trackOrigin and trackTooltip), in milliseconds. The tracker runs even if trackOrigin and trackTooltip are false to check if the origin has not been removed while the tooltip was open, so you shouldn't set too high or too low values unless you need to. <strong>Default: 500</strong></td>
+				</tr>
+				<tr>
+					<td><h4>trackOrigin</h4></td>
+					<td>boolean</td>
+					<td>Repositions the tooltip if the origin moves or is resized. As this option may have an impact on performance, we suggest you enable it only if you need to. <strong>Default: false</strong></td>
+				</tr>
+				<tr>
+					<td><h4>trackTooltip</h4></td>
+					<td>boolean</td>
+					<td>Repositions the tooltip if its size changes. When the size change results from a call to the 'content' method, the tooltip is already repositioned without the need to enable this option. As this option may have an impact on performance, we suggest you enable it only if you need to. See <a href="#faq_sizeissue">this entry</a> of the FAQ. <strong>Default: false</strong></td>
 				</tr>
 				<tr>
 					<td><h4>trigger</h4></td>
@@ -1311,7 +1311,7 @@ $('#myfield')
 			<ul>
 				<li>The best way to solve this is to give a size to your images in CSS. That way, even if they're not loaded yet, they will have a size and Tooltipster will be able to compute the appropriate position.</li>
 				<li>Another solution is to use <span class="code">.on('load', callback)</span> event listeners on your images and to call the <span class="code">reposition</span> method of the tooltip inside the callback.</li>
-				<li>The last solution is to use the <span class="code">sizeTracker</span> option. As it will check the size of the tooltip at regular intervals, this may have an impact on performance. Use this as a last resort.</li>
+				<li>The last solution is to use the <span class="code">trackOrigin</span> option. As it will check the size of the tooltip at regular intervals, this may have an impact on performance. Use this as a last resort.</li>
 			</ul>
 			
 			<h4>"Shouldn't Tooltipster remove &lt;script> tags from my content to prevent XSS exploits?"</h4>

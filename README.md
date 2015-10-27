@@ -26,15 +26,15 @@ functionFormat
 interactive  
 interactiveTolerance  
 multiple  
-positionTracker  
 repositionOnScroll  
 restoration  
-sizeTracker  
 speed  
 timer  
 theme  
 touchDevices  
 trackerInterval  
+trackOrigin  
+trackTooltip  
 trigger  
 updateAnimation  
 zIndex  

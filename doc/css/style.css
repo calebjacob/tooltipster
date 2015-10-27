@@ -419,7 +419,10 @@ Demos
 
 #demo-complex.complex {
 	position: fixed;
-	
+}
+
+#demo-complex-li {
+	z-index: 1;
 }
 
 #demo-complex-placeholder {

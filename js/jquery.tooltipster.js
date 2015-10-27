@@ -35,10 +35,10 @@
 			// must be 'body' for now, or an element positioned at (0, 0)
 			// in the document, typically like very top views of an app.
 			parent: 'body',
-			positionTracker: false,
+			trackOrigin: false,
 			repositionOnScroll: false,
 			restoration: 'none',
-			sizeTracker: false,
+			trackTooltip: false,
 			speed: 350,
 			theme: [],
 			timer: 0,
@@ -74,6 +74,8 @@
 		// this will be the user content shown in the tooltip. A capital "C" is used
 		// because there is also a method called content()
 		this.Content;
+		// to keep the tooltip from opening once it's destroyed
+		this.destroyed = false;
 		// an instance of the chosen display plugin
 		this.displayPlugin;
 		// this is the element which gets one or more tooltips, also called "origin"
@@ -103,7 +105,7 @@
 		// this will be the tooltip element (jQuery wrapped HTML element)
 		this.$tooltip;
 		// for the size tracker
-		this.tooltipBcr;
+		this.contentBcr;
 		// the element the tooltip will be appended to
 		this.$tooltipParent;
 		// the tooltip left/top coordinates, saved after each repositioning
@@ -625,8 +627,8 @@
 					geo.origin.offset.right = geo.origin.offset.left + geo.origin.size.width;
 					geo.origin.offset.bottom = geo.origin.offset.top + geo.origin.size.height;
 					
-					geo.origin.windowOffset.right -= mappedOffsetRight - geo.origin.offset.right;
-					geo.origin.windowOffset.bottom -= mappedOffsetBottom - geo.origin.offset.bottom;
+					geo.origin.windowOffset.right = geo.origin.offset.right - geo.window.scroll.left;
+					geo.origin.windowOffset.bottom = geo.origin.offset.bottom - geo.window.scroll.top;
 				}
 			}
 			
@@ -635,39 +637,40 @@
 			geo.available = {
 				window: {
 					bottom: {
-						height: geo.window.size.height - bcr.bottom,
+						height: geo.window.size.height - geo.origin.windowOffset.bottom,
 						width: geo.window.size.width
 					},
 					left: {
 						height: geo.window.size.height,
-						width: bcr.left
+						width: geo.origin.windowOffset.left
 					},
 					right: {
 						height: geo.window.size.height,
-						width: geo.window.size.width - bcr.right
+						width: geo.window.size.width - geo.origin.windowOffset.right
 					},
 					top: {
-						height: bcr.top,
-						width:  geo.window.size.width
+						height: geo.origin.windowOffset.top,
+						width: geo.window.size.width
 					}
+				}
+			};
+			
+			geo.available.document = {
+				bottom: {
+					height: geo.document.size.height - geo.origin.offset.bottom,
+					width: geo.document.size.width
 				},
-				document: {
-					bottom: {
-						height: geo.document.size.height - geo.window.scroll.top - bcr.bottom,
-						width: geo.document.size.width
-					},
-					left: {
-						height: geo.document.size.height,
-						width: bcr.left + geo.window.scroll.left
-					},
-					right: {
-						height: geo.document.size.height,
-						width: geo.document.size.width - geo.window.scroll.left - bcr.right
-					},
-					top: {
-						height: bcr.top + geo.window.scroll.top,
-						width: geo.document.size.width
-					}
+				left: {
+					height: geo.document.size.height,
+					width: geo.origin.offset.left
+				},
+				right: {
+					height: geo.document.size.height,
+					width: geo.document.size.width - geo.origin.offset.right
+				},
+				top: {
+					height: geo.origin.offset.top,
+					width: geo.document.size.width
 				}
 			};
 			
@@ -682,86 +685,6 @@
 			}
 			
 			return geo;
-		},
-		
-		_tracker_start: function() {
-			
-			var self = this;
-			
-			// get the initial dimensions
-			if (self.options.sizeTracker) {
-				self.tooltipBcr = self.$tooltip[0].getBoundingClientRect();
-			}
-			
-			self.tracker = setInterval(function() {
-				
-				// if the origin has been removed, destroy the instance. Our
-				// garbage collector does the same thing but at much larger
-				// intervals just to prevent memory leaks. But when the
-				// tooltip is open, it's important to do it more often so
-				// that the tooltip does not stick on screen a long time
-				// after its origin was removed
-				if (!bodyContains(self.$el)) {
-					self.destroy();
-				}
-				// if the tooltip element has somehow been removed
-				else if (!bodyContains(self.namespace)) {
-					self._close();
-				}
-				// if everything is alright
-				else {
-					
-					// compare the former and current positions of the origin to reposition
-					// the tooltip if need be
-					if (self.options.positionTracker) {
-						
-						var g = self._geometry(),
-							identical = false;
-						
-						// compare size first (a change requires repositioning too)
-						if (areEqual(g.origin.size, self.geometry.origin.size)) {
-							
-							// for elements that have a fixed lineage (see self::_geometry), we track the
-							// top and left properties (relative to window)
-							if (self.geometry.origin.fixedLineage) {
-								if (areEqual(g.origin.windowOffset, self.geometry.origin.windowOffset)) {
-									identical = true;
-								}
-							}
-							// otherwise, track total offset (relative to document)
-							else {
-								if (areEqual(g.origin.offset, self.geometry.origin.offset)) {
-									identical = true;
-								}
-							}
-						}
-						
-						if (!identical) {
-							
-							// close the tooltip when using the mouseleave close trigger
-							// (see https://github.com/iamceege/tooltipster/pull/253)
-							if (self.options.triggerClose.mouseleave) {
-								self._close();
-							}
-							else {
-								self.reposition();
-							}
-						}
-					}
-					
-					if (self.options.sizeTracker) {
-						
-						var currentBcr = self.$tooltip[0].getBoundingClientRect();
-						
-						if (	currentBcr.height !== self.tooltipBcr.height
-							||	currentBcr.width !== self.tooltipBcr.width
-						){
-							self.reposition();
-							self.tooltipBcr = currentBcr;
-						}
-					}
-				}
-			}, self.options.trackerInterval);
 		},
 		
 		/**
@@ -814,346 +737,337 @@
 			
 			var self = this;
 			
-			// check that the origin is still in the DOM
-			if (bodyContains(self.$el)) {
+			if (!self.destroyed) {
 				
-				var ok = true;
-				
-				// trigger an event. The event.stop function allows the callback
-				// to prevent the opening of the tooltip
-				self._trigger({
-					type: 'before',
-					event: event,
-					stop: function(){
-						ok = false;
-					}
-				});
-				
-				if (ok && self.options.functionBefore) {
+				// check that the origin is still in the DOM
+				if (bodyContains(self.$el)) {
 					
-					// call our custom function before continuing
-					ok = self.options.functionBefore.call(self, self, {
+					var ok = true;
+					
+					// trigger an event. The event.stop function allows the callback
+					// to prevent the opening of the tooltip
+					self._trigger({
+						type: 'before',
 						event: event,
-						origin: self.$el[0]
+						stop: function(){
+							ok = false;
+						}
 					});
-				}
-				
-				if (ok !== false) {
 					
-					// continue only if the tooltip is enabled and has any content
-					if (self.enabled && self.Content !== null) {
+					if (ok && self.options.functionBefore) {
 						
-						// init the display plugin if it has not been initialized yet
-						if (!self.displayPlugin) {
+						// call our custom function before continuing
+						ok = self.options.functionBefore.call(self, self, {
+							event: event,
+							origin: self.$el[0]
+						});
+					}
+					
+					if (ok !== false) {
+						
+						// continue only if the tooltip is enabled and has any content
+						if (self.enabled && self.Content !== null) {
 							
-							var pluginClass = $.tooltipster.displayPlugin[self.options.displayPlugin];
-							
-							if (pluginClass) {
-								self.displayPlugin = new pluginClass(self);
-							}
-							else {
-								throw new Error('The "' + self.options.displayPlugin + '" plugin is not defined');
-							}
-						}
-						
-						// save the method callback and cancel close method callbacks
-						if (callback) {
-							self.callbacks.open.push(callback);
-						}
-						self.callbacks.close = [];
-						
-						//get rid of any appearance timer
-						clearTimeout(self.timerOpen);
-						self.timerOpen = null;
-						clearTimeout(self.timerClose);
-						self.timerClose = null;
-						
-						var extraTime,
-							finish = function() {
+							// init the display plugin if it has not been initialized yet
+							if (!self.displayPlugin) {
 								
-								if (self.State != 'stable'){
-									self.state('stable');
-								}
+								var pluginClass = $.tooltipster.displayPlugin[self.options.displayPlugin];
 								
-								// trigger any open method custom callbacks and reset them
-								$.each(self.callbacks.open, function(i,c) {
-									c.call(self, self, {
-										origin: self.$el[0],
-										tooltip: self.$tooltip[0]
-									});
-								});
-								
-								self.callbacks.open = [];
-							};
-						
-						// if this origin already has its tooltip open
-						if (self.State !== 'closed') {
-							
-							// the timer (if any) will start (or restart) right now
-							extraTime = 0;
-							
-							// if it was disappearing, cancel that
-							if (self.State === 'disappearing') {
-								
-								self.state('appearing');
-								
-								if (supportsTransitions()) {
-									
-									self.$tooltip
-										.clearQueue()
-										.removeClass('tooltipster-dying')
-										.addClass('tooltipster-show');
-									
-									if (self.options.speed > 0) {
-										self.$tooltip.delay(self.options.speed);
-									}
-									
-									self.$tooltip.queue(finish);
+								if (pluginClass) {
+									self.displayPlugin = new pluginClass(self);
 								}
 								else {
-									// in case the tooltip was currently fading out, bring it back
-									// to life
-									self.$tooltip
-										.stop()
-										.fadeIn(finish);
+									throw new Error('The "' + self.options.displayPlugin + '" plugin is not defined');
 								}
 							}
-							// if the tooltip is already open, we still need to trigger the method
-							// custom callback
-							else if (self.State == 'stable') {
-								finish();
+							
+							// save the method callback and cancel close method callbacks
+							if (callback) {
+								self.callbacks.open.push(callback);
 							}
-						}
-						// if the tooltip isn't already open, open that sucker up!
-						else {
+							self.callbacks.close = [];
 							
-							self.state('appearing');
+							//get rid of any appearance timer
+							clearTimeout(self.timerOpen);
+							self.timerOpen = null;
+							clearTimeout(self.timerClose);
+							self.timerClose = null;
 							
-							// the timer (if any) will start when the tooltip has fully appeared
-							// after its transition
-							extraTime = self.options.speed;
+							var extraTime,
+								finish = function() {
+									
+									if (self.State != 'stable'){
+										self.state('stable');
+									}
+									
+									// trigger any open method custom callbacks and reset them
+									$.each(self.callbacks.open, function(i,c) {
+										c.call(self, self, {
+											origin: self.$el[0],
+											tooltip: self.$tooltip[0]
+										});
+									});
+									
+									self.callbacks.open = [];
+								};
 							
-							// build the base of our tooltip
-							self.$tooltip = self.displayPlugin.build();
-							
-							// this will be useful to know quickly if the tooltip is in
-							// the DOM or not 
-							self.$tooltip.attr('id', self.namespace);
-							
-							for (var i=0; i < self.options.theme.length; i++) {
-								self.$tooltip.addClass(self.options.theme[i]);
-							}
-							
-							self.$tooltip.css({
-								// must not overflow the window until the positioning method
-								// is called
-								height: 0,
-								width: 0,
-								zIndex: self.options.zIndex
-							});
-							
-							if (self.options.interactive) {
-								self.$tooltip.css('pointer-events', 'auto')
-							}
-							
-							// insert the content
-							self._content_insert();
-							
-							// determine the future parent
-							if (typeof self.options.parent == 'string') {
-								self.$tooltipParent = $(self.options.parent);
-							}
-							else {
-								self.$tooltipParent = self.options.parent;
-							}
-							
-							if (supportsTransitions()){
+							// if this origin already has its tooltip open
+							if (self.State !== 'closed') {
 								
-								// We have to apply the classes before the element is appended
-								// to the DOM, otherwise the fadeIn animation (or whatever start
-								// animation) is randomly not played.
-								// Explanation: if the element is initially opaque, the made
-								// transparent with a CSS class, then made opaque again by
-								// removing the class, the browser will not redraw the element
-								// and will display an opaque element without animation. That's
-								// expected, but what is surprising is that even forcing
-								// a redraw (with ::_forceRedraw) after the class has been
-								// applied randomly fails, and removing the class with a
-								// timeout after 10ms also randomly fails to trigger the
-								// animation, which means that browsers tend to optimize their
-								// repaints over short periods, not only over the current
-								// microtask. Maybe there's a better way to force a redraw out
-								// there, but it seems that just applying the tooltipster-initial
-								// class before respositioning is ok for now and does not break
-								// anything.
-								self.$tooltip
-									.addClass('tooltipster-' + self.options.animation)
-									.addClass('tooltipster-initial');
-							}
-							
-							// reposition the tooltip and attach to the DOM
-							self.reposition(event, true);
-							
-							// animate in the tooltip
-							if (supportsTransitions()) {
+								// the timer (if any) will start (or restart) right now
+								extraTime = 0;
 								
-								self.$tooltip.css({
-									'-moz-animation-duration': self.options.speed + 'ms',
-									'-ms-animation-duration': self.options.speed + 'ms',
-									'-o-animation-duration': self.options.speed + 'ms',
-									'-webkit-animation-duration': self.options.speed + 'ms',
-									'animation-duration': self.options.speed + 'ms',
-									'transition-duration': self.options.speed + 'ms'
-								});
-								
-								setTimeout(
-									function() {
+								// if it was disappearing, cancel that
+								if (self.State === 'disappearing') {
+									
+									self.state('appearing');
+									
+									if (supportsTransitions()) {
 										
 										self.$tooltip
-											.addClass('tooltipster-show')
-											.removeClass('tooltipster-initial');
+											.clearQueue()
+											.removeClass('tooltipster-dying')
+											.addClass('tooltipster-show');
 										
 										if (self.options.speed > 0) {
 											self.$tooltip.delay(self.options.speed);
 										}
 										
 										self.$tooltip.queue(finish);
-									},
-									0
-								);
+									}
+									else {
+										// in case the tooltip was currently fading out, bring it back
+										// to life
+										self.$tooltip
+											.stop()
+											.fadeIn(finish);
+									}
+								}
+								// if the tooltip is already open, we still need to trigger the method
+								// custom callback
+								else if (self.State == 'stable') {
+									finish();
+								}
 							}
+							// if the tooltip isn't already open, open that sucker up!
 							else {
-								self.$tooltip
-									.css('display', 'none')
-									.fadeIn(self.options.speed, finish);
-							}
-							
-							// will check if our tooltip origin is removed while the tooltip is
-							// shown
-							self._tracker_start();
-							
-							$(window)
-								// reposition on resize (in case position can/has to be changed)
-								.on('resize.'+ self.namespace, function(e) {
-									self.reposition(e);
-								})
-								// same as below for parents
-								.on('scroll.'+ self.namespace, function(e) {
-									self._scrollHandler(e);
-								});
-							
-							self.$originParents = self.$el.parents();
-							
-							// scrolling may require the tooltip to be moved or even
-							// repositioned in some cases
-							self.$originParents.each(function(i, el){
 								
-								$(el).on('scroll.'+ self.namespace, function(e) {
-									self._scrollHandler(e);
-								});
-							});
-							
-							// in case a listener is already bound for autoclosing (mouse or
-							// touch, hover or click), unbind it first
-							$('body').off('.'+ self.namespace +'-autoClose');
-							
-							// here we'll have to set different sets of bindings for both touch
-							// and mouse events
-							if (self.options.triggerClose.mouseleave) {
+								self.state('appearing');
 								
-								// if the user touches the body, close
-								if (deviceHasTouchCapability) {
+								// the timer (if any) will start when the tooltip has fully appeared
+								// after its transition
+								extraTime = self.options.speed;
+								
+								// build the base of our tooltip
+								self.$tooltip = self.displayPlugin.build();
+								
+								// this will be useful to know quickly if the tooltip is in
+								// the DOM or not 
+								self.$tooltip.attr('id', self.namespace);
+								
+								for (var i=0; i < self.options.theme.length; i++) {
+									self.$tooltip.addClass(self.options.theme[i]);
+								}
+								
+								self.$tooltip.css({
+									// must not overflow the window until the positioning method
+									// is called
+									height: 0,
+									width: 0,
+									zIndex: self.options.zIndex
+								});
+								
+								if (self.options.interactive) {
+									self.$tooltip.css('pointer-events', 'auto')
+								}
+								
+								// insert the content
+								self._content_insert();
+								
+								// determine the future parent
+								if (typeof self.options.parent == 'string') {
+									self.$tooltipParent = $(self.options.parent);
+								}
+								else {
+									self.$tooltipParent = self.options.parent;
+								}
+								
+								if (supportsTransitions()) {
 									
-									// timeout 0 : to prevent immediate closing if the method was called
-									// on a click event and if options.delay == 0 (because of bubbling)
-									setTimeout(function() {
-										
-										// we don't want to bind on click here because the
-										// initial touchstart event has not yet triggered its
-										// click event, which is thus about to happen
-										$('body').on('touchstart.'+ self.namespace +'-autoClose', function(event) {
+									// note: there seems to be an issue with start animations which
+									// are randomly not played on fast devices in both Chrome and FF,
+									// couldn't find a way to solve it yet. It seems that applying
+									// the classes before appending to the DOM helps a little, but
+									// that's not even sure.
+									self.$tooltip
+										.addClass('tooltipster-' + self.options.animation)
+										.addClass('tooltipster-initial');
+								}
+								
+								// reposition the tooltip and attach to the DOM
+								self.reposition(event, true);
+								
+								// animate in the tooltip
+								if (supportsTransitions()) {
+									
+									self.$tooltip.css({
+										'-moz-animation-duration': self.options.speed + 'ms',
+										'-ms-animation-duration': self.options.speed + 'ms',
+										'-o-animation-duration': self.options.speed + 'ms',
+										'-webkit-animation-duration': self.options.speed + 'ms',
+										'animation-duration': self.options.speed + 'ms',
+										'transition-duration': self.options.speed + 'ms'
+									});
+									
+									setTimeout(
+										function() {
 											
-											// if the tooltip is not interactive or if the click was made
-											// outside of the tooltip
+											self.$tooltip
+												.addClass('tooltipster-show')
+												.removeClass('tooltipster-initial');
+											
+											if (self.options.speed > 0) {
+												self.$tooltip.delay(self.options.speed);
+											}
+											
+											self.$tooltip.queue(finish);
+										},
+										0
+									);
+								}
+								else {
+									self.$tooltip
+										.css('display', 'none')
+										.fadeIn(self.options.speed, finish);
+								}
+								
+								// will check if our tooltip origin is removed while the tooltip is
+								// shown
+								self._tracker_start();
+								
+								$(window)
+									// reposition on resize (in case position can/has to be changed)
+									.on('resize.'+ self.namespace, function(e) {
+										self.reposition(e);
+									})
+									// same as below for parents
+									.on('scroll.'+ self.namespace, function(e) {
+										self._scrollHandler(e);
+									});
+								
+								self.$originParents = self.$el.parents();
+								
+								// scrolling may require the tooltip to be moved or even
+								// repositioned in some cases
+								self.$originParents.each(function(i, el){
+									
+									$(el).on('scroll.'+ self.namespace, function(e) {
+										self._scrollHandler(e);
+									});
+								});
+								
+								// in case a listener is already bound for autoclosing (mouse or
+								// touch, hover or click), unbind it first
+								$('body').off('.'+ self.namespace +'-autoClose');
+								
+								// here we'll have to set different sets of bindings for both touch
+								// and mouse events
+								if (self.options.triggerClose.mouseleave) {
+									
+									// if the user touches the body, close
+									if (deviceHasTouchCapability) {
+										
+										// timeout 0 : to prevent immediate closing if the method was called
+										// on a click event and if options.delay == 0 (because of bubbling)
+										setTimeout(function() {
+											
+											// we don't want to bind on click here because the
+											// initial touchstart event has not yet triggered its
+											// click event, which is thus about to happen
+											$('body').on('touchstart.'+ self.namespace +'-autoClose', function(event) {
+												
+												// if the tooltip is not interactive or if the click was made
+												// outside of the tooltip
+												if (!self.options.interactive || !$.contains(self.$tooltip[0], event.target)) {
+													self._close();
+												}
+											});
+										}, 0);
+									}
+									
+									// if we have to allow interaction
+									if (self.options.interactive) {
+										
+										// as for mouse interaction, we get rid of the tooltip only
+										// after the mouse has spent some time out of it
+										var tolerance = null;
+										
+										self.$el.add(self.$tooltip)
+											// close after some time out of the origin and the tooltip
+											.on('mouseleave.'+ self.namespace +'-autoClose', function(event) {
+												
+												clearTimeout(tolerance);
+												
+												tolerance = setTimeout(function() {
+													self._close(event);
+												}, self.options.interactiveTolerance);
+											})
+											// suspend timeout when the mouse is over the origin or
+											// the tooltip
+											.on('mouseenter.'+ self.namespace + '-autoClose', function() {
+												clearTimeout(tolerance);
+											});
+									}
+									// if this is a non-interactive tooltip, get rid of it if the mouse leaves
+									else {
+										self.$el.on('mouseleave.'+ self.namespace + '-autoClose', function(event) {
+											self._close(event);
+										});
+									}
+								}
+								
+								// close the tooltip when the origin gets a click (common behavior of
+								// native tooltips)
+								if (self.options.triggerClose.originClick) {
+									
+									self.$el.on('click.'+ self.namespace + '-autoClose', function(event) {
+										self._close(event);
+									});
+								}
+								
+								// here we'll set the same bindings for both clicks and touch on the body
+								// to close the tooltip
+								if (self.options.triggerOpen.click) {
+									
+									// explanations : same as above
+									setTimeout(function() {
+										$('body').on('click.'+ self.namespace +'-autoClose touchstart.'+ self.namespace +'-autoClose', function(event) {
 											if (!self.options.interactive || !$.contains(self.$tooltip[0], event.target)) {
-												self._close();
+												self._close(event);
 											}
 										});
 									}, 0);
 								}
 								
-								// if we have to allow interaction
-								if (self.options.interactive) {
-									
-									// as for mouse interaction, we get rid of the tooltip only
-									// after the mouse has spent some time out of it
-									var tolerance = null;
-									
-									self.$el.add(self.$tooltip)
-										// close after some time out of the origin and the tooltip
-										.on('mouseleave.'+ self.namespace +'-autoClose', function(event) {
-											
-											clearTimeout(tolerance);
-											
-											tolerance = setTimeout(function() {
-												self._close(event);
-											}, self.options.interactiveTolerance);
-										})
-										// suspend timeout when the mouse is over the origin or
-										// the tooltip
-										.on('mouseenter.'+ self.namespace + '-autoClose', function() {
-											clearTimeout(tolerance);
-										});
-								}
-								// if this is a non-interactive tooltip, get rid of it if the mouse leaves
-								else {
-									self.$el.on('mouseleave.'+ self.namespace + '-autoClose', function(event) {
-										self._close(event);
+								self._trigger('ready');
+								
+								// call our custom callback
+								if (self.options.functionReady) {
+									self.options.functionReady.call(self, self, {
+										origin: self.$el[0],
+										tooltip: self.$tooltip[0]
 									});
 								}
 							}
 							
-							// close the tooltip when the origin gets a click (common behavior of
-							// native tooltips)
-							if (self.options.triggerClose.originClick) {
+							// if we have a timer set, let the countdown begin
+							if (self.options.timer > 0) {
 								
-								self.$el.on('click.'+ self.namespace + '-autoClose', function(event) {
-									self._close(event);
-								});
+								self.timerClose = setTimeout(function() {
+									self.timerClose = null;
+									self._close();
+								}, self.options.timer + extraTime);
 							}
-							
-							// here we'll set the same bindings for both clicks and touch on the body
-							// to close the tooltip
-							if (self.options.triggerOpen.click) {
-								
-								// explanations : same as above
-								setTimeout(function() {
-									$('body').on('click.'+ self.namespace +'-autoClose touchstart.'+ self.namespace +'-autoClose', function(event) {
-										if (!self.options.interactive || !$.contains(self.$tooltip[0], event.target)) {
-											self._close(event);
-										}
-									});
-								}, 0);
-							}
-							
-							self._trigger('ready');
-							
-							// call our custom callback
-							if (self.options.functionReady) {
-								self.options.functionReady.call(self, self, {
-									origin: self.$el[0],
-									tooltip: self.$tooltip[0]
-								});
-							}
-						}
-						
-						// if we have a timer set, let the countdown begin
-						if (self.options.timer > 0) {
-							
-							self.timerClose = setTimeout(function() {
-								self.timerClose = null;
-								self._close();
-							}, self.options.timer + extraTime);
 						}
 					}
 				}
@@ -1292,7 +1206,10 @@
 		 */
 		_sizerConstrained: function(width, height) {
 			
+			// we'll set a width and see what height is generated and if there
+			// is horizontal overflow
 			this.$tooltip.css({
+				height: '',
 				left: 0,
 				top: 0,
 				width: width
@@ -1300,14 +1217,27 @@
 			
 			this._forceRedraw();
 			
+			// note: we used to use offsetWidth instead of boundingRectClient but
+			// it returned rounded values, causing issues with sub-pixel layouts.
+			
 			var $content = this.$tooltip.find('.tooltipster-content'),
 				newHeight = this.$tooltip.outerHeight(),
+				tooltipBrc = this.$tooltip[0].getBoundingClientRect(),
+				contentBrc = $content[0].getBoundingClientRect(),
 				fits = {
 					height: newHeight <= height,
 					width: (
-						// this condition accounts for a min-width property that could apply
-					this.$tooltip[0].offsetWidth <= width
-					&&	$content[0].offsetWidth >= $content[0].scrollWidth
+						// this condition accounts for min-width property that
+						// may apply
+							tooltipBrc.width <= width
+						// the -1 is here because scrollWidth actually returns
+						// a rounded value, and may be greater than brc.width if
+						// it has been rounded up. This may cause an issue
+						// an issue for contents which actually really overflowed
+						// by 1px or so, but that should be very rare. Not sure
+						// how to solve this efficiently.
+						// See http://blogs.msdn.com/b/ie/archive/2012/02/17/sub-pixel-rendering-and-the-css-object-model.aspx
+						&&	contentBrc.width >= $content[0].scrollWidth - 1
 					)
 				};
 			
@@ -1353,10 +1283,12 @@
 			
 			this._forceRedraw();
 			
-			// note : the tooltip must not have margins, it would screw things up
+			// same remark as in ::_sizerConstrained()
+			var tooltipBrc = this.$tooltip[0].getBoundingClientRect();
+			
 			return {
-				height: this.$tooltip.outerHeight(),
-				width: this.$tooltip.outerWidth()
+				height: tooltipBrc.height,
+				width: tooltipBrc.width
 			};
 		},
 		
@@ -1374,6 +1306,87 @@
 			// overflow must be auto during the test
 			this.$tooltip.find('.tooltipster-content')
 				.css('overflow', 'auto');
+		},
+		
+		_tracker_start: function() {
+			
+			var self = this,
+				$content = self.$tooltip.find('.tooltipster-content');
+			
+			// get the initial content size
+			if (self.options.trackTooltip) {
+				self.contentBcr = $content[0].getBoundingClientRect();
+			}
+			
+			self.tracker = setInterval(function() {
+				
+				// if the origin has been removed, destroy the instance. Our
+				// garbage collector does the same thing but at much larger
+				// intervals just to prevent memory leaks. But when the
+				// tooltip is open, it's important to do it more often so
+				// that the tooltip does not stick on screen a long time
+				// after its origin was removed
+				if (!bodyContains(self.$el)) {
+					self.destroy();
+				}
+				// if the tooltip element has somehow been removed
+				else if (!bodyContains(self.namespace)) {
+					self._close();
+				}
+				// if everything is alright
+				else {
+					
+					// compare the former and current positions of the origin to reposition
+					// the tooltip if need be
+					if (self.options.trackOrigin) {
+						
+						var g = self._geometry(),
+							identical = false;
+						
+						// compare size first (a change requires repositioning too)
+						if (areEqual(g.origin.size, self.geometry.origin.size)) {
+							
+							// for elements that have a fixed lineage (see self::_geometry), we track the
+							// top and left properties (relative to window)
+							if (self.geometry.origin.fixedLineage) {
+								if (areEqual(g.origin.windowOffset, self.geometry.origin.windowOffset)) {
+									identical = true;
+								}
+							}
+							// otherwise, track total offset (relative to document)
+							else {
+								if (areEqual(g.origin.offset, self.geometry.origin.offset)) {
+									identical = true;
+								}
+							}
+						}
+						
+						if (!identical) {
+							
+							// close the tooltip when using the mouseleave close trigger
+							// (see https://github.com/iamceege/tooltipster/pull/253)
+							if (self.options.triggerClose.mouseleave) {
+								self._close();
+							}
+							else {
+								self.reposition();
+							}
+						}
+					}
+					
+					if (self.options.trackTooltip) {
+						
+						var currentBcr = $content[0].getBoundingClientRect();
+						
+						if (	currentBcr.height !== self.contentBcr.height
+							||	currentBcr.width !== self.contentBcr.width
+						){
+							self.reposition();
+							self.contentBcr = currentBcr;
+						}
+					}
+				}
+			}, self.options.trackerInterval);
 		},
 		
 		_trigger: function(){
@@ -1484,75 +1497,80 @@
 			
 			var self = this;
 			
-			self._close();
+			self.destroyed = true;
 			
-			self.$el
-				.removeData(self.namespace)
-				.off('.'+ self.namespace);
-			
-			// last event
-			self._trigger('destroy');
-			
-			// unbind private and public event listeners
-			self._off();
-			self.off();
-			
-			var ns = self.$el.data('tooltipster-ns');
-			
-			// if the origin has been removed from DOM, its data may
-			// well have been destroyed in the process and there would
-			// be nothing to clean up or restore
-			if (ns) {
+			self._close(null, function(){
 				
-				// if there are no more tooltips on this element
-				if (ns.length === 1) {
+				self.$el
+					.removeData(self.namespace)
+					.off('.'+ self.namespace);
+				
+				// last event
+				self._trigger('destroy');
+				
+				// unbind private and public event listeners
+				self._off();
+				self.off();
+				
+				var ns = self.$el.data('tooltipster-ns');
+				
+				// if the origin has been removed from DOM, its data may
+				// well have been destroyed in the process and there would
+				// be nothing to clean up or restore
+				if (ns) {
 					
-					// optional restoration of a title attribute
-					var title = null;
-					if (self.options.restoration === 'previous') {
-						title = self.$el.data('tooltipster-initialTitle');
-					}
-					else if (self.options.restoration === 'current') {
+					// if there are no more tooltips on this element
+					if (ns.length === 1) {
 						
-						// old school technique to stringify when outerHTML is not supported
-						title =
-							(typeof self.Content === 'string') ?
-							self.Content :
-							$('<div></div>').append(self.Content).html();
+						// optional restoration of a title attribute
+						var title = null;
+						if (self.options.restoration === 'previous') {
+							title = self.$el.data('tooltipster-initialTitle');
+						}
+						else if (self.options.restoration === 'current') {
+							
+							// old school technique to stringify when outerHTML is not supported
+							title =
+								(typeof self.Content === 'string') ?
+									self.Content :
+									$('<div></div>').append(self.Content).html();
+						}
+						
+						if (title) {
+							self.$el.attr('title', title);
+						}
+						
+						// final cleaning
+						self.$el
+							.removeClass('tooltipstered')
+							.removeData('tooltipster-ns')
+							.removeData('tooltipster-initialTitle');
 					}
-					
-					if (title) {
-						self.$el.attr('title', title);
+					else {
+						// remove the instance namespace from the list of namespaces of
+						// tooltips present on the element
+						ns = $.grep(ns, function(el, i) {
+							return el !== self.namespace;
+						});
+						self.$el.data('tooltipster-ns', ns);
 					}
-					
-					// final cleaning
-					self.$el
-						.removeClass('tooltipstered')
-						.removeData('tooltipster-ns')
-						.removeData('tooltipster-initialTitle');
 				}
-				else {
-					// remove the instance namespace from the list of namespaces of
-					// tooltips present on the element
-					ns = $.grep(ns, function(el, i) {
-						return el !== self.namespace;
-					});
-					self.$el.data('tooltipster-ns', ns);
-				}
-			}
-			
-			// remove external references, just in case
-			self.$el = null;
-			self.$tooltip = null;
-			self.$tooltipParent = null;
-			
-			// make sure the object is no longer referenced in there to prevent
-			// memory leaks
-			instancesLatest = $.grep(instancesLatest, function(el, i) {
-				return self !== el;
+				
+				// remove external references, just in case
+				self.$el = null;
+				self.$emitter = null;
+				self.$emitterPublic = null;
+				self.$tooltip = null;
+				self.$tooltipParent = null;
+				
+				// make sure the object is no longer referenced in there to prevent
+				// memory leaks
+				instancesLatest = $.grep(instancesLatest, function(el, i) {
+					return self !== el;
+				});
+				
+				clearInterval(self.garbageCollector);
 			});
-			
-			clearInterval(self.garbageCollector);
 			
 			return true;
 		},
@@ -2607,25 +2625,17 @@
 					})
 					.css(arrowCoord.prop, arrowCoord.val);
 			
-			// we don't need to set a size if the size is natural. It would be
-			// harmless in Chrome but it creates a bug in Firefox, so we just don't
-			// do it
-			if (finalResult.sizeMode == 'constrained') {
-				
-				self.instance.$tooltip
-					.css({
-						height: finalResult.size.height,
-						width: finalResult.size.width
-					});
-			}
-			else {
-				
-				self.instance.$tooltip
-					.css({
-						height: '',
-						width: ''
-					});
-			}
+			// we need to set a size even if the tooltip is in its natural size
+			// because when the tooltip is positioned beyond the width of the body
+			// (which is by default the width of the window; it will happen when
+			// you scroll the window horizontally to get to the origin), its text
+			// content will otherwise break lines at each word to keep up with the
+			// body overflow strategy.
+			self.instance.$tooltip
+				.css({
+					height: finalResult.size.height,
+					width: finalResult.size.width
+				});
 			
 			// end positioning tests session and append the tooltip HTML element
 			// to its parent

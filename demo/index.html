@@ -13,12 +13,15 @@
 	<script type="text/javascript" src="../js/jquery.tooltipster.js"></script>
 	
 	<script type="text/javascript">
+		
 		$(document).ready(function() {
 			$('.tooltip.hover').tooltipster({
 				trigger: 'hover'
 			});
 			$('.tooltip.click').tooltipster({
-				trigger: 'click'
+				trigger: 'click',
+				trackOrigin: true,
+				trackTooltip: true
 			});
 		});
 		
@@ -145,7 +148,7 @@
 	<section class="container">
 		<img src="map.png" usemap="#map" />
 		<map name="map">
-			<area shape="circle" coords="396,220,102" href="#" class="tooltip hover" title="Map area" />
+			<area shape="circle" coords="396,220,102" class="tooltip click" title="Map area" />
 		</map>
 	</section>
 	

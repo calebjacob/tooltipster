@@ -134,8 +134,8 @@ $(function() {
 	
 	$('#demo-complex')
 		.tooltipster({
-			positionTracker: true,
 			trackerInterval: 10,
+			trackOrigin: true,
 			trigger: 'custom'
 		})
 		.click(function(){
