@@ -2432,15 +2432,15 @@
 			}
 
 			// IE8 doesn't support width/height but can be calculated
-			targetRect.width = targetRect.width || targetRect.right - targetRect.left;
-			targetRect.height = targetRect.height || targetRect.bottom - targetRect.top;
+			var rectWidth = targetRect.width || targetRect.right - targetRect.left;
+			var rectHeight = targetRect.height || targetRect.bottom - targetRect.top;
 
 			switch (finalResult.side) {
 				
 				case 'left':
 				case 'right':
 					if (fixInline) {
-						finalResult.coord.top = Math.floor(targetRect.top - finalResult.size.height / 2 + targetRect.height / 2);
+						finalResult.coord.top = Math.floor(targetRect.top - finalResult.size.height / 2 + rectHeight / 2);
 					}
 					else {
 						finalResult.coord.top = Math.floor(helper.geo.origin.windowOffset.top - (finalResult.size.height / 2) + (helper.geo.origin.size.height / 2));
@@ -2450,7 +2450,7 @@
 				case 'bottom':
 				case 'top':
 					if (fixInline) {
-						finalResult.coord.left = Math.floor(targetRect.left - finalResult.size.width / 2 + targetRect.width / 2);
+						finalResult.coord.left = Math.floor(targetRect.left - finalResult.size.width / 2 + rectWidth / 2);
 					}
 					else {
 						finalResult.coord.left = Math.floor(helper.geo.origin.windowOffset.left - (finalResult.size.width / 2) + (helper.geo.origin.size.width / 2));
@@ -2506,7 +2506,7 @@
 			// by default, the arrow will aim at the middle of the origin
 			if (finalResult.side == 'top' || finalResult.side == 'bottom') {
 				if (fixInline) {
-					finalResult.arrowTarget = Math.floor(targetRect.left + targetRect.width / 2);
+					finalResult.arrowTarget = Math.floor(targetRect.left + rectWidth / 2);
 				}
 				else {
 					finalResult.arrowTarget = helper.geo.origin.windowOffset.left + Math.floor(helper.geo.origin.size.width / 2);
@@ -2514,7 +2514,7 @@
 			}
 			else {
 				if (fixInline) {
-					finalResult.arrowTarget = Math.floor(targetRect.top + targetRect.height / 2);
+					finalResult.arrowTarget = Math.floor(targetRect.top + rectHeight / 2);
 				}
 				else {
 					finalResult.arrowTarget = helper.geo.origin.windowOffset.top + Math.floor(helper.geo.origin.size.height / 2);
