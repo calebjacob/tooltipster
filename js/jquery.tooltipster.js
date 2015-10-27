@@ -2400,16 +2400,43 @@
 			// centering it on the middle of the origin
 			finalResult.coord = {};
 			
+			// if multiple client rects are created, the element may be broke into multiple lines
+			var rects = self.instance.$el[0].getClientRects();
+			var fixInline = rects.length > 1;
+			var targetRect;
+
+			switch (finalResult.side) {
+
+				case 'top':
+				case 'right':
+					targetRect = rects[0];
+					break;
+				case 'bottom':
+				case 'left':
+					targetRect = rects[rects.length - 1];
+					break;
+			}
+
 			switch (finalResult.side) {
 				
 				case 'left':
 				case 'right':
-					finalResult.coord.top = Math.floor(helper.geo.origin.windowOffset.top - (finalResult.size.height / 2) + (helper.geo.origin.size.height / 2));
+					if (fixInline) {
+						finalResult.coord.top = Math.floor(targetRect.top - finalResult.size.height / 2 + targetRect.height / 2);
+					}
+					else {
+						finalResult.coord.top = Math.floor(helper.geo.origin.windowOffset.top - (finalResult.size.height / 2) + (helper.geo.origin.size.height / 2));
+					}
 					break;
 				
 				case 'bottom':
 				case 'top':
-					finalResult.coord.left = Math.floor(helper.geo.origin.windowOffset.left - (finalResult.size.width / 2) + (helper.geo.origin.size.width / 2));
+					if (fixInline) {
+						finalResult.coord.left = Math.floor(targetRect.left - finalResult.size.width / 2 + targetRect.width / 2);
+					}
+					else {
+						finalResult.coord.left = Math.floor(helper.geo.origin.windowOffset.left - (finalResult.size.width / 2) + (helper.geo.origin.size.width / 2));
+					}
 					break;
 			}
 			
@@ -2460,10 +2487,20 @@
 			
 			// by default, the arrow will aim at the middle of the origin
 			if (finalResult.side == 'top' || finalResult.side == 'bottom') {
-				finalResult.arrowTarget = helper.geo.origin.windowOffset.left + Math.floor(helper.geo.origin.size.width / 2);
+				if (fixInline) {
+					finalResult.arrowTarget = Math.floor(targetRect.left + targetRect.width / 2);
+				}
+				else {
+					finalResult.arrowTarget = helper.geo.origin.windowOffset.left + Math.floor(helper.geo.origin.size.width / 2);
+				}
 			}
 			else {
-				finalResult.arrowTarget = helper.geo.origin.windowOffset.top + Math.floor(helper.geo.origin.size.height / 2);
+				if (fixInline) {
+					finalResult.arrowTarget = Math.floor(targetRect.top + targetRect.height / 2);
+				}
+				else {
+					finalResult.arrowTarget = helper.geo.origin.windowOffset.top + Math.floor(helper.geo.origin.size.height / 2);
+				}
 			}
 			
 			// this will be used so that the final arrow target is not too close
