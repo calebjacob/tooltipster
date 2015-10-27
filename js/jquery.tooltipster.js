@@ -2431,6 +2431,10 @@
 					break;
 			}
 
+			// IE8 doesn't support width/height but can be calculated
+			targetRect.width = targetRect.width || targetRect.right - targetRect.left;
+			targetRect.height = targetRect.height || targetRect.bottom - targetRect.top;
+
 			switch (finalResult.side) {
 				
 				case 'left':
