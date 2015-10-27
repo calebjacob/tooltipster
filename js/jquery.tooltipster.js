@@ -2402,45 +2402,43 @@
 			
 			// if multiple client rects are created, the element may be broke into multiple lines
 			var rects = self.instance.$el[0].getClientRects();
-			var fixInline = rects.length > 1;
 			var targetRect;
+			if (rects.length > 1) {
 
-			switch (finalResult.side) {
+				// choose a target client rect
+				switch (finalResult.side) {
 
-				case 'top':
-					targetRect = rects[0];
-					break;
-				case 'right':
-					if (rects.length > 2) {
-						targetRect = rects[Math.ceil(rects.length / 2) - 1];
-					}
-					else {
+					case 'top':
 						targetRect = rects[0];
-					}
-					break;
-				case 'bottom':
-					targetRect = rects[rects.length - 1];
-					break;
-				case 'left':
-					if (rects.length > 2) {
-						targetRect = rects[Math.ceil((rects.length + 1) / 2) - 1];
-					}
-					else {
+						break;
+					case 'right':
+						if (rects.length > 2) {
+							targetRect = rects[Math.ceil(rects.length / 2) - 1];
+						}
+						else {
+							targetRect = rects[0];
+						}
+						break;
+					case 'bottom':
 						targetRect = rects[rects.length - 1];
-					}
-					break;
+						break;
+					case 'left':
+						if (rects.length > 2) {
+							targetRect = rects[Math.ceil((rects.length + 1) / 2) - 1];
+						}
+						else {
+							targetRect = rects[rects.length - 1];
+						}
+						break;
+				}
 			}
-
-			// IE8 doesn't support width/height but can be calculated
-			var rectWidth = targetRect.width || targetRect.right - targetRect.left;
-			var rectHeight = targetRect.height || targetRect.bottom - targetRect.top;
 
 			switch (finalResult.side) {
 				
 				case 'left':
 				case 'right':
-					if (fixInline) {
-						finalResult.coord.top = Math.floor(targetRect.top - finalResult.size.height / 2 + rectHeight / 2);
+					if (targetRect) {
+						finalResult.coord.top = Math.floor((targetRect.top + targetRect.bottom - finalResult.size.height) / 2);
 					}
 					else {
 						finalResult.coord.top = Math.floor(helper.geo.origin.windowOffset.top - (finalResult.size.height / 2) + (helper.geo.origin.size.height / 2));
@@ -2449,8 +2447,8 @@
 				
 				case 'bottom':
 				case 'top':
-					if (fixInline) {
-						finalResult.coord.left = Math.floor(targetRect.left - finalResult.size.width / 2 + rectWidth / 2);
+					if (targetRect) {
+						finalResult.coord.left = Math.floor((targetRect.left + targetRect.right - finalResult.size.width) / 2);
 					}
 					else {
 						finalResult.coord.left = Math.floor(helper.geo.origin.windowOffset.left - (finalResult.size.width / 2) + (helper.geo.origin.size.width / 2));
@@ -2505,16 +2503,16 @@
 			
 			// by default, the arrow will aim at the middle of the origin
 			if (finalResult.side == 'top' || finalResult.side == 'bottom') {
-				if (fixInline) {
-					finalResult.arrowTarget = Math.floor(targetRect.left + rectWidth / 2);
+				if (targetRect) {
+					finalResult.arrowTarget = Math.floor((targetRect.left + targetRect.right) / 2);
 				}
 				else {
 					finalResult.arrowTarget = helper.geo.origin.windowOffset.left + Math.floor(helper.geo.origin.size.width / 2);
 				}
 			}
 			else {
-				if (fixInline) {
-					finalResult.arrowTarget = Math.floor(targetRect.top + rectHeight / 2);
+				if (targetRect) {
+					finalResult.arrowTarget = Math.floor((targetRect.top + targetRect.bottom) / 2);
 				}
 				else {
 					finalResult.arrowTarget = helper.geo.origin.windowOffset.top + Math.floor(helper.geo.origin.size.height / 2);
