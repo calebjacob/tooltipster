@@ -2408,12 +2408,26 @@
 			switch (finalResult.side) {
 
 				case 'top':
-				case 'right':
 					targetRect = rects[0];
 					break;
+				case 'right':
+					if (rects.length > 2) {
+						targetRect = rects[Math.ceil(rects.length / 2) - 1];
+					}
+					else {
+						targetRect = rects[0];
+					}
+					break;
 				case 'bottom':
-				case 'left':
 					targetRect = rects[rects.length - 1];
+					break;
+				case 'left':
+					if (rects.length > 2) {
+						targetRect = rects[Math.ceil((rects.length + 1) / 2) - 1];
+					}
+					else {
+						targetRect = rects[rects.length - 1];
+					}
 					break;
 			}
 
