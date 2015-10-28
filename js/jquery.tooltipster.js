@@ -1,4 +1,4 @@
-/*! Tooltipster 4.0.0rc25 */
+/*! Tooltipster 4.0.0rc26 */
 
 /**
  * Released on 2015-10-28
@@ -1479,6 +1479,14 @@
 			else {
 				self._close();
 			}
+		},
+		
+		/**
+		 * @see self::_close
+		 */
+		close: function(callback) {
+			this._close(null, callback);
+			return this;
 		},
 		
 		content: function(c) {
