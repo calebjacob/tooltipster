@@ -886,8 +886,7 @@ $(document).ready(function() {
 			
 			<pre class="prettyprint">
 {
-    arrowMargin: [number],
-    arrowTarget: [number],
+    arrowMargin: 10,
     container: ['window' || 'document' || 'overflow'],
     contentOverflow: 'initial',
     coord: {
@@ -900,12 +899,11 @@ $(document).ready(function() {
         height: [number],
         width: [number]
     },
-    sizeMode: ['natural' || 'constrained']
+    sizeMode: ['natural' || 'constrained'],
+    target: [number]
 }</pre>
 			
-			<p><span class="code">arrowMargin</span> is a safety margin that will keep the target.</p>
-			
-			<p><span class="code">arrowTarget</span> tells Tooltipster where the arrow should aim at, if the arrow is enabled. Its value is the distance from the edge of the viewport to the target (left edge of the viewport if the side is "top" or "bottom", top edge if the side is "left" or "right"). By default, the arrow aims at the middle of the origin.</p>
+			<p><span class="code">arrowMargin</span> is a safety margin that will keep the arrow from being too close from the edge of the tooltip. You'll have to increase this value if you use large arrows.</p>
 			
 			<p><span class="code">container</span> tells you if, in Tooltipster's proposition, the tooltip will be contained in the viewport, if it has to overflow into the document, or if it has to overflow the document itself. This property is for your information only, editing it will have no effect.</p>
 			
@@ -920,6 +918,8 @@ $(document).ready(function() {
 			<p><span class="code">size</span> properties tell you the size that your tooltip will have. It is either the natural size of the tooltip, or a size that has been set by Tooltipster to have fit best on screen according to your requirements.</p>
 			
 			<p><span class="code">sizeMode</span> sets if the tooltip is in its natural size, or is going to get size properties set by Tooltipster. Editing the <span class="code">size</span> property without having <span class="code">sizeMode</span> set to <span class="code">constrained</span> will produce unexpected results. Also, if the browser does not support <span class="code">display:flex</span>, the tooltip will not apply a height greater than its natural height.</p>
+			
+			<p><span class="code">target</span> represents the location Tooltipster thinks the tooltip should ideally be centered on, and the arrow aiming at. It is given as the distance from the relevant edge of the viewport (left edge if the side is "top" or "bottom", top edge if the side is "left" or "right"). The target is usually the middle of the origin, but can be somewhere else when the origin is actually a portion of text split in several lines. Editing this value will change the location the arrow is aiming at (if enabled) but will not change the position of the tooltip itself (use <span class="code">coords</span> for that).</p>
 			
 			<p>As a further help, you will also find useful precalculated data about the page layout in <span class="code">helper.geo</span>. It will help you avoid putting the tooltip accidentally off screen, for example. This object is in this form:</p>
 			

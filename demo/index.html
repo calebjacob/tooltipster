@@ -15,16 +15,33 @@
 	<script type="text/javascript">
 		
 		$(document).ready(function() {
+			
 			$('.tooltip.hover').tooltipster({
 				trigger: 'hover'
 			});
+			
 			$('.tooltip.click').tooltipster({
 				trigger: 'click',
 				trackOrigin: true,
 				trackTooltip: true
 			});
+			
+			$('.inline').tooltipster({
+				content: 'Second',
+				multiple: true,
+				position: 'right'
+			});
+			$('.inline').tooltipster({
+				content: 'Third',
+				multiple: true,
+				position: 'bottom'
+			});
+			$('.inline').tooltipster({
+				content: 'Fourth',
+				multiple: true,
+				position: 'left'
+			});
 		});
-		
 		
 		
 		$(function(){
@@ -152,6 +169,14 @@
 		</map>
 	</section>
 	
+	<section id="inline_container" class="container">
+		<p>Lorem ipsum dolor sit amet, <strong class="tooltip hover inline" title="First">consectetur adipisicing elit</strong>. Magni omnis, molestias natus sit odio aliquid expedita quibusdam asperiores ducimus eos, tenetur quasi dolores quae iste quaerat, maxime consectetur ab repellendus.</p>
+		<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Odio placeat sunt quasi laudantium. <strong class="tooltip hover inline" title="First">Voluptatum consectetur voluptatem rem, sapiente, neque vero esse dicta veritatis accusamus!</strong> Obcaecati at in ad sit odio aliquid expedita quibusdam asperiores ducimus eos, tenetur quasi dolores quae iste quaerat, maxime consectetur!</p>
+		<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Odio placeat sunt quasi laudantium. <strong class="tooltip hover inline" title="First">Voluptatum consectetur tempor voluptatem rem, sapiente, neque vero esse dicta veritatis accusamus reprehenderit eos deserunt eleifend!</strong> Obcaecati at in ad sit odio aliquid expedita quibusdam asperiores ducimus eos, tenetur quasi dolores quae iste quaerat, maxime consectetur!</p>
+		<p><strong class="tooltip hover inline" title="First">Quasi consequuntur aut, mollitia, tempore exercitationem rerum neque ad, expedita deserunt dolores alias<br />quae assumenda id facere cum laudantium tenetur corrupti ipsam deleniti quas eveniet ratione sit nulla officia recusandae.</strong></p>
+	</section>
+	
+	
 	<section id="scrollable" class="container">
 		<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo. Quisque sit amet est et sapien ullamcorper pharetra. Vestibulum erat wisi, condimentum sed, commodo vitae, ornare sit amet, wisi. Aenean fermentum, elit eget tincidunt condimentum, eros ipsum rutrum orci, sagittis tempus lacus enim ac dui. Donec non enim in turpis pulvinar facilisis. Ut felis. Praesent dapibus, neque id cursus faucibus, tortor neque egestas augue, eu vulputate magna eros eu erat. Aliquam erat volutpat. Nam dui mi, tincidunt quis, accumsan porttitor, facilisis luctus, metus</p>
 		<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.</p>
@@ -172,7 +197,6 @@
 			<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>
 			<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>
 		</div>
-		
 	</section>
 	
 	<section class="container">

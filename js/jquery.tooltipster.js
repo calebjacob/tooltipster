@@ -169,10 +169,10 @@
 			// Also, an existing title="" attribute will result in an empty string
 			// content
 			if (self.options.content !== null) {
-				self._content_set(self.options.content);
+				self._contentSet(self.options.content);
 			}
 			else {
-				self._content_set(initialTitle);
+				self._contentSet(initialTitle);
 			}
 			
 			self.$el
@@ -363,7 +363,7 @@
 			return self;
 		},
 		
-		_content_insert: function() {
+		_contentInsert: function() {
 			
 			var self = this,
 				$el = self.$tooltip.find('.tooltipster-content'),
@@ -399,7 +399,7 @@
 			}
 		},
 		
-		_content_set: function(content) {
+		_contentSet: function(content) {
 			
 			// clone if asked. Cloning the object makes sure that each instance has its
 			// own version of the content (in case a same object were provided for several
@@ -882,7 +882,7 @@
 								}
 								
 								// insert the content
-								self._content_insert();
+								self._contentInsert();
 								
 								// determine the future parent
 								if (typeof self.options.parent == 'string') {
@@ -1413,7 +1413,7 @@
 			var self = this;
 			
 			// change the content
-			self._content_set(content);
+			self._contentSet(content);
 			
 			if (self.Content !== null) {
 				
@@ -1421,7 +1421,7 @@
 				if (self.State !== 'closed') {
 					
 					// reset the content in the tooltip
-					self._content_insert();
+					self._contentInsert();
 					
 					// reposition and resize the tooltip
 					self.reposition();
@@ -2126,6 +2126,9 @@
 			this.options;
 		},
 		
+		/**
+		 * Recompute this.options from the options declared to the instance
+		 */
 		_optionsInit: function(){
 			
 			var defaults = this._defaults(),
@@ -2194,8 +2197,10 @@
 		 * Make whatever modifications are needed when the side is changed. This has
 		 * been made an independant method for easy inheritance in custom plugins based
 		 * on this default plugin.
+		 *
+		 * @param {string} side
 		 */
-		_side_change: function(side) {
+		_sideChange: function(side) {
 			
 			this.instance.$tooltip
 				.removeClass('tooltipster-bottom')
@@ -2203,6 +2208,102 @@
 				.removeClass('tooltipster-right')
 				.removeClass('tooltipster-top')
 				.addClass('tooltipster-' + side);
+		},
+		
+		/**
+		 * Returns the target that the tooltip should aim at for a given side.
+		 * The calculated value is a distance from the edge of the window
+		 * (left edge for top/bottom sides, top edge for left/right side). The
+		 * tooltip will be centered on that position and the arrow will be
+		 * positioned there (as much as possible).
+		 * 
+		 * @param {string} side
+		 * @return {integer}
+		 */
+		_targetFind: function(helper, side){
+			
+			var target,
+				rects = this.instance.$el[0].getClientRects();
+			
+			// by default, the target will be the middle of the origin
+			if (rects.length === 1){
+				
+				switch (side) {
+					
+					case 'left':
+					case 'right':
+						target = Math.floor(helper.geo.origin.windowOffset.top + (helper.geo.origin.size.height / 2));
+						break;
+					
+					case 'bottom':
+					case 'top':
+						target = Math.floor(helper.geo.origin.windowOffset.left + (helper.geo.origin.size.width / 2));
+						break;
+				}
+			}
+			// if multiple client rects exist, the element may be text split
+			// up into multiple lines and the middle of the origin may not be
+			// best option anymore
+			else {
+				
+				var targetRect;
+				
+				// choose the best target client rect
+				switch (side) {
+					
+					case 'top':
+						
+						// first
+						targetRect = rects[0];
+						break;
+					
+					case 'right':
+						
+						// the middle line, rounded down in case there is an even
+						// number of lines (looks more centered => check out the
+						// demo with 4 split lines)
+						if (rects.length > 2) {
+							targetRect = rects[Math.ceil(rects.length / 2) - 1];
+						}
+						else {
+							targetRect = rects[0];
+						}
+						break;
+					
+					case 'bottom':
+						
+						// last
+						targetRect = rects[rects.length - 1];
+						break;
+					
+					case 'left':
+						
+						// the middle line, rounded up
+						if (rects.length > 2) {
+							targetRect = rects[Math.ceil((rects.length + 1) / 2) - 1];
+						}
+						else {
+							targetRect = rects[rects.length - 1];
+						}
+						break;
+				}
+				
+				switch (side) {
+					
+					case 'left':
+					case 'right':
+						target = Math.floor(targetRect.top + (targetRect.bottom - targetRect.top) / 2);
+						
+						break;
+					
+					case 'bottom':
+					case 'top':
+						target = Math.floor(targetRect.left + (targetRect.right - targetRect.left) / 2);
+						break;
+				}
+			}
+			
+			return target;
 		},
 		
 		/**
@@ -2306,7 +2407,7 @@
 					
 					// this may have an effect on the size of the tooltip if there are css
 					// rules for the arrow or something else
-					self._side_change(side);
+					self._sideChange(side);
 					
 					// now we get the size of the tooltip when it does not have any size
 					// constraints set
@@ -2414,63 +2515,24 @@
 				finalResult.container = 'overflow';
 			}
 			
-			// first, let's find the coordinates of the tooltip relatively to the window,
-			// centering it on the middle of the origin
+			// first, let's find the coordinates of the tooltip relatively to the
+			// window.
 			finalResult.coord = {};
 			
-			// if multiple client rects are created, the element may be broke into multiple lines
-			var rects = self.instance.$el[0].getClientRects();
-			var targetRect;
-			if (rects.length > 1) {
-
-				// choose a target client rect
-				switch (finalResult.side) {
-
-					case 'top':
-						targetRect = rects[0];
-						break;
-					case 'right':
-						if (rects.length > 2) {
-							targetRect = rects[Math.ceil(rects.length / 2) - 1];
-						}
-						else {
-							targetRect = rects[0];
-						}
-						break;
-					case 'bottom':
-						targetRect = rects[rects.length - 1];
-						break;
-					case 'left':
-						if (rects.length > 2) {
-							targetRect = rects[Math.ceil((rects.length + 1) / 2) - 1];
-						}
-						else {
-							targetRect = rects[rects.length - 1];
-						}
-						break;
-				}
-			}
-
+			// to know where to put the tooltip, we need to know on which point
+			// of the x or y axis we should center it. That coordinate is the target
+			finalResult.target = self._targetFind(helper, finalResult.side);
+			
 			switch (finalResult.side) {
 				
 				case 'left':
 				case 'right':
-					if (targetRect) {
-						finalResult.coord.top = Math.floor((targetRect.top + targetRect.bottom - finalResult.size.height) / 2);
-					}
-					else {
-						finalResult.coord.top = Math.floor(helper.geo.origin.windowOffset.top - (finalResult.size.height / 2) + (helper.geo.origin.size.height / 2));
-					}
+					finalResult.coord.top = Math.floor(finalResult.target - finalResult.size.height / 2);
 					break;
 				
 				case 'bottom':
 				case 'top':
-					if (targetRect) {
-						finalResult.coord.left = Math.floor((targetRect.left + targetRect.right - finalResult.size.width) / 2);
-					}
-					else {
-						finalResult.coord.left = Math.floor(helper.geo.origin.windowOffset.left - (finalResult.size.width / 2) + (helper.geo.origin.size.width / 2));
-					}
+					finalResult.coord.left = Math.floor(finalResult.target - finalResult.size.width / 2);
 					break;
 			}
 			
@@ -2519,24 +2581,6 @@
 				}
 			}
 			
-			// by default, the arrow will aim at the middle of the origin
-			if (finalResult.side == 'top' || finalResult.side == 'bottom') {
-				if (targetRect) {
-					finalResult.arrowTarget = Math.floor((targetRect.left + targetRect.right) / 2);
-				}
-				else {
-					finalResult.arrowTarget = helper.geo.origin.windowOffset.left + Math.floor(helper.geo.origin.size.width / 2);
-				}
-			}
-			else {
-				if (targetRect) {
-					finalResult.arrowTarget = Math.floor((targetRect.top + targetRect.bottom) / 2);
-				}
-				else {
-					finalResult.arrowTarget = helper.geo.origin.windowOffset.top + Math.floor(helper.geo.origin.size.height / 2);
-				}
-			}
-			
 			// this will be used so that the final arrow target is not too close
 			// from the edge of the tooltip so that the arrow does not overflow
 			// the tooltip. It should be equal or greater than half the width of
@@ -2552,7 +2596,7 @@
 			// the size of the tooltip, and the custom functionPosition may want to detect the
 			// size of something before making a decision. So let's make things easier for the
 			// implementor
-			self._side_change(finalResult.side);
+			self._sideChange(finalResult.side);
 			
 			// now unneeded, we don't want it passed to functionPosition
 			delete finalResult.fits;
@@ -2589,8 +2633,9 @@
 			}
 			
 			
-			// compute the position of the arrow target relatively to the
-			// tooltip container and make needed adjustments
+			// compute the position of the target relatively to the
+			// tooltip container so we can place the arrow, and make needed
+			// adjustments
 			var arrowCoord,
 				maxVal;
 			
@@ -2598,7 +2643,7 @@
 				
 				arrowCoord = {
 					prop: 'left',
-					val: finalResult.arrowTarget - finalResult.coord.left
+					val: finalResult.target - finalResult.coord.left
 				};
 				maxVal = finalResult.size.width - finalResult.arrowMargin;
 			}
@@ -2606,7 +2651,7 @@
 				
 				arrowCoord = {
 					prop: 'top',
-					val: finalResult.arrowTarget - finalResult.coord.top
+					val: finalResult.target - finalResult.coord.top
 				};
 				maxVal = finalResult.size.height - finalResult.arrowMargin;
 			}
@@ -2651,7 +2696,7 @@
 			// set position values
 			
 			// again, in case functionPosition changed the side
-			self._side_change(finalResult.side);
+			self._sideChange(finalResult.side);
 			
 			if (helper.geo.origin.fixedLineage) {
 				self.instance.$tooltip

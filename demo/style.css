@@ -18,6 +18,10 @@ body {
 	overflow: hidden;
 }
 
+.inline:hover {
+	background: khaki;
+}
+
 .item {
 	width: 200px;
 	float: left;
@@ -31,6 +35,11 @@ body {
 	height: 300px;
 	width: 300px;
 	margin: 0 auto;
+}
+
+#inline_container p {
+	margin: auto;
+	width: 300px;
 }
 
 #scrollable {
