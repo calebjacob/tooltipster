@@ -1,7 +1,7 @@
-/*! Tooltipster 4.0.0rc24 */
+/*! Tooltipster 4.0.0rc25 */
 
 /**
- * Released on 2015-10-25
+ * Released on 2015-10-28
  * 
  * A rockin' custom tooltip jQuery plugin
  * Developed by Caleb Jacob under the MIT license http://opensource.org/licenses/MIT
@@ -2226,7 +2226,7 @@
 				rects = this.instance.$el[0].getClientRects();
 			
 			// by default, the target will be the middle of the origin
-			if (rects.length === 1){
+			if (rects.length < 2){
 				
 				switch (side) {
 					
