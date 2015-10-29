@@ -1,7 +1,7 @@
-/*! Tooltipster 4.0.0rc26 */
+/*! Tooltipster 4.0.0rc27 */
 
 /**
- * Released on 2015-10-28
+ * Released on 2015-10-29
  * 
  * A rockin' custom tooltip jQuery plugin
  * Developed by Caleb Jacob under the MIT license http://opensource.org/licenses/MIT
@@ -811,7 +811,7 @@
 									self.callbacks.open = [];
 								};
 							
-							// if this origin already has its tooltip open
+							// if the tooltip is already open
 							if (self.State !== 'closed') {
 								
 								// the timer (if any) will start (or restart) right now
@@ -922,15 +922,19 @@
 									setTimeout(
 										function() {
 											
-											self.$tooltip
-												.addClass('tooltipster-show')
-												.removeClass('tooltipster-initial');
-											
-											if (self.options.speed > 0) {
-												self.$tooltip.delay(self.options.speed);
+											// a quick hover may have already triggered a mouseleave
+											if (self.State != 'closed') {
+												
+												self.$tooltip
+													.addClass('tooltipster-show')
+													.removeClass('tooltipster-initial');
+												
+												if(self.options.speed > 0){
+													self.$tooltip.delay(self.options.speed);
+												}
+												
+												self.$tooltip.queue(finish);
 											}
-											
-											self.$tooltip.queue(finish);
 										},
 										0
 									);
@@ -981,17 +985,20 @@
 										// on a click event and if options.delay == 0 (because of bubbling)
 										setTimeout(function() {
 											
-											// we don't want to bind on click here because the
-											// initial touchstart event has not yet triggered its
-											// click event, which is thus about to happen
-											$('body').on('touchstart.'+ self.namespace +'-autoClose', function(event) {
+											if (self.State != 'closed') {
 												
-												// if the tooltip is not interactive or if the click was made
-												// outside of the tooltip
-												if (!self.options.interactive || !$.contains(self.$tooltip[0], event.target)) {
-													self._close();
-												}
-											});
+												// we don't want to bind on click here because the
+												// initial touchstart event has not yet triggered its
+												// click event, which is thus about to happen
+												$('body').on('touchstart.' + self.namespace + '-autoClose', function(event){
+													
+													// if the tooltip is not interactive or if the click was made
+													// outside of the tooltip
+													if(!self.options.interactive || !$.contains(self.$tooltip[0], event.target)){
+														self._close();
+													}
+												});
+											}
 										}, 0);
 									}
 									
@@ -1041,11 +1048,15 @@
 									
 									// explanations : same as above
 									setTimeout(function() {
-										$('body').on('click.'+ self.namespace +'-autoClose touchstart.'+ self.namespace +'-autoClose', function(event) {
-											if (!self.options.interactive || !$.contains(self.$tooltip[0], event.target)) {
-												self._close(event);
-											}
-										});
+										
+										if (self.State != 'closed') {
+											
+											$('body').on('click.' + self.namespace + '-autoClose touchstart.' + self.namespace + '-autoClose', function(event){
+												if(!self.options.interactive || !$.contains(self.$tooltip[0], event.target)){
+													self._close(event);
+												}
+											});
+										}
 									}, 0);
 								}
 								
@@ -1454,6 +1465,7 @@
 									setTimeout(function() {
 										
 										if (self.State != 'closed') {
+											
 											self.$tooltip.css({
 												'-webkit-transition': self.options.speed + 'ms',
 												'-moz-transition': self.options.speed + 'ms',
