@@ -1,7 +1,7 @@
-/*! Tooltipster 4.0.0rc27 */
+/*! Tooltipster 4.0.0rc28 */
 
 /**
- * Released on 2015-10-29
+ * Released on 2015-10-30
  * 
  * A rockin' custom tooltip jQuery plugin
  * Developed by Caleb Jacob under the MIT license http://opensource.org/licenses/MIT
@@ -35,15 +35,15 @@
 			// must be 'body' for now, or an element positioned at (0, 0)
 			// in the document, typically like very top views of an app.
 			parent: 'body',
-			trackOrigin: false,
 			repositionOnScroll: false,
 			restoration: 'none',
-			trackTooltip: false,
 			speed: 350,
 			theme: [],
 			timer: 0,
 			touchDevices: true,
 			trackerInterval: 500,
+			trackOrigin: false,
+			trackTooltip: false,
 			trigger: 'hover',
 			triggerClose: {
 				click: false,
@@ -111,26 +111,8 @@
 		// the tooltip left/top coordinates, saved after each repositioning
 		this.tooltipCoord;
 		
-		// option formatting
-		
-		if (this.options.trigger == 'hover') {
-			
-			this.options.triggerOpen = { hover: true };
-			
-			this.options.triggerClose = {
-				mouseleave: true,
-				originClick: true
-			};
-		}
-		else if (this.options.trigger == 'click') {
-			
-			this.options.triggerOpen = { click: true };
-			this.options.triggerClose = { click: true };
-		}
-		
-		if (typeof this.options.theme == 'string') {
-			this.options.theme = [this.options.theme];
-		}
+		// some options may need to be reformatted
+		this._optionsFormat();
 		
 		// launch
 		this._init();
@@ -703,8 +685,8 @@
 			return this;
 		},
 		
-		// this function will schedule the opening of the tooltip after the delay, if
-		// there is one
+		// when using the hover open trigger, this function will schedule the
+		// opening of the tooltip after the delay, if there is one
 		_open: function(event) {
 			
 			var self = this;
@@ -719,11 +701,8 @@
 				if (self.options.delay) {
 					self.timerOpen = setTimeout(function() {
 						
-						// for the hover open trigger, we check if the mouse is still over the
-						// origin, otherwise we do not open anything
-						if (	!self.options.triggerOpen.hover
-							||	self.mouseIsOverOrigin
-						) {
+						// open only if the mouse is still over the origin
+						if (self.mouseIsOverOrigin) {
 							self._openNow(event);
 						}
 					}, self.options.delay);
@@ -892,23 +871,21 @@
 									self.$tooltipParent = self.options.parent;
 								}
 								
+								// reposition the tooltip and attach to the DOM
+								self.reposition(event, true);
+								
+								// animate in the tooltip
 								if (supportsTransitions()) {
 									
 									// note: there seems to be an issue with start animations which
 									// are randomly not played on fast devices in both Chrome and FF,
 									// couldn't find a way to solve it yet. It seems that applying
 									// the classes before appending to the DOM helps a little, but
-									// that's not even sure.
+									// it messes up some CSS transitions. The issue almost never
+									// happens when delay==0 though
 									self.$tooltip
 										.addClass('tooltipster-' + self.options.animation)
 										.addClass('tooltipster-initial');
-								}
-								
-								// reposition the tooltip and attach to the DOM
-								self.reposition(event, true);
-								
-								// animate in the tooltip
-								if (supportsTransitions()) {
 									
 									self.$tooltip.css({
 										'-moz-animation-duration': self.options.speed + 'ms',
@@ -1085,6 +1062,28 @@
 			}
 		},
 		
+		_optionsFormat: function(){
+			
+			if (this.options.trigger == 'hover') {
+				
+				this.options.triggerOpen = { hover: true };
+				
+				this.options.triggerClose = {
+					mouseleave: true,
+					originClick: true
+				};
+			}
+			else if (this.options.trigger == 'click') {
+				
+				this.options.triggerOpen = { click: true };
+				this.options.triggerClose = { click: true };
+			}
+			
+			if (typeof this.options.theme == 'string') {
+				this.options.theme = [this.options.theme];
+			}
+		},
+		
 		/**
 		 * Handles the scroll on any of the parents of the origin (when the
 		 * tooltip is open)
@@ -1250,13 +1249,22 @@
 						// See http://blogs.msdn.com/b/ie/archive/2012/02/17/sub-pixel-rendering-and-the-css-object-model.aspx
 						&&	contentBrc.width >= $content[0].scrollWidth - 1
 					)
-				};
+				},
+				width = contentBrc.right;
+			
+			// Old versions of IE get the width wrong
+			if (IE && IE <= 10) {
+				width = Math.ceil(width) + 1;
+			}
 			
 			return {
 				fits: fits.height && fits.width,
 				size: {
 					height: newHeight,
-					width: $content[0].offsetWidth
+					// rounding up fixes an issue in IE11- (at least).
+					// Besides, brc.width/height are not defined in IE8- but in this
+					// case, brc.right/bottom will have the same value
+					width: width
 				}
 			};
 		},
@@ -1281,6 +1289,8 @@
 		 * Get the size of a tooltip when we do not set any specific height or width.
 		 * This method does not reset the position values to what they were when the
 		 * test is over, do it yourself if need be.
+		 * 
+		 * Some remarks from ::_sizerConstrained() also apply here
 		 */
 		_sizerNatural: function() {
 			
@@ -1294,12 +1304,16 @@
 			
 			this._forceRedraw();
 			
-			// same remark as in ::_sizerConstrained()
-			var tooltipBrc = this.$tooltip[0].getBoundingClientRect();
+			var tooltipBrc = this.$tooltip[0].getBoundingClientRect(),
+				width = tooltipBrc.right;
+			
+			if (IE && IE <= 10) {
+				width = Math.ceil(width) + 1;
+			}
 			
 			return {
-				height: tooltipBrc.height,
-				width: tooltipBrc.width
+				height: tooltipBrc.bottom,
+				width: width
 			};
 		},
 		
@@ -1675,6 +1689,7 @@
 			if (val === undefined) return this.options[o];
 			else {
 				this.options[o] = val;
+				this._optionsFormat();
 				return this;
 			}
 		},
@@ -2012,6 +2027,21 @@
 		return same;
 	}
 	
+	/**
+	 * A fast function to check if an element is still in the DOM. It
+	 * tries to use an id as ids are indexed by the browser, or falls
+	 * back to jQuery's `contains` method.
+	 *
+	 * @param {string|object} ref An id or a jQuery-wrapped HTML element
+	 * @return {boolean}
+	 */
+	function bodyContains(ref) {
+		
+		var id = (typeof ref === 'string') ? ref : ref.attr('id');
+		
+		return id ? !!document.getElementById(id) : $.contains(document.body, ref[0]);
+	}
+	
 	// we'll assume the device has no mouse until we detect any mouse movement
 	var deviceHasMouse = false;
 	$('body').one('mousemove', function() {
@@ -2024,6 +2054,12 @@
 	function deviceIsPureTouch() {
 		return (!deviceHasMouse && deviceHasTouchCapability);
 	}
+	
+	// this detects old versions of IE which need dirty fixes
+	var uA = navigator.userAgent.toLowerCase(),
+		IE = (uA.indexOf('msie') != -1) ?
+			parseInt(uA.split('msie')[1]) :
+			false;
 	
 	// detecting support for CSS transitions
 	function supportsTransitions() {
@@ -2039,21 +2075,6 @@
 			if (typeof s[v[i] + p] == 'string') { return true; }
 		}
 		return false;
-	}
-	
-	/**
-	 * A fast function to check if an element is still in the DOM. It
-	 * tries to use an id as ids are indexed by the browser, or falls
-	 * back to jQuery's `contains` method.
-	 * 
-	 * @param {string|object} ref An id or a jQuery-wrapped HTML element
-	 * @return {boolean}
- 	 */
-	function bodyContains(ref) {
-		
-		var id = (typeof ref === 'string') ? ref : ref.attr('id');
-		
-		return id ? !!document.getElementById(id) : $.contains(document.body, ref[0]);
 	}
 })(jQuery);
 
@@ -2137,7 +2158,7 @@
 		 */
 		_init: function(instance) {
 			
-			var $d = $('<i><!--[if IE 6]><i></i><![endif]--></i>');
+			var $d = $('<i><!--[if lte IE 6]><i></i><![endif]--></i>');
 			
 			// list of instance variables
 			

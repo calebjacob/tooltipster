@@ -12,8 +12,8 @@
 
 .tooltipster-box {
 	/* see .tooltipster-base. flex-shrink 1 is only necessary for IE10-
-	and flex-basis 0 for IE11- (at least) */
-	flex: 1 1 0;
+	and flex-basis auto for IE11- (at least) */
+	flex: 1 1 auto;
 }
 
 .tooltipster-content {
