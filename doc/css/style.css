@@ -466,6 +466,15 @@ Demos
 	width: 250px;
 }
 
+#grouped_icons input {
+	font-size: 30px;
+}
+
+#grouped_separator {
+	display: inline-block;
+	margin: 0 50px;
+}
+
 /* 
 -------------------------------------
 Tooltips

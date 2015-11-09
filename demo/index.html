@@ -9,7 +9,9 @@
 	<link rel="stylesheet" type="text/css" href="../css/tooltipster.css" />
 	
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.2/raphael-min.js"></script>
-	<script type="text/javascript" src="//code.jquery.com/jquery-1.7.0.min.js"></script>
+	<script type="text/javascript" src="./svg.js"></script>
+	<script type="text/javascript" src="./svg.screenbox.js"></script>
+	<script type="text/javascript" src="//code.jquery.com/jquery-1.8.0.min.js"></script>
 	<script type="text/javascript" src="../js/jquery.tooltipster.js"></script>
 	
 	<script type="text/javascript">
@@ -45,6 +47,7 @@
 		
 		
 		$(function(){
+			
 			var gender1 = new Raphael(document.getElementById('genderChart1'), 300, 300);
 			
 			gender1.customAttributes.arc = function (xloc, yloc, value, total, R) {
@@ -69,42 +72,42 @@
 				};
 			};
 
-// base light grey circle
+			// base light grey circle
 			var baseCircle1 = gender1.circle(150, 150, 150);
 			baseCircle1.attr({
 				stroke: 'none',
-				fill: '#66cca6',
-			})
-
-// arcs
-			var maleArc1 = gender1.path().attr({
-				"stroke": "#3ea9f5",
-				"stroke-width": 40,
-				arc: [0, 0, 0, 360, 100],
-				transform: "t150,150", // translate to center of canvas, then rotate by degrees
+				fill: '#66cca6'
 			});
 
-//maleArc1.node.setAttribute("class","tooltip");
+			// arcs
+			var maleArc1 = gender1.path().attr({
+				stroke: "#3ea9f5",
+				"stroke-width": 40,
+				arc: [0, 0, 0, 360, 100],
+				transform: "t150,150" // translate to center of canvas, then rotate by degrees
+			}).attr('id', 'blue');
+
+			//maleArc1.node.setAttribute("class","tooltip");
 			
 			var genderlessArc1 = gender1.path().attr({
 				"stroke": "#fff",
 				"stroke-width": 40,
 				arc: [0, 0, 0, 360, 100],
-				transform: "t150,150r240", // rotate to 200 degrees, where last arc ended
+				transform: "t150,150r240" // rotate to 200 degrees, where last arc ended
 			});
 			
 			var customArc1 = gender1.path().attr({
 				"stroke": "#662c91",
 				"stroke-width": 40,
 				arc: [0, 0, 0, 360, 100],
-				transform: "t150,150r248",
+				transform: "t150,150r248"
 			});
 			
 			var femaleArc1 = gender1.path().attr({
 				"stroke": "#ff7aac",
 				"stroke-width": 40,
 				arc: [0, 0, 0, 360, 100],
-				transform: "t150,150r266",
+				transform: "t150,150r266"
 			});
 			
 			
@@ -123,34 +126,59 @@
 					});
 				});
 			});
-
-
-
-// top dark grey circle
+			
+			// top dark grey circle
 			var topCircle1 = gender1.circle(150, 150, 85);
 			topCircle1.attr({
 				stroke: 'none',
-				fill: '#b9e1d2',
-			})
-			
-			$(maleArc1.node).tooltipster({
-				content: 'Male characters',
-				theme: 'tooltipster-shadow'
-			});
-			$(genderlessArc1.node).tooltipster({
-				content: 'Genderless characters',
-				theme: 'tooltipster-shadow'
-			});
-			$(customArc1.node).tooltipster({
-				content: 'Custom gender characters',
-				theme: 'tooltipster-shadow'
-			});
-			$(femaleArc1.node).tooltipster({
-				content: 'Female characters',
-				theme: 'tooltipster-shadow'
+				fill: '#b9e1d2'
 			});
 			
-// END GENDER CHART 1
+			
+			$(maleArc1.node)
+				.attr('id', 'blue')
+				.tooltipster({
+					content: 'Male characters',
+					theme: 'tooltipster-shadow'
+				});
+			$(genderlessArc1.node)
+				.attr('id', 'white')
+				.tooltipster({
+					content: 'Genderless characters',
+					theme: 'tooltipster-shadow'
+				});
+			$(customArc1.node)
+				.attr('id', 'purple')
+				.tooltipster({
+					content: 'Custom gender characters',
+					theme: 'tooltipster-shadow'
+				});
+			$(femaleArc1.node)
+				.attr('id', 'pink')
+				.tooltipster({
+					content: 'Female characters',
+					theme: 'tooltipster-shadow'
+				});
+			
+			$('#genderChart1 > svg').attr('id', 'chart');
+			
+			// END GENDER CHART 1
+			
+			var draw = SVG('drawing'),
+				nested = draw
+					.viewbox(0, 0, 300, 200)
+					.nested()
+					.viewbox(-50, 20, 200, 300),
+				path = draw.path('M150 0 L75 200 L225 200 Z')
+					.rotate(25)
+					.scale(0.5);
+			
+			$(path.node)
+				.attr('id', 'triangle')
+				.tooltipster({
+					content: 'Triangle',
+					theme: 'tooltipster-shadow'
+				});
 		});
 	</script>
 </head>
@@ -202,6 +230,7 @@
 	<section class="container">
 		SVG
 		<div id="genderChart1"></div>
+		<div id="drawing"></div>
 	</section>
 </body>
 </html>

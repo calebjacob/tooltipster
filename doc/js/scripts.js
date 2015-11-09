@@ -221,6 +221,51 @@ $(function() {
 		interactive: true
 	});
 	
+	// grouped demo
+	$('.tooltip_slow').tooltipster({
+		delay: 1000,
+		speed: 1000
+	});
+	
+	var instances = $.fn.tooltipster('instances', '.tooltip_group1');
+	
+	$.each(instances, function (i, instance) {
+		
+		instance.on('start', function (event) {
+			
+			var open = false,
+				speed;
+			
+			$.each(instances, function (i, inst) {
+				
+				if (instance !== inst) {
+					
+					if (inst.state() !== 'closed'){
+						
+						open = true;
+						
+						speed = inst.option('speed');
+						
+						inst.option('speed', 0);
+						inst.close();
+						inst.option('speed', speed);
+					}
+				}
+			});
+			
+			if (open) {
+				
+				speed = instance.option('speed');
+				
+				instance.option('speed', 0);
+				instance.open();
+				instance.option('speed', speed);
+				
+				event.stop();
+			}
+		});
+	})
+	
 	// themes
 	
 	$('.tooltipster-light-preview').tooltipster({

@@ -27,12 +27,12 @@
 	<link rel="stylesheet" type="text/css" href="css/themes/tooltipster-punk.css" />
 	<link rel="stylesheet" type="text/css" href="css/themes/tooltipster-shadow.css" />
 	
-	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js"></script>
+	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
 	<script type="text/javascript" src="doc/js/jquery.jgfeed.js"></script>
 	<script type="text/javascript" src="doc/js/prettify.js"></script>
 	<script type="text/javascript" src="doc/js/lang-css.js"></script>
 	<script type="text/javascript" src="doc/js/scripts.js"></script>
-	<script type="text/javascript" src="js/jquery.tooltipster.js"></script>
+	<script type="text/javascript" src="/js/jquery.tooltipster.js"></script>
 	
 	<!--[if lt IE 9]>
 		<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -124,7 +124,7 @@
 						<map name="imagemap">
 							<area id="demo-imagemaparea" title="The tooltip triggers only on a given image area" shape="poly" coords="20,17,26,0,32,17,48,16,36,29,40,45,27,36,11,45,16,29,2,17" />
 						</map>
-					</span> Support of image maps
+					</span> Support of image maps &amp; SVG
 				</li>
 				<li>
 					<span id="demo-multiple">Hover</span> Multiple tooltips on a single element
@@ -148,7 +148,7 @@
 &lt;head&#62;
     &lt;link rel="stylesheet" type="text/css" href="tooltipster/css/tooltipster.css" /&#62;
 
-    &lt;script type="text/javascript" src="http://code.jquery.com/jquery-1.7.0.min.js"&#62;&lt;/script&#62;
+    &lt;script type="text/javascript" src="http://code.jquery.com/jquery-1.8.0.min.js"&#62;&lt;/script&#62;
     &lt;script type="text/javascript" src="tooltipster/js/jquery.tooltipster.min.js"&#62;&lt;/script&#62;
 &lt;/head&#62;
 </pre>
@@ -296,7 +296,12 @@ $('.tooltip').tooltipster({
 						'swing',<br />
 						'slide',<br />
 						'fall'</td>
-					<td>Determines how the tooltip will animate in and out. Feel free to modify or create custom transitions in your custom themes. In IE9 and lower, all animations default to a JavaScript generated, fade animation. <strong>Default: 'fade'</strong></td>
+					<td>Determines how the tooltip will animate in and out. In addition to the built-in transitions, you may also create custom transitions in your CSS files. In IE9 and lower, all animations default to a JavaScript generated, fade animation. <strong>Default: 'fade'</strong></td>
+				</tr>
+				<tr>
+					<td><h4>animationDuration</h4></td>
+					<td>integer,<br />integer[],<br />null</td>
+					<td>Sets the speed of the animation, in milliseconds. If you wish to provide different durations for the opening and closing animations, provide an array of two different values. If you wish to handle the animation duration from your CSS files only, set this option to null. <strong>Default: 350</strong></td>
 				</tr>
 				<tr>
 					<td><h4>arrow</h4></td>
@@ -325,18 +330,18 @@ $('.tooltip').tooltipster({
 				</tr>
 				<tr>
 					<td><h4>delay</h4></td>
-					<td>integer</td>
-					<td>Delay how long it takes (in milliseconds) for the tooltip to start animating in when the 'hover' open trigger is used. <strong>Default: 200</strong></td>
+					<td>integer,<br />integer[]</td>
+					<td>Delay how long it takes (in milliseconds) for the tooltip to start its opening and closing animations when the 'hover' triggers are used. If you wish to specify different delays for opening and closing, you may provide an array of two different values. <strong>Default: 300</strong></td>
 				</tr>
 				<tr>
 					<td><h4>displayPlugin</h4></td>
 					<td>string</td>
-					<td>The name of the display plugin that should be used. <strong>Default: 'default'</strong></td>
+					<td>The name of the display plugin to use. <strong>Default: 'default'</strong></td>
 				</tr>
 				<tr>
 					<td><h4>distance</h4></td>
 					<td>integer,<br />integer[]</td>
-					<td>The distance between the origin and the tooltip, in pixels. The value may be an integer or an array of integers (in the usual CSS order) if you wish to specify a different distance for each side. <strong>Default: 6</strong></td>
+					<td>The distance between the origin and the tooltip, in pixels. The value may be an integer or an array of integers (in the usual CSS syntax) if you wish to specify a different distance for each side. <strong>Default: 6</strong></td>
 				</tr>
 				<tr>
 					<td><h4>functionInit</h4></td>
@@ -371,12 +376,7 @@ $('.tooltip').tooltipster({
 				<tr>
 					<td><h4>interactive</h4></td>
 					<td>boolean</td>
-					<td>Give users the possibility to interact with the tooltip. By default, the tooltip will still close if the user moves away from or clicks out of the tooltip. <strong>Default: false</strong></td>
-				</tr>
-				<tr>
-					<td><h4>interactiveTolerance</h4></td>
-					<td>integer</td>
-					<td>If the tooltip is interactive and activated by a hover event, set the amount of time (milliseconds) allowed for a user to hover off of the origin on to the tooltip itself - keeping the tooltip from closing. <strong>Default: 350</strong></td>
+					<td>Give users the possibility to interact with the content of the tooltip. If you want them to be able to make clicks, fill forms or do other interactions inside the tooltip, you have to set this option to true. When the 'hover' close trigger is used, the user has to move the cursor over the tooltip before it starts closing (the 'delay' option can give more time to the user). <strong>Default: false</strong></td>
 				</tr>
 				<tr>
 					<td><h4>maxWidth</h4></td>
@@ -407,11 +407,6 @@ $('.tooltip').tooltipster({
 					<td><h4>side</h4></td>
 					<td>string,<br />string[]</td>
 					<td>Sets the side of the tooltip. The value may one of the following: 'top', 'bottom', 'left', 'right'. It may also be an array containing one or more of these values. When using an array, the order of values is taken into account when the side must be adapted and the absence of a side disables it (<a href="#sides">see example</a>). <strong>Default: ['top', 'bottom', 'right', 'left']</strong></td>
-				</tr>
-				<tr>
-					<td><h4>speed</h4></td>
-					<td>integer</td>
-					<td>Sets the speed of the animation. <strong>Default: 350</strong></td>
 				</tr>
 				<tr>
 					<td><h4>timer</h4></td>
@@ -461,7 +456,7 @@ $('.tooltip').tooltipster({
 				<tr>
 					<td><h4>triggerClose.mouseleave</h4></td>
 					<td>boolean</td>
-					<td>Closes the tooltip after the mouse has gone away from the origin. The 'interactiveTolerance' option is taken into account for the delay before closing. <strong>Default: false</strong></td>
+					<td>Closes the tooltip after the mouse has gone away from the origin. The 'delay' option is taken into account as the delay before closing. <strong>Default: false</strong></td>
 				</tr>
 				<tr>
 					<td><h4>triggerClose.originClick</h4></td>
@@ -722,11 +717,13 @@ var instances = $.fn.tooltipster('instancesLatest');
 				<li><a href="#positioning">Achieving custom positioning</a></li>
 				<li><a href="#data-attributes">Specifiying options through data-attributes</a></li>
 				<li><a href="#formatting">Working with data sets</a></li>
-				<li><a href="#nested">Nested tooltips</a></li>
 				<li><a href="#object-oriented">Object-oriented Tooltipster</a></li>
 				<li><a href="#multiple">Using multiple tooltips on a single element</a></li>
 				<li><a href="#delegation">Dynamic live binding on newly created elements</a></li>
 				<li><a href="#events">Event-driven Tooltipster</a></li>
+				<li><a href="#nested">Nested tooltips</a></li>
+				<li><a href="#grouped">Grouped tooltips</a></li>
+				<li><a href="#svg">Tooltips on SVG elements</a></li>
 				<li><a href="#accessibility">Making tooltips accessible to persons with disabilities</a></li>
 			</ul>
 			
@@ -1050,29 +1047,6 @@ $('#example').tooltipster({
     }
 });</pre>
 			
-			<h3 id="nested">Nested tooltips <a href="#usecases">&#8657;</a></h3>
-			
-			<p>The question comes frequently, so here is the answer: yes, it's possible. Here is an example:</p>
-			
-			<pre class="prettyprint">
-&lt;strong id="nesting"&gt;Hover me!&lt;/strong&gt;
-</pre>
-
-<pre class="prettyprint">
-$('#nesting').tooltipster({
-    content: $('&lt;span&gt;Hover me too!&lt;/span&gt;'),
-    functionReady: function(instance, helper){
-        
-        // the nested tooltip must be initialized once the first tooltip is open, that's why we do this inside functionReady()
-        instance.content().tooltipster({
-            content: 'I am a nested tooltip!',
-            distance: 0
-        });
-    },
-    interactive: true
-});
-</pre>
-			<p>Result : <strong id="nesting">Hover me!</strong></p>
 			<h3 id="object-oriented">Object-oriented Tooltipster <a href="#usecases">&#8657;</a></h3>
 			
 			<p>So far, quite often we called instance methods like this: <span class="code">$(...).tooltipster(methodName)</span>. However, advanced users may prefer to handle objects directly rather that go through the DOM to manipulate their tooltips. That's possible with Tooltipster!</p>
@@ -1211,9 +1185,9 @@ instance.on('before', doThat);
 			
 			<p>Your listeners will get one argument, the event, which holds useful properties: <span class="code">event.type</span>, <span class="code">event.instance</span>, <span class="code">event.event</span> (when there is one, similar to the usual <span class="code">helper.event</span>), etc.</p>
 			
-			<p>The possible event types are <span class="code">openInit</span>, <span class="code">before</span>, <span class="code">ready</span>, <span class="code">beforeClose</span>, <span class="code">after</span>, <span class="code">format</span>, <span class="code">position</span>, <span class="code">destroy</span>, <span class="code">state</span>, <span class="code">update</span>, <span class="code">scroll</span> and <span class="code">reposition</span>.</p>
+			<p>The possible event types are <span class="code">start</span>, <span class="code">before</span>, <span class="code">ready</span>, <span class="code">beforeClose</span>, <span class="code">after</span>, <span class="code">format</span>, <span class="code">position</span>, <span class="code">destroy</span>, <span class="code">state</span>, <span class="code">update</span>, <span class="code">scroll</span> and <span class="code">reposition</span>.</p>
 			
-			<p><span class="code">openInit</span> happens when the <span class="code">hover</span> open trigger is used and that the origin gets hovered.</p>
+			<p><span class="code">start</span> happens when the <span class="code">hover</span> open trigger is used and that the origin gets hovered. The event has a special <span class="code">event.stop</span> property which is a function you may call to prevent the tooltip from opening.</p>
 			
 			<p><span class="code">before</span>, <span class="code">ready</span>, <span class="code">after</span>, <span class="code">format</span> and <span class="code">position</span> happen at the same time as their equivalent <span class="code">functionBefore</span>, etc.</p>
 			
@@ -1232,6 +1206,58 @@ instance.on('before', doThat);
 			<p><span class="code">reposition</span> happens after Tooltipster repositioned of the tooltip. The event has a special <span class="code">event.position</span> with positioning information.</p>
 			
 			<p><span class="code">scroll</span> happens whenever a parent of the origin is scrolled.</p>
+			
+			
+			<h3 id="nested">Nested tooltips <a href="#usecases">&#8657;</a></h3>
+			
+			<p>The question comes frequently, so here is the answer: yes, it's possible. Here is an example:</p>
+			
+			<pre class="prettyprint">
+&lt;strong id="nesting"&gt;Hover me!&lt;/strong&gt;
+</pre>
+
+<pre class="prettyprint">
+$('#nesting').tooltipster({
+    content: $('&lt;span&gt;Hover me too!&lt;/span&gt;'),
+    functionReady: function(instance, helper){
+        
+        // the nested tooltip must be initialized once the first tooltip is open, that's why we do this inside functionReady()
+        instance.content().tooltipster({
+            content: 'I am a nested tooltip!',
+            distance: 0
+        });
+    },
+    interactive: true
+});
+</pre>
+			<p>Result : <strong id="nesting">Hover me!</strong></p>
+			
+			
+			<h3 id="grouped">Grouped tooltips <a href="#usecases">&#8657;</a></h3>
+			
+			<p>When the user hovers on adjacent elements one after the other to read their tooltips, you may wish to display the tooltips instantly rather than wait for the default delay and animation times. A demonstration is worth a thousand words, so check out this example:</p>
+			
+			<p id="grouped_icons">
+				<input type="button" value="❤" title="Add to favorites" class="tooltip_slow" />
+				<input type="button" value="☂" title="Dance in the rain" class="tooltip_slow" />
+				<input type="button" value="♞" title="Play chess" class="tooltip_slow" />
+				<input type="button" value="☯" title="Turn off the computer and meditate" class="tooltip_slow" />
+				
+				<span id="grouped_separator">...and now this one:</span>
+				
+				<input type="button" value="❤" title="Add to favorites" class="tooltip_slow tooltip_group1" />
+				<input type="button" value="☂" title="Dance in the rain" class="tooltip_slow tooltip_group1" />
+				<input type="button" value="♞" title="Play chess" class="tooltip_slow tooltip_group1" />
+				<input type="button" value="☯" title="Turn off the computer and meditate" class="tooltip_slow tooltip_group1" />
+			</p>
+			
+			<p>This is a good opportunity to tap into Tooltipster's powerful features. This is how it's done:</p>
+			
+			<h3 id="svg">Tooltips on SVG elements <a href="#usecases">&#8657;</a></h3>
+			
+			<p>Browsers do not always make our life easy when it comes to working with SVG. Determining the coordinates of SVG paths, polylines or polygons is especially difficult since the native <span class="code">getBoundingClientRect</span>, <span class="code">getBBox</span> and other methods produce inaccurate results in most browsers (as of today in 2015). The result is that by default, the position of tooltips on SVG elements may be completely off.</p>
+			
+			<p>Fortunately, Tooltipster includes the native support of an SVG library which provides the best results in that matter: <strong>SVG.js</strong>.<br />Just include <a href="https://github.com/wout/svg.js">SVG.js</a> and its <a href="https://github.com/fuzzyma/svg.screenbbox.js">ScreenBBox</a> plugin in your page and that's it, Tooltipster will use it out of the box for optimal results.</p>
 			
 			<h3 id="accessibility">Making tooltips accessible to persons with disabilities <a href="#usecases">&#8657;</a></h3>
 			
@@ -1323,6 +1349,20 @@ $('#myfield')
 			<h4>"Is it ok to remove elements that have a tooltip without destroying it first?"</h4>
 			
 			<p>Yes, when their origin is removed from the DOM, tooltips will destroy themselves after a few seconds. Unless we made a mistake somewhere, it means no memory leaks.</p>
+			
+			<h4>"How compatible is Tooltipster with old versions of Internet Explorer ?"</h4>
+			
+			<p>Tooltipster works "decently" down to IE6. However, these caveats should be noted:</p>
+			
+			<ul>
+				<li>In IE11 and lower, the size returned by the helper of functionPosition may be greater than the maxWidth (if you set one) by 1 or 2 pixels.</li>
+				<li>In IE9 and lower, a height returned by functionPosition which would be greater than the natural height of the tooltip would not be enforced due to the lack of display:flex.</li>
+				<li>In IE8 and lower, some styling like shadows and rounded corners are not available. The size may be off by a couple pixels due to the lack of proper box-sizing.</li>
+				<li>In IE7, the arrow may be misplaced by a couple pixels in some cases.</li>
+				<li>In IE6 does not enforce minWidth, maxWidth, fixed position or multiple tooltips. The arrow is not displayed unless you explicitly enable it (and will look bad unless you style it yourself).</li>
+			</ul>
+			
+			<p>This list is not exhaustive. You may report an issue if you detect one, we will answer but we cannot guaranty that a fix will be provided.</p>
 			
 		</section>
 		

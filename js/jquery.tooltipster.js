@@ -1,10 +1,12 @@
-/*! Tooltipster 4.0.0rc28 */
+/*! Tooltipster 4.0.0rc29 */
 
 /**
- * Released on 2015-10-30
+ * Released on 2015-11-09
  * 
  * A rockin' custom tooltip jQuery plugin
- * Developed by Caleb Jacob under the MIT license http://opensource.org/licenses/MIT
+ * Developed by Caleb Jacob and Louis Ameline under the MIT license http://opensource.org/licenses/MIT
+ * 
+ * Requires jQuery 1.8 (1.7 is fine too except for SVG in IE)
  * 
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
  * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
@@ -18,11 +20,12 @@
 	
 	var defaults = {
 			animation: 'fade',
+			animationDuration: 350,
 			content: null,
 			contentAsHTML: false,
 			contentCloning: false,
 			debug: true,
-			delay: 200,
+			delay: 300,
 			displayPlugin: 'default',
 			functionInit: null,
 			functionBefore: null,
@@ -30,14 +33,12 @@
 			functionAfter: null,
 			functionFormat: null,
 			interactive: false,
-			interactiveTolerance: 350,
 			multiple: false,
 			// must be 'body' for now, or an element positioned at (0, 0)
 			// in the document, typically like very top views of an app.
 			parent: 'body',
 			repositionOnScroll: false,
 			restoration: 'none',
-			speed: 350,
 			theme: [],
 			timer: 0,
 			touchDevices: true,
@@ -100,8 +101,10 @@
 		this.$originParents;
 		// State (capital S) can be either : appearing, stable, disappearing, closed
 		this.State = 'closed';
-		this.timerClose = null;
-		this.timerOpen = null;
+		this.timeouts = {
+			close: [],
+			open: null
+		};
 		// this will be the tooltip element (jQuery wrapped HTML element)
 		this.$tooltip;
 		// for the size tracker
@@ -164,6 +167,17 @@
 				// to be able to find all instances on the page later (upon window
 				// events in particular)
 				.addClass('tooltipstered');
+			
+			// jQuery < v3.0's addClass and hasClass do not work on SVG elements.
+			// However, $('.tooltipstered') does find elements having the class.
+			if (!self.$el.hasClass('tooltipstered')) {
+				
+				var c = self.$el.attr('class') || '';
+				
+				if (c.indexOf('tooltipstered') == -1) {
+					self.$el.attr('class', c +' tooltipstered')
+				}
+			}
 			
 			// for 'click' and 'hover' open triggers : bind on events to open the tooltip.
 			// Closing is now handled in _openNow() because of its bindings.
@@ -231,11 +245,8 @@
 			if (callback) self.callbacks.close.push(callback);
 			self.callbacks.open = [];
 			
-			// get rid of any appearance timeout
-			clearTimeout(self.timerOpen);
-			self.timerOpen = null;
-			clearTimeout(self.timerClose);
-			self.timerClose = null;
+			// clear open/close timeouts
+			self._timeoutsClear();
 			
 			var finishCallbacks = function() {
 				
@@ -320,20 +331,42 @@
 				
 				if (supportsTransitions()) {
 					
+					// if null, the value in CSS rules will prevail
+					if (self.options.animationDuration) {
+						
+						self.$tooltip.css({
+							'-moz-animation-duration': self.options.animationDuration[1] + 'ms',
+							'-ms-animation-duration': self.options.animationDuration[1] + 'ms',
+							'-o-animation-duration': self.options.animationDuration[1] + 'ms',
+							'-webkit-animation-duration': self.options.animationDuration[1] + 'ms',
+							'animation-duration': self.options.animationDuration[1] + 'ms',
+							'transition-duration': self.options.animationDuration[1] + 'ms'
+						});
+					}
+					
 					self.$tooltip
 						.clearQueue()
 						.removeClass('tooltipster-show')
 						// for transitions only
 						.addClass('tooltipster-dying');
 					
-					if (self.options.speed > 0) self.$tooltip.delay(self.options.speed);
+					if (self.options.animationDuration && self.options.animationDuration[1] > 0) {
+						self.$tooltip.delay(self.options.animationDuration[1]);
+					}
 					
 					self.$tooltip.queue(finish);
 				}
 				else {
+					
+					// if self.options was set to null to make the CSS rules
+					// prevail, fall back to 350ms on non-compatible browsers
+					var duration = self.options ?
+						self.options.animationDuration[1] :
+						350;
+					
 					self.$tooltip
 						.stop()
-						.fadeOut(self.options.speed, finish);
+						.fadeOut(duration, finish);
 				}
 			}
 			// if the tooltip is already closed, we still need to trigger
@@ -465,23 +498,19 @@
 						// the origin has a fixed lineage if itself or one of its
 						// ancestors has a fixed position
 						fixedLineage: false,
-						offset: {
-							left: bcr.left + window.scrollX,
-							top: bcr.top + window.scrollY
-						},
+						offset: {},
 						size: {
 							height: bcr.bottom - bcr.top,
 							width: bcr.right - bcr.left
 						},
 						usemapImage: originIsArea ? $target[0] : null,
 						windowOffset: {
-							bottom: bcr.bottom,
 							left: bcr.left,
-							right: bcr.right,
 							top: bcr.top
 						}
 					}
-				};
+				},
+				geoFixed = false;
 			
 			// if the element is a map area, some properties may need
 			// to be recalculated
@@ -515,10 +544,7 @@
 							geo.origin.size.height = areaWidth * 2;
 							geo.origin.size.width = geo.origin.size.height;
 							
-							geo.origin.offset.left += areaLeftOffset;
 							geo.origin.windowOffset.left += areaLeftOffset;
-							
-							geo.origin.offset.top += areaTopOffset;
 							geo.origin.windowOffset.top += areaTopOffset;
 							
 							break;
@@ -535,10 +561,7 @@
 							geo.origin.size.height = areaBottom - areaTop;
 							geo.origin.size.width = areaRight - areaLeft;
 							
-							geo.origin.offset.left += areaLeftOffset;
 							geo.origin.windowOffset.left += areaLeftOffset;
-							
-							geo.origin.offset.top += areaTopOffset;
 							geo.origin.windowOffset.top += areaTopOffset;
 							
 							break;
@@ -593,26 +616,47 @@
 							geo.origin.size.height = areaGreatestY - areaSmallestY;
 							geo.origin.size.width = areaGreatestX - areaSmallestX;
 							
-							geo.origin.offset.left += areaSmallestX;
 							geo.origin.windowOffset.left += areaSmallestX;
-							
-							geo.origin.offset.top += areaSmallestY;
 							geo.origin.windowOffset.top += areaSmallestY;
 							
 							break;
 					}
-					
-					// save this before we overwrite it
-					var mappedOffsetRight = geo.origin.offset.right,
-						mappedOffsetBottom = geo.origin.offset.bottom;
-					
-					geo.origin.offset.right = geo.origin.offset.left + geo.origin.size.width;
-					geo.origin.offset.bottom = geo.origin.offset.top + geo.origin.size.height;
-					
-					geo.origin.windowOffset.right = geo.origin.offset.right - geo.window.scroll.left;
-					geo.origin.windowOffset.bottom = geo.origin.offset.bottom - geo.window.scroll.top;
 				}
 			}
+			
+			// SVG coordinates may need fixing but we need svg.screenbox.js
+			// to provide it
+			if ($target[0] instanceof SVGElement && SVG.svgjs) {
+				
+				if (!SVG.parser) {
+					SVG.prepare();
+				}
+				
+				var path = SVG.adopt($target[0]);
+				
+				if (path && path.screenBBox) {
+					
+					var bbox = path.screenBBox();
+					
+					geo.origin.size.height = bbox.height;
+					geo.origin.size.width = bbox.width;
+					
+					geo.origin.windowOffset.left = bbox.x;
+					geo.origin.windowOffset.top = bbox.y;
+				}
+			}
+			
+			// TODO: call a user callback over the geometry of the origin
+			
+			// calculate the remaining properties with what we got
+			
+			geo.origin.windowOffset.right = geo.origin.windowOffset.left + geo.origin.size.width;
+			geo.origin.windowOffset.bottom = geo.origin.windowOffset.top + geo.origin.size.height;
+			
+			geo.origin.offset.left = geo.origin.windowOffset.left + window.scrollX;
+			geo.origin.offset.top = geo.origin.windowOffset.top + window.scrollY;
+			geo.origin.offset.bottom = geo.origin.offset.top + geo.origin.size.height;
+			geo.origin.offset.right = geo.origin.offset.left + geo.origin.size.width;
 			
 			// the space that is available to display the tooltip, relatively
 			// to the viewport and to the document
@@ -689,25 +733,35 @@
 		// opening of the tooltip after the delay, if there is one
 		_open: function(event) {
 			
-			var self = this;
+			var self = this,
+				ok = true;
 			
 			if (self.State != 'stable' && self.State != 'appearing') {
 				
 				self._trigger({
-					type: 'initOpen',
-					event: event
+					type: 'start',
+					event: event,
+					stop: function(){
+						ok = false;
+					}
 				});
 				
-				if (self.options.delay) {
-					self.timerOpen = setTimeout(function() {
+				if (ok) {
+					
+					if (self.options.delay[0]) {
 						
-						// open only if the mouse is still over the origin
-						if (self.mouseIsOverOrigin) {
-							self._openNow(event);
-						}
-					}, self.options.delay);
+						self.timeouts.open = setTimeout(function() {
+							// open only if the mouse is still over the origin
+							if (self.mouseIsOverOrigin) {
+								self._openNow(event);
+							}
+						}, self.options.delay[0]);
+					}
+					else {
+						self._openNow(event);
+					}
 				}
-				else self._openNow(event);
+				
 			}
 		},
 		
@@ -766,11 +820,8 @@
 							}
 							self.callbacks.close = [];
 							
-							//get rid of any appearance timer
-							clearTimeout(self.timerOpen);
-							self.timerOpen = null;
-							clearTimeout(self.timerClose);
-							self.timerClose = null;
+							// get rid of any appearance timeouts
+							self._timeoutsClear();
 							
 							var extraTime,
 								finish = function() {
@@ -808,8 +859,8 @@
 											.removeClass('tooltipster-dying')
 											.addClass('tooltipster-show');
 										
-										if (self.options.speed > 0) {
-											self.$tooltip.delay(self.options.speed);
+										if (self.options.animationDuration && self.options.animationDuration[0] > 0) {
+											self.$tooltip.delay(self.options.animationDuration[0]);
 										}
 										
 										self.$tooltip.queue(finish);
@@ -835,7 +886,9 @@
 								
 								// the timer (if any) will start when the tooltip has fully appeared
 								// after its transition
-								extraTime = self.options.speed;
+								extraTime = self.options.animationDuration ?
+									self.options.animationDuration[0] :
+									0;
 								
 								// build the base of our tooltip
 								self.$tooltip = self.displayPlugin.build();
@@ -882,19 +935,22 @@
 									// couldn't find a way to solve it yet. It seems that applying
 									// the classes before appending to the DOM helps a little, but
 									// it messes up some CSS transitions. The issue almost never
-									// happens when delay==0 though
+									// happens when delay[0]==0 though
 									self.$tooltip
 										.addClass('tooltipster-' + self.options.animation)
 										.addClass('tooltipster-initial');
 									
-									self.$tooltip.css({
-										'-moz-animation-duration': self.options.speed + 'ms',
-										'-ms-animation-duration': self.options.speed + 'ms',
-										'-o-animation-duration': self.options.speed + 'ms',
-										'-webkit-animation-duration': self.options.speed + 'ms',
-										'animation-duration': self.options.speed + 'ms',
-										'transition-duration': self.options.speed + 'ms'
-									});
+									if (self.options.animationDuration) {
+										
+										self.$tooltip.css({
+											'-moz-animation-duration': self.options.animationDuration[0] + 'ms',
+											'-ms-animation-duration': self.options.animationDuration[0] + 'ms',
+											'-o-animation-duration': self.options.animationDuration[0] + 'ms',
+											'-webkit-animation-duration': self.options.animationDuration[0] + 'ms',
+											'animation-duration': self.options.animationDuration[0] + 'ms',
+											'transition-duration': self.options.animationDuration[0] + 'ms'
+										});
+									}
 									
 									setTimeout(
 										function() {
@@ -906,8 +962,8 @@
 													.addClass('tooltipster-show')
 													.removeClass('tooltipster-initial');
 												
-												if(self.options.speed > 0){
-													self.$tooltip.delay(self.options.speed);
+												if(self.options.animationDuration && self.options.animationDuration[0] > 0){
+													self.$tooltip.delay(self.options.animationDuration[0]);
 												}
 												
 												self.$tooltip.queue(finish);
@@ -917,14 +973,20 @@
 									);
 								}
 								else {
+									
+									// same as the closing animation: a 350ms fallback
+									var duration = self.options.animationDuration ?
+										self.options.animationDuration[0] :
+										350;
+									
 									self.$tooltip
 										.css('display', 'none')
-										.fadeIn(self.options.speed, finish);
+										.fadeIn(duration, finish);
 								}
 								
 								// will check if our tooltip origin is removed while the tooltip is
 								// shown
-								self._tracker_start();
+								self._trackerStart();
 								
 								$(window)
 									// reposition on resize (in case position can/has to be changed)
@@ -947,10 +1009,6 @@
 									});
 								});
 								
-								// in case a listener is already bound for autoclosing (mouse or
-								// touch, hover or click), unbind it first
-								$('body').off('.'+ self.namespace +'-autoClose');
-								
 								// here we'll have to set different sets of bindings for both touch
 								// and mouse events
 								if (self.options.triggerClose.mouseleave) {
@@ -969,7 +1027,7 @@
 												// click event, which is thus about to happen
 												$('body').on('touchstart.' + self.namespace + '-autoClose', function(event){
 													
-													// if the tooltip is not interactive or if the click was made
+													// if the tooltip is not interactive or if the touch was made
 													// outside of the tooltip
 													if(!self.options.interactive || !$.contains(self.$tooltip[0], event.target)){
 														self._close();
@@ -979,35 +1037,35 @@
 										}, 0);
 									}
 									
-									// if we have to allow interaction
+									var $elements = self.$el,
+										timeout = null;
+									
+									// if we have to allow interaction, bind on the tooltip too
 									if (self.options.interactive) {
-										
-										// as for mouse interaction, we get rid of the tooltip only
-										// after the mouse has spent some time out of it
-										var tolerance = null;
-										
-										self.$el.add(self.$tooltip)
-											// close after some time out of the origin and the tooltip
-											.on('mouseleave.'+ self.namespace +'-autoClose', function(event) {
+										$elements = $elements.add(self.$tooltip);
+									}
+									
+									$elements
+										// close after some time spent outside of the elements
+										.on('mouseleave.'+ self.namespace +'-autoClose', function(event) {
+											
+											if (self.options.delay[1]) {
 												
-												clearTimeout(tolerance);
-												
-												tolerance = setTimeout(function() {
+												timeout = setTimeout(function() {
 													self._close(event);
-												}, self.options.interactiveTolerance);
-											})
-											// suspend timeout when the mouse is over the origin or
-											// the tooltip
-											.on('mouseenter.'+ self.namespace + '-autoClose', function() {
-												clearTimeout(tolerance);
-											});
-									}
-									// if this is a non-interactive tooltip, get rid of it if the mouse leaves
-									else {
-										self.$el.on('mouseleave.'+ self.namespace + '-autoClose', function(event) {
-											self._close(event);
+												}, self.options.delay[1]);
+												
+												self.timeouts.close.push(timeout);
+											}
+											else {
+												self._close(event);
+											}
+										})
+										// suspend the mouseleave timeout when the mouse comes back
+										// over the elements
+										.on('mouseenter.'+ self.namespace + '-autoClose', function() {
+											clearTimeout(timeout);
 										});
-									}
 								}
 								
 								// close the tooltip when the origin gets a click (common behavior of
@@ -1051,10 +1109,11 @@
 							// if we have a timer set, let the countdown begin
 							if (self.options.timer > 0) {
 								
-								self.timerClose = setTimeout(function() {
-									self.timerClose = null;
+								var timeout = setTimeout(function() {
 									self._close();
 								}, self.options.timer + extraTime);
+								
+								self.timeouts.close.push(timeout);
 							}
 						}
 					}
@@ -1063,6 +1122,18 @@
 		},
 		
 		_optionsFormat: function(){
+			
+			if (typeof this.options.delay == 'number') {
+				this.options.delay = [this.options.delay, this.options.delay];
+			}
+			
+			if (typeof this.options.animationDuration == 'number') {
+				this.options.animationDuration = [this.options.animationDuration, this.options.animationDuration];
+			}
+			
+			if (typeof this.options.theme == 'string') {
+				this.options.theme = [this.options.theme];
+			}
 			
 			if (this.options.trigger == 'hover') {
 				
@@ -1077,10 +1148,6 @@
 				
 				this.options.triggerOpen = { click: true };
 				this.options.triggerClose = { click: true };
-			}
-			
-			if (typeof this.options.theme == 'string') {
-				this.options.theme = [this.options.theme];
 			}
 		},
 		
@@ -1252,8 +1319,8 @@
 				},
 				width = contentBrc.right;
 			
-			// Old versions of IE get the width wrong
-			if (IE && IE <= 10) {
+			// old versions of IE get the width wrong for some reason
+			if (IE && IE <= 11) {
 				width = Math.ceil(width) + 1;
 			}
 			
@@ -1307,7 +1374,7 @@
 			var tooltipBrc = this.$tooltip[0].getBoundingClientRect(),
 				width = tooltipBrc.right;
 			
-			if (IE && IE <= 10) {
+			if (IE && IE <= 11) {
 				width = Math.ceil(width) + 1;
 			}
 			
@@ -1333,7 +1400,25 @@
 				.css('overflow', 'auto');
 		},
 		
-		_tracker_start: function() {
+		/**
+		 * Clear appearance timeouts
+		 */
+		_timeoutsClear: function(){
+			
+			// there is only one possible open timeout: the delayed opening
+			// when the hover open trigger is used
+			clearTimeout(this.timeouts.open);
+			this.timeouts.open = null;
+			
+			// ... but several close timeouts: the delayed closing when the
+			// mouseleave close trigger is used and the timer option
+			$.each(this.timeouts.close, function(i, timeout){
+				clearTimeout(timeout);
+			});
+			this.timeouts.close = [];
+		},
+		
+		_trackerStart: function() {
 			
 			var self = this,
 				$content = self.$tooltip.find('.tooltipster-content');
@@ -1456,46 +1541,22 @@
 						
 						if (supportsTransitions()) {
 							
-							self.$tooltip
-								.css({
-									'width': '',
-									'-webkit-transition': 'all ' + self.options.speed + 'ms, width 0ms, height 0ms, left 0ms, top 0ms',
-									'-moz-transition': 'all ' + self.options.speed + 'ms, width 0ms, height 0ms, left 0ms, top 0ms',
-									'-o-transition': 'all ' + self.options.speed + 'ms, width 0ms, height 0ms, left 0ms, top 0ms',
-									'-ms-transition': 'all ' + self.options.speed + 'ms, width 0ms, height 0ms, left 0ms, top 0ms',
-									'transition': 'all ' + self.options.speed + 'ms, width 0ms, height 0ms, left 0ms, top 0ms'
-								})
-								.addClass('tooltipster-content-changing');
+							self.$tooltip.addClass('tooltipster-content-changing');
 							
-							// reset the CSS transitions and finish the change animation
+							// remove the class after a while. The actual duration of the
+							// update animation may be shorter, it's set in the CSS rules
 							setTimeout(function() {
 								
 								if (self.State != 'closed') {
 									
 									self.$tooltip.removeClass('tooltipster-content-changing');
-									
-									// after the changing animation has completed, reset the
-									// CSS transitions
-									setTimeout(function() {
-										
-										if (self.State != 'closed') {
-											
-											self.$tooltip.css({
-												'-webkit-transition': self.options.speed + 'ms',
-												'-moz-transition': self.options.speed + 'ms',
-												'-o-transition': self.options.speed + 'ms',
-												'-ms-transition': self.options.speed + 'ms',
-												'transition': self.options.speed + 'ms'
-											});
-										}
-									}, self.options.speed);
 								}
-							}, self.options.speed);
+							}, 1000);
 						}
 						else {
-							self.$tooltip.fadeTo(self.options.speed, 0.5, function() {
+							self.$tooltip.fadeTo(200, 0.5, function() {
 								if (self.State != 'closed') {
-									self.$tooltip.fadeTo(self.options.speed, 1);
+									self.$tooltip.fadeTo(200, 1);
 								}
 							});
 						}
@@ -1539,6 +1600,8 @@
 					.removeData(self.namespace)
 					.off('.'+ self.namespace);
 				
+				self.$tooltip.off('.'+ self.namespace);
+				
 				// last event
 				self._trigger('destroy');
 				
@@ -1575,8 +1638,18 @@
 						}
 						
 						// final cleaning
+						
+						// normal elements
+						if (self.$el.hasClass('tooltipstered')) {
+							self.$el.removeClass('tooltipstered')
+						}
+						// SVG elements
+						else {
+							var c = self.$el.attr('class').replace('tooltipstered', '');
+							self.$el.attr('class', c);
+						}
+						
 						self.$el
-							.removeClass('tooltipstered')
 							.removeData('tooltipster-ns')
 							.removeData('tooltipster-initialTitle');
 					}
@@ -1606,7 +1679,10 @@
 				clearInterval(self.garbageCollector);
 			});
 			
-			return true;
+			// we return the scope rather than true so that the call to
+			// .tooltipster('destroy') actually returns the matched elements
+			// and applies to all of them
+			return this;
 		},
 		
 		disable: function() {
@@ -2055,11 +2131,13 @@
 		return (!deviceHasMouse && deviceHasTouchCapability);
 	}
 	
-	// this detects old versions of IE which need dirty fixes
+	// detect IE versions for dirty fixes
 	var uA = navigator.userAgent.toLowerCase(),
-		IE = (uA.indexOf('msie') != -1) ?
-			parseInt(uA.split('msie')[1]) :
-			false;
+		IE = false;
+	
+	if (uA.indexOf('msie') != -1) IE = parseInt(uA.split('msie')[1]);
+	else if (uA.toLowerCase().indexOf('trident') !== -1 && uA.indexOf(' rv:11') !== -1) IE = 11;
+	else if (uA.toLowerCase().indexOf('edge/') != -1) IE = parseInt(uA.toLowerCase().split('edge/')[1]);
 	
 	// detecting support for CSS transitions
 	function supportsTransitions() {
@@ -2168,7 +2246,7 @@
 		},
 		
 		/**
-		 * Recompute this.options from the options declared to the instance
+		 * (Re)compute this.options from the options declared to the instance
 		 */
 		_optionsInit: function(){
 			

@@ -1,7 +1,7 @@
 {
   "name": "tooltipster",
   "title": "Tooltipster",
-  "description": "A lightweight, flexible jQuery plugin enabling you to easily create semantic, modern tooltips enhanced with the power of CSS.",
+  "description": "A powerful and extensible jQuery plugin for modern tooltips.",
   "keywords": [
     "tooltip"
   ],
@@ -18,7 +18,6 @@
     },
     {
       "name": "Louis Ameline",
-      "email": "evangun2001@yahoo.fr",
       "url": "https://github.com/louisameline"
     }
   ],
