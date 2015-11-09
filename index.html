@@ -1417,18 +1417,18 @@ $('#myfield')
 			<ul>
 				<li>The best way to solve this is to give a size to your images in CSS. That way, even if they're not loaded yet, they will have a size and Tooltipster will be able to compute the appropriate position.</li>
 				<li>Another solution is to use <span class="code">.on('load', callback)</span> event listeners on your images and to call the <span class="code">reposition</span> method of the tooltip inside the callback.</li>
-				<li>The last solution is to use the <span class="code">trackOrigin</span> option. As it will check the size of the tooltip at regular intervals, this may have an impact on performance. Use this as a last resort.</li>
+				<li>The last solution is to use the <span class="code">trackTooltip</span> option. As it will check the size of the tooltip at regular intervals, this may have an impact on performance. Use this as a last resort.</li>
 			</ul>
 			
 			<h4>"Shouldn't Tooltipster remove &lt;script> tags from my content to prevent XSS exploits?"</h4>
 			
-			<p>No, Tooltipster will never tamper with your content in any way. Besides, &lt;script> tags are not the only possible threat (see <a href="https://www.owasp.org/index.php/XSS_(Cross_Site_Scripting)_Prevention_Cheat_Sheet">some good advice</a>).</p>
+			<p>No, it's not Tooltipster's job to tamper with your content in any way. Besides, &lt;script> tags are not the only possible threat (see <a href="https://www.owasp.org/index.php/XSS_(Cross_Site_Scripting)_Prevention_Cheat_Sheet">some good advice</a>).</p>
 				
 			<p>It's really up to you to decide what should be sanitized before display. You may use <span class="code">functionInit</span>, <span class="code">functionBefore</span> or <span class="code">functionFormat</span> to do so.</p>
 			
 			<h4>"Is it ok to remove elements that have a tooltip without destroying it first?"</h4>
 			
-			<p>Yes, when their origin is removed from the DOM, tooltips will destroy themselves after a few seconds. Unless we made a mistake somewhere, it means no memory leaks.</p>
+			<p>Yes, when their origin is removed from the DOM, tooltips will destroy themselves after a few seconds. Unless we made a mistake somewhere, it means that there will be no memory leaks.</p>
 			
 			<h4>"How compatible is Tooltipster with old versions of Internet Explorer ?"</h4>
 			
