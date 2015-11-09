@@ -1596,92 +1596,97 @@
 			
 			var self = this;
 			
-			self.destroyed = true;
-			
-			self._close(null, function(){
+			if (!self.destroyed) {
 				
-				self.$el
-					.removeData(self.namespace)
-					.off('.'+ self.namespace);
+				self.destroyed = true;
 				
-				self.$tooltip.off('.'+ self.namespace);
-				
-				// last event
-				self._trigger('destroy');
-				
-				// unbind private and public event listeners
-				self._off();
-				self.off();
-				
-				var ns = self.$el.data('tooltipster-ns');
-				
-				// if the origin has been removed from DOM, its data may
-				// well have been destroyed in the process and there would
-				// be nothing to clean up or restore
-				if (ns) {
+				self._close(null, function(){
 					
-					// if there are no more tooltips on this element
-					if (ns.length === 1) {
+					self.$el
+						.removeData(self.namespace)
+						.off('.'+ self.namespace);
+					
+					// the tooltip may be destroyed before it ever opened
+					if (self.$tooltip){
+						self.$tooltip.off('.' + self.namespace);
+					}
+					
+					// last event
+					self._trigger('destroy');
+					
+					// unbind private and public event listeners
+					self._off();
+					self.off();
+					
+					var ns = self.$el.data('tooltipster-ns');
+					
+					// if the origin has been removed from DOM, its data may
+					// well have been destroyed in the process and there would
+					// be nothing to clean up or restore
+					if (ns) {
 						
-						// optional restoration of a title attribute
-						var title = null;
-						if (self.options.restoration === 'previous') {
-							title = self.$el.data('tooltipster-initialTitle');
-						}
-						else if (self.options.restoration === 'current') {
+						// if there are no more tooltips on this element
+						if (ns.length === 1) {
 							
-							// old school technique to stringify when outerHTML is not supported
-							title =
-								(typeof self.Content === 'string') ?
+							// optional restoration of a title attribute
+							var title = null;
+							if (self.options.restoration === 'previous') {
+								title = self.$el.data('tooltipster-initialTitle');
+							}
+							else if (self.options.restoration === 'current') {
+								
+								// old school technique to stringify when outerHTML is not supported
+								title = (typeof self.Content === 'string') ?
 									self.Content :
 									$('<div></div>').append(self.Content).html();
+							}
+							
+							if (title) {
+								self.$el.attr('title', title);
+							}
+							
+							// final cleaning
+							
+							// normal elements
+							if (self.$el.hasClass('tooltipstered')) {
+								self.$el.removeClass('tooltipstered')
+							}
+							// SVG elements
+							else {
+								var c = self.$el.attr('class').replace('tooltipstered', '');
+								self.$el.attr('class', c);
+							}
+							
+							self.$el
+								.removeData('tooltipster-ns')
+								.removeData('tooltipster-initialTitle');
 						}
-						
-						if (title) {
-							self.$el.attr('title', title);
-						}
-						
-						// final cleaning
-						
-						// normal elements
-						if (self.$el.hasClass('tooltipstered')) {
-							self.$el.removeClass('tooltipstered')
-						}
-						// SVG elements
 						else {
-							var c = self.$el.attr('class').replace('tooltipstered', '');
-							self.$el.attr('class', c);
+							// remove the instance namespace from the list of namespaces of
+							// tooltips present on the element
+							ns = $.grep(ns, function(el, i) {
+								return el !== self.namespace;
+							});
+							self.$el.data('tooltipster-ns', ns);
 						}
-						
-						self.$el
-							.removeData('tooltipster-ns')
-							.removeData('tooltipster-initialTitle');
 					}
-					else {
-						// remove the instance namespace from the list of namespaces of
-						// tooltips present on the element
-						ns = $.grep(ns, function(el, i) {
-							return el !== self.namespace;
-						});
-						self.$el.data('tooltipster-ns', ns);
-					}
-				}
-				
-				// remove external references, just in case
-				self.$el = null;
-				self.$emitter = null;
-				self.$emitterPublic = null;
-				self.$tooltip = null;
-				self.$tooltipParent = null;
-				
-				// make sure the object is no longer referenced in there to prevent
-				// memory leaks
-				instancesLatest = $.grep(instancesLatest, function(el, i) {
-					return self !== el;
+					
+					// remove external references, just in case
+					self.$el = null;
+					self.$emitter = null;
+					self.$emitterPublic = null;
+					self.$tooltip = null;
+					self.$tooltipParent = null;
+					
+					// make sure the object is no longer referenced in there to prevent
+					// memory leaks
+					instancesLatest = $.grep(instancesLatest, function(el, i) {
+						return self !== el;
+					});
+					
+					clearInterval(self.garbageCollector);
 				});
-				
-				clearInterval(self.garbageCollector);
-			});
+			}
 			
 			// we return the scope rather than true so that the call to
 			// .tooltipster('destroy') actually returns the matched elements
