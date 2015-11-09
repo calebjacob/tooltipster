@@ -234,7 +234,7 @@ $(function() {
 		instance.on('start', function (event) {
 			
 			var open = false,
-				speed;
+				duration;
 			
 			$.each(instances, function (i, inst) {
 				
@@ -244,22 +244,22 @@ $(function() {
 						
 						open = true;
 						
-						speed = inst.option('speed');
+						duration = inst.option('animationDuration');
 						
-						inst.option('speed', 0);
+						inst.option('animationDuration', 0);
 						inst.close();
-						inst.option('speed', speed);
+						inst.option('animationDuration', duration);
 					}
 				}
 			});
 			
 			if (open) {
 				
-				speed = instance.option('speed');
+				duration = instance.option('animationDuration');
 				
-				instance.option('speed', 0);
+				instance.option('animationDuration', 0);
 				instance.open();
-				instance.option('speed', speed);
+				instance.option('animationDuration', duration);
 				
 				event.stop();
 			}

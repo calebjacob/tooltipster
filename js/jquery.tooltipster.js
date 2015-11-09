@@ -625,18 +625,22 @@
 			}
 			
 			// SVG coordinates may need fixing but we need svg.screenbox.js
-			// to provide it
-			if ($target[0] instanceof SVGElement && SVG.svgjs) {
+			// to provide it. SVGElement is IE8+
+			if (	window.SVGElement
+				&&	$target[0] instanceof SVGElement
+				&&	SVG.svgjs
+			) {
 				
 				if (!SVG.parser) {
 					SVG.prepare();
 				}
 				
-				var path = SVG.adopt($target[0]);
+				var svgEl = SVG.adopt($target[0]);
 				
-				if (path && path.screenBBox) {
+				// not all figures need (and have) screenBBox
+				if (svgEl && svgEl.screenBBox) {
 					
-					var bbox = path.screenBBox();
+					var bbox = svgEl.screenBBox();
 					
 					geo.origin.size.height = bbox.height;
 					geo.origin.size.width = bbox.width;

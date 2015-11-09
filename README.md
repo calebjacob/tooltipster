@@ -2,7 +2,8 @@ Tooltipster
 ===========
 
 An extensible jQuery tooltip plugin by Caleb Jacob and Louis Ameline under MIT license.  
-Compatible with Mozilla Firefox, Google Chrome, IE6+ and others. Requires jQuery 1.8+
+Compatible with Mozilla Firefox, Google Chrome, IE6+ and others.  
+Requires jQuery 1.10+ (see the compatibility note in the doc).
 
 A reminder of options/methods lies below. For detailed documentation, visit http://iamceege.github.io/tooltipster/
 
@@ -35,6 +36,8 @@ trackerInterval
 trackOrigin  
 trackTooltip  
 trigger  
+triggerClose  
+triggerOpen  
 updateAnimation  
 zIndex  
 
