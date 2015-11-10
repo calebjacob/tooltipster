@@ -1,12 +1,10 @@
-/*! Tooltipster 4.0.0rc29 */
+/*! Tooltipster 4.0.0rc30 */
 
 /**
- * Released on 2015-11-09
+ * Released on 2015-11-10
  * 
  * A rockin' custom tooltip jQuery plugin
  * Developed by Caleb Jacob and Louis Ameline under the MIT license http://opensource.org/licenses/MIT
- * 
- * Requires jQuery 1.8 (1.7 is fine too except for SVG in IE)
  * 
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
  * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
@@ -56,7 +54,7 @@
 				hover: false,
 				click: false
 			},
-			updateAnimation: true,
+			updateAnimation: 'rotate',
 			zIndex: 9999999
 		},
 		instancesLatest = [];
@@ -1545,7 +1543,10 @@
 						
 						if (supportsTransitions()) {
 							
-							self.$tooltip.addClass('tooltipster-content-changing');
+							// keep the reference in the local scope
+							var animation = self.options.updateAnimation;
+							
+							self.$tooltip.addClass('tooltipster-update-'+ animation);
 							
 							// remove the class after a while. The actual duration of the
 							// update animation may be shorter, it's set in the CSS rules
@@ -1553,7 +1554,7 @@
 								
 								if (self.State != 'closed') {
 									
-									self.$tooltip.removeClass('tooltipster-content-changing');
+									self.$tooltip.removeClass('tooltipster-update-'+ animation);
 								}
 							}, 1000);
 						}

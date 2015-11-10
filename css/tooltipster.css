@@ -36,6 +36,8 @@
 
 /* ANIMATIONS */
 
+/* Open/close animations */
+
 /* fade */
 
 .tooltipster-fade {
@@ -169,11 +171,29 @@
 	opacity: 0;
 }
 
-/* changing content */
+/* Update animations */
 
-/* an animation rather than a transition because
+/* We use animations rather than transitions here because
  transition times may be specified in the style tag due to
  animationDuration, and we try to avoid using !important */
+
+/* fade */
+
+@keyframes tooltipster-fading {
+	0% {
+		opacity: 0;
+	}
+	100% {
+		opacity: 1;
+	}
+}
+
+.tooltipster-update-fade {
+	animation: tooltipster-fading 400ms;
+}
+
+/* rotate */
+
 @keyframes tooltipster-rotating {
 	25% {
 		transform: rotate(-2deg);
@@ -186,11 +206,24 @@
 	}
 }
 
-.tooltipster-content-changing {
+.tooltipster-update-rotate {
 	animation: tooltipster-rotating 600ms;
 }
 
+/* scale */
 
+@keyframes tooltipster-scaling {
+	50% {
+		transform: scale(1.1);
+	}
+	100% {
+		transform: scale(1);
+	}
+}
+
+.tooltipster-update-scale {
+	animation: tooltipster-scaling 600ms;
+}
 
 
 
