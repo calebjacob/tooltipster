@@ -33,6 +33,7 @@
 	<script type="text/javascript" src="doc/js/lang-css.js"></script>
 	<script type="text/javascript" src="doc/js/scripts.js"></script>
 	<script type="text/javascript" src="js/jquery.tooltipster.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.5.3/clipboard.js"></script>
 	
 	<!--[if lt IE 9]>
 		<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -624,7 +625,7 @@ $('.tooltip').tooltipster({
 					<td>Returns the instance of Tooltipster associated to the tooltip. If the selector matches multiple origins, only the instance of the first will be returned.</td>
 				</tr>
 				<tr>
-					<td><h4>on, once, off, triggerHandler</h4></td>
+					<td><h4>on, one, off, triggerHandler</h4></td>
 					<td>callback</td>
 					<td>Use Tooltipster's events (<a href="#events">see example</a>).</td>
 				</tr>
@@ -1161,7 +1162,7 @@ $('body').on('mouseenter', '.tooltip:not(.tooltipstered)', function(){
 			
 			<h3 id="events">Event-driven Tooltipster <a href="#usecases">&#8657;</a></h3>
 			
-			<p>Advanced users with complex needs may take advantage of the many events that Tooltipster triggers during its tasks. You may handle your listeners using jQuery's syntax: <span class="code">instance.on()</span>, <span class="code">instance.once()</span>, <span class="code">instance.off()</span> and <span class="code">instance.triggerHandler()</span>.</p>
+			<p>Advanced users with complex needs may take advantage of the many events that Tooltipster triggers during its tasks. You may handle your listeners using jQuery's syntax: <span class="code">instance.on()</span>, <span class="code">instance.one()</span>, <span class="code">instance.off()</span> and <span class="code">instance.triggerHandler()</span>.</p>
 			
 			<p>The best thing about these events is that instead of having to provide a single callback to <span class="code">functionBefore</span> and the like, you may easily bind several handlers to the event emitter. For example, instead of doing this:</p>
 			
@@ -1390,6 +1391,8 @@ $('#myfield')
 			<h3 id="community">Community submitted use cases <a href="#usecases">&#8657;</a></h3>
 			
 			<p><a href="http://stackoverflow.com/questions/14741688/how-to-display-messages-from-jquery-validate-plugin-inside-of-tooltipster-toolti">Using Tooltipster alongside jQuery Validate</a> by <a href="https://github.com/sparky672">sparky672</a></p>
+			
+			<p><a href="https://github.com/iamceege/tooltipster/issues/485">Using Tooltipster alongside Clipboard</a> by Louis</p>
 			
 			<p>Did you do something awesome with Tooltipster? <a href="#talk">Tell us</a> and we'll post it up here!</p>
 		</section>

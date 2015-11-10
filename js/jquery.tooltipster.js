@@ -1747,8 +1747,8 @@
 		/**
 		 * For public use only, not to be used by display plugins
 		 */
-		once: function(){
-			this.$emitterPublic.once.apply(this.$emitterPublic, Array.prototype.slice.apply(arguments));
+		one: function(){
+			this.$emitterPublic.one.apply(this.$emitterPublic, Array.prototype.slice.apply(arguments));
 			return this;
 		},
 		

@@ -63,6 +63,7 @@ elementOrigin()
 elementTooltip()  
 enable()  
 instance()  
+on, one, off, triggerHandler  
 open([callback])  
 option(optionName)  
 option(optionName, optionValue)  

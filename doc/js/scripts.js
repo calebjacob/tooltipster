@@ -264,7 +264,8 @@ $(function() {
 				event.stop();
 			}
 		});
-	})
+	});
+	
 	
 	// themes
 	
