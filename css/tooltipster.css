@@ -174,8 +174,9 @@
 /* Update animations */
 
 /* We use animations rather than transitions here because
- transition times may be specified in the style tag due to
- animationDuration, and we try to avoid using !important */
+ transition durations may be specified in the style tag due to
+ animationDuration, and we try to avoid collisions and the use
+ of !important */
 
 /* fade */
 

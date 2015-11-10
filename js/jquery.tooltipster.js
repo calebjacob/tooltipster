@@ -69,10 +69,13 @@
 			close: [],
 			open: []
 		};
-		this.tracker = null;
+		// the schedule time of DOM removal
+		this.closingTime;
 		// this will be the user content shown in the tooltip. A capital "C" is used
 		// because there is also a method called content()
 		this.Content;
+		// for the size tracker
+		this.contentBcr;
 		// to keep the tooltip from opening once it's destroyed
 		this.destroyed = false;
 		// an instance of the chosen display plugin
@@ -88,6 +91,7 @@
 		// with our internal listeners
 		this.$emitterPublic = $({});
 		this.enabled = true;
+		// the reference to the gc interval
 		this.garbageCollector;
 		// various position and size data recomputed before each repositioning
 		this.geometry;
@@ -99,14 +103,15 @@
 		this.$originParents;
 		// State (capital S) can be either : appearing, stable, disappearing, closed
 		this.State = 'closed';
+		// timeout references
 		this.timeouts = {
 			close: [],
 			open: null
 		};
 		// this will be the tooltip element (jQuery wrapped HTML element)
 		this.$tooltip;
-		// for the size tracker
-		this.contentBcr;
+		// the reference to the tracker interval
+		this.tracker = null;
 		// the element the tooltip will be appended to
 		this.$tooltipParent;
 		// the tooltip left/top coordinates, saved after each repositioning
@@ -259,78 +264,105 @@
 				self.callbacks.close = [];
 			};
 			
-			// close
-			if (self.State == 'stable' || self.State == 'appearing') {
+			if (self.State != 'closed') {
 				
-				self.state('disappearing');
+				var necessary = true,
+					d = new Date(),
+					now = d.getTime(),
+					newClosingTime = now + self.options.animationDuration[1];
 				
-				var finish = function() {
+				// the tooltip may already already be disappearing, but if a new
+				// call to close() is made after the animationDuration was changed
+				// to 0 (for example), we ought to actually close it sooner than
+				// previously scheduled. In that case it should be noted that the
+				// browser will not adapt the animation duration to the new
+				// animationDuration that was set after the start of the closing
+				// animation.
+				// Note: the same thing could be considered at opening, but is not
+				// really useful since the tooltip is actually opened immediately
+				// upon a call to _openNow(). Since it would not make the opening
+				// animation finish sooner, its sole impact would be to trigger the
+				// state event and the open callbacks sooner than the actual end of
+				// the opening animation, which is not great.
+				if (self.State == 'disappearing') {
 					
-					// stop the tracker
-					clearInterval(self.tracker);
+					if (newClosingTime > self.closingTime) {
+						necessary = false;
+					}
+				}
+				
+				if (necessary) {
 					
-					// a beforeClose option has been asked several times but would
-					// probably useless since the content element is still accessible
-					// via ::content(), and because people can always use listeners
-					// inside their content to track what's going on. For the sake of
-					// simplicity, this has been denied. Bur for the rare people who
-					// really need the option (for old browsers or for the case where
-					// detaching the content is actually destructive, for file or
-					// password inputs for example), this event will do the work.
-					self._trigger({
-						type: 'beforeClose',
-						event: event
-					});
+					self.closingTime = newClosingTime;
 					
-					// detach our content object first, so the next jQuery's remove()
-					// call does not unbind its event handlers
-					if (typeof self.Content == 'object' && self.Content !== null) {
-						self.Content.detach();
+					if (self.State != 'disappearing') {
+						self.state('disappearing');
 					}
 					
-					self.$tooltip.remove();
-					self.$tooltip = null;
-					
-					// unbind orientationchange, scroll and resize listeners
-					$(window).off('.'+ self.namespace);
-					
-					// unbind scroll listeners
-					self.$originParents.each(function(i, el){
-						$(el).off('scroll.'+ self.namespace);
-					});
-					// clear the array to prevent memory leaks
-					self.$originParents = null;
-					
-					// unbind any auto-closing click/touch listeners
-					$('body').off('.'+ self.namespace +'-autoClose');
-					
-					// unbind any auto-closing hover listeners
-					self.$el.off('.'+ self.namespace +'-autoClose');
-					
-					self.state('closed');
-					
-					// trigger event
-					self._trigger({
-						type: 'after',
-						event: event
-					});
-					
-					// call our constructor custom callback function
-					if (self.options.functionAfter) {
-						self.options.functionAfter.call(self, self, {
-							event: event,
-							origin: self.$el[0]
+					var finish = function() {
+						
+						// stop the tracker
+						clearInterval(self.tracker);
+						
+						// a beforeClose option has been asked several times but would
+						// probably useless since the content element is still accessible
+						// via ::content(), and because people can always use listeners
+						// inside their content to track what's going on. For the sake of
+						// simplicity, this has been denied. Bur for the rare people who
+						// really need the option (for old browsers or for the case where
+						// detaching the content is actually destructive, for file or
+						// password inputs for example), this event will do the work.
+						self._trigger({
+							type: 'beforeClose',
+							event: event
 						});
-					}
+						
+						// detach our content object first, so the next jQuery's remove()
+						// call does not unbind its event handlers
+						if (typeof self.Content == 'object' && self.Content !== null) {
+							self.Content.detach();
+						}
+						
+						self.$tooltip.remove();
+						self.$tooltip = null;
+						
+						// unbind orientationchange, scroll and resize listeners
+						$(window).off('.'+ self.namespace);
+						
+						// unbind scroll listeners
+						self.$originParents.each(function(i, el){
+							$(el).off('scroll.'+ self.namespace);
+						});
+						// clear the array to prevent memory leaks
+						self.$originParents = null;
+						
+						// unbind any auto-closing click/touch listeners
+						$('body').off('.'+ self.namespace +'-autoClose');
+						
+						// unbind any auto-closing hover listeners
+						self.$el.off('.'+ self.namespace +'-autoClose');
+						
+						self.state('closed');
+						
+						// trigger event
+						self._trigger({
+							type: 'after',
+							event: event
+						});
+						
+						// call our constructor custom callback function
+						if (self.options.functionAfter) {
+							self.options.functionAfter.call(self, self, {
+								event: event,
+								origin: self.$el[0]
+							});
+						}
+						
+						// call our method custom callbacks functions
+						finishCallbacks();
+					};
 					
-					// call our method custom callbacks functions
-					finishCallbacks();
-				};
-				
-				if (supportsTransitions()) {
-					
-					// if null, the value in CSS rules will prevail
-					if (self.options.animationDuration) {
+					if (supportsTransitions()) {
 						
 						self.$tooltip.css({
 							'-moz-animation-duration': self.options.animationDuration[1] + 'ms',
@@ -340,36 +372,32 @@
 							'animation-duration': self.options.animationDuration[1] + 'ms',
 							'transition-duration': self.options.animationDuration[1] + 'ms'
 						});
+						
+						self.$tooltip
+							// clear both potential open and close tasks
+							.clearQueue()
+							.removeClass('tooltipster-show')
+							// for transitions only
+							.addClass('tooltipster-dying');
+						
+						if (self.options.animationDuration[1] > 0) {
+							self.$tooltip.delay(self.options.animationDuration[1]);
+						}
+						
+						self.$tooltip.queue(finish);
 					}
-					
-					self.$tooltip
-						.clearQueue()
-						.removeClass('tooltipster-show')
-						// for transitions only
-						.addClass('tooltipster-dying');
-					
-					if (self.options.animationDuration && self.options.animationDuration[1] > 0) {
-						self.$tooltip.delay(self.options.animationDuration[1]);
+					else {
+						
+						self.$tooltip
+							.stop()
+							.fadeOut(self.options.animationDuration[1], finish);
 					}
-					
-					self.$tooltip.queue(finish);
 				}
-				else {
-					
-					// if self.options was set to null to make the CSS rules
-					// prevail, fall back to 350ms on non-compatible browsers
-					var duration = self.options ?
-						self.options.animationDuration[1] :
-						350;
-					
-					self.$tooltip
-						.stop()
-						.fadeOut(duration, finish);
-				}
+				
 			}
 			// if the tooltip is already closed, we still need to trigger
 			// the method custom callbacks
-			else if (self.State == 'closed') {
+			else {
 				finishCallbacks();
 			}
 			
@@ -763,7 +791,6 @@
 						self._openNow(event);
 					}
 				}
-				
 			}
 		},
 		
@@ -861,7 +888,7 @@
 											.removeClass('tooltipster-dying')
 											.addClass('tooltipster-show');
 										
-										if (self.options.animationDuration && self.options.animationDuration[0] > 0) {
+										if (self.options.animationDuration[0] > 0) {
 											self.$tooltip.delay(self.options.animationDuration[0]);
 										}
 										
@@ -888,9 +915,7 @@
 								
 								// the timer (if any) will start when the tooltip has fully appeared
 								// after its transition
-								extraTime = self.options.animationDuration ?
-									self.options.animationDuration[0] :
-									0;
+								extraTime = self.options.animationDuration[0];
 								
 								// build the base of our tooltip
 								self.$tooltip = self.displayPlugin.build();
@@ -942,17 +967,14 @@
 										.addClass('tooltipster-' + self.options.animation)
 										.addClass('tooltipster-initial');
 									
-									if (self.options.animationDuration) {
-										
-										self.$tooltip.css({
-											'-moz-animation-duration': self.options.animationDuration[0] + 'ms',
-											'-ms-animation-duration': self.options.animationDuration[0] + 'ms',
-											'-o-animation-duration': self.options.animationDuration[0] + 'ms',
-											'-webkit-animation-duration': self.options.animationDuration[0] + 'ms',
-											'animation-duration': self.options.animationDuration[0] + 'ms',
-											'transition-duration': self.options.animationDuration[0] + 'ms'
-										});
-									}
+									self.$tooltip.css({
+										'-moz-animation-duration': self.options.animationDuration[0] + 'ms',
+										'-ms-animation-duration': self.options.animationDuration[0] + 'ms',
+										'-o-animation-duration': self.options.animationDuration[0] + 'ms',
+										'-webkit-animation-duration': self.options.animationDuration[0] + 'ms',
+										'animation-duration': self.options.animationDuration[0] + 'ms',
+										'transition-duration': self.options.animationDuration[0] + 'ms'
+									});
 									
 									setTimeout(
 										function() {
@@ -964,7 +986,7 @@
 													.addClass('tooltipster-show')
 													.removeClass('tooltipster-initial');
 												
-												if(self.options.animationDuration && self.options.animationDuration[0] > 0){
+												if(self.options.animationDuration[0] > 0){
 													self.$tooltip.delay(self.options.animationDuration[0]);
 												}
 												
@@ -976,14 +998,9 @@
 								}
 								else {
 									
-									// same as the closing animation: a 350ms fallback
-									var duration = self.options.animationDuration ?
-										self.options.animationDuration[0] :
-										350;
-									
 									self.$tooltip
 										.css('display', 'none')
-										.fadeIn(duration, finish);
+										.fadeIn(self.options.animationDuration[0], finish);
 								}
 								
 								// will check if our tooltip origin is removed while the tooltip is
