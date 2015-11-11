@@ -181,7 +181,7 @@ $(function() {
 		});
 	
 	$('#demo-position').tooltipster({
-		content: $('<div>Most accurate tooltips ever! Great to create menus too :)<br /><br />A<br />B<br />C<br />D<br />E<br />F</div>'),
+		content: $('<div>Most accurate tooltips ever! Great to create menus too :)<br /><br />A<br />B<br />C<br />D</div>'),
 		// 8 extra pixels for the arrow to overflow the grid
 		maxWidth: 258,
 		side: ['right'],

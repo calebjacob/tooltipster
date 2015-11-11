@@ -1,7 +1,8 @@
 Tooltipster
 ===========
 
-An extensible jQuery tooltip plugin by Caleb Jacob and Louis Ameline under MIT license.  
+A flexible and extensible jQuery tooltip plugin by Caleb Jacob and Louis Ameline under MIT license.  
+Simple enough for everyone, powerful enough for everything.  
 Compatible with Mozilla Firefox, Google Chrome, IE6+ and others.  
 Requires jQuery 1.10+ (see the compatibility note in the doc).
 
