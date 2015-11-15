@@ -117,7 +117,6 @@ $(function() {
 	$('#demo-multiple').tooltipster({
 		animation: 'grow',
 		content: 'South',
-		delay: 200,
 		multiple: true,
 		side: 'bottom',
 		theme: 'tooltipster-light'

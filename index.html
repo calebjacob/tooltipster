@@ -27,7 +27,7 @@
 	<link rel="stylesheet" type="text/css" href="css/themes/tooltipster-punk.css" />
 	<link rel="stylesheet" type="text/css" href="css/themes/tooltipster-shadow.css" />
 	
-	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js"></script>
+	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.0/jquery.min.js"></script>
 	<script type="text/javascript" src="doc/js/jquery.jgfeed.js"></script>
 	<script type="text/javascript" src="doc/js/prettify.js"></script>
 	<script type="text/javascript" src="doc/js/lang-css.js"></script>
@@ -160,7 +160,7 @@
 &lt;/head&#62;
 </pre>
 			
-			<p>Compatibility note: jQuery 1.7 is enough except if you need SVG support in IE (then use jQuery 1.10+). Tooltipster does not work at all with jQuery 1.8 in IE.</p>
+			<p>Compatibility note: jQuery 1.7 is enough except if you need SVG support in IE (then use jQuery 1.10+). Tooltipster does not work at all with jQuery 1.8 in IE9.</p>
 			
 			<h3>2. Set up your HTML</h3>
 			
@@ -214,7 +214,7 @@ $('.tooltip').tooltipster({
 			
 			<h3 id="further">5. Using HTML tags inside your tooltips</h3>
 			
-			<p>Tooltipster allows you to use any HTML markup inside your tooltips. This means you can insert things like images and text formatting tags. To achieve this, the preferred method is to provide your content as an HTML element, which may be jQuery-wrapped, in the options. Advanced users will resort to templates. Example:</p>
+			<p>Tooltipster allows you to use any HTML markup inside your tooltips. It means that you can insert things like images and text formatting tags. To achieve this, the preferred method is to provide your content as an HTML element (which may be jQuery-wrapped) in the options. Advanced users will resort to templates. Example:</p>
 			
 			<pre class="prettyprint">
 &lt;head&#62;
@@ -323,11 +323,6 @@ $('.tooltip').tooltipster({
 					<td>Delay how long it takes (in milliseconds) for the tooltip to start its opening and closing animations when the 'hover' triggers are used. If you wish to specify different delays for opening and closing, you may provide an array of two different values. <strong>Default: 300</strong></td>
 				</tr>
 				<tr>
-					<td><h4>displayPlugin</h4></td>
-					<td>string</td>
-					<td>The name of the display plugin to use. <strong>Default: 'default'</strong></td>
-				</tr>
-				<tr>
 					<td><h4>distance</h4></td>
 					<td>integer,<br />integer[]</td>
 					<td>The distance between the origin and the tooltip, in pixels. The value may be an integer or an array of integers (in the usual CSS syntax) if you wish to specify a different distance for each side. <strong>Default: 6</strong></td>
@@ -365,7 +360,7 @@ $('.tooltip').tooltipster({
 				<tr>
 					<td><h4>interactive</h4></td>
 					<td>boolean</td>
-					<td>Give users the possibility to interact with the content of the tooltip. If you want them to be able to make clicks, fill forms or do other interactions inside the tooltip, you have to set this option to true. When the 'hover' close trigger is used, the user has to move the cursor over the tooltip before it starts closing (the 'delay' option can give more time to the user). <strong>Default: false</strong></td>
+					<td>Give users the possibility to interact with the content of the tooltip. If you want them to be able to make clicks, fill forms or do other interactions inside the tooltip, you have to set this option to true. When the 'hover' close trigger is used, the user has to move the cursor to the tooltip before it starts closing (this lapse of time has its duration set by the 'delay' option). <strong>Default: false</strong></td>
 				</tr>
 				<tr>
 					<td><h4>maxWidth</h4></td>
@@ -381,6 +376,11 @@ $('.tooltip').tooltipster({
 					<td><h4>multiple</h4></td>
 					<td>boolean</td>
 					<td>Allows you to put multiple tooltips on a single element (<a href="#multiple">see example</a>). When set to true, the returnObjects option is automatically set to true as well. <strong>Default: false</strong></td>
+				</tr>
+				<tr>
+					<td><h4>plugins</h4></td>
+					<td>string[]</td>
+					<td>The names of plugins to be used by Tooltipster. <strong>Default: ['default']</strong></td>
 				</tr>
 				<tr>
 					<td><h4>repositionOnScroll</h4></td>
@@ -533,7 +533,7 @@ $('#my-other-tooltip')
     .tooltipster('open')
     .tooltipster('content', 'My new content');</pre>
 			
-			<p>There is another way to call instance methods which will be discussed in <a href="#object-oriented">another section below</a>. Most users just need to know that it's the recommended way of calling methods when you are inside <span class="code">functionInit</span>, <span class="code">functionBefore</span> and the like. It goes like this:</p>
+			<p>There is another way to call instance methods which will be discussed in <a href="#object-oriented">another section below</a>. Users with simple use cases just need to know that it's the recommended way of calling methods when you are inside <span class="code">functionInit</span>, <span class="code">functionBefore</span> and the like. It goes like this:</p>
 			
 			<pre class="prettyprint">
 instance.methodName([argument1] [, argument2]);</pre>
@@ -608,7 +608,7 @@ $('.tooltip').tooltipster({
 				<tr>
 					<td><h4>open</h4></td>
 					<td>callback</td>
-					<td>Opens the tooltip. The `callback` function argument is optional (see its <a href="#callback_arguments">input signature</a>).</td>
+					<td>Opens the tooltip. The `callback` function argument is optional (see its <a href="#callback_arguments">input signature</a>) and, if provided, is called when the opening animation has ended.</td>
 				</tr>
 				<tr>
 					<td><h4>option (getter)</h4></td>
@@ -648,7 +648,7 @@ $.fn.tooltipster(methodName [, argument]);</pre>
 				<tr>
 					<td><h4>instances</h4></td>
 					<td>None<br />OR selector<br />OR HTML element</td>
-					<td>Returns the instances of Tooltipster of all tooltips set on the element(s) matched by the second argument. If there is no argument, then all instances of all tooltips present in the page are returned.</td>
+					<td>Returns the instances of Tooltipster of all tooltips set on the element(s) matched by the argument. If there is no argument, then all instances of all tooltips present in the page are returned.</td>
 				</tr>
 				<tr>
 					<td><h4>instancesLatest</h4></td>
@@ -703,7 +703,7 @@ var instances = $.fn.tooltipster('instancesLatest');
 				<li><a href="#apicontent">Updating a tooltip's content</a></li>
 				<li><a href="#triggers">Setting when a tooltip should open and close</a></li>
 				<li><a href="#ajax">Using AJAX to generate your tooltip content</a></li>
-				<li><a href="#sides">Forcing or disabling given sides</a></li>
+				<li><a href="#sides">Forcing or disabling sides</a></li>
 				<li><a href="#positioning">Achieving custom positioning</a></li>
 				<li><a href="#data-attributes">Specifiying options through data-attributes</a></li>
 				<li><a href="#formatting">Working with data sets</a></li>
@@ -754,7 +754,7 @@ $('.tooltip').tooltipster({
 			
 			<pre class="prettyprint">
 $('#myelement').tooltipster('content', 'My new content');</pre>
-			<p>By default, Tooltipster will play a subtle animation when the content changes. To tweak the animation, override the <span class="code">.tooltipster-content-changing</span> class in your CSS. It's important to note that only CSS transforms will be animated. To disable this animation, set the <span class="code">updateAnimation</span> option to false.</p>
+			<p>Tooltipster plays a subtle animation when the content changes. This animation may be changed or disabled through the <span class="code">updateAnimation</span> option.</p>
 			
 			<h3 id="triggers">Setting when a tooltip should open and close <a href="#usecases">&#8657;</a></h3>
 			
@@ -819,7 +819,7 @@ $('#example').tooltipster({
 			
 			<h3 id="ajax">Using AJAX to generate your tooltip content <a href="#usecases">&#8657;</a></h3>
 			
-			<p>Tooltipster gives you the ability to fire a custom function when a tooltip is initialized (<span class="code">functionInit</span>), but also every time the tooltip starts appearing (<span class="code">functionBefore</span>), when it has fully appeared (<span class="code">functionReady</span>) or when it has disappeared (<span class="code">functionAfter</span>).</p>
+			<p>Tooltipster gives you the ability to fire a custom function when a tooltip is initialized (<span class="code">functionInit</span>), but also every time the tooltip is about to open (<span class="code">functionBefore</span>), when it has opened (<span class="code">functionReady</span>) or after it has closed (<span class="code">functionAfter</span>).</p>
 			
 			<p>One great use for this is to grab dynamic content for your tooltips via AJAX. In this example we will use <span class="code">functionBefore</span> to load data the first time the tooltip is opened. Until the data has been loaded, we will display a "Loading..." notification:</p>
 			
@@ -850,7 +850,7 @@ $('.tooltip').tooltipster({
     }
 });</pre>
 			
-			<p>In addition to this, you may provide a function as the callback argument of the open/close methods. If the tooltip is already in the state you are asking for (open/closed), the callback is executed immediately. Please note that if the open/close action is somehow cancelled before it has completed its animation, the callback function will never be called.</p>
+			<p>In addition to this, you may provide a function as the callback argument of the open/close methods. If the tooltip is already in the state you are asking for (open & stable / closed), the callback is executed immediately. Please note that if the open/close action is somehow cancelled before it has completed its animation, the callback function will never be called.</p>
 			<pre class="prettyprint">
 $(document).ready(function() {
    
@@ -868,7 +868,7 @@ $(document).ready(function() {
 });
 </pre>
 			
-			<h3 id="sides">Forcing or disabling given sides <a href="#usecases">&#8657;</a></h3>
+			<h3 id="sides">Forcing or disabling sides <a href="#usecases">&#8657;</a></h3>
 			
 			<p>Let's hover a little on how the <span class="code">side</span> option works.<br />You have two options: provide either a string, like <span class="code">side: 'top'</span>, or an array of strings, like <span class="code">side: ['top', 'bottom']</span> for example.</p>
 			
@@ -1101,7 +1101,7 @@ $('#my-element').tooltipster();
 
 $('#my-element').tooltipster('open').tooltipster('content', 'My new content');</pre>
 			
-			<p>Can also be written like this:</p>
+			<p>...can also be written like this:</p>
 			
 			<pre class="prettyprint">
 $('#my-element').tooltipster();
@@ -1175,7 +1175,7 @@ $('#my-element').tooltipster({
 			
 			<p>We chose not to include that option directly because there is no solution that would be both 100% reliable and fast at the same time, and we wanted you to be aware of it before you proceeded. We recommend that you initialize tooltips manually after you create elements that should be tooltipped, in order to avoid any surprises. We do not provide support for issues that might arise from live binding.</p>
 			
-			<p>If you go the delegation way, you will rely on the bubbling of events (mouseenter or click) triggered on their origin. That may be an issue if these events are stopped from bubbling at some point, and you might run into race conditions depending on how you handle things. And of course, the tooltips won't be initialized until their origin is hovered/clicked, which may be an issue if you wish to manipulate them programmatically.</p>
+			<p>If you go the delegation way, you will rely on the bubbling of events (mouseenter or click) triggered on their origin. That may be an issue if these events are stopped from bubbling at some point, and you might run into race conditions depending on how you handle things. And of course, the tooltips won't be initialized until their origin is hovered/clicked, which may be an issue if you wish to manipulate them programmatically or if you use a plugin which is supposed to start working before the tooltip opens.</p>
 			
 			<p>If you understand these caveats and are willing to proceed, the code below will do the work. You might want to change ".tooltip" to something else and switch from <span class="code">'mouseenter'</span> to <span class="code">'click'</span> if you want a click trigger.</p>
 			
@@ -1207,7 +1207,7 @@ $("#my-tooltip").tooltipster({
 			
 			
 			<pre class="prettyprint">
-var instance = $("#my-tooltip").tooltipster({}).instance();
+var instance = $("#my-tooltip").tooltipster().instance();
 
 instance
     .on('before', doThis)

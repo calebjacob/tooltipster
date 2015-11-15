@@ -1,7 +1,7 @@
-/*! Tooltipster 4.0.0rc30 */
+/*! Tooltipster 4.0.0rc31 */
 
 /**
- * Released on 2015-11-10
+ * Released on 2015-11-15
  * 
  * A rockin' custom tooltip jQuery plugin
  * Developed by Caleb Jacob and Louis Ameline under the MIT license http://opensource.org/licenses/MIT
@@ -24,7 +24,6 @@
 			contentCloning: false,
 			debug: true,
 			delay: 300,
-			displayPlugin: 'default',
 			functionInit: null,
 			functionBefore: null,
 			functionReady: null,
@@ -35,6 +34,7 @@
 			// must be 'body' for now, or an element positioned at (0, 0)
 			// in the document, typically like very top views of an app.
 			parent: 'body',
+			plugins: ['default'],
 			repositionOnScroll: false,
 			restoration: 'none',
 			theme: [],
@@ -78,8 +78,6 @@
 		this.contentBcr;
 		// to keep the tooltip from opening once it's destroyed
 		this.destroyed = false;
-		// an instance of the chosen display plugin
-		this.displayPlugin;
 		// this is the element which gets one or more tooltips, also called "origin"
 		this.$el = $(element);
 		// we can't emit directly on the instance because if a method with the same
@@ -95,12 +93,16 @@
 		this.garbageCollector;
 		// various position and size data recomputed before each repositioning
 		this.geometry;
+		// proxy the variable for display plugins who may use it
+		this.IE = IE;
 		this.mouseIsOverOrigin = false;
 		// a unique namespace per instance
 		this.namespace = 'tooltipster-'+ Math.round(Math.random()*100000);
 		this.options = $.extend(true, {}, defaults, options);
 		// will be used to support origins in scrollable areas
 		this.$originParents;
+		// to remove themes if needed
+		this.previousThemes = [];
 		// State (capital S) can be either : appearing, stable, disappearing, closed
 		this.State = 'closed';
 		// timeout references
@@ -108,12 +110,11 @@
 			close: [],
 			open: null
 		};
-		// this will be the tooltip element (jQuery wrapped HTML element)
+		// this will be the tooltip element (jQuery wrapped HTML element).
+		// It's the job of a plugin to create it and append it to the DOM
 		this.$tooltip;
 		// the reference to the tracker interval
 		this.tracker = null;
-		// the element the tooltip will be appended to
-		this.$tooltipParent;
 		// the tooltip left/top coordinates, saved after each repositioning
 		this.tooltipCoord;
 		
@@ -182,62 +183,38 @@
 				}
 			}
 			
-			// for 'click' and 'hover' open triggers : bind on events to open the tooltip.
-			// Closing is now handled in _openNow() because of its bindings.
-			// Notes about touch events :
-				// - mouseenter, mouseleave and clicks happen even on pure touch devices
-				//   because they are emulated. deviceIsPureTouch() is a simple attempt
-				//   to detect them.
-				// - on hybrid devices, we do not prevent touch gesture from opening
-				//   tooltips. It would be too complex to differentiate real mouse events
-				//   from emulated ones.
-				// - we check deviceIsPureTouch() at each event rather than prior to
-				//   binding because the situation may change during browsing
-			if (self.options.triggerOpen.hover) {
-				
-				self.$el.on('mouseenter.'+ self.namespace, function(event) {
-					if (!deviceIsPureTouch() || self.options.touchDevices) {
-						self.mouseIsOverOrigin = true;
-						self._open(event);
-					}
-				});
-				
-				// for touch interaction
-				if (deviceHasTouchCapability && self.options.touchDevices) {
-					
-					// for touch devices, we immediately display the tooltip because we
-					// cannot rely on mouseleave to handle the delay
-					self.$el.on('touchstart.'+ self.namespace, function(event) {
-						self._openNow(event);
-					});
-				}
-			}
-			
-			if (self.options.triggerOpen.click) {
-				
-				// note : for touch devices, we do not bind on touchstart, we only rely
-				// on the emulated clicks (triggered by taps)
-				self.$el.on('click.'+ self.namespace, function(event) {
-					if (!deviceIsPureTouch() || self.options.touchDevices) {
-						self._openNow(event);
-					}
-				});
-			}
-			
-			if (self.options.triggerClose.mouseleave) {
-				
-				self.$el.on('mouseleave.'+ self.namespace, function() {
-					if (!deviceIsPureTouch() || self.options.touchDevices) {
-						self.mouseIsOverOrigin = false;
-					}
-				});
-			}
+			// set listeners on the origin
+			self._prepareOrigin();
 			
 			self.garbageCollector = setInterval(function() {
 				if (!bodyContains(self.$el)) {
 					self.destroy();
 				}
 			}, 20000);
+			
+			// init plugins
+			$.each(self.options.plugins, function(i, plugin){
+				
+				var pluginClass = $.tooltipster.plugins[plugin];
+				
+				if (pluginClass) {
+					new pluginClass(self);
+				}
+				else {
+					throw new Error('The "' + plugin + '" plugin is not defined');
+				}
+			});
+			
+			self
+				// prepare the tooltip when it gets created. This event must
+				// be fired by a plugin
+				._on('create', function(){
+					self._prepareTooltip();
+				})
+				// save position information when it's sent by a plugin
+				._on('reposition', function(e){
+					self.tooltipCoord = e.position;
+				});
 		},
 		
 		_close: function(event, callback) {
@@ -323,25 +300,28 @@
 							self.Content.detach();
 						}
 						
-						self.$tooltip.remove();
-						self.$tooltip = null;
+						// unbind listeners which are no longer needed
 						
-						// unbind orientationchange, scroll and resize listeners
-						$(window).off('.'+ self.namespace);
+						self.$tooltip
+							.off('.'+ self.namespace +'-triggerClose')
+							.removeClass('tooltipster-dying');
 						
-						// unbind scroll listeners
+						// orientationchange, scroll and resize listeners
+						$(window).off('.'+ self.namespace +'-triggerClose');
+						
+						// scroll listeners
 						self.$originParents.each(function(i, el){
-							$(el).off('scroll.'+ self.namespace);
+							$(el).off('scroll.'+ self.namespace +'-triggerClose');
 						});
 						// clear the array to prevent memory leaks
 						self.$originParents = null;
 						
-						// unbind any auto-closing click/touch listeners
-						$('body').off('.'+ self.namespace +'-autoClose');
+						$('body').off('.'+ self.namespace +'-triggerClose');
 						
-						// unbind any auto-closing hover listeners
-						self.$el.off('.'+ self.namespace +'-autoClose');
+						self.$el.off('.'+ self.namespace +'-triggerClose');
 						
+						// a plugin that would like to remove the tooltip from the
+						// DOM when closed should bind on this
 						self.state('closed');
 						
 						// trigger event
@@ -393,7 +373,6 @@
 							.fadeOut(self.options.animationDuration[1], finish);
 					}
 				}
-				
 			}
 			// if the tooltip is already closed, we still need to trigger
 			// the method custom callbacks
@@ -830,19 +809,6 @@
 						// continue only if the tooltip is enabled and has any content
 						if (self.enabled && self.Content !== null) {
 							
-							// init the display plugin if it has not been initialized yet
-							if (!self.displayPlugin) {
-								
-								var pluginClass = $.tooltipster.displayPlugin[self.options.displayPlugin];
-								
-								if (pluginClass) {
-									self.displayPlugin = new pluginClass(self);
-								}
-								else {
-									throw new Error('The "' + self.options.displayPlugin + '" plugin is not defined');
-								}
-							}
-							
 							// save the method callback and cancel close method callbacks
 							if (callback) {
 								self.callbacks.open.push(callback);
@@ -908,53 +874,36 @@
 									finish();
 								}
 							}
-							// if the tooltip isn't already open, open that sucker up!
+							// if the tooltip isn't already open, open it
 							else {
 								
+								// a plugin must bind on this and make the tooltip available in
+								// the DOM (if it isn't yet)
 								self.state('appearing');
 								
 								// the timer (if any) will start when the tooltip has fully appeared
 								// after its transition
 								extraTime = self.options.animationDuration[0];
 								
-								// build the base of our tooltip
-								self.$tooltip = self.displayPlugin.build();
-								
-								// this will be useful to know quickly if the tooltip is in
-								// the DOM or not 
-								self.$tooltip.attr('id', self.namespace);
-								
-								for (var i=0; i < self.options.theme.length; i++) {
-									self.$tooltip.addClass(self.options.theme[i]);
-								}
-								
 								self.$tooltip.css({
 									// must not overflow the window until the positioning method
 									// is called
 									height: 0,
+									left: 0,
+									top: 0,
 									width: 0,
 									zIndex: self.options.zIndex
 								});
 								
-								if (self.options.interactive) {
-									self.$tooltip.css('pointer-events', 'auto')
-								}
-								
 								// insert the content
 								self._contentInsert();
-								
-								// determine the future parent
-								if (typeof self.options.parent == 'string') {
-									self.$tooltipParent = $(self.options.parent);
-								}
-								else {
-									self.$tooltipParent = self.options.parent;
-								}
 								
 								// reposition the tooltip and attach to the DOM
 								self.reposition(event, true);
 								
-								// animate in the tooltip
+								// animate in the tooltip. If the display plugin wants no css
+								// animations, it may override the animation option with a
+								// dummy value that will produce no effect
 								if (supportsTransitions()) {
 									
 									// note: there seems to be an issue with start animations which
@@ -998,22 +947,29 @@
 								}
 								else {
 									
+									// old browsers will have to live with this. If the display
+									// plugin wants no fading, it will have to cancel it the dirty
+									// way, sorry
 									self.$tooltip
 										.css('display', 'none')
 										.fadeIn(self.options.animationDuration[0], finish);
 								}
 								
-								// will check if our tooltip origin is removed while the tooltip is
-								// shown
+								// checks if the origin is removed while the tooltip is open
 								self._trackerStart();
+								
+								// NOTE: the listeners below have a '-triggerClose' namespace
+								// because we'll remove them when the tooltip closes (unlike
+								// the '-triggerOpen' listeners). So some of them are actually
+								// not about close triggers, rather about positioning.
 								
 								$(window)
 									// reposition on resize (in case position can/has to be changed)
-									.on('resize.'+ self.namespace, function(e) {
+									.on('resize.'+ self.namespace +'-triggerClose', function(e) {
 										self.reposition(e);
 									})
 									// same as below for parents
-									.on('scroll.'+ self.namespace, function(e) {
+									.on('scroll.'+ self.namespace +'-triggerClose', function(e) {
 										self._scrollHandler(e);
 									});
 								
@@ -1021,9 +977,9 @@
 								
 								// scrolling may require the tooltip to be moved or even
 								// repositioned in some cases
-								self.$originParents.each(function(i, el){
+								self.$originParents.each(function(i, parent){
 									
-									$(el).on('scroll.'+ self.namespace, function(e) {
+									$(parent).on('scroll.'+ self.namespace +'-triggerClose', function(e) {
 										self._scrollHandler(e);
 									});
 								});
@@ -1044,7 +1000,7 @@
 												// we don't want to bind on click here because the
 												// initial touchstart event has not yet triggered its
 												// click event, which is thus about to happen
-												$('body').on('touchstart.' + self.namespace + '-autoClose', function(event){
+												$('body').on('touchstart.' + self.namespace +'-triggerClose', function(event){
 													
 													// if the tooltip is not interactive or if the touch was made
 													// outside of the tooltip
@@ -1066,7 +1022,7 @@
 									
 									$elements
 										// close after some time spent outside of the elements
-										.on('mouseleave.'+ self.namespace +'-autoClose', function(event) {
+										.on('mouseleave.'+ self.namespace +'-triggerClose', function(event) {
 											
 											if (self.options.delay[1]) {
 												
@@ -1082,7 +1038,7 @@
 										})
 										// suspend the mouseleave timeout when the mouse comes back
 										// over the elements
-										.on('mouseenter.'+ self.namespace + '-autoClose', function() {
+										.on('mouseenter.'+ self.namespace + '-triggerClose', function() {
 											clearTimeout(timeout);
 										});
 								}
@@ -1091,7 +1047,7 @@
 								// native tooltips)
 								if (self.options.triggerClose.originClick) {
 									
-									self.$el.on('click.'+ self.namespace + '-autoClose', function(event) {
+									self.$el.on('click.'+ self.namespace + '-triggerClose', function(event) {
 										self._close(event);
 									});
 								}
@@ -1105,7 +1061,7 @@
 										
 										if (self.State != 'closed') {
 											
-											$('body').on('click.' + self.namespace + '-autoClose touchstart.' + self.namespace + '-autoClose', function(event){
+											$('body').on('click.' + self.namespace + '-triggerClose touchstart.' + self.namespace +'-triggerClose', function(event){
 												if(!self.options.interactive || !$.contains(self.$tooltip[0], event.target)){
 													self._close(event);
 												}
@@ -1154,6 +1110,11 @@
 				this.options.theme = [this.options.theme];
 			}
 			
+			// determine the future parent
+			if (typeof this.options.parent == 'string') {
+				this.options.parent = $(this.options.parent);
+			}
+			
 			if (this.options.trigger == 'hover') {
 				
 				this.options.triggerOpen = { hover: true };
@@ -1168,6 +1129,107 @@
 				this.options.triggerOpen = { click: true };
 				this.options.triggerClose = { click: true };
 			}
+			
+			// for the display plugin
+			this._trigger('options');
+		},
+		
+		/**
+		 * Set listeners on the origin if the open triggers require them.
+		 * Unlike the listeners set at opening time, these ones
+		 * remain event when the tooltip is closed. It has been made a
+		 * separate method so it can be called when the triggers are
+		 * changed in the options.
+		 */
+		_prepareOrigin: function(){
+			
+			var self = this;
+			
+			// in case we're resetting the triggers
+			self.$el.off('.'+ self.namespace +'-triggerOpen');
+			
+			// for 'click' and 'hover' open triggers : bind on events to open the tooltip.
+			// Closing is now handled in _openNow() because of its bindings.
+			// Notes about touch events :
+			// - mouseenter, mouseleave and clicks happen even on pure touch devices
+			//   because they are emulated. deviceIsPureTouch() is a simple attempt
+			//   to detect them.
+			// - on hybrid devices, we do not prevent touch gesture from opening
+			//   tooltips. It would be too complex to differentiate real mouse events
+			//   from emulated ones.
+			// - we check deviceIsPureTouch() at each event rather than prior to
+			//   binding because the situation may change during browsing
+			if (self.options.triggerOpen.hover) {
+				
+				self.$el.on('mouseenter.'+ self.namespace +'-triggerOpen', function(event) {
+					if (!deviceIsPureTouch() || self.options.touchDevices) {
+						self.mouseIsOverOrigin = true;
+						self._open(event);
+					}
+				});
+				
+				// for touch interaction
+				if (deviceHasTouchCapability && self.options.touchDevices) {
+					
+					// for touch devices, we immediately display the tooltip because we
+					// cannot rely on mouseleave to handle the delay
+					self.$el.on('touchstart.'+ self.namespace +'-triggerOpen', function(event) {
+						self._openNow(event);
+					});
+				}
+			}
+			
+			if (self.options.triggerOpen.click) {
+				
+				// note : for touch devices, we do not bind on touchstart, we only rely
+				// on the emulated clicks (triggered by taps)
+				self.$el.on('click.'+ self.namespace +'-triggerOpen', function(event) {
+					if (!deviceIsPureTouch() || self.options.touchDevices) {
+						self._openNow(event);
+					}
+				});
+			}
+			
+			if (self.options.triggerClose.mouseleave) {
+				
+				self.$el.on('mouseleave.'+ self.namespace +'-triggerOpen', function() {
+					if (!deviceIsPureTouch() || self.options.touchDevices) {
+						self.mouseIsOverOrigin = false;
+					}
+				});
+			}
+		},
+		
+		/**
+		 * Do the things that need to be done only once after the tooltip
+		 * HTML element it has been created. It has been made a separate
+		 * method so it can be called when options are changed. Remember
+		 * that the tooltip may actually exist in the DOM before it is
+		 * opened, and present after it has been closed: it's the display
+		 * plugin that takes care of handling it.
+		 */
+		_prepareTooltip: function(){
+			
+			var self = this;
+			
+			// this will be useful to know quickly if the tooltip is in
+			// the DOM or not 
+			self.$tooltip.attr('id', self.namespace);
+			
+			// themes
+			// remove the old ones and add the new ones
+			$.each(self.previousThemes, function(i, theme){
+				self.$tooltip.removeClass(theme);
+			});
+			$.each(self.options.theme, function(i, theme){
+				self.$tooltip.addClass(theme);
+			});
+			
+			self.previousThemes = $.merge([], self.options.theme);
+			
+			// pointer events
+			var p = self.options.interactive ? 'auto' : '';
+			self.$tooltip.css('pointer-events', p);
 		},
 		
 		/**
@@ -1364,7 +1426,7 @@
 			var $sizer = this.$tooltip.parent();
 			
 			this.$tooltip
-				.appendTo(this.$tooltipParent)
+				.appendTo(this.options.parent)
 				.find('.tooltipster-content')
 					.css('overflow', '');
 			
@@ -1622,12 +1684,8 @@
 					
 					self.$el
 						.removeData(self.namespace)
+						// remove the open trigger listeners
 						.off('.'+ self.namespace);
-					
-					// the tooltip may be destroyed before it ever opened
-					if (self.$tooltip){
-						self.$tooltip.off('.' + self.namespace);
-					}
 					
 					// last event
 					self._trigger('destroy');
@@ -1694,7 +1752,7 @@
 					self.$emitter = null;
 					self.$emitterPublic = null;
 					self.$tooltip = null;
-					self.$tooltipParent = null;
+					self.options.parent = null;
 					
 					// make sure the object is no longer referenced in there to prevent
 					// memory leaks
@@ -1789,10 +1847,23 @@
 		 * the instance itself is returned
 		 */ 
 		option: function(o, val) {
-			if (val === undefined) return this.options[o];
+			
+			if (val === undefined) {
+				return this.options[o];
+			}
 			else {
+				
+				// change value
 				this.options[o] = val;
+				
+				// format
 				this._optionsFormat();
+				
+				// re-prepare the triggers if needed
+				if ($.inArray(o, ['trigger', 'triggerClose', 'triggerOpen']) >= 0) {
+					this._prepareOrigin();
+				}
+				
 				return this;
 			}
 		},
@@ -1815,11 +1886,11 @@
 			
 			// if the tooltip has not been removed from DOM manually (or if it
 			// has been detached on purpose)
-			if (tooltipIsDetached || bodyContains(self.namespace)) {
+			if (bodyContains(self.namespace) || tooltipIsDetached) {
 				
 				if (!tooltipIsDetached) {
-					// detach in case the tooltip overflows the window and adds scrollbars
-					// to it, so _geometry can be accurate
+					// detach in case the tooltip overflows the window and adds
+					// scrollbars to it, so _geometry can be accurate
 					self.$tooltip.detach();
 				}
 				
@@ -1827,18 +1898,12 @@
 				self.geometry = self._geometry();
 				
 				// call the display plugin
-				var position = self.displayPlugin.reposition({
-					geo: self.geometry
-				});
-				
-				// remember the coordinates for later offset adjustment
-				self.tooltipCoord = position.coord;
-				
-				// trigger event
 				self._trigger({
-					type: 'reposition',
+					type: '_reposition',
 					event: event,
-					position: position
+					helper: {
+						geo: self.geometry
+					}
 				});
 			}
 			
@@ -2116,7 +2181,7 @@
 	};
 	
 	// will collect plugins
-	$.tooltipster.displayPlugin = {};
+	$.tooltipster.plugins = {};
 	
 	// quick & dirty compare function, not bijective nor multidimensional
 	function areEqual(a,b) {
@@ -2191,10 +2256,10 @@
 	
 	var pluginName = 'default',
 		/**
-		 * @see ::_init()
+		 * @see ::init()
 		 */
 		plugin = function(instance, options) {
-			this._init(instance, options);
+			this.init(instance, options);
 		};
 	
 	plugin.prototype = {
@@ -2204,7 +2269,7 @@
 		 * 
 		 * @return {object} An object with the defaults options
 		 */
-		_defaults: function() {
+		defaults: function() {
 			
 			return {
 				// if the tooltip should display an arrow that points to the origin
@@ -2259,38 +2324,111 @@
 		 * 
 		 * @param {object} instance The tooltipster object that instantiated
 		 * this plugin
-		 * @param {object} options Options, @see self::_defaults()
+		 * @param {object} options Options, @see self::defaults()
 		 */
-		_init: function(instance) {
+		init: function(instance) {
 			
-			var $d = $('<i><!--[if lte IE 6]><i></i><![endif]--></i>');
+			var self = this;
 			
 			// list of instance variables
 			
-			this.instance = instance;
-			this.isIE6 = $d.children().length > 0;
-			this.options;
+			self.instance = instance;
+			self.options;
+			self.previousState = 'closed';
+			
+			// initial formatting
+			self.optionsFormat();
+			
+			self.instance._on('state', function(event){
+				if (event.state == 'closed') {
+					self.close();
+				}
+				else if (event.state == 'appearing' && self.previousState == 'closed') {
+					self.create();
+				}
+			});
+			
+			// reformat every time the options are changed
+			self.instance._on('options', function(){
+				self.optionsFormat();
+			});
+			
+			self.instance._on('_reposition', function(e){
+				self.reposition(e.event, e.helper);
+			});
+		},
+		
+		/**
+		 * Contains the HTML markup of the tooltip.
+		 *
+		 * @return {object} The tooltip, as a jQuery-wrapped HTML element
+		 */
+		create: function() {
+			
+			// note: we wrap with a .tooltipster-box div to be able to set a margin on it
+			// (.tooltipster-base must not have one)
+			var $html = $(
+				'<div class="tooltipster-base">' +
+					'<div class="tooltipster-box">' +
+						'<div class="tooltipster-content"></div>' +
+					'</div>' +
+					'<div class="tooltipster-arrow">' +
+						'<div class="tooltipster-arrow-uncropped">' +
+							'<div class="tooltipster-arrow-border"></div>' +
+							'<div class="tooltipster-arrow-background"></div>' +
+						'</div>' +
+					'</div>' +
+				'</div>'
+			);
+			
+			// hide arrow if asked
+			if (!this.options.arrow) {
+				$html
+					.find('.tooltipster-box')
+					.css('margin', 0)
+					.end()
+					.find('.tooltipster-arrow')
+					.hide();
+			}
+			
+			// apply min/max width if asked
+			if (this.options.minWidth) {
+				$html.css('min-width', this.options.minWidth + 'px');
+			}
+			if (this.options.maxWidth) {
+				$html.css('max-width', this.options.maxWidth + 'px');
+			}
+			
+			this.instance.$tooltip = $html;
+			
+			this.instance.$tooltip.appendTo(this.options.parent);
+			
+			// tell the instance that the tooltip element has been created
+			this.instance._trigger('create');
+		},
+		
+		close: function(){
+			// remove the tooltip from the DOM
+			this.instance.$tooltip.remove();
 		},
 		
 		/**
 		 * (Re)compute this.options from the options declared to the instance
 		 */
-		_optionsInit: function(){
+		optionsFormat: function(){
 			
-			var defaults = this._defaults(),
-				options = this.instance.options;
+			var defaults = this.defaults();
+			
+			this.options = $.extend(true, {}, defaults, this.instance.options);
 			
 			// for backward compatibility, deprecated in v4.0.0
-			if (options.position) {
-				options.side = options.position;
+			if (this.options.position) {
+				this.options.side = this.options.position;
 			}
-			
-			this.options = $.extend(true, {}, defaults, options);
-			
 			// $.extend merges arrays, we don't want that, we only want the
 			// array provided by the user
-			if (typeof options.side == 'object') {
-				this.options.side = options.side;
+			if (typeof this.instance.options.side == 'object') {
+				this.options.side = this.instance.options.side;
 			}
 			
 			// options formatting
@@ -2313,9 +2451,6 @@
 					left: this.options.distance[3]
 				};
 			}
-			// edit the instance distance option so we don't have to recompute
-			// it every time this method is called
-			options.distance = this.options.distance;
 				
 			// let's transform 'top' into ['top', 'bottom', 'right', 'left'] (for example)
 			if (typeof this.options.side == 'string') {
@@ -2332,190 +2467,31 @@
 			// misc
 			
 			// disable the arrow in IE6 unless the arrow option was explicitly set to true
-			if (	this.isIE6
-				&&	options.arrow !== true
+			if (	this.instance.IE === 6
+				&&	this.options.arrow !== true
 			) {
 				this.options.arrow = false;
 			}
 		},
 		
 		/**
-		 * Make whatever modifications are needed when the side is changed. This has
-		 * been made an independant method for easy inheritance in custom plugins based
-		 * on this default plugin.
-		 *
-		 * @param {string} side
-		 */
-		_sideChange: function(side) {
-			
-			this.instance.$tooltip
-				.removeClass('tooltipster-bottom')
-				.removeClass('tooltipster-left')
-				.removeClass('tooltipster-right')
-				.removeClass('tooltipster-top')
-				.addClass('tooltipster-' + side);
-		},
-		
-		/**
-		 * Returns the target that the tooltip should aim at for a given side.
-		 * The calculated value is a distance from the edge of the window
-		 * (left edge for top/bottom sides, top edge for left/right side). The
-		 * tooltip will be centered on that position and the arrow will be
-		 * positioned there (as much as possible).
-		 * 
-		 * @param {string} side
-		 * @return {integer}
-		 */
-		_targetFind: function(helper, side){
-			
-			var target,
-				rects = this.instance.$el[0].getClientRects();
-			
-			// by default, the target will be the middle of the origin
-			if (rects.length < 2){
-				
-				switch (side) {
-					
-					case 'left':
-					case 'right':
-						target = Math.floor(helper.geo.origin.windowOffset.top + (helper.geo.origin.size.height / 2));
-						break;
-					
-					case 'bottom':
-					case 'top':
-						target = Math.floor(helper.geo.origin.windowOffset.left + (helper.geo.origin.size.width / 2));
-						break;
-				}
-			}
-			// if multiple client rects exist, the element may be text split
-			// up into multiple lines and the middle of the origin may not be
-			// best option anymore
-			else {
-				
-				var targetRect;
-				
-				// choose the best target client rect
-				switch (side) {
-					
-					case 'top':
-						
-						// first
-						targetRect = rects[0];
-						break;
-					
-					case 'right':
-						
-						// the middle line, rounded down in case there is an even
-						// number of lines (looks more centered => check out the
-						// demo with 4 split lines)
-						if (rects.length > 2) {
-							targetRect = rects[Math.ceil(rects.length / 2) - 1];
-						}
-						else {
-							targetRect = rects[0];
-						}
-						break;
-					
-					case 'bottom':
-						
-						// last
-						targetRect = rects[rects.length - 1];
-						break;
-					
-					case 'left':
-						
-						// the middle line, rounded up
-						if (rects.length > 2) {
-							targetRect = rects[Math.ceil((rects.length + 1) / 2) - 1];
-						}
-						else {
-							targetRect = rects[rects.length - 1];
-						}
-						break;
-				}
-				
-				switch (side) {
-					
-					case 'left':
-					case 'right':
-						target = Math.floor(targetRect.top + (targetRect.bottom - targetRect.top) / 2);
-						
-						break;
-					
-					case 'bottom':
-					case 'top':
-						target = Math.floor(targetRect.left + (targetRect.right - targetRect.left) / 2);
-						break;
-				}
-			}
-			
-			return target;
-		},
-		
-		/**
-		 * Contains the HTML markup of the tooltip.
-		 *
-		 * @return {object} The tooltip, as a jQuery-wrapped HTML element
-		 */
-		build: function() {
-			
-			this._optionsInit();
-			
-			// note: we wrap with a .tooltipster-box div to be able to set a margin on it
-			// (.tooltipster-base must not have one)
-			var $html = $(
-				'<div class="tooltipster-base">' +
-					'<div class="tooltipster-box">' +
-						'<div class="tooltipster-content"></div>' +
-					'</div>' +
-					'<div class="tooltipster-arrow">' +
-						'<div class="tooltipster-arrow-uncropped">' +
-							'<div class="tooltipster-arrow-border"></div>' +
-							'<div class="tooltipster-arrow-background"></div>' +
-						'</div>' +
-					'</div>' +
-				'</div>'
-			);
-			
-			// hide arrow if asked
-			if (!this.options.arrow) {
-				$html
-					.find('.tooltipster-box')
-						.css('margin', 0)
-						.end()
-					.find('.tooltipster-arrow')
-						.hide();
-			}
-			
-			// apply min/max width if asked
-			if (this.options.minWidth) {
-				$html.css('min-width', this.options.minWidth + 'px');
-			}
-			if (this.options.maxWidth) {
-				$html.css('max-width', this.options.maxWidth + 'px');
-			}
-			
-			return $html;
-		},
-		
-		/**
-		 * This method must compute and set the positioning properties of the tooltip
-		 * (left, top, width, height, etc.). It must also make sure the
+		 * This method must compute and set the positioning properties of the
+		 * tooltip (left, top, width, height, etc.). It must also make sure the
 		 * tooltip is eventually appended to its parent (since the element may be
 		 * detached from the DOM at the moment the method is called).
-		 * 
-		 * Plugin creators will at least have to use self.instance.$tooltip and
-		 * self.instance.$tooltipParent. Also, some of its methods may help plugin
-		 * creators, especially its _sizer internal methods that help measure the size
+		 *
+		 * Plugin creators will at least have to use self.instance.$tooltip.
+		 * Also, some of its methods may help plugin
+		 * creators, especially its _sizer utilities that help measure the size
 		 * of the tooltip in various conditions.
-		 * 
+		 *
 		 * @param {object} helper An object that contains variables that plugin
 		 * creators may find useful (see below)
 		 * @param {object} helper.geo An object with many layout properties
-		 * about objects of interest (window, document, origin). This should help plugin
-		 * users compute the optimal position of the tooltip
+		 * about objects of interest (window, document, origin). This should help
+		 * plugin users compute the optimal position of the tooltip
 		 */
-		reposition: function(helper) {
+		reposition: function(event, helper) {
 			
 			var self = this,
 				finalResult,
@@ -2523,10 +2499,6 @@
 					document: {},
 					window: {}
 				};
-			
-			// we reinit the options at each repositioning because the user may
-			// have changed them with the `option` method
-			self._optionsInit();
 			
 			// start position tests session
 			self.instance._sizerStart();
@@ -2553,7 +2525,7 @@
 					
 					// this may have an effect on the size of the tooltip if there are css
 					// rules for the arrow or something else
-					self._sideChange(side);
+					self.sideChange(side);
 					
 					// now we get the size of the tooltip when it does not have any size
 					// constraints set
@@ -2667,7 +2639,7 @@
 			
 			// to know where to put the tooltip, we need to know on which point
 			// of the x or y axis we should center it. That coordinate is the target
-			finalResult.target = self._targetFind(helper, finalResult.side);
+			finalResult.target = self.targetFind(helper, finalResult.side);
 			
 			switch (finalResult.side) {
 				
@@ -2742,7 +2714,7 @@
 			// the size of the tooltip, and the custom functionPosition may want to detect the
 			// size of something before making a decision. So let's make things easier for the
 			// implementor
-			self._sideChange(finalResult.side);
+			self.sideChange(finalResult.side);
 			
 			// now unneeded, we don't want it passed to functionPosition
 			delete finalResult.fits;
@@ -2758,7 +2730,7 @@
 			// add some variables to the helper for the custom function
 			helper.origin = self.instance.$el[0];
 			helper.tooltip = self.instance.$tooltip[0];
-			helper.tooltipParent = self.instance.$tooltipParent[0];
+			helper.tooltipParent = self.options.parent[0];
 			
 			var edit = function(result){
 				finalResult = result;
@@ -2775,7 +2747,7 @@
 				
 				var r = self.options.functionPosition.call(self, self.instance, helper, $.extend(true, {}, finalResult));
 				
-				if (r) finalResult = r; 
+				if (r) finalResult = r;
 			}
 			
 			
@@ -2842,7 +2814,7 @@
 			// set position values
 			
 			// again, in case functionPosition changed the side
-			self._sideChange(finalResult.side);
+			self.sideChange(finalResult.side);
 			
 			if (helper.geo.origin.fixedLineage) {
 				self.instance.$tooltip
@@ -2860,14 +2832,14 @@
 					top: finalResult.coord.top
 				})
 				.find('.tooltipster-box')
-					.css('overflow', finalResult.contentOverflow)
-					.end()
+				.css('overflow', finalResult.contentOverflow)
+				.end()
 				.find('.tooltipster-arrow')
-					.css({
-						'left': '',
-						'top': ''
-					})
-					.css(arrowCoord.prop, arrowCoord.val);
+				.css({
+					'left': '',
+					'top': ''
+				})
+				.css(arrowCoord.prop, arrowCoord.val);
 			
 			// we need to set a size even if the tooltip is in its natural size
 			// because when the tooltip is positioned beyond the width of the body
@@ -2885,10 +2857,127 @@
 			// to its parent
 			self.instance._sizerEnd();
 			
-			return finalResult;
+			self.instance._trigger({
+				type: 'reposition',
+				event: event,
+				position: finalResult
+			});
+		},
+		
+		/**
+		 * Make whatever modifications are needed when the side is changed. This has
+		 * been made an independant method for easy inheritance in custom plugins based
+		 * on this default plugin.
+		 *
+		 * @param {string} side
+		 */
+		sideChange: function(side) {
+			
+			this.instance.$tooltip
+				.removeClass('tooltipster-bottom')
+				.removeClass('tooltipster-left')
+				.removeClass('tooltipster-right')
+				.removeClass('tooltipster-top')
+				.addClass('tooltipster-' + side);
+		},
+		
+		/**
+		 * Returns the target that the tooltip should aim at for a given side.
+		 * The calculated value is a distance from the edge of the window
+		 * (left edge for top/bottom sides, top edge for left/right side). The
+		 * tooltip will be centered on that position and the arrow will be
+		 * positioned there (as much as possible).
+		 * 
+		 * @param {string} side
+		 * @return {integer}
+		 */
+		targetFind: function(helper, side){
+			
+			var target,
+				rects = this.instance.$el[0].getClientRects();
+			
+			// by default, the target will be the middle of the origin
+			if (rects.length < 2){
+				
+				switch (side) {
+					
+					case 'left':
+					case 'right':
+						target = Math.floor(helper.geo.origin.windowOffset.top + (helper.geo.origin.size.height / 2));
+						break;
+					
+					case 'bottom':
+					case 'top':
+						target = Math.floor(helper.geo.origin.windowOffset.left + (helper.geo.origin.size.width / 2));
+						break;
+				}
+			}
+			// if multiple client rects exist, the element may be text split
+			// up into multiple lines and the middle of the origin may not be
+			// best option anymore
+			else {
+				
+				var targetRect;
+				
+				// choose the best target client rect
+				switch (side) {
+					
+					case 'top':
+						
+						// first
+						targetRect = rects[0];
+						break;
+					
+					case 'right':
+						
+						// the middle line, rounded down in case there is an even
+						// number of lines (looks more centered => check out the
+						// demo with 4 split lines)
+						if (rects.length > 2) {
+							targetRect = rects[Math.ceil(rects.length / 2) - 1];
+						}
+						else {
+							targetRect = rects[0];
+						}
+						break;
+					
+					case 'bottom':
+						
+						// last
+						targetRect = rects[rects.length - 1];
+						break;
+					
+					case 'left':
+						
+						// the middle line, rounded up
+						if (rects.length > 2) {
+							targetRect = rects[Math.ceil((rects.length + 1) / 2) - 1];
+						}
+						else {
+							targetRect = rects[rects.length - 1];
+						}
+						break;
+				}
+				
+				switch (side) {
+					
+					case 'left':
+					case 'right':
+						target = Math.floor(targetRect.top + (targetRect.bottom - targetRect.top) / 2);
+						
+						break;
+					
+					case 'bottom':
+					case 'top':
+						target = Math.floor(targetRect.left + (targetRect.right - targetRect.left) / 2);
+						break;
+				}
+			}
+			
+			return target;
 		}
 	};
 	
-	$.tooltipster.displayPlugin[pluginName] = plugin;
+	$.tooltipster.plugins[pluginName] = plugin;
 	
 })(jQuery);
