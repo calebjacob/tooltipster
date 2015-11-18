@@ -201,7 +201,7 @@
 					new pluginClass(self);
 				}
 				else {
-					throw new Error('The "' + plugin + '" plugin is not defined');
+					throw new Error('The "'+ plugin +'" plugin is not defined');
 				}
 			});
 			
@@ -297,22 +297,22 @@
 						// unbind listeners which are no longer needed
 						
 						self.$tooltip
-							.off('.' + self.namespace + '-triggerClose')
+							.off('.'+ self.namespace +'-triggerClose')
 							.removeClass('tooltipster-dying');
 						
 						// orientationchange, scroll and resize listeners
-						$(window).off('.' + self.namespace + '-triggerClose');
+						$(window).off('.'+ self.namespace +'-triggerClose');
 						
 						// scroll listeners
 						self.$originParents.each(function(i, el){
-							$(el).off('scroll.' + self.namespace + '-triggerClose');
+							$(el).off('scroll.'+ self.namespace +'-triggerClose');
 						});
 						// clear the array to prevent memory leaks
 						self.$originParents = null;
 						
-						$('body').off('.' + self.namespace + '-triggerClose');
+						$('body').off('.'+ self.namespace +'-triggerClose');
 						
-						self.$el.off('.' + self.namespace + '-triggerClose');
+						self.$el.off('.'+ self.namespace +'-triggerClose');
 						
 						// a plugin that would like to remove the tooltip from the
 						// DOM when closed should bind on this
@@ -924,7 +924,7 @@
 									// it messes up some CSS transitions. The issue almost never
 									// happens when delay[0]==0 though
 									self.$tooltip
-										.addClass('tooltipster-' + self.options.animation)
+										.addClass('tooltipster-'+ self.options.animation)
 										.addClass('tooltipster-initial');
 									
 									self.$tooltip.css({
@@ -1011,7 +1011,7 @@
 												// we don't want to bind on click here because the
 												// initial touchstart event has not yet triggered its
 												// click event, which is thus about to happen
-												$('body').on('touchstart.' + self.namespace +'-triggerClose', function(event){
+												$('body').on('touchstart.'+ self.namespace +'-triggerClose', function(event){
 													
 													// if the tooltip is not interactive or if the touch was made
 													// outside of the tooltip
@@ -1072,7 +1072,7 @@
 										
 										if (self.State != 'closed') {
 											
-											$('body').on('click.' + self.namespace + '-triggerClose touchstart.' + self.namespace +'-triggerClose', function(event){
+											$('body').on('click.'+ self.namespace +'-triggerClose touchstart.'+ self.namespace +'-triggerClose', function(event){
 												if(!self.options.interactive || !$.contains(self.$tooltip[0], event.target)){
 													self._close(event);
 												}
@@ -2087,7 +2087,7 @@
 							var resp = self[args[0]](args[1], args[2]);
 						}
 						else {
-							throw new Error('Unknown method .tooltipster("' + args[0] + '")');
+							throw new Error('Unknown method .tooltipster("'+ args[0] +'")');
 						}
 						
 						// if the function returned anything other than the instance
@@ -2102,7 +2102,7 @@
 						}
 					}
 					else {
-						throw new Error('You called Tooltipster\'s "' + args[0] + '" method on an uninitialized element');
+						throw new Error('You called Tooltipster\'s "'+ args[0] +'" method on an uninitialized element');
 					}
 				});
 				
@@ -2899,7 +2899,7 @@
 				.removeClass('tooltipster-left')
 				.removeClass('tooltipster-right')
 				.removeClass('tooltipster-top')
-				.addClass('tooltipster-' + side);
+				.addClass('tooltipster-'+ side);
 		},
 		
 		/**
