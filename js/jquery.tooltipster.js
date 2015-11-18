@@ -1696,7 +1696,7 @@
 					self.$el
 						.removeData(self.namespace)
 						// remove the open trigger listeners
-						.off('.'+ self.namespace);
+						.off('.'+ self.namespace +'-triggerOpen');
 					
 					// last event
 					self._trigger('destroy');
