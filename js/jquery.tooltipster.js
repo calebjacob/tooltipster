@@ -1,7 +1,7 @@
-/*! Tooltipster 4.0.0rc31 */
+/*! Tooltipster 4.0.0rc32 */
 
 /**
- * Released on 2015-11-15
+ * Released on 2015-11-18
  * 
  * A rockin' custom tooltip jQuery plugin
  * Developed by Caleb Jacob and Louis Ameline under the MIT license http://opensource.org/licenses/MIT
@@ -34,7 +34,7 @@
 			// must be 'body' for now, or an element positioned at (0, 0)
 			// in the document, typically like very top views of an app.
 			parent: 'body',
-			plugins: ['default'],
+			plugins: ['sideTip'],
 			repositionOnScroll: false,
 			restoration: 'none',
 			theme: [],
@@ -294,31 +294,25 @@
 							event: event
 						});
 						
-						// detach our content object first, so the next jQuery's remove()
-						// call does not unbind its event handlers
-						if (typeof self.Content == 'object' && self.Content !== null) {
-							self.Content.detach();
-						}
-						
 						// unbind listeners which are no longer needed
 						
 						self.$tooltip
-							.off('.'+ self.namespace +'-triggerClose')
+							.off('.' + self.namespace + '-triggerClose')
 							.removeClass('tooltipster-dying');
 						
 						// orientationchange, scroll and resize listeners
-						$(window).off('.'+ self.namespace +'-triggerClose');
+						$(window).off('.' + self.namespace + '-triggerClose');
 						
 						// scroll listeners
 						self.$originParents.each(function(i, el){
-							$(el).off('scroll.'+ self.namespace +'-triggerClose');
+							$(el).off('scroll.' + self.namespace + '-triggerClose');
 						});
 						// clear the array to prevent memory leaks
 						self.$originParents = null;
 						
-						$('body').off('.'+ self.namespace +'-triggerClose');
+						$('body').off('.' + self.namespace + '-triggerClose');
 						
-						self.$el.off('.'+ self.namespace +'-triggerClose');
+						self.$el.off('.' + self.namespace + '-triggerClose');
 						
 						// a plugin that would like to remove the tooltip from the
 						// DOM when closed should bind on this
@@ -331,7 +325,7 @@
 						});
 						
 						// call our constructor custom callback function
-						if (self.options.functionAfter) {
+						if(self.options.functionAfter){
 							self.options.functionAfter.call(self, self, {
 								event: event,
 								origin: self.$el[0]
@@ -655,7 +649,24 @@
 				}
 			}
 			
-			// TODO: call a user callback over the geometry of the origin
+			// user callback through an event
+			var edit = function(r){
+				geo.origin.size.height = r.height,
+				geo.origin.windowOffset.left = r.left,
+				geo.origin.windowOffset.top = r.top,
+				geo.origin.size.width = r.width
+			};
+			
+			self._trigger({
+				type: 'geometry',
+				edit: edit,
+				geometry: {
+					height: geo.origin.size.height,
+					left: geo.origin.windowOffset.left,
+					top: geo.origin.windowOffset.top,
+					width: geo.origin.size.width
+				}
+			});
 			
 			// calculate the remaining properties with what we got
 			
@@ -2254,7 +2265,7 @@
  */
 (function($) {
 	
-	var pluginName = 'default',
+	var pluginName = 'sideTip',
 		/**
 		 * @see ::init()
 		 */
@@ -2340,12 +2351,15 @@
 			self.optionsFormat();
 			
 			self.instance._on('state', function(event){
+				
 				if (event.state == 'closed') {
 					self.close();
 				}
 				else if (event.state == 'appearing' && self.previousState == 'closed') {
 					self.create();
 				}
+				
+				self.previousState = event.state;
 			});
 			
 			// reformat every time the options are changed
@@ -2356,6 +2370,18 @@
 			self.instance._on('_reposition', function(e){
 				self.reposition(e.event, e.helper);
 			});
+		},
+		
+		close: function(){
+			
+			// detach our content object first, so the next jQuery's remove()
+			// call does not unbind its event handlers
+			if (typeof this.instance.Content == 'object' && this.instance.Content !== null) {
+				this.instance.Content.detach();
+			}
+			
+			// remove the tooltip from the DOM
+			this.instance.$tooltip.remove();
 		},
 		
 		/**
@@ -2405,11 +2431,6 @@
 			
 			// tell the instance that the tooltip element has been created
 			this.instance._trigger('create');
-		},
-		
-		close: function(){
-			// remove the tooltip from the DOM
-			this.instance.$tooltip.remove();
 		},
 		
 		/**

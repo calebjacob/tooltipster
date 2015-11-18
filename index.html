@@ -380,7 +380,7 @@ $('.tooltip').tooltipster({
 				<tr>
 					<td><h4>plugins</h4></td>
 					<td>string[]</td>
-					<td>The names of plugins to be used by Tooltipster. <strong>Default: ['default']</strong></td>
+					<td>The names of plugins to be used by Tooltipster. <strong>Default: ['sideTip']</strong></td>
 				</tr>
 				<tr>
 					<td><h4>repositionOnScroll</h4></td>
@@ -1228,7 +1228,7 @@ instance.on('before', doThat);
 			
 			<p>Your listeners will get one argument, the event, which holds useful properties: <span class="code">event.type</span>, <span class="code">event.instance</span>, <span class="code">event.event</span> (when there is one, similar to the usual <span class="code">helper.event</span>), etc.</p>
 			
-			<p>The possible event types are <span class="code">start</span>, <span class="code">before</span>, <span class="code">ready</span>, <span class="code">beforeClose</span>, <span class="code">after</span>, <span class="code">format</span>, <span class="code">position</span>, <span class="code">destroy</span>, <span class="code">state</span>, <span class="code">update</span>, <span class="code">scroll</span> and <span class="code">reposition</span>.</p>
+			<p>The possible event types are <span class="code">start</span>, <span class="code">before</span>, <span class="code">ready</span>, <span class="code">beforeClose</span>, <span class="code">after</span>, <span class="code">format</span>, <span class="code">geometry</span>, <span class="code">position</span>, <span class="code">destroy</span>, <span class="code">state</span>, <span class="code">update</span>, <span class="code">scroll</span> and <span class="code">reposition</span>.</p>
 			
 			<p><span class="code">start</span> happens when the <span class="code">hover</span> open trigger is used and that the origin gets hovered. The event has a special <span class="code">event.stop</span> property which is a function you may call to prevent the tooltip from opening.</p>
 			
@@ -1239,6 +1239,8 @@ instance.on('before', doThat);
 			<p><span class="code">beforeClose</span> happens upon closing just before the tooltip is removed from the DOM. If you think you need this event, you may be wrong! When the tooltip is closed, remember that the content is just detached from the DOM and still accessible via the <span class="code">content</span> method.</p>
 			
 			<p><span class="code">format</span> has a special <span class="code">event.format</span> property which is a function you may use to format the content before display. Just provide your formatted content as first argument.</p>
+			
+			<p><span class="code">geometry</span> happens when Tooltipster determines the size and coordinates of the origin, in order to know where to place the tooltip. The computed properties (left, top, width and height) are passed in the <span class="code">event.geometry</span> object. It has a special <span class="code">event.edit</span> property which is a function you may use to provide this information yourself. Just provide the edited geometry object as first argument. In some cases, this may be easier to use than <span class="code">functionPosition</span> as it allows you to provide a specific target without having to compute the final position yourself.</p>
 			
 			<p><span class="code">state</span> happens every time the tooltip enters a different state. The state value is held in <span class="code">event.state</span> and may be <span class="code">appearing</span>, <span class="code">stable</span>, <span class="code">disappearing</span> or <span class="code">closed</span>.</p>
 			
@@ -1367,6 +1369,8 @@ $.each(instances, function (i, instance) {
 			<p>Browsers do not always make our life easy when it comes to working with SVG. Determining the coordinates of SVG paths, polylines or polygons is especially difficult since the native <span class="code">getBoundingClientRect</span>, <span class="code">getBBox</span> and other methods produce inaccurate results in most browsers (as of today in 2015). The result is that by default, the position of tooltips on SVG elements may be completely off.</p>
 			
 			<p>Fortunately, Tooltipster includes the native support of an SVG library which provides the best results in that matter: <strong>SVG.js</strong>.<br />Just include <a href="https://github.com/wout/svg.js" target="_blank">SVG.js</a> and its <a href="https://github.com/fuzzyma/svg.screenbbox.js" target="_blank">ScreenBBox</a> plugin in your page and that's it, Tooltipster will use them out of the box for optimal results.</p>
+			
+			<p>For those who seek even more control over positioning, the <span class="code">position</span> and <span class="code">geometry</span> events (as well as the corresponding <span class="code">functionPosition</span> option) allow you to set the exact position of the tooltip yourself.</p>
 			
 			<h3 id="accessibility">Making tooltips accessible to persons with disabilities <a href="#usecases">&#8657;</a></h3>
 			
