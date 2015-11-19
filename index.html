@@ -1228,7 +1228,7 @@ instance.on('before', doThat);
 			
 			<p>Your listeners will get one argument, the event, which holds useful properties: <span class="code">event.type</span>, <span class="code">event.instance</span>, <span class="code">event.event</span> (when there is one, similar to the usual <span class="code">helper.event</span>), etc.</p>
 			
-			<p>The possible event types are <span class="code">start</span>, <span class="code">before</span>, <span class="code">ready</span>, <span class="code">beforeClose</span>, <span class="code">after</span>, <span class="code">format</span>, <span class="code">geometry</span>, <span class="code">position</span>, <span class="code">destroy</span>, <span class="code">state</span>, <span class="code">update</span>, <span class="code">scroll</span> and <span class="code">reposition</span>.</p>
+			<p>The possible event types are <span class="code">start</span>, <span class="code">before</span>, <span class="code">ready</span>, <span class="code">close</span>, <span class="code">closing</span>, <span class="code">after</span>, <span class="code">format</span>, <span class="code">geometry</span>, <span class="code">position</span>, <span class="code">destroy</span>, <span class="code">state</span>, <span class="code">update</span>, <span class="code">scroll</span> and <span class="code">repositioned</span>.</p>
 			
 			<p><span class="code">start</span> happens when the <span class="code">hover</span> open trigger is used and that the origin gets hovered. The event has a special <span class="code">event.stop</span> property which is a function you may call to prevent the tooltip from opening.</p>
 			
@@ -1236,7 +1236,9 @@ instance.on('before', doThat);
 			
 			<p><span class="code">before</span> has a special <span class="code">event.stop</span> property which is a function you may call to prevent the tooltip from opening.</p>
 			
-			<p><span class="code">beforeClose</span> happens upon closing just before the tooltip is removed from the DOM. If you think you need this event, you may be wrong! When the tooltip is closed, remember that the content is just detached from the DOM and still accessible via the <span class="code">content</span> method.</p>
+			<p><span class="code">close</span> happens at the start of the closing animation. During the animation, the closing may be still cancelled if the tooltip is reopened. The event has a special <span class="code">event.stop</span> property which is a function you may call to ignore the closing order.</p>
+			
+			<p><span class="code">closing</span> happens at the end of the closing animation, when you know for sure that the tooltip is about to be closed. If you think you need this event, you may be wrong! When the tooltip is closed, remember that the content is just detached from the DOM and still accessible via the <span class="code">content</span> method.</p>
 			
 			<p><span class="code">format</span> has a special <span class="code">event.format</span> property which is a function you may use to format the content before display. Just provide your formatted content as first argument.</p>
 			
@@ -1248,7 +1250,7 @@ instance.on('before', doThat);
 			
 			<p><span class="code">position</span> happens during the positioning process and can be used to provide a custom position (see <span class="code">functionPosition</span>). The event has a special <span class="code">event.edit</span> property which is the function you may call with your edited positioning values as first argument.</p>
 			
-			<p><span class="code">reposition</span> happens after Tooltipster repositioned of the tooltip. The event has a special <span class="code">event.position</span> with positioning information.</p>
+			<p><span class="code">repositioned</span> happens after Tooltipster repositioned of the tooltip. The event has a special <span class="code">event.position</span> with positioning information.</p>
 			
 			<p><span class="code">scroll</span> happens whenever a parent of the origin is scrolled.</p>
 			
