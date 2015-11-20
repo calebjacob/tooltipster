@@ -4,5 +4,13 @@
   "main": ["js/jquery.tooltipster.min.js", "css/tooltipster.css"],
   "dependencies": {
     "jquery": ">=1.7"
-  }
+  },
+  "ignore":[
+    "*",
+    "**/**",
+    "!/js/**",
+    "!/css/**",
+    "!/README.*",
+    "!/LICENSE"
+  ]
 }
