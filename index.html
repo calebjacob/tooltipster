@@ -657,13 +657,18 @@ $.fn.tooltipster(methodName [, argument]);</pre>
 				</tr>
 				<tr>
 					<td><h4>origins</h4></td>
-					<td>None</td>
-					<td>Returns an array of all HTML elements in the page which have one or several tooltips initialized.</td>
+					<td>None<br />OR selector</td>
+					<td>Returns an array of all HTML elements in the page which have one or several tooltips initialized. If a selector is passed, the results will be limited to the descendants of the matched elements.</td>
 				</tr>
 				<tr>
 					<td><h4>setDefaults</h4></td>
 					<td>options</td>
 					<td>Changes the default options that will apply to any tooltips created from now on.</td>
+				</tr>
+				<tr>
+					<td><h4>staticMethodAdd</h4></td>
+					<td>name, function</td>
+					<td>Creates static methods, meant for plugin makers.</td>
 				</tr>
 			</table>
 			<br /><br />
@@ -1228,7 +1233,7 @@ instance.on('before', doThat);
 			
 			<p>Your listeners will get one argument, the event, which holds useful properties: <span class="code">event.type</span>, <span class="code">event.instance</span>, <span class="code">event.event</span> (when there is one, similar to the usual <span class="code">helper.event</span>), etc.</p>
 			
-			<p>The possible event types are <span class="code">start</span>, <span class="code">before</span>, <span class="code">ready</span>, <span class="code">close</span>, <span class="code">closing</span>, <span class="code">after</span>, <span class="code">format</span>, <span class="code">geometry</span>, <span class="code">position</span>, <span class="code">destroy</span>, <span class="code">state</span>, <span class="code">update</span>, <span class="code">scroll</span> and <span class="code">repositioned</span>.</p>
+			<p>The possible event types are <span class="code">start</span>, <span class="code">before</span>, <span class="code">ready</span>, <span class="code">close</span>, <span class="code">closing</span>, <span class="code">after</span>, <span class="code">format</span>, <span class="code">geometry</span>, <span class="code">position</span>, <span class="code">destroy</span>, <span class="code">state</span>, <span class="code">update</span>, <span class="code">scroll</span>, <span class="code">repositioned</span>, <span class="code">created</span> and <span class="code">reposition</span>.</p>
 			
 			<p><span class="code">start</span> happens when the <span class="code">hover</span> open trigger is used and that the origin gets hovered. The event has a special <span class="code">event.stop</span> property which is a function you may call to prevent the tooltip from opening.</p>
 			
@@ -1240,6 +1245,8 @@ instance.on('before', doThat);
 			
 			<p><span class="code">closing</span> happens at the end of the closing animation, when you know for sure that the tooltip is about to be closed. If you think you need this event, you may be wrong! When the tooltip is closed, remember that the content is just detached from the DOM and still accessible via the <span class="code">content</span> method.</p>
 			
+			<p><span class="code">created</span> is meant for plugin makers and happens when an HTML element has been created for the tooltip.</p>
+			
 			<p><span class="code">format</span> has a special <span class="code">event.format</span> property which is a function you may use to format the content before display. Just provide your formatted content as first argument.</p>
 			
 			<p><span class="code">geometry</span> happens when Tooltipster determines the size and coordinates of the origin, in order to know where to place the tooltip. The computed properties (left, top, width and height) are passed in the <span class="code">event.geometry</span> object. It has a special <span class="code">event.edit</span> property which is a function you may use to provide this information yourself. Just provide the edited geometry object as first argument. In some cases, this may be easier to use than <span class="code">functionPosition</span> as it allows you to provide a specific target without having to compute the final position yourself.</p>
@@ -1249,6 +1256,8 @@ instance.on('before', doThat);
 			<p><span class="code">update</span> happens when a call to the <span class="code">content</span> method has updated the content. The event has a special <span class="code">event.content</span> property.</p>
 			
 			<p><span class="code">position</span> happens during the positioning process and can be used to provide a custom position (see <span class="code">functionPosition</span>). The event has a special <span class="code">event.edit</span> property which is the function you may call with your edited positioning values as first argument.</p>
+			
+			<p><span class="code">reposition</span> is meant for plugin makers and happens when Tooltipster thinks the tooltip should be repositioned.</p>
 			
 			<p><span class="code">repositioned</span> happens after Tooltipster repositioned of the tooltip. The event has a special <span class="code">event.position</span> with positioning information.</p>
 			

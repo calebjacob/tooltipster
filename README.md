@@ -74,8 +74,8 @@ state()
 Static methods
 -------------------------
 
-setDefaults({})  
 instances([, selector || element])  
 instancesLatest()  
 origins()  
-
+setDefaults({})  
+staticMethodAdd({})  
