@@ -117,6 +117,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 				if (self.$el.data('tooltipster-initialTitle') === undefined) {
 					
 					initialTitle = self.$el.attr('title');
+
+                    // optionally, data-tooltip can be used instead of title.
+                    // libraries such as Knockout can repopulate the title if there's a binding causing the native browser tooltip to show in addition to tooltipster's tooltips.
+                    if (!initialTitle) initialTitle = self.$el.attr('data-tooltip');
 					
 					// we do not want initialTitle to have the value "undefined" because of how jQuery's .data() method works
 					if (initialTitle === undefined) initialTitle = null;
