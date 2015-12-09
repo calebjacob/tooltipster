@@ -71,11 +71,10 @@ option(optionName, optionValue)
 reposition()   
 state()   
 
-Static methods
+Global methods
 -------------------------
 
-instances([, selector || element])  
+instances([selector || element])  
 instancesLatest()  
 origins()  
 setDefaults({})  
-staticMethodAdd({})  

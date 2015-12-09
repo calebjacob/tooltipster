@@ -222,11 +222,11 @@ $(function() {
 	
 	// grouped demo
 	$('.tooltip_slow').tooltipster({
-		delay: 1000,
-		speed: 1000
+		animationDuration: 1000,
+		delay: 1000
 	});
 	
-	var instances = $.fn.tooltipster('instances', '.tooltip_group1');
+	var instances = $.tooltipster.instances('.tooltip_group1');
 	
 	$.each(instances, function (i, instance) {
 		
