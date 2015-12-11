@@ -1,7 +1,7 @@
-/*! Tooltipster 4.0.0rc35 */
+/*! Tooltipster 4.0.0rc36 */
 
 /**
- * Released on 2015-12-09
+ * Released on 2015-12-11
  * 
  * A rockin' custom tooltip jQuery plugin
  * Developed by Caleb Jacob and Louis Ameline under the MIT license http://opensource.org/licenses/MIT
@@ -16,7 +16,7 @@
 
 ;(function($) {
 	
-	var globalCore = function(){},
+	var globalCore = function() {},
 		defaults = {
 			animation: 'fade',
 			animationDuration: 350,
@@ -72,7 +72,7 @@
 		 * @param {string} selector optional Use this to restrict the results
 		 * to the descendants of an element
 		 */
-		origins: function(selector){
+		origins: function(selector) {
 			
 			var sel = selector ?
 			selector +' ' :
@@ -89,7 +89,7 @@
 		 * page are returned.
 		 * @return {array}
 		 */
-		instances: function(selector){
+		instances: function(selector) {
 			
 			var instances = [],
 				sel = selector || '.tooltipstered';
@@ -117,15 +117,15 @@
 		instancesLatest: function() {
 			return instancesLatest;
 		},
-		off: function(){
+		off: function() {
 			$emitterGlobal.off.apply($emitterGlobal, Array.prototype.slice.apply(arguments));
 			return this;
 		},
-		on: function(){
+		on: function() {
 			$emitterGlobal.on.apply($emitterGlobal, Array.prototype.slice.apply(arguments));
 			return this;
 		},
-		one: function(){
+		one: function() {
 			$emitterGlobal.one.apply($emitterGlobal, Array.prototype.slice.apply(arguments));
 			return this;
 		},
@@ -136,7 +136,7 @@
 		 * @param {object} plugin
 		 * @return {array}
 		 */
-		plug: function(name, plugin){
+		plug: function(name, plugin) {
 			if (plugin) {
 				plugins[name] = plugin;
 				return this;
@@ -164,7 +164,7 @@
 		globalMethodAdd: function(name, fn) {
 			this[name] = fn;
 		},
-		triggerHandler: function(){
+		triggerHandler: function() {
 			$emitterGlobal.triggerHandler.apply($emitterGlobal, Array.prototype.slice.apply(arguments));
 			return this;
 		}
@@ -190,8 +190,9 @@
 		this.Content;
 		// for the size tracker
 		this.contentBcr;
-		// to keep the tooltip from opening once it's destroyed
+		// to disable the tooltip once the destruction has begun
 		this.destroyed = false;
+		this.destroying = false;
 		// this is the element which gets one or more tooltips, also called "origin"
 		this.$el = $(element);
 		// we can't emit directly on the instance because if a method with the same
@@ -307,7 +308,7 @@
 			}, 20000);
 			
 			// init plugins
-			$.each(self.options.plugins, function(i, plugin){
+			$.each(self.options.plugins, function(i, plugin) {
 				
 				if (plugins[plugin]) {
 					new plugins[plugin](self);
@@ -320,11 +321,11 @@
 			self
 				// prepare the tooltip when it gets created. This event must
 				// be fired by a plugin
-				._on('created', function(){
+				._on('created', function() {
 					self._prepareTooltip();
 				})
 				// save position information when it's sent by a plugin
-				._on('repositioned', function(e){
+				._on('repositioned', function(e) {
 					self.tooltipCoord = e.position;
 				});
 		},
@@ -337,13 +338,13 @@
 			self._trigger({
 				type: 'close',
 				event: event,
-				stop: function(){
+				stop: function() {
 					ok = false;
 				}
 			});
 			
 			// a destroying tooltip may not refuse to close
-			if (ok || self.destroyed) {
+			if (ok || self.destroying) {
 				
 				// save the method custom callback and cancel any open method custom callbacks
 				if (callback) self.callbacks.close.push(callback);
@@ -428,7 +429,7 @@
 							$(window).off('.'+ self.namespace +'-triggerClose');
 							
 							// scroll listeners
-							self.$originParents.each(function(i, el){
+							self.$originParents.each(function(i, el) {
 								$(el).off('scroll.'+ self.namespace +'-triggerClose');
 							});
 							// clear the array to prevent memory leaks
@@ -449,7 +450,7 @@
 							});
 							
 							// call our constructor custom callback function
-							if(self.options.functionAfter){
+							if (self.options.functionAfter) {
 								self.options.functionAfter.call(self, self, {
 									event: event,
 									origin: self.$el[0]
@@ -507,7 +508,7 @@
 			var self = this,
 				$el = self.$tooltip.find('.tooltipster-content'),
 				formattedContent = self.Content,
-				format = function(content){
+				format = function(content) {
 					formattedContent = content;
 				};
 			
@@ -776,7 +777,7 @@
 			}
 			
 			// user callback through an event
-			var edit = function(r){
+			var edit = function(r) {
 				geo.origin.size.height = r.height,
 				geo.origin.windowOffset.left = r.left,
 				geo.origin.windowOffset.top = r.top,
@@ -862,7 +863,7 @@
 		/**
 		 * For internal use by display plugins, if needed
 		 */
-		_off: function(){
+		_off: function() {
 			this.$emitterPrivate.off.apply(this.$emitterPrivate, Array.prototype.slice.apply(arguments));
 			return this;
 		},
@@ -870,7 +871,7 @@
 		/**
 		 * For internal use by display plugins, if needed
 		 */
-		_on: function(){
+		_on: function() {
 			this.$emitterPrivate.on.apply(this.$emitterPrivate, Array.prototype.slice.apply(arguments));
 			return this;
 		},
@@ -887,7 +888,7 @@
 				self._trigger({
 					type: 'start',
 					event: event,
-					stop: function(){
+					stop: function() {
 						ok = false;
 					}
 				});
@@ -915,7 +916,8 @@
 			
 			var self = this;
 			
-			if (!self.destroyed) {
+			// if the destruction process has not begun
+			if (!self.destroying) {
 				
 				// check that the origin is still in the DOM
 				if (bodyContains(self.$el)) {
@@ -927,7 +929,7 @@
 					self._trigger({
 						type: 'before',
 						event: event,
-						stop: function(){
+						stop: function() {
 							ok = false;
 						}
 					});
@@ -958,7 +960,7 @@
 							var extraTime,
 								finish = function() {
 									
-									if (self.State != 'stable'){
+									if (self.State != 'stable') {
 										self.state('stable');
 									}
 									
@@ -1072,7 +1074,7 @@
 													.addClass('tooltipster-show')
 													.removeClass('tooltipster-initial');
 												
-												if(self.options.animationDuration[0] > 0){
+												if (self.options.animationDuration[0] > 0) {
 													self.$tooltip.delay(self.options.animationDuration[0]);
 												}
 												
@@ -1114,7 +1116,7 @@
 								
 								// scrolling may require the tooltip to be moved or even
 								// repositioned in some cases
-								self.$originParents.each(function(i, parent){
+								self.$originParents.each(function(i, parent) {
 									
 									$(parent).on('scroll.'+ self.namespace +'-triggerClose', function(e) {
 										self._scrollHandler(e);
@@ -1137,11 +1139,11 @@
 												// we don't want to bind on click here because the
 												// initial touchstart event has not yet triggered its
 												// click event, which is thus about to happen
-												$('body').on('touchstart.'+ self.namespace +'-triggerClose', function(event){
+												$('body').on('touchstart.'+ self.namespace +'-triggerClose', function(event) {
 													
 													// if the tooltip is not interactive or if the touch was made
 													// outside of the tooltip
-													if(!self.options.interactive || !$.contains(self.$tooltip[0], event.target)){
+													if (!self.options.interactive || !$.contains(self.$tooltip[0], event.target)) {
 														self._close();
 													}
 												});
@@ -1198,8 +1200,8 @@
 										
 										if (self.State != 'closed') {
 											
-											$('body').on('click.'+ self.namespace +'-triggerClose touchstart.'+ self.namespace +'-triggerClose', function(event){
-												if(!self.options.interactive || !$.contains(self.$tooltip[0], event.target)){
+											$('body').on('click.'+ self.namespace +'-triggerClose touchstart.'+ self.namespace +'-triggerClose', function(event) {
+												if (!self.options.interactive || !$.contains(self.$tooltip[0], event.target)) {
 													self._close(event);
 												}
 											});
@@ -1233,7 +1235,7 @@
 			}
 		},
 		
-		_optionsFormat: function(){
+		_optionsFormat: function() {
 			
 			if (typeof this.options.delay == 'number') {
 				this.options.delay = [this.options.delay, this.options.delay];
@@ -1278,7 +1280,7 @@
 		 * separate method so it can be called when the triggers are
 		 * changed in the options.
 		 */
-		_prepareOrigin: function(){
+		_prepareOrigin: function() {
 			
 			var self = this;
 			
@@ -1345,7 +1347,7 @@
 		 * opened, and present after it has been closed: it's the display
 		 * plugin that takes care of handling it.
 		 */
-		_prepareTooltip: function(){
+		_prepareTooltip: function() {
 			
 			var self = this;
 			
@@ -1355,10 +1357,10 @@
 			
 			// themes
 			// remove the old ones and add the new ones
-			$.each(self.previousThemes, function(i, theme){
+			$.each(self.previousThemes, function(i, theme) {
 				self.$tooltip.removeClass(theme);
 			});
-			$.each(self.options.theme, function(i, theme){
+			$.each(self.options.theme, function(i, theme) {
 				self.$tooltip.addClass(theme);
 			});
 			
@@ -1621,7 +1623,7 @@
 		/**
 		 * Clear appearance timeouts
 		 */
-		_timeoutsClear: function(){
+		_timeoutsClear: function() {
 			
 			// there is only one possible open timeout: the delayed opening
 			// when the hover open trigger is used
@@ -1630,7 +1632,7 @@
 			
 			// ... but several close timeouts: the delayed closing when the
 			// mouseleave close trigger is used and the timer option
-			$.each(this.timeouts.close, function(i, timeout){
+			$.each(this.timeouts.close, function(i, timeout) {
 				clearTimeout(timeout);
 			});
 			this.timeouts.close = [];
@@ -1717,11 +1719,11 @@
 			}, self.options.trackerInterval);
 		},
 		
-		_trigger: function(){
+		_trigger: function() {
 			
 			var args = Array.prototype.slice.apply(arguments);
 			
-			if (typeof args[0] == 'string'){
+			if (typeof args[0] == 'string') {
 				args[0] = { type: args[0] };
 			}
 			
@@ -1794,18 +1796,27 @@
 		 * @see self::_close
 		 */
 		close: function(callback) {
-			this._close(null, callback);
+			
+			if (!this.destroyed) {
+				this._close(null, callback);
+			}
+			
 			return this;
 		},
 		
 		content: function(c) {
+			
 			// getter method
 			if (c === undefined) {
 				return this.Content;
 			}
 			// setter method
 			else {
-				this._update(c);
+				
+				if (!this.destroyed) {
+					this._update(c);
+				}
+				
 				return this;
 			}
 		},
@@ -1814,16 +1825,13 @@
 			
 			var self = this;
 			
-			if (!self.destroyed) {
+			if (!self.destroying) {
 				
-				self.destroyed = true;
+				self.destroying = true;
 				
-				self._close(null, function(){
+				self._close(null, function() {
 					
-					self.$el
-						.removeData(self.namespace)
-						// remove the open trigger listeners
-						.off('.'+ self.namespace +'-triggerOpen');
+					self.destroyed = true;
 					
 					// last event
 					self._trigger('destroyed');
@@ -1831,6 +1839,11 @@
 					// unbind private and public event listeners
 					self._off();
 					self.off();
+					
+					self.$el
+						.removeData(self.namespace)
+						// remove the open trigger listeners
+						.off('.'+ self.namespace +'-triggerOpen');
 					
 					var ns = self.$el.data('tooltipster-ns');
 					
@@ -1886,6 +1899,7 @@
 					}
 					
 					// remove external references, just in case
+					self.Content = null;
 					self.$el = null;
 					self.$emitterPrivate = null;
 					self.$emitterPublic = null;
@@ -1905,7 +1919,7 @@
 			// we return the scope rather than true so that the call to
 			// .tooltipster('destroy') actually returns the matched elements
 			// and applies to all of them
-			return this;
+			return self;
 		},
 		
 		disable: function() {
@@ -1917,11 +1931,17 @@
 		},
 		
 		elementOrigin: function() {
-			return this.$el[0];
+			
+			if (!this.destroyed) {
+				return this.$el[0];
+			}
+			else {
+				return null;
+			}
 		},
 		
 		elementTooltip: function() {
-			return this.$tooltip ? this.$tooltip[0] : undefined;
+			return this.$tooltip ? this.$tooltip[0] : null;
 		},
 		
 		enable: function() {
@@ -1935,7 +1955,7 @@
 		 * @param callback
 		 */
 		hide: function(callback) {
-			return this._close(null, callback);
+			return this.close(callback);
 		},
 		
 		instance: function() {
@@ -1945,24 +1965,30 @@
 		/**
 		 * For public use only, not to be used by display plugins (use ::_off() instead)
 		 */
-		off: function(){
-			this.$emitterPublic.off.apply(this.$emitterPublic, Array.prototype.slice.apply(arguments));
+		off: function() {
+			if (!this.destroyed) {
+				this.$emitterPublic.off.apply(this.$emitterPublic, Array.prototype.slice.apply(arguments));
+			}
 			return this;
 		},
 		
 		/**
 		 * For public use only, not to be used by display plugins (use ::_on() instead)
 		 */
-		on: function(){
-			this.$emitterPublic.on.apply(this.$emitterPublic, Array.prototype.slice.apply(arguments));
+		on: function() {
+			if (!this.destroyed) {
+				this.$emitterPublic.on.apply(this.$emitterPublic, Array.prototype.slice.apply(arguments));
+			}
 			return this;
 		},
 		
 		/**
 		 * For public use only, not to be used by display plugins
 		 */
-		one: function(){
-			this.$emitterPublic.one.apply(this.$emitterPublic, Array.prototype.slice.apply(arguments));
+		one: function() {
+			if (!this.destroyed) {
+				this.$emitterPublic.one.apply(this.$emitterPublic, Array.prototype.slice.apply(arguments));
+			}
 			return this;
 		},
 		
@@ -1972,6 +1998,8 @@
 		 * @see self::_openNow
 		 */
 		open: function(callback) {
+			// note: we could check for the value of this.destroyed like in ::close() but
+			// it's not necessary as the check is also done in ::_openNow()
 			this._openNow(null, callback);
 			return this;
 		},
@@ -1986,20 +2014,25 @@
 		 */ 
 		option: function(o, val) {
 			
+			// getter
 			if (val === undefined) {
 				return this.options[o];
 			}
+			// setter
 			else {
 				
-				// change value
-				this.options[o] = val;
-				
-				// format
-				this._optionsFormat();
-				
-				// re-prepare the triggers if needed
-				if ($.inArray(o, ['trigger', 'triggerClose', 'triggerOpen']) >= 0) {
-					this._prepareOrigin();
+				if (!this.destroyed) {
+					
+					// change value
+					this.options[o] = val;
+					
+					// format
+					this._optionsFormat();
+					
+					// re-prepare the triggers if needed
+					if ($.inArray(o, ['trigger', 'triggerClose', 'triggerOpen']) >= 0) {
+						this._prepareOrigin();
+					}
 				}
 				
 				return this;
@@ -2022,27 +2055,30 @@
 			
 			var self = this;
 			
-			// if the tooltip has not been removed from DOM manually (or if it
-			// has been detached on purpose)
-			if (bodyContains(self.namespace) || tooltipIsDetached) {
+			if (!self.destroyed) {
 				
-				if (!tooltipIsDetached) {
-					// detach in case the tooltip overflows the window and adds
-					// scrollbars to it, so _geometry can be accurate
-					self.$tooltip.detach();
-				}
-				
-				// refresh the geometry object before passing it as a helper
-				self.geometry = self._geometry();
-				
-				// call the display plugin
-				self._trigger({
-					type: 'reposition',
-					event: event,
-					helper: {
-						geo: self.geometry
+				// if the tooltip has not been removed from DOM manually (or if it
+				// has been detached on purpose)
+				if (bodyContains(self.namespace) || tooltipIsDetached) {
+					
+					if (!tooltipIsDetached) {
+						// detach in case the tooltip overflows the window and adds
+						// scrollbars to it, so _geometry can be accurate
+						self.$tooltip.detach();
 					}
-				});
+					
+					// refresh the geometry object before passing it as a helper
+					self.geometry = self._geometry();
+					
+					// call the display plugin
+					self._trigger({
+						type: 'reposition',
+						event: event,
+						helper: {
+							geo: self.geometry
+						}
+					});
+				}
 			}
 			
 			return self;
@@ -2064,6 +2100,7 @@
 		 */
 		state: function(state) {
 			
+			// setter (internal use only)
 			if (state) {
 				
 				this.State = state;
@@ -2075,6 +2112,7 @@
 				
 				return this;
 			}
+			// getter
 			else {
 				return this.State;
 			}
@@ -2083,8 +2121,10 @@
 		/**
 		 * For public use only, not to be used by display plugins
 		 */
-		triggerHandler: function(){
-			this.$emitterPublic.triggerHandler.apply(this.$emitterPublic, Array.prototype.slice.apply(arguments));
+		triggerHandler: function() {
+			if (!this.destroyed) {
+				this.$emitterPublic.triggerHandler.apply(this.$emitterPublic, Array.prototype.slice.apply(arguments));
+			}
 			return this;
 		}
 	};
@@ -2402,7 +2442,7 @@
 			// initial formatting
 			self.optionsFormat();
 			
-			self.instance._on('state', function(event){
+			self.instance._on('state', function(event) {
 				
 				if (event.state == 'closed') {
 					self.close();
@@ -2415,16 +2455,16 @@
 			});
 			
 			// reformat every time the options are changed
-			self.instance._on('options', function(){
+			self.instance._on('options', function() {
 				self.optionsFormat();
 			});
 			
-			self.instance._on('reposition', function(e){
+			self.instance._on('reposition', function(e) {
 				self.reposition(e.event, e.helper);
 			});
 		},
 		
-		close: function(){
+		close: function() {
 			
 			// detach our content object first, so the next jQuery's remove()
 			// call does not unbind its event handlers
@@ -2488,7 +2528,7 @@
 		/**
 		 * (Re)compute this.options from the options declared to the instance
 		 */
-		optionsFormat: function(){
+		optionsFormat: function() {
 			
 			var defaults = this.defaults();
 			
@@ -2805,7 +2845,7 @@
 			helper.tooltip = self.instance.$tooltip[0];
 			helper.tooltipParent = self.options.parent[0];
 			
-			var edit = function(result){
+			var edit = function(result) {
 				finalResult = result;
 			};
 			
@@ -2964,13 +3004,13 @@
 		 * @param {string} side
 		 * @return {integer}
 		 */
-		targetFind: function(helper, side){
+		targetFind: function(helper, side) {
 			
 			var target,
 				rects = this.instance.$el[0].getClientRects();
 			
 			// by default, the target will be the middle of the origin
-			if (rects.length < 2){
+			if (rects.length < 2) {
 				
 				switch (side) {
 					

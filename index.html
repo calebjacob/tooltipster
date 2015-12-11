@@ -107,7 +107,7 @@
 				<li>
 					<span id="demo-html">Hover</span> Fixed width, side &amp; HTML
 				</li>
-				<li>
+				<li id="test">
 					<span id="demo-events" title="Press any key on your keyboard or click anywhere in the page to close this">Click</span> Custom open/close triggers
 				</li>
 				<li>
@@ -1207,15 +1207,15 @@ $('body').on('mouseenter', '.tooltip:not(.tooltipstered)', function(){
 			<h4 id="event-types">Event types</h4>
 			
 			<p>
-				Some event types will sound familiar: <span class="code">init</span>, <span class="code">before</span>, <span class="code">ready</span>, <span class="code">after</span>, <span class="code">format</span>, <span class="code">position</span>. They happen at the same time as their equivalent <span class="code">functionBefore</span>, etc.<br />
+				The <span class="code">init</span>, <span class="code">before</span>, <span class="code">ready</span>, <span class="code">after</span>, <span class="code">format</span> and <span class="code">position</span> events will sound familiar: they happen at the same time as their equivalent <span class="code">functionInit</span>, etc.<br />
 				Others are new: <span class="code">close</span>, <span class="code">closing</span>, <span class="code">destroyed</span>, <span class="code">created</span>, <span class="code">geometry</span>, <span class="code">reposition</span>, <span class="code">repositioned</span>, <span class="code">scroll</span>, <span class="code">start</span>, <span class="code">state</span> and <span class="code">updated</span>.
 			</p>
 			
-			<p>Your listeners will get one argument, the event, which holds useful properties: <span class="code">event.type</span>, <span class="code">event.instance</span>, <span class="code">event.event</span> (when there is one, similar to the usual <span class="code">helper.event</span>) and potentially others as described below. Alphabetically:</p>
+			<p>Your listeners will get one argument, the event, which holds useful properties: <span class="code">event.type</span>, <span class="code">event.instance</span>, <span class="code">event.event</span> (when there is one, similarly to the usual <span class="code">helper.event</span>) and potentially others as described below. Alphabetically:</p>
 			
 			<p><span class="code">before</span> has a special <span class="code">event.stop</span> property which is a function you may call to prevent the tooltip from opening.</p>
 			
-			<p><span class="code">close</span> happens at the start of the closing animation. During the animation, the closing may be still cancelled if the tooltip is reopened. The event has a special <span class="code">event.stop</span> property which is a function you may call to ignore the closing order.</p>
+			<p><span class="code">close</span> happens at the start of the closing animation. Note: during the animation, the closing may be still cancelled if the tooltip is reopened. The event has a special <span class="code">event.stop</span> property which is a function you may call to ignore the closing order.</p>
 			
 			<p><span class="code">closing</span> happens at the end of the closing animation, when you know for sure that the tooltip is about to be closed. If you think you need this event, you may be wrong! When the tooltip is closed, remember that the content is just detached from the DOM and still accessible via the <span class="code">content</span> method.</p>
 			
