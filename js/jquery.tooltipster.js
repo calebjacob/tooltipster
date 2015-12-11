@@ -38,6 +38,7 @@
 			plugins: ['sideTip'],
 			repositionOnScroll: false,
 			restoration: 'none',
+			selfDestruction: true,
 			theme: [],
 			timer: 0,
 			touchDevices: true,
@@ -193,8 +194,8 @@
 		// to disable the tooltip once the destruction has begun
 		this.destroyed = false;
 		this.destroying = false;
-		// this is the element which gets one or more tooltips, also called "origin"
-		this.$el = $(element);
+		// the element to which this tooltip is associated, also called the "origin"
+		this.$el;
 		// we can't emit directly on the instance because if a method with the same
 		// name as the event exists, it will be called by jQuery. Se we use a plain
 		// object as emitter. This emitter is for internal use by display plugins,
@@ -213,13 +214,13 @@
 		this.mouseIsOverOrigin = false;
 		// a unique namespace per instance
 		this.namespace = 'tooltipster-'+ Math.round(Math.random()*100000);
-		this.options = $.extend(true, {}, defaults, options);
+		this.options;
 		// will be used to support origins in scrollable areas
 		this.$originParents;
 		// to remove themes if needed
 		this.previousThemes = [];
-		// State (capital S) can be either : appearing, stable, disappearing, closed
-		this.State = 'closed';
+		// the state can be either : appearing, stable, disappearing, closed
+		this.state = 'closed';
 		// timeout references
 		this.timeouts = {
 			close: [],
@@ -233,18 +234,21 @@
 		// the tooltip left/top coordinates, saved after each repositioning
 		this.tooltipCoord;
 		
-		// some options may need to be reformatted
-		this._optionsFormat();
-		
 		// launch
-		this._init();
+		this._init(element, options);
 	};
 	
 	$.Tooltipster.prototype = {
 		
-		_init: function() {
+		_init: function(element, options) {
 			
 			var self = this;
+			
+			self.$el = $(element);
+			self.options = $.extend(true, {}, defaults, options);
+			
+			// some options may need to be reformatted
+			self._optionsFormat();
 			
 			// note : the content is null (empty) by default and can stay that
 			// way if the plugin remains initialized but not fed any content. The
@@ -301,11 +305,8 @@
 			// set listeners on the origin
 			self._prepareOrigin();
 			
-			self.garbageCollector = setInterval(function() {
-				if (!bodyContains(self.$el)) {
-					self.destroy();
-				}
-			}, 20000);
+			// set the garbage collector
+			self._prepareGC();
 			
 			// init plugins
 			$.each(self.options.plugins, function(i, plugin) {
@@ -366,7 +367,7 @@
 					self.callbacks.close = [];
 				};
 				
-				if (self.State != 'closed') {
+				if (self.state != 'closed') {
 					
 					var necessary = true,
 						d = new Date(),
@@ -386,7 +387,7 @@
 					// animation finish sooner, its sole impact would be to trigger the
 					// state event and the open callbacks sooner than the actual end of
 					// the opening animation, which is not great.
-					if (self.State == 'disappearing') {
+					if (self.state == 'disappearing') {
 						
 						if (newClosingTime > self.closingTime) {
 							necessary = false;
@@ -397,8 +398,8 @@
 						
 						self.closingTime = newClosingTime;
 						
-						if (self.State != 'disappearing') {
-							self.state('disappearing');
+						if (self.state != 'disappearing') {
+							self._stateSet('disappearing');
 						}
 						
 						var finish = function() {
@@ -441,7 +442,7 @@
 							
 							// a plugin that would like to remove the tooltip from the
 							// DOM when closed should bind on this
-							self.state('closed');
+							self._stateSet('closed');
 							
 							// trigger event
 							self._trigger({
@@ -556,6 +557,10 @@
 				type: 'updated',
 				content: content
 			});
+		},
+		
+		_destroyError: function() {
+			throw new Error('This tooltip has been destroyed and cannot execute your method call.');
 		},
 		
 		/**
@@ -883,7 +888,7 @@
 			var self = this,
 				ok = true;
 			
-			if (self.State != 'stable' && self.State != 'appearing') {
+			if (self.state != 'stable' && self.state != 'appearing') {
 				
 				self._trigger({
 					type: 'start',
@@ -960,8 +965,8 @@
 							var extraTime,
 								finish = function() {
 									
-									if (self.State != 'stable') {
-										self.state('stable');
+									if (self.state != 'stable') {
+										self._stateSet('stable');
 									}
 									
 									// trigger any open method custom callbacks and reset them
@@ -976,15 +981,15 @@
 								};
 							
 							// if the tooltip is already open
-							if (self.State !== 'closed') {
+							if (self.state !== 'closed') {
 								
 								// the timer (if any) will start (or restart) right now
 								extraTime = 0;
 								
 								// if it was disappearing, cancel that
-								if (self.State === 'disappearing') {
+								if (self.state === 'disappearing') {
 									
-									self.state('appearing');
+									self._stateSet('appearing');
 									
 									if (supportsTransitions()) {
 										
@@ -1009,7 +1014,7 @@
 								}
 								// if the tooltip is already open, we still need to trigger the method
 								// custom callback
-								else if (self.State == 'stable') {
+								else if (self.state == 'stable') {
 									finish();
 								}
 							}
@@ -1018,7 +1023,7 @@
 								
 								// a plugin must bind on this and make the tooltip available in
 								// the DOM (if it isn't yet)
-								self.state('appearing');
+								self._stateSet('appearing');
 								
 								// the timer (if any) will start when the tooltip has fully appeared
 								// after its transition
@@ -1068,7 +1073,7 @@
 										function() {
 											
 											// a quick hover may have already triggered a mouseleave
-											if (self.State != 'closed') {
+											if (self.state != 'closed') {
 												
 												self.$tooltip
 													.addClass('tooltipster-show')
@@ -1134,7 +1139,7 @@
 										// on a click event and if options.delay == 0 (because of bubbling)
 										setTimeout(function() {
 											
-											if (self.State != 'closed') {
+											if (self.state != 'closed') {
 												
 												// we don't want to bind on click here because the
 												// initial touchstart event has not yet triggered its
@@ -1198,7 +1203,7 @@
 									// explanations : same as above
 									setTimeout(function() {
 										
-										if (self.State != 'closed') {
+										if (self.state != 'closed') {
 											
 											$('body').on('click.'+ self.namespace +'-triggerClose touchstart.'+ self.namespace +'-triggerClose', function(event) {
 												if (!self.options.interactive || !$.contains(self.$tooltip[0], event.target)) {
@@ -1271,6 +1276,26 @@
 			
 			// for the display plugin
 			this._trigger('options');
+		},
+		
+		/**
+		 * Sets or cancels the garbage collector interval
+		 */
+		_prepareGC: function(){
+			
+			var self = this;
+			
+			if (self.options.selfDestruction) {
+				
+				self.garbageCollector = setInterval(function(){
+					if(!bodyContains(self.$el)){
+						self.destroy();
+					}
+				}, 20000);
+			}
+			else {
+				clearInterval(self.garbageCollector);
+			}
 		},
 		
 		/**
@@ -1621,6 +1646,24 @@
 		},
 		
 		/**
+		 * Changes the state of the tooltip
+		 *
+		 * @param {string} state
+		 * @return {object} this
+		 */
+		_stateSet: function(state) {
+			
+			this.state = state;
+			
+			this._trigger({
+				type: 'state',
+				state: state
+			});
+			
+			return this;
+		},
+		
+		/**
 		 * Clear appearance timeouts
 		 */
 		_timeoutsClear: function() {
@@ -1650,17 +1693,10 @@
 			
 			self.tracker = setInterval(function() {
 				
-				// if the origin has been removed, destroy the instance. Our
-				// garbage collector does the same thing but at much larger
-				// intervals just to prevent memory leaks. But when the
-				// tooltip is open, it's important to do it more often so
-				// that the tooltip does not stick on screen a long time
-				// after its origin was removed
-				if (!bodyContains(self.$el)) {
-					self.destroy();
-				}
-				// if the tooltip element has somehow been removed
-				else if (!bodyContains(self.namespace)) {
+				// if the origin or tooltip elements have been removed.
+				// Note: we could destroy the instance now if the origin has
+				// been removed but we'll leave that task to our garbage collector
+				if (!bodyContains(self.$el) || !bodyContains(self.namespace)) {
 					self._close();
 				}
 				// if everything is alright
@@ -1749,7 +1785,7 @@
 			if (self.Content !== null) {
 				
 				// update the tooltip if it is open
-				if (self.State !== 'closed') {
+				if (self.state !== 'closed') {
 					
 					// reset the content in the tooltip
 					self._contentInsert();
@@ -1771,7 +1807,7 @@
 							// update animation may be shorter, it's set in the CSS rules
 							setTimeout(function() {
 								
-								if (self.State != 'closed') {
+								if (self.state != 'closed') {
 									
 									self.$tooltip.removeClass('tooltipster-update-'+ animation);
 								}
@@ -1779,7 +1815,7 @@
 						}
 						else {
 							self.$tooltip.fadeTo(200, 0.5, function() {
-								if (self.State != 'closed') {
+								if (self.state != 'closed') {
 									self.$tooltip.fadeTo(200, 1);
 								}
 							});
@@ -1800,6 +1836,9 @@
 			if (!this.destroyed) {
 				this._close(null, callback);
 			}
+			else {
+				this._destroyError();
+			}
 			
 			return this;
 		},
@@ -1816,6 +1855,9 @@
 				if (!this.destroyed) {
 					this._update(c);
 				}
+				else {
+					this._destroyError();
+				}
 				
 				return this;
 			}
@@ -1825,95 +1867,102 @@
 			
 			var self = this;
 			
-			if (!self.destroying) {
+			if (!self.destroyed) {
 				
-				self.destroying = true;
-				
-				self._close(null, function() {
+				if (!self.destroying) {
 					
-					self.destroyed = true;
+					self.destroying = true;
 					
-					// last event
-					self._trigger('destroyed');
-					
-					// unbind private and public event listeners
-					self._off();
-					self.off();
-					
-					self.$el
-						.removeData(self.namespace)
-						// remove the open trigger listeners
-						.off('.'+ self.namespace +'-triggerOpen');
-					
-					var ns = self.$el.data('tooltipster-ns');
-					
-					// if the origin has been removed from DOM, its data may
-					// well have been destroyed in the process and there would
-					// be nothing to clean up or restore
-					if (ns) {
+					self._close(null, function() {
 						
-						// if there are no more tooltips on this element
-						if (ns.length === 1) {
+						self.destroying = false;
+						self.destroyed = true;
+						
+						// last event
+						self._trigger('destroyed');
+						
+						// unbind private and public event listeners
+						self._off();
+						self.off();
+						
+						self.$el
+							.removeData(self.namespace)
+							// remove the open trigger listeners
+							.off('.'+ self.namespace +'-triggerOpen');
+						
+						var ns = self.$el.data('tooltipster-ns');
+						
+						// if the origin has been removed from DOM, its data may
+						// well have been destroyed in the process and there would
+						// be nothing to clean up or restore
+						if (ns) {
 							
-							// optional restoration of a title attribute
-							var title = null;
-							if (self.options.restoration === 'previous') {
-								title = self.$el.data('tooltipster-initialTitle');
-							}
-							else if (self.options.restoration === 'current') {
+							// if there are no more tooltips on this element
+							if (ns.length === 1) {
 								
-								// old school technique to stringify when outerHTML is not supported
-								title = (typeof self.Content === 'string') ?
-									self.Content :
-									$('<div></div>').append(self.Content).html();
+								// optional restoration of a title attribute
+								var title = null;
+								if (self.options.restoration === 'previous') {
+									title = self.$el.data('tooltipster-initialTitle');
+								}
+								else if (self.options.restoration === 'current') {
+									
+									// old school technique to stringify when outerHTML is not supported
+									title = (typeof self.Content === 'string') ?
+										self.Content :
+										$('<div></div>').append(self.Content).html();
+								}
+								
+								if (title) {
+									self.$el.attr('title', title);
+								}
+								
+								// final cleaning
+								
+								// normal elements
+								if (self.$el.hasClass('tooltipstered')) {
+									self.$el.removeClass('tooltipstered')
+								}
+								// SVG elements
+								else {
+									var c = self.$el.attr('class').replace('tooltipstered', '');
+									self.$el.attr('class', c);
+								}
+								
+								self.$el
+									.removeData('tooltipster-ns')
+									.removeData('tooltipster-initialTitle');
 							}
-							
-							if (title) {
-								self.$el.attr('title', title);
-							}
-							
-							// final cleaning
-							
-							// normal elements
-							if (self.$el.hasClass('tooltipstered')) {
-								self.$el.removeClass('tooltipstered')
-							}
-							// SVG elements
 							else {
-								var c = self.$el.attr('class').replace('tooltipstered', '');
-								self.$el.attr('class', c);
+								// remove the instance namespace from the list of namespaces of
+								// tooltips present on the element
+								ns = $.grep(ns, function(el, i) {
+									return el !== self.namespace;
+								});
+								self.$el.data('tooltipster-ns', ns);
 							}
-							
-							self.$el
-								.removeData('tooltipster-ns')
-								.removeData('tooltipster-initialTitle');
 						}
-						else {
-							// remove the instance namespace from the list of namespaces of
-							// tooltips present on the element
-							ns = $.grep(ns, function(el, i) {
-								return el !== self.namespace;
-							});
-							self.$el.data('tooltipster-ns', ns);
-						}
-					}
-					
-					// remove external references, just in case
-					self.Content = null;
-					self.$el = null;
-					self.$emitterPrivate = null;
-					self.$emitterPublic = null;
-					self.$tooltip = null;
-					self.options.parent = null;
-					
-					// make sure the object is no longer referenced in there to prevent
-					// memory leaks
-					instancesLatest = $.grep(instancesLatest, function(el, i) {
-						return self !== el;
+						
+						// remove external references, just in case
+						self.Content = null;
+						self.$el = null;
+						self.$emitterPrivate = null;
+						self.$emitterPublic = null;
+						self.$tooltip = null;
+						self.options.parent = null;
+						
+						// make sure the object is no longer referenced in there to prevent
+						// memory leaks
+						instancesLatest = $.grep(instancesLatest, function(el, i) {
+							return self !== el;
+						});
+						
+						clearInterval(self.garbageCollector);
 					});
-					
-					clearInterval(self.garbageCollector);
-				});
+				}
+			}
+			else {
+				self._destroyError();
 			}
 			
 			// we return the scope rather than true so that the call to
@@ -1923,11 +1972,19 @@
 		},
 		
 		disable: function() {
-			// close first, in case the tooltip would not disappear on
-			// its own (no close trigger)
-			this._close();
-			this.enabled = false;
-			return this;
+			
+			if (!this.destroyed) {
+				
+				// close first, in case the tooltip would not disappear on
+				// its own (no close trigger)
+				this._close();
+				this.enabled = false;
+				
+				return this;
+			}
+			else {
+				this._destroyError();
+			}
 		},
 		
 		elementOrigin: function() {
@@ -1936,7 +1993,7 @@
 				return this.$el[0];
 			}
 			else {
-				return null;
+				this._destroyError();
 			}
 		},
 		
@@ -1979,6 +2036,9 @@
 			if (!this.destroyed) {
 				this.$emitterPublic.on.apply(this.$emitterPublic, Array.prototype.slice.apply(arguments));
 			}
+			else {
+				this._destroyError();
+			}
 			return this;
 		},
 		
@@ -1989,6 +2049,9 @@
 			if (!this.destroyed) {
 				this.$emitterPublic.one.apply(this.$emitterPublic, Array.prototype.slice.apply(arguments));
 			}
+			else {
+				this._destroyError();
+			}
 			return this;
 		},
 		
@@ -1998,9 +2061,14 @@
 		 * @see self::_openNow
 		 */
 		open: function(callback) {
-			// note: we could check for the value of this.destroyed like in ::close() but
-			// it's not necessary as the check is also done in ::_openNow()
-			this._openNow(null, callback);
+			
+			if (!this.destroyed && !this.destroying) {
+				this._openNow(null, callback);
+			}
+			else {
+				this._destroyError();
+			}
+			
 			return this;
 		},
 		
@@ -2033,6 +2101,13 @@
 					if ($.inArray(o, ['trigger', 'triggerClose', 'triggerOpen']) >= 0) {
 						this._prepareOrigin();
 					}
+					
+					if (o === 'selfDestruction') {
+						this._prepareGC();
+					}
+				}
+				else {
+					this._destroyError();
 				}
 				
 				return this;
@@ -2080,6 +2155,9 @@
 					});
 				}
 			}
+			else {
+				self._destroyError();
+			}
 			
 			return self;
 		},
@@ -2094,28 +2172,19 @@
 		},
 		
 		/**
-		 * @param {string} state optional internal Use this to use the function
-		 * as a setter
-		 * @return {string} The state of the tooltip: stable, closed, etc.
+		 * Returns some properties about the instance
+		 * 
+		 * @returns {object}
 		 */
-		state: function(state) {
+		status: function(){
 			
-			// setter (internal use only)
-			if (state) {
-				
-				this.State = state;
-				
-				this._trigger({
-					type: 'state',
-					state: state
-				});
-				
-				return this;
-			}
-			// getter
-			else {
-				return this.State;
-			}
+			return {
+				destroyed: this.destroyed,
+				destroying: this.destroying,
+				enabled: this.enabled,
+				open: this.state !== 'closed',
+				state: this.state
+			};
 		},
 		
 		/**
@@ -2124,6 +2193,9 @@
 		triggerHandler: function() {
 			if (!this.destroyed) {
 				this.$emitterPublic.triggerHandler.apply(this.$emitterPublic, Array.prototype.slice.apply(arguments));
+			}
+			else {
+				this._destroyError();
 			}
 			return this;
 		}
@@ -2170,7 +2242,7 @@
 								&&	typeof args[1] == 'object'
 								&&	args[1] !== null
 								&&	!self.options.contentCloning
-								&&	debug
+								&&	self.options.debug
 							) {
 								console.log(contentCloningWarning);
 							}

@@ -239,7 +239,7 @@ $(function() {
 				
 				if (instance !== inst) {
 					
-					if (inst.state() !== 'closed'){
+					if (inst.status().open){
 						
 						open = true;
 						

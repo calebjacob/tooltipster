@@ -394,6 +394,11 @@ $('.tooltip').tooltipster({
 					<td>Specifies if a TITLE attribute should be restored on the HTML element after a call to the 'destroy' method. This attribute may be omitted, or be restored with the value that existed before Tooltipster was initialized, or be restored with the stringified value of the current content. Note: in case of multiple tooltips on a single element, only the last destroyed tooltip may trigger a restoration. <strong>Default: 'none'</strong></td>
 				</tr>
 				<tr>
+					<td><h4>selfDestruction</h4></td>
+					<td>boolean</td>
+					<td>Sets if the tooltip should self-destruct after a few seconds when its origin is removed from the DOM. This prevents memory leaks. <strong>Default: true</strong></td>
+				</tr>
+				<tr>
 					<td><h4>side</h4></td>
 					<td>string,<br />string[]</td>
 					<td>Sets the side of the tooltip. The value may one of the following: 'top', 'bottom', 'left', 'right'. It may also be an array containing one or more of these values. When using an array, the order of values is taken into account when the side must be adapted and the absence of a side disables it (see the <a href="#sides">sides section</a>). <strong>Default: ['top', 'bottom', 'right', 'left']</strong></td>
@@ -627,9 +632,9 @@ $('.tooltip').tooltipster({
 					<td>Resizes and repositions the tooltip.</td>
 				</tr>
 				<tr>
-					<td><h4>state</h4></td>
+					<td><h4>status</h4></td>
 					<td>None</td>
-					<td>Returns the current state of the tooltip. Possible values are 'appearing', 'stable', 'disappearing', 'closed'.</td>
+					<td>Returns various information about the tooltip, like if it is open or not. See the <a href="#status">status section</a>.</td>
 				</tr>
 			</table>
 			
@@ -711,8 +716,9 @@ var instances = $.tooltipster.instancesLatest();
 				<li><a href="#ajax">Using AJAX to generate your tooltip content</a></li>
 				<li><a href="#sides">Forcing or disabling sides</a></li>
 				<li><a href="#positioning">Achieving custom positioning</a></li>
-				<li><a href="#data-attributes">Specifiying options through data-attributes</a></li>
+				<li><a href="#data-attributes">Specifying options through data-attributes</a></li>
 				<li><a href="#formatting">Working with data sets</a></li>
+				<li><a href="#status">Status: getting information about the tooltip</a></li>
 				<li><a href="#object-oriented">Object-oriented Tooltipster</a></li>
 				<li><a href="#multiple">Using multiple tooltips on a single element</a></li>
 				<li><a href="#delegation">Dynamic live binding on newly created elements</a></li>
@@ -1096,6 +1102,24 @@ $('#example').tooltipster({
 console.log($('#example').tooltipster('content'));	
 			</pre>
 			
+			<h3 id="status">Status: getting information about the tooltip <a href="#usecases">&#8657;</a></h3>
+			
+			<p>The <span class="code">status</span> method returns an object that contains information about the tooltip. Here is this object with the meaning of each property:</p>
+			
+			<pre class="prettyprint">
+{
+    // if the tooltip has been destroyed
+    destroyed: boolean,
+    // if the tooltip is scheduled for destruction (which means that the tooltip is currently closing and may not be reopened)
+    destroying: boolean,
+    // if the tooltip is enabled
+    enabled: boolean,
+    // if the tooltip is open (either appearing, stable or disappearing)
+    open: boolean,
+    // the state equals one of these four values:
+    state: 'appearing' || 'stable' || 'disappearing' || 'closed'
+}</pre>
+			
 			<h3 id="object-oriented">Object-oriented Tooltipster <a href="#usecases">&#8657;</a></h3>
 			
 			<p>So far, quite often we called instance methods like this: <span class="code">$(...).tooltipster(methodName)</span>. However, advanced users may prefer to handle objects directly rather that go through the DOM to manipulate their tooltips. That's possible with Tooltipster!</p>
@@ -1351,7 +1375,7 @@ $.each(instances, function (i, instance) {
             if (instance !== inst) {
                 
                 // if another instance is already open
-                if (inst.state() !== 'closed'){
+                if (inst.status().open){
 
                     open = true;
                     
@@ -1486,10 +1510,6 @@ $('#myfield')
 			<p>No, it's not Tooltipster's job to tamper with your content in any way. Besides, &lt;script> tags are not the only possible threat (see <a href="https://www.owasp.org/index.php/XSS_(Cross_Site_Scripting)_Prevention_Cheat_Sheet">some good advice</a>).</p>
 				
 			<p>It's really up to you to decide what should be sanitized before display. You may use <span class="code">functionInit</span>, <span class="code">functionBefore</span> or <span class="code">functionFormat</span> to do so.</p>
-			
-			<h4>"Is it ok to remove elements that have a tooltip without destroying it first?"</h4>
-			
-			<p>Yes, when their origin is removed from the DOM, tooltips will destroy themselves after a few seconds. This means that there should be no memory leaks.</p>
 			
 			<h4>"Tooltipster does not work with disabled &lt;input> and &lt;button> elements"</h4>
 			

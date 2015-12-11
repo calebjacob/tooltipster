@@ -30,6 +30,7 @@ interactive
 multiple  
 repositionOnScroll  
 restoration  
+selfDestruction  
 timer  
 theme  
 touchDevices  
@@ -69,7 +70,7 @@ open([callback])
 option(optionName)  
 option(optionName, optionValue)  
 reposition()   
-state()   
+status()   
 
 Global methods
 -------------------------
