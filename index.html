@@ -179,7 +179,7 @@
 			
 			<h3>3. Activate Tooltipster</h3>
 			
-			<p>The last thing we have to do is activate the plugin. To do this, add the following script right before your closing <span class="code">&lt;/head&#62;</span> tag (using whatever selector you'd like - in this case we're using the <span class="code">.tooltip</span> class):</p>
+			<p>The last thing we have to do is activate Tooltipster. To do this, add the following script right before your closing <span class="code">&lt;/head&#62;</span> tag (using whatever selector you'd like - in this case we're still using the <span class="code">.tooltip</span> class):</p>
 			
 			<pre class="prettyprint">
 &lt;head&#62;
@@ -222,7 +222,7 @@ $('.tooltip').tooltipster({
     &lt;script&#62;
         $(document).ready(function() {
             
-            $('#mytooltip').tooltipster({
+            $('#origin').tooltipster({
                 content: $('&lt;span&gt;&lt;img src="myimage.png" /&gt; &lt;strong&gt;This text is in bold case !&lt;/strong&gt;&lt;/span&gt;')
             });
         });
@@ -230,7 +230,7 @@ $('.tooltip').tooltipster({
 &lt;/head&#62;
 
 &lt;body&#62;
-    &lt;div id="mytooltip"&#62; 
+    &lt;div id="origin"&#62; 
         This div has a tooltip with HTML when you hover over it!
     &lt;/div&#62;
 &lt;/body&#62;</pre>
@@ -243,7 +243,7 @@ $('.tooltip').tooltipster({
     &lt;script&#62;
         $(document).ready(function() {
 
-            $('.tooltip').tooltipster({
+            $('#origin').tooltipster({
                 contentAsHTML: true
             });
         });
@@ -251,7 +251,7 @@ $('.tooltip').tooltipster({
 &lt;/head&#62;
 
 &lt;body&#62;
-    &lt;div class="tooltip" title="&amp;lt;span&amp;gt;&amp;lt;img src=&amp;quot;myimage.png&amp;quot; /&amp;gt; &amp;lt;strong&amp;gt; This text is in bold case !&amp;lt;/strong&amp;gt; &amp;lt;/span&amp;gt;" &gt;
+    &lt;div id="origin" title="&amp;lt;span&amp;gt;&amp;lt;img src=&amp;quot;myimage.png&amp;quot; /&amp;gt; &amp;lt;strong&amp;gt; This text is in bold case !&amp;lt;/strong&amp;gt; &amp;lt;/span&amp;gt;" &gt;
         This div has a tooltip with HTML when you hover over it!
     &lt;/div&#62;
 &lt;/body&#62;</pre>
@@ -390,7 +390,7 @@ $('.tooltip').tooltipster({
 				</tr>
 				<tr>
 					<td><h4>restoration</h4></td>
-					<td>'none', 'previous' or 'current'</td>
+					<td>'none',<br />'previous',<br />'current'</td>
 					<td>Specifies if a TITLE attribute should be restored on the HTML element after a call to the 'destroy' method. This attribute may be omitted, or be restored with the value that existed before Tooltipster was initialized, or be restored with the stringified value of the current content. Note: in case of multiple tooltips on a single element, only the last destroyed tooltip may trigger a restoration. <strong>Default: 'none'</strong></td>
 				</tr>
 				<tr>
@@ -535,7 +535,7 @@ $('#my-tooltip').tooltipster('content', 'My new content');
 
 // NOTE: most methods are actually chainable, as you would expect them to be:
 $('#my-other-tooltip')
-    .tooltipster()
+    .tooltipster({})
     .tooltipster('open')
     .tooltipster('content', 'My new content');</pre>
 			
@@ -1142,12 +1142,12 @@ instance.open().content('My new content');</pre>
 			
 			<p>What happened here? The <span class="code">instance</span> method returns the Tooltipster instance that corresponds to the <b>first</b> tooltip set on <span class="code">#my-element</span>. Once we have the Tooltipster instance that corresponds to a tooltip, we can call any methods directly on it to manipulate the tooltip.</p>
 			
-			<p>If <b>multiple</b> tooltips were set on <span class="code">#my-element</span> using the <span class="code">multiple</span> option (see next section), we'd have to call <span class="code">$.tooltipster.instances('#my-element');</span> to get an array with all their instances.</p>
+			<p>If <b>multiple</b> tooltips were set on <span class="code">#my-element</span> using the <span class="code">multiple</span> option (see next section), we'd have to call <span class="code">$.tooltipster.instances('#my-element');</span> to get an array with all the instances.</p>
 			
 			<p>As you've seen in many previous examples involving callbacks - either <span class="code">functionInit</span>, <span class="code">functionBefore</span>, etc., open/close callbacks, they all get the Tooltipster instance that calls them as first parameter. So this works fine:</p>
 			
 			<pre class="prettyprint">
-$('#mytooltip').tooltipster({
+$('#origin').tooltipster({
     functionBefore: function(instance, helper){
         instance.content('Random content');
     }
@@ -1183,7 +1183,7 @@ var instances = $.tooltipster.instances($myElement);
 instances[0].content('New content for my first tooltip').open();
 instances[1].content('New content for my second tooltip').open();
 
-// WARNING : calling  methods in the usual way only affects the first tooltip that was created on the element
+// WARNING: calling  methods in the usual way only affects the first tooltip that was created on the element
 $myElement.tooltipster('content', 'New content for my first tooltip')
 </pre>
 
@@ -1261,7 +1261,7 @@ $('body').on('mouseenter', '.tooltip:not(.tooltipstered)', function(){
 			
 			<p><span class="code">repositioned</span> happens after Tooltipster repositioned of the tooltip. The event has a special <span class="code">event.position</span> with positioning information.</p>
 			
-			<p><span class="code">scroll</span> happens whenever a parent of the origin is scrolled.</p>
+			<p><span class="code">scroll</span> happens whenever a parent of the origin is scrolled. The native scroll event is passed as <span class="code">event.event</span>.</p>
 			
 			<p><span class="code">start</span> happens when the <span class="code">hover</span> open trigger is used and that the origin gets hovered. The event has a special <span class="code">event.stop</span> property which is a function you may call to prevent the tooltip from opening.</p>
 			
@@ -1338,13 +1338,13 @@ $('#nesting').tooltipster({
 				
 				<span id="grouped_separator">...and now this one:</span>
 				
-				<input type="button" value="❤" title="Add to favorites" class="tooltip_slow tooltip_group1" />
-				<input type="button" value="☂" title="Dance in the rain" class="tooltip_slow tooltip_group1" />
-				<input type="button" value="♞" title="Play chess" class="tooltip_slow tooltip_group1" />
-				<input type="button" value="☯" title="Turn off the computer and meditate" class="tooltip_slow tooltip_group1" />
+				<input type="button" value="❤" title="Add to favorites" class="tooltip_slow tooltip_group" />
+				<input type="button" value="☂" title="Dance in the rain" class="tooltip_slow tooltip_group" />
+				<input type="button" value="♞" title="Play chess" class="tooltip_slow tooltip_group" />
+				<input type="button" value="☯" title="Turn off the computer and meditate" class="tooltip_slow tooltip_group" />
 			</p>
 			
-			<p>This is a good opportunity to tap into Tooltipster's powerful features. This is the HTML we wrote:</p>
+			<p>This is a good opportunity to demonstrate Tooltipster's powerful features. This is the HTML we wrote:</p>
 			
 			<pre class="prettyprint">
 &lt;input type="button" value="❤" title="Add to favorites" class="tooltip tooltip_group" /&gt;
@@ -1359,58 +1359,57 @@ $('#nesting').tooltipster({
 // initialize tooltips in the page as usual
 $('.tooltip').tooltipster();
 
-// get instances of the group
-var instances = $.tooltipster.instances('.tooltip_group');
+// bind on start events (triggered on mouseenter)
+$.tooltipster.on('start', function(event) {
 
-$.each(instances, function (i, instance) {
-    
-    // bind on the start event (triggered on mouseenter)
-    instance.on('start', function (event) {
+    if ($(event.instance.elementOrigin()).hasClass('tooltip_group')) {
 
-        var open = false,
+        var instances = $.tooltipster.instances('.tooltip_group'),
+            open = false,
             duration;
 
-        $.each(instances, function (i, inst) {
+        $.each(instances, function (i, instance) {
 
-            if (instance !== inst) {
-                
+            if (instance !== event.instance) {
+
                 // if another instance is already open
-                if (inst.status().open){
+                if (instance.status().open){
 
                     open = true;
-                    
+
                     // get the current animationDuration
-                    duration = inst.option('animationDuration');
-                    
+                    duration = instance.option('animationDuration');
+
                     // close the tooltip without animation
-                    inst.option('animationDuration', 0);
-                    inst.close();
+                    instance.option('animationDuration', 0);
+                    instance.close();
                     
                     // restore the animationDuration to its normal value
-                    inst.option('animationDuration', duration);
+                    instance.option('animationDuration', duration);
                 }
             }
         });
-		
+
         // if another instance was open
         if (open) {
 
-            // get the current animationDuration
-            duration = instance.option('animationDuration');
+            duration = event.instance.option('animationDuration');
 
             // open the tooltip without animation
-            instance.option('animationDuration', 0);
-            instance.open();
-			
+            event.instance.option('animationDuration', 0);
+            event.instance.open();
+            
             // restore the animationDuration to its normal value
-            instance.option('animationDuration', duration);
+            event.instance.option('animationDuration', duration);
 
             // now that we have opened the tooltip, the hover trigger must be stopped
             event.stop();
         }
-    });
-})
+    }
+});
 </pre>
+			
+			<p>For your convenience, this has been turned into a Tooltipster plugin <a href="https://github.com/louisameline/tooltipster.discovery" target="_blank">available here</a>.</p>
 			
 			<h3 id="svg">Tooltips on SVG elements <a href="#usecases">&#8657;</a></h3>
 			

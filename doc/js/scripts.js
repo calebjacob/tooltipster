@@ -226,45 +226,43 @@ $(function() {
 		delay: 1000
 	});
 	
-	var instances = $.tooltipster.instances('.tooltip_group1');
-	
-	$.each(instances, function (i, instance) {
+	$.tooltipster.on('start', function(event) {
 		
-		instance.on('start', function (event) {
+		if ($(event.instance.elementOrigin()).hasClass('tooltip_group')) {
 			
-			var open = false,
+			var instances = $.tooltipster.instances('.tooltip_group'),
+				open = false,
 				duration;
 			
-			$.each(instances, function (i, inst) {
-				
-				if (instance !== inst) {
+			$.each(instances, function (i, instance) {
 					
-					if (inst.status().open){
+				if (instance !== event.instance) {
+					
+					if (instance.status().open){
 						
 						open = true;
 						
-						duration = inst.option('animationDuration');
+						duration = instance.option('animationDuration');
 						
-						inst.option('animationDuration', 0);
-						inst.close();
-						inst.option('animationDuration', duration);
+						instance.option('animationDuration', 0);
+						instance.close();
+						instance.option('animationDuration', duration);
 					}
 				}
 			});
 			
 			if (open) {
 				
-				duration = instance.option('animationDuration');
+				duration = event.instance.option('animationDuration');
 				
-				instance.option('animationDuration', 0);
-				instance.open();
-				instance.option('animationDuration', duration);
+				event.instance.option('animationDuration', 0);
+				event.instance.open();
+				event.instance.option('animationDuration', duration);
 				
 				event.stop();
 			}
-		});
+		}
 	});
-	
 	
 	// themes
 	
