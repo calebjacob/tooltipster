@@ -492,7 +492,7 @@ $('.tooltip').tooltipster({
 			
 			<h3 id="callback_arguments">Arguments passed to callback functions</h3>
 			
-			<p>Almost all user callbacks have the same input signature. It means that <span class="code">functionInit</span>, <span class="code">functionBefore</span>, <span class="code">functionReady</span>, <span class="code">functionAfter</span>, <span class="code">functionFormat</span>, <span class="code">functionPosition</span> and the <span class="code">open</span> and <span class="code">close</span> callbacks all get these parameters:</p>
+			<p>Almost all user callbacks have the same input signature. It means that <span class="code">functionInit</span>, <span class="code">functionBefore</span>, <span class="code">functionReady</span>, <span class="code">functionAfter</span>, <span class="code">functionFormat</span>, <span class="code">functionPosition</span> and the <span class="code">open</span> and <span class="code">close</span> callbacks all get these two parameters:</p>
 			
 			<pre class="prettyprint">
 callback(instance, helper);</pre>
@@ -518,10 +518,9 @@ callback(instance, helper);</pre>
 			
 			<h3>Instance methods</h3>
 			
-			<p>Instance methods are used to manipulate one tooltip in particular. Here is how you would usually call them:</p>
+			<p>Instance methods are used to manipulate one tooltip in particular. There are two ways to call them.</p>
 			
-			<pre class="prettyprint">
-$('#my-tooltip').tooltipster(methodName [, argument1] [, argument2]);</pre>
+			<p>1) Through the HTML element on which they are set: <span class="code">$('#my-tooltip').tooltipster(methodName [, argument1] [, argument2]);</span></p>
 			
 			<p>Example:</p>
 			
@@ -539,10 +538,7 @@ $('#my-other-tooltip')
     .tooltipster('open')
     .tooltipster('content', 'My new content');</pre>
 			
-			<p>There is another way to call instance methods which will be discussed in the <a href="#object-oriented">object-oriented section</a>. Users with simple use cases just need to know that it's the recommended way of calling methods when you are inside <span class="code">functionInit</span>, <span class="code">functionBefore</span> and the like. It goes like this:</p>
-			
-			<pre class="prettyprint">
-instance.methodName([argument1] [, argument2]);</pre>
+			<p>2) Through the tooltip instance, when you have it: <span class="code">instance.methodName([argument1] [, argument2]);</span></p>
 			
 			<p>Example:</p>
 			
@@ -553,7 +549,8 @@ $('.tooltip').tooltipster({
     }
 });</pre>
 			
-			<p>Here is the list of instance methods:</p>
+			<p>The second one will be discussed in the <a href="#object-oriented">object-oriented section</a>. Users with simple use cases just need to know that it's the recommended way of calling methods when you are inside <span class="code">functionInit</span>, <span class="code">functionBefore</span> and the like. Here is the list of instance methods:</p>
+			<br /><br />
 			
 			<table class="table_methods" border="0" cellpadding="0" cellspacing="0">
 				<tr>
@@ -637,13 +634,12 @@ $('.tooltip').tooltipster({
 					<td>Returns various information about the tooltip, like if it is open or not. See the <a href="#status">status section</a>.</td>
 				</tr>
 			</table>
+			<br /><br />
 			
 			<h3>Global methods</h3>
 			
-			<p>Global methods are methods which may affect/handle several tooltips at once. Here is how you call them:</p>
-			
-			<pre class="prettyprint">
-$.tooltipster.methodName([argument]);</pre>
+			<p>Global methods are methods which may affect/handle several tooltips at once. You call them with: <span class="code">$.tooltipster.methodName([argument]);</span></p>
+			<br />
 			
 			<table class="table_methods" border="0" cellpadding="0" cellspacing="0">
 				<tr>

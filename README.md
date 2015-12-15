@@ -13,7 +13,6 @@ Standard options
 
 animation  
 animationDuration  
-autoClose  
 closeOnClick  
 content  
 contentAsHTML  
