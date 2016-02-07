@@ -1,4 +1,4 @@
-/*! Tooltipster 4.0.0rc37 */
+/*! Tooltipster 4.0.0rc38 */
 
 /**
  * http://iamceege.github.io/tooltipster/
