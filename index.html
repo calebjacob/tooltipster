@@ -489,13 +489,17 @@ $('.tooltip').tooltipster({
 					<td>Set the z-index of the tooltip. <strong>Default: 9999999</strong></td>
 				</tr>
 			</table>
+			<br /><br />
 			
 			<h3 id="callback_arguments">Arguments passed to callback functions</h3>
 			
 			<p>Almost all user callbacks have the same input signature. It means that <span class="code">functionInit</span>, <span class="code">functionBefore</span>, <span class="code">functionReady</span>, <span class="code">functionAfter</span>, <span class="code">functionFormat</span>, <span class="code">functionPosition</span> and the <span class="code">open</span> and <span class="code">close</span> callbacks all get these two parameters:</p>
 			
 			<pre class="prettyprint">
-callback(instance, helper);</pre>
+// this is valid for the other callback functions too
+functionInit(instance, helper){
+    ...
+}</pre>
 			
 			<p>Small exception: <span class="code">functionFormat</span> and <span class="code">functionPosition</span> get an extra third parameter (documented above).</p>
 			

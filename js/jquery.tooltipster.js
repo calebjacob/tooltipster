@@ -1124,6 +1124,7 @@
 									height: 0,
 									left: 0,
 									top: 0,
+									overflow: 'hidden',
 									width: 0,
 									zIndex: self.options.zIndex
 								});
@@ -1610,18 +1611,19 @@
 		 * This method does not reset the position values to what they were when the
 		 * test is over, do it yourself if need be.
 		 * 
-		 * @param {int} width
-		 * @param {int} height
+		 * @param {int} width_constr
+		 * @param {int} height_constr
 		 * @return {object} An object with `height` and `width` properties. Either of these
 		 * will be true if the content overflows in that dimension, false if it fits.
 		 */
-		_sizerConstrained: function(width, height) {
+		_sizerConstrained: function(width_constr, height_constr) {
 			
 			// we'll set a width and see what height is generated and if there
 			// is horizontal overflow
 			this.$tooltip.css({
 				height: '',
 				left: 0,
+				overflow: 'visible',
 				top: 0,
 				width: width
 			});
@@ -1631,20 +1633,27 @@
 			// note: we used to use offsetWidth instead of boundingRectClient but
 			// it returned rounded values, causing issues with sub-pixel layouts.
 			
+			// note2: noticed that the bcrWidth of text content of a div was once
+			// greater than the bcrWidth of its container by 1px, causing the final
+			// tooltip box to be too small for its content. However, evaluating
+			// their widths one against the other (below) surprisingly returned
+			// equality. Happened only once in Chrome 48, was not able to reproduce
+			// => just having fun with float position values...
+			
 			var $content = this.$tooltip.find('.tooltipster-content'),
 				newHeight = this.$tooltip.outerHeight(),
 				tooltipBrc = this.$tooltip[0].getBoundingClientRect(),
 				contentBrc = $content[0].getBoundingClientRect(),
 				fits = {
-					height: newHeight <= height,
+					height: newHeight <= height_constr,
 					width: (
 						// this condition accounts for min-width property that
 						// may apply
-							tooltipBrc.width <= width
+							tooltipBrc.width <= width_constr
 						// the -1 is here because scrollWidth actually returns
 						// a rounded value, and may be greater than brc.width if
 						// it has been rounded up. This may cause an issue
-						// an issue for contents which actually really overflowed
+						// for contents which actually really overflowed
 						// by 1px or so, but that should be very rare. Not sure
 						// how to solve this efficiently.
 						// See http://blogs.msdn.com/b/ie/archive/2012/02/17/sub-pixel-rendering-and-the-css-object-model.aspx
@@ -1699,6 +1708,7 @@
 			this.$tooltip.css({
 				height: '',
 				left: 0,
+				overflow: 'visible',
 				top: 0,
 				width: ''
 			});
