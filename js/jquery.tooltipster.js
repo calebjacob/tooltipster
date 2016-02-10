@@ -1,4 +1,4 @@
-/*! Tooltipster 4.0.0rc38 */
+/*! Tooltipster 4.0.0rc39 */
 
 /**
  * http://iamceege.github.io/tooltipster/
@@ -1288,7 +1288,7 @@
 								
 								// here we'll set the same bindings for both clicks and touch on the body
 								// to close the tooltip
-								if (self.options.triggerOpen.click) {
+								if (self.options.triggerClose.click) {
 									
 									// explanations : same as above
 									setTimeout(function() {
