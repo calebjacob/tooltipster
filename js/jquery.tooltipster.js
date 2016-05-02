@@ -1,4 +1,4 @@
-/*! Tooltipster 4.0.0rc39 */
+/*! Tooltipster 4.0.0rc40 */
 
 /**
  * http://iamceege.github.io/tooltipster/
@@ -755,13 +755,13 @@
 						
 						case 'circle':
 							
-							var areaLeft = coords[0],
-								areaTop = coords[1],
-								areaWidth = coords[2],
-								areaTopOffset = areaTop - areaWidth,
-								areaLeftOffset = areaLeft - areaWidth;
+							var circleCenterLeft = coords[0],
+								circleCenterTop = coords[1],
+								circleRadius = coords[2],
+								areaTopOffset = circleCenterTop - circleRadius,
+								areaLeftOffset = circleCenterLeft - circleRadius;
 							
-							geo.origin.size.height = areaWidth * 2;
+							geo.origin.size.height = circleRadius * 2;
 							geo.origin.size.width = geo.origin.size.height;
 							
 							geo.origin.windowOffset.left += areaLeftOffset;
@@ -774,15 +774,13 @@
 							var areaLeft = coords[0],
 								areaTop = coords[1],
 								areaRight = coords[2],
-								areaBottom = coords[3],
-								areaTopOffset = areaBottom - areaTop,
-								areaLeftOffset = areaRight - areaLeft;
+								areaBottom = coords[3];
 							
 							geo.origin.size.height = areaBottom - areaTop;
 							geo.origin.size.width = areaRight - areaLeft;
 							
-							geo.origin.windowOffset.left += areaLeftOffset;
-							geo.origin.windowOffset.top += areaTopOffset;
+							geo.origin.windowOffset.left += areaLeft;
+							geo.origin.windowOffset.top += areaTop;
 							
 							break;
 						
