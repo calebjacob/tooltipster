@@ -23,7 +23,7 @@
 	overflow: auto;
 }
 
-.tooltipster-sizer {
+.tooltipster-ruler {
 	/* these let us test the size of the tooltip without overflowing the window */
 	bottom: 0;
 	left: 0;

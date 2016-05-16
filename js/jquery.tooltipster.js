@@ -1,4 +1,4 @@
-/*! Tooltipster 4.0.0rc40 */
+/*! Tooltipster 4.0.0rc41 */
 
 /**
  * http://iamceege.github.io/tooltipster/
@@ -98,6 +98,15 @@
 					}
 				}
 			});
+		},
+		/**
+		 * Returns a ruler, a tool to help measure the size of a tooltip under
+		 * various settings. Meant for plugins
+		 * 
+		 * @see Ruler
+		 */
+		_getRuler: function($tooltip) {
+			return new Ruler($tooltip);
 		},
 		/**
 		 * Returns instances of all tooltips in the page or an a given element
@@ -210,7 +219,7 @@
 				if (plugin.global) {
 					
 					// instantiate at global level
-					var fn = function(){};
+					var fn = function() {};
 					fn.prototype = plugin.global;
 					
 					var p = new fn();
@@ -650,26 +659,6 @@
 		
 		_destroyError: function() {
 			throw new Error('This tooltip has been destroyed and cannot execute your method call.');
-		},
-		
-		/**
-		 * Force the browser to redraw (re-render) the tooltip immediately. This is required
-		 * when you changed some CSS properties and need to make something with it
-		 * immediately, without waiting for the browser to redraw at the end of instructions.
-		 * 
-		 * @see http://stackoverflow.com/questions/3485365/how-can-i-force-webkit-to-redraw-repaint-to-propagate-style-changes
-		 */
-		_forceRedraw: function() {
-			
-			// note : this would work but for Webkit only
-			//this.$tooltip.close();
-			//this.$tooltip[0].offsetHeight;
-			//this.$tooltip.open();
-			
-			// works in FF too
-			var $p = this.$tooltip.parent();
-			this.$tooltip.detach();
-			this.$tooltip.appendTo($p);
 		},
 		
 		/**
@@ -1369,13 +1358,13 @@
 		/**
 		 * Sets or cancels the garbage collector interval
 		 */
-		_prepareGC: function(){
+		_prepareGC: function() {
 			
 			var self = this;
 			
 			if (self.options.selfDestruction) {
 				
-				self.garbageCollector = setInterval(function(){
+				self.garbageCollector = setInterval(function() {
 					if(!bodyContains(self.$origin)){
 						self.destroy();
 					}
@@ -1600,146 +1589,6 @@
 					event: event
 				});
 			}
-		},
-		
-		/**
-		 * Check if a tooltip can fit in the provided dimensions when we restrain its width.
-		 * The idea is to see if the new height is small enough and if the content does not
-		 * overflow horizontally.
-		 * This method does not reset the position values to what they were when the
-		 * test is over, do it yourself if need be.
-		 * 
-		 * @param {int} width_constr
-		 * @param {int} height_constr
-		 * @return {object} An object with `height` and `width` properties. Either of these
-		 * will be true if the content overflows in that dimension, false if it fits.
-		 */
-		_sizerConstrained: function(width_constr, height_constr) {
-			
-			// we'll set a width and see what height is generated and if there
-			// is horizontal overflow
-			this.$tooltip.css({
-				height: '',
-				left: 0,
-				overflow: 'visible',
-				top: 0,
-				width: width
-			});
-			
-			this._forceRedraw();
-			
-			// note: we used to use offsetWidth instead of boundingRectClient but
-			// it returned rounded values, causing issues with sub-pixel layouts.
-			
-			// note2: noticed that the bcrWidth of text content of a div was once
-			// greater than the bcrWidth of its container by 1px, causing the final
-			// tooltip box to be too small for its content. However, evaluating
-			// their widths one against the other (below) surprisingly returned
-			// equality. Happened only once in Chrome 48, was not able to reproduce
-			// => just having fun with float position values...
-			
-			var $content = this.$tooltip.find('.tooltipster-content'),
-				newHeight = this.$tooltip.outerHeight(),
-				tooltipBrc = this.$tooltip[0].getBoundingClientRect(),
-				contentBrc = $content[0].getBoundingClientRect(),
-				fits = {
-					height: newHeight <= height_constr,
-					width: (
-						// this condition accounts for min-width property that
-						// may apply
-							tooltipBrc.width <= width_constr
-						// the -1 is here because scrollWidth actually returns
-						// a rounded value, and may be greater than brc.width if
-						// it has been rounded up. This may cause an issue
-						// for contents which actually really overflowed
-						// by 1px or so, but that should be very rare. Not sure
-						// how to solve this efficiently.
-						// See http://blogs.msdn.com/b/ie/archive/2012/02/17/sub-pixel-rendering-and-the-css-object-model.aspx
-						&&	contentBrc.width >= $content[0].scrollWidth - 1
-					)
-				},
-				width = contentBrc.right;
-			
-			// old versions of IE get the width wrong for some reason
-			if (IE && IE <= 11) {
-				width = Math.ceil(width) + 1;
-			}
-			
-			return {
-				fits: fits.height && fits.width,
-				size: {
-					height: newHeight,
-					// rounding up fixes an issue in IE11- (at least).
-					// Besides, brc.width/height are not defined in IE8- but in this
-					// case, brc.right/bottom will have the same value
-					width: width
-				}
-			};
-		},
-		
-		/**
-		 * Append the tooltip to its parent after the size tests are over and get rid
-		 * of the test container.
-		 */
-		_sizerEnd: function() {
-			
-			var $sizer = this.$tooltip.parent();
-			
-			this.$tooltip
-				.appendTo(this.options.parent)
-				.find('.tooltipster-content')
-					.css('overflow', '');
-			
-			$sizer.remove();
-		},
-		
-		/**
-		 * Get the size of a tooltip when we do not set any specific height or width.
-		 * This method does not reset the position values to what they were when the
-		 * test is over, do it yourself if need be.
-		 * 
-		 * Some remarks from ::_sizerConstrained() also apply here
-		 */
-		_sizerNatural: function() {
-			
-			// reset to natural size
-			this.$tooltip.css({
-				height: '',
-				left: 0,
-				overflow: 'visible',
-				top: 0,
-				width: ''
-			});
-			
-			this._forceRedraw();
-			
-			var tooltipBrc = this.$tooltip[0].getBoundingClientRect(),
-				width = tooltipBrc.right;
-			
-			if (IE && IE <= 11) {
-				width = Math.ceil(width) + 1;
-			}
-			
-			return {
-				height: tooltipBrc.bottom,
-				width: width
-			};
-		},
-		
-		/**
-		 * Move the tooltip into an invisible div that does not allow overflow to make
-		 * size tests. Note : the tooltip may or may not be attached to the DOM at the
-		 * moment this method is called, it does not matter.
-		 */
-		_sizerStart: function() {
-			
-			$('<div class="tooltipster-sizer"></div>')
-				.append(this.$tooltip)
-				.appendTo('body');
-			
-			// overflow must be auto during the test
-			this.$tooltip.find('.tooltipster-content')
-				.css('overflow', 'auto');
 		},
 		
 		/**
@@ -2273,7 +2122,7 @@
 		 * 
 		 * @returns {object}
 		 */
-		status: function(){
+		status: function() {
 			
 			return {
 				destroyed: this.destroyed,
@@ -2456,6 +2305,188 @@
 	};
 	
 	// Utilities
+	
+	/**
+	 * A class to check if a tooltip can fit in given dimensions
+	 * 
+	 * @param {object} $tooltip The jQuery wrapped tooltip element, or a clone of it
+	 */
+	function Ruler($tooltip) {
+		
+		// list of instance variables
+		
+		this.$container;
+		this.constraints = null;
+		this.$tooltip = $tooltip;
+		
+		this._init();
+	}
+	
+	Ruler.prototype = {
+		
+		/**
+		 * Move the tooltip into an invisible div that does not allow overflow to make
+		 * size tests. Note : the tooltip may or may not be attached to the DOM at the
+		 * moment this method is called, it does not matter.
+		 */
+		_init: function() {
+			
+			this.$container = $('<div class="tooltipster-ruler"></div>')
+				.append(this.$tooltip)
+				.appendTo('body');
+			
+			// overflow must be auto during the test
+			this.$tooltip.find('.tooltipster-content')
+				.css('overflow', 'auto');
+		},
+		
+		/**
+		 * Force the browser to redraw (re-render) the tooltip immediately. This is required
+		 * when you changed some CSS properties and need to make something with it
+		 * immediately, without waiting for the browser to redraw at the end of instructions.
+		 *
+		 * @see http://stackoverflow.com/questions/3485365/how-can-i-force-webkit-to-redraw-repaint-to-propagate-style-changes
+		 */
+		_forceRedraw: function() {
+			
+			// note : this would work but for Webkit only
+			//this.$tooltip.close();
+			//this.$tooltip[0].offsetHeight;
+			//this.$tooltip.open();
+			
+			// works in FF too
+			var $p = this.$tooltip.parent();
+			this.$tooltip.detach();
+			this.$tooltip.appendTo($p);
+		},
+		
+		/**
+		 * Set maximum dimensions for the tooltip. A call to ::measure afterwards
+		 * will tell us if the content overflows or if it's ok
+		 *
+		 * @param {int} width
+		 * @param {int} height
+		 * @return {Ruler}
+		 */
+		constrain: function(width, height) {
+			
+			this.constraints = {
+				width: width,
+				height: height
+			};
+			
+			// we'll only set the width and see what height is generated and if there
+			// is horizontal overflow
+			this.$tooltip.css({
+				height: '',
+				left: 0,
+				overflow: 'visible',
+				top: 0,
+				width: width
+			});
+			
+			return this;
+		},
+		
+		/**
+		 * Reset the tooltip content overflow and remove the test container
+		 */
+		destroy: function() {
+			
+			// in case the element was not a clone
+			this.$tooltip
+				.detach()
+				.find('.tooltipster-content')
+					.css('overflow', '');
+			
+			this.$container.remove();
+		},
+		
+		/**
+		 * Removes any constraints
+		 * 
+		 * @returns {Ruler}
+		 */
+		free: function() {
+			
+			this.constraints = null;
+			
+			// reset to natural size
+			this.$tooltip.css({
+				height: '',
+				left: 0,
+				overflow: 'visible',
+				top: 0,
+				width: ''
+			});
+			
+			return this;
+		},
+		
+		/**
+		 * Returns the size of the tooltip. When constraints are applied, also returns
+		 * whether the tooltip fits in the provided dimensions.
+		 * The idea is to see if the new height is small enough and if the content does
+		 * not overflow horizontally.
+		 *
+		 * @param {int} width
+		 * @param {int} height
+		 * @return {object} An object with a bool `fits` property and a `size` property
+		 */
+		measure: function() {
+			
+			this._forceRedraw();
+			
+			var tooltipBrc = this.$tooltip[0].getBoundingClientRect(),
+				result = { size: {
+					// brc.width/height are not defined in IE8- but in this
+					// case, brc.right/bottom will have the same value
+					height: tooltipBrc.bottom,
+					width: tooltipBrc.right
+				}};
+			
+			if(this.constraints) {
+				
+				// note: we used to use offsetWidth instead of boundingRectClient but
+				// it returned rounded values, causing issues with sub-pixel layouts.
+				
+				// note2: noticed that the bcrWidth of text content of a div was once
+				// greater than the bcrWidth of its container by 1px, causing the final
+				// tooltip box to be too small for its content. However, evaluating
+				// their widths one against the other (below) surprisingly returned
+				// equality. Happened only once in Chrome 48, was not able to reproduce
+				// => just having fun with float position values...
+				
+				var $content = this.$tooltip.find('.tooltipster-content'),
+					height = this.$tooltip.outerHeight(),
+					contentBrc = $content[0].getBoundingClientRect(),
+					fits = {
+						height: height <= this.constraints.height,
+						width: (
+							// this condition accounts for min-width property that
+							// may apply
+							tooltipBrc.width <= this.constraints.width
+								// the -1 is here because scrollWidth actually returns
+								// a rounded value, and may be greater than brc.width if
+								// it was rounded up. This may cause an issue for contents
+								// which actually really overflow  by 1px or so, but that
+								// should be very rare. Not sure how to solve this efficiently.
+								// See http://blogs.msdn.com/b/ie/archive/2012/02/17/sub-pixel-rendering-and-the-css-object-model.aspx
+							&&	contentBrc.width >= $content[0].scrollWidth - 1
+						)
+					};
+				
+				result.fits = fits.height && fits.width;
+			}
+			
+			// old versions of IE get the width wrong for some reason
+			if (IE && IE <= 11) {
+				result.size.width = Math.ceil(result.size.width) + 1;
+			}
+			
+			return result;
+		}
+	};
 	
 	// quick & dirty compare function, not bijective nor multidimensional
 	function areEqual(a,b) {
@@ -2755,10 +2786,7 @@
 			 * tooltip is eventually appended to its parent (since the element may be
 			 * detached from the DOM at the moment the method is called).
 			 *
-			 * Plugin creators will at least have to use self.instance.$tooltip.
-			 * Also, some of its methods may help plugin
-			 * creators, especially its _sizer utilities that help measure the size
-			 * of the tooltip in various conditions.
+			 * Plugin creators will at least have to use self.instance.$tooltip
 			 *
 			 * @param {object} helper An object that contains variables that plugin
 			 * creators may find useful (see below)
@@ -2773,10 +2801,9 @@
 					testResults = {
 						document: {},
 						window: {}
-					};
-				
-				// start position tests session
-				self.instance._sizerStart();
+					},
+					// start position tests session
+					ruler = $.tooltipster._getRuler(self.instance.$tooltip);
 				
 				// find which side can contain the tooltip without overflow.
 				// We'll compute things relatively to window, then document if need be.
@@ -2788,7 +2815,7 @@
 						naturalSize,
 						outerNaturalSize,
 						side,
-						sizerResult;
+						rulerResult;
 					
 					for (var i=0; i < self.options.side.length; i++) {
 						
@@ -2804,7 +2831,7 @@
 						
 						// now we get the size of the tooltip when it does not have any size
 						// constraints set
-						naturalSize = self.instance._sizerNatural();
+						naturalSize = ruler.free().measure().size;
 						
 						if (side == 'top' || side == 'bottom') {
 							distance.vertical = self.options.distance[side];
@@ -2846,24 +2873,25 @@
 						else {
 							
 							// let's try to use size constraints to fit
-							sizerResult = self.instance._sizerConstrained(
-								helper.geo.available[container][side].width - distance.horizontal,
-								helper.geo.available[container][side].height - distance.vertical
-							);
+							rulerResult = ruler.constrain(
+									helper.geo.available[container][side].width - distance.horizontal,
+									helper.geo.available[container][side].height - distance.vertical
+								)
+								.measure();
 							
 							testResults[container][side].constrained = {
-								fits: sizerResult.fits,
+								fits: rulerResult.fits,
 								distance: distance,
 								outerSize: {
-									height: sizerResult.size.height + distance.vertical,
-									width: sizerResult.size.width + distance.horizontal
+									height: rulerResult.size.height + distance.vertical,
+									width: rulerResult.size.width + distance.horizontal
 								},
 								side: side,
-								size: sizerResult.size,
+								size: rulerResult.size,
 								sizeMode: 'constrained'
 							};
 							
-							if (sizerResult.fits) {
+							if (rulerResult.fits) {
 								// we let tests run as we may find a fitting natural size
 								// on the next sides
 								constrainedFits = true;
@@ -3072,7 +3100,7 @@
 					// this assumes that the parent of the tooltip is located at
 					// (0, 0) in the document, typically like when the parent is
 					// <body>.
-					// If we ever allow other types of parent, .tooltipster-sizer
+					// If we ever allow other types of parent, .tooltipster-ruler
 					// will have to be appended to the parent to inherit css style
 					// values that affect the display of the text and such.
 					originParentOffset = {
@@ -3128,9 +3156,11 @@
 						width: finalResult.size.width
 					});
 				
-				// end positioning tests session and append the tooltip HTML element
-				// to its parent
-				self.instance._sizerEnd();
+				// end positioning tests session
+				ruler.destroy();
+				
+				// append the tooltip HTML element to its parent
+				self.instance.$tooltip.appendTo(self.instance.options.parent);
 				
 				self.instance._trigger({
 					type: 'repositioned',
@@ -3253,5 +3283,4 @@
 			}
 		}
 	});
-	
 })(jQuery);
