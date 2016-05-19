@@ -553,7 +553,7 @@ $('.tooltip').tooltipster({
     }
 });</pre>
 			
-			<p>The second one will be discussed in the <a href="#object-oriented">object-oriented section</a>. Users with simple use cases just need to know that it's the recommended way of calling methods when you are inside <span class="code">functionInit</span>, <span class="code">functionBefore</span> and the like. Here is the list of instance methods:</p>
+			<p>The latter will be discussed in the <a href="#object-oriented">object-oriented section</a>. Users with simple use cases just need to know that it's the recommended way of calling methods when you are inside <span class="code">functionInit</span>, <span class="code">functionBefore</span> and the like. Here is the list of instance methods:</p>
 			<br /><br />
 			
 			<table class="table_methods" border="0" cellpadding="0" cellspacing="0">
@@ -926,7 +926,6 @@ $(document).ready(function() {
 			
 			<pre class="prettyprint">
 {
-    arrowMargin: 10,
     container: ['window' || 'document' || 'overflow'],
     contentOverflow: 'initial',
     coord: {
@@ -942,8 +941,6 @@ $(document).ready(function() {
     sizeMode: ['natural' || 'constrained'],
     target: [number]
 }</pre>
-			
-			<p><span class="code">arrowMargin</span> is a safety margin that will keep the arrow from being too close from the edge of the tooltip. You'll have to increase this value if you use large arrows.</p>
 			
 			<p><span class="code">container</span> tells you if, in Tooltipster's proposition, the tooltip will be contained in the viewport, if it has to overflow into the document, or if it has to overflow the document itself. This property is for your information only, editing it will have no effect.</p>
 			
