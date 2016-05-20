@@ -1,10 +1,9 @@
-/*! Tooltipster 4.0.0rc42 */
-
 /**
  * http://iamceege.github.io/tooltipster/
  * 
  * A rockin' custom tooltip jQuery plugin
- * Developed by Caleb Jacob and Louis Ameline under the MIT license http://opensource.org/licenses/MIT
+ * Developed by Caleb Jacob and Louis Ameline under the MIT license
+ * http://opensource.org/licenses/MIT
  * 
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
  * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
@@ -33,9 +32,9 @@
 			interactive: false,
 			multiple: false,
 			// must be 'body' for now, or an element positioned at (0, 0)
-			// in the document, typically like very top views of an app.
+			// in the document, typically like the very top views of an app.
 			parent: 'body',
-			plugins: ['sideTip'],
+			plugins: ['tooltipster.sideTip'],
 			repositionOnScroll: false,
 			restoration: 'none',
 			selfDestruction: true,
@@ -63,8 +62,8 @@
 		instancesLatest = [],
 		// collects plugins in their bare object form
 		plugins = {},
-		// don't edit manually, it will be updated by grunt after the manifest
-		semVer = '4.0.0';
+		// don't set manually, it will be updated by Grunt after the manifest
+		semVer = '';
 	
 	
 	// global methods
@@ -2627,7 +2626,7 @@
 					// It should be equal to or greater than half the width of
 					// the arrow (by width we mean the size of the side which touches
 					// the side of the tooltip).
-					minIntersection: 10,
+					minIntersection: 16,
 					minWidth: 0,
 					side: 'top'
 					/*

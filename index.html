@@ -20,19 +20,19 @@
 	<link rel="stylesheet" type="text/css" href="doc/css/reset.css" />
 	<link rel="stylesheet" type="text/css" href="doc/css/prettify.css" />
 	<link rel="stylesheet" type="text/css" href="doc/css/style.css" />
-	<link rel="stylesheet" type="text/css" href="css/tooltipster.css" />
-	<link rel="stylesheet" type="text/css" href="css/themes/tooltipster-borderless.css" />
-	<link rel="stylesheet" type="text/css" href="css/themes/tooltipster-light.css" />
-	<link rel="stylesheet" type="text/css" href="css/themes/tooltipster-noir.css" />
-	<link rel="stylesheet" type="text/css" href="css/themes/tooltipster-punk.css" />
-	<link rel="stylesheet" type="text/css" href="css/themes/tooltipster-shadow.css" />
+	<link rel="stylesheet" type="text/css" href="dist/css/tooltipster.bundle.min.css" />
+	<link rel="stylesheet" type="text/css" href="dist/css/plugins/tooltipster/sideTip/themes/tooltipster-borderless.min.css" />
+	<link rel="stylesheet" type="text/css" href="dist/css/plugins/tooltipster/sideTip/themes/tooltipster-light.min.css" />
+	<link rel="stylesheet" type="text/css" href="dist/css/plugins/tooltipster/sideTip/themes/tooltipster-noir.min.css" />
+	<link rel="stylesheet" type="text/css" href="dist/css/plugins/tooltipster/sideTip/themes/tooltipster-punk.min.css" />
+	<link rel="stylesheet" type="text/css" href="dist/css/plugins/tooltipster/sideTip/themes/tooltipster-shadow.min.css" />
 	
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.0/jquery.min.js"></script>
 	<script type="text/javascript" src="doc/js/jquery.jgfeed.js"></script>
 	<script type="text/javascript" src="doc/js/prettify.js"></script>
 	<script type="text/javascript" src="doc/js/lang-css.js"></script>
 	<script type="text/javascript" src="doc/js/scripts.js"></script>
-	<script type="text/javascript" src="js/jquery.tooltipster.js"></script>
+	<script type="text/javascript" src="dist/js/tooltipster.bundle.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.5.3/clipboard.js"></script>
 	
 	<!--[if lt IE 9]>
@@ -153,10 +153,10 @@
 			<p>After you <a href="https://github.com/iamceege/tooltipster/archive/master.zip">download Tooltipster</a>, load jQuery and include Tooltipster's CSS and JavaScript files in your page.<br /></p>
 <pre class="prettyprint">
 &lt;head&#62;
-    &lt;link rel="stylesheet" type="text/css" href="tooltipster/css/tooltipster.css" /&#62;
+    &lt;link rel="stylesheet" type="text/css" href="tooltipster/dist/css/tooltipster.bundle.min.css" /&#62;
 
     &lt;script type="text/javascript" src="http://code.jquery.com/jquery-1.10.0.min.js"&#62;&lt;/script&#62;
-    &lt;script type="text/javascript" src="tooltipster/js/jquery.tooltipster.min.js"&#62;&lt;/script&#62;
+    &lt;script type="text/javascript" src="tooltipster/dist/js/tooltipster.bundle.min.js"&#62;&lt;/script&#62;
 &lt;/head&#62;
 </pre>
 			
@@ -203,7 +203,7 @@
 				<div class="tooltipster-shadow-preview" title="Hey, I have a smaller arrow" target="_blank">Shadow</div>
 			</div>
 			
-			<p> To use a theme, just include its css file (located in the <span class="code">css/themes</span> folder) in your page and specify its name in Tooltipster's options:</p>
+			<p> To use a theme, just include its css file (located in the <span class="code">dist/css/plugins/tooltipster/sideTip/themes</span> folder) in your page and specify its name in Tooltipster's options:</p>
 						
 			<pre class="prettyprint">
 $('.tooltip').tooltipster({
@@ -369,6 +369,11 @@ $('.tooltip').tooltipster({
 					<td>Set a maximum width for the tooltip. <strong>Default: null (no max width)</strong></td>
 				</tr>
 				<tr>
+					<td><h4>minIntersection</h4></td>
+					<td>integer</td>
+					<td>Corresponds to the minimum distance to enforce between the center of the arrow and the edges of the tooltip. Mainly used when you create an arrow bigger than those of the default themes. <strong>Default: 14</strong></td>
+				</tr>
+				<tr>
 					<td><h4>minWidth</h4></td>
 					<td>integer</td>
 					<td>Set a minimum width for the tooltip. <strong>Default: 0 (auto width)</strong></td>
@@ -401,7 +406,7 @@ $('.tooltip').tooltipster({
 				<tr>
 					<td><h4>side</h4></td>
 					<td>string,<br />string[]</td>
-					<td>Sets the side of the tooltip. The value may one of the following: 'top', 'bottom', 'left', 'right'. It may also be an array containing one or more of these values. When using an array, the order of values is taken into account when the side must be adapted and the absence of a side disables it (see the <a href="#sides">sides section</a>). <strong>Default: ['top', 'bottom', 'right', 'left']</strong></td>
+					<td>Sets the side of the tooltip. The value may one of the following: 'top', 'bottom', 'left', 'right'. It may also be an array containing one or more of these values. When using an array, the order of values is taken into account as order of fallbacks and the absence of a side disables it (see the <a href="#sides">sides section</a>). <strong>Default: ['top', 'bottom', 'right', 'left']</strong></td>
 				</tr>
 				<tr>
 					<td><h4>timer</h4></td>
@@ -1503,7 +1508,7 @@ $('#myfield')
 			
 			<h4>"Shouldn't Tooltipster remove &lt;script> tags from my content to prevent XSS exploits?"</h4>
 			
-			<p>No, it's not Tooltipster's job to tamper with your content in any way. Besides, &lt;script> tags are not the only possible threat (see <a href="https://www.owasp.org/index.php/XSS_(Cross_Site_Scripting)_Prevention_Cheat_Sheet">some good advice</a>).</p>
+			<p>No, it's not Tooltipster's job to tamper with your content in any way. Besides, &lt;script> tags are not the only possible threat (read <a href="https://www.owasp.org/index.php/XSS_(Cross_Site_Scripting)_Prevention_Cheat_Sheet">some good advice</a>).</p>
 				
 			<p>It's really up to you to decide what should be sanitized before display. You may use <span class="code">functionInit</span>, <span class="code">functionBefore</span> or <span class="code">functionFormat</span> to do so.</p>
 			

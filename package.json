@@ -1,0 +1,42 @@
+{
+	"author": {
+		"name" : "Caleb Jacob",
+		"email" : "hello@calebjacob.com",
+		"url" : "http://calebjacob.com"
+	},
+	"bugs": {
+		"url": "https://github.com/iamceege/tooltipster/issues"
+	},
+	"description": "A flexible and extensible jQuery plugin for modern tooltips.",
+	"devDependencies": {
+		"grunt": "1.0.1",
+		"grunt-contrib-clean": "1.0.0",
+		"grunt-contrib-compress": "1.2.0",
+		"grunt-contrib-concat": "1.0.1",
+		"grunt-contrib-copy": "1.0.0",
+		"grunt-contrib-cssmin": "1.0.1",
+		"grunt-contrib-uglify": "1.0.1",
+		"grunt-string-replace": "1.2.1"
+	},
+	"homepage": "https://github.com/iamceege/tooltipster",
+	"keywords": [
+		"tooltip",
+		"tooltips"
+	],
+	"license": "MIT",
+	"main": "dist/js/tooltipster.full.min.js",
+	"maintainers": [{
+		"name" : "Louis Ameline",
+		"email" : "evangun2001@yahoo.fr",
+		"url" : "https://github.com/louisameline"
+	}],
+	"name": "tooltipster",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/iamceege/tooltipster.git"
+	},
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"version": "4.0.0rc43"
+}

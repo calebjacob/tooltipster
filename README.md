@@ -4,7 +4,8 @@ Tooltipster
 A flexible and extensible jQuery plugin for modern tooltips by Caleb Jacob and Louis Ameline under MIT license.  
 Simple enough for everyone, powerful enough for everything.  
 Compatible with Mozilla Firefox, Google Chrome, IE6+ and others.  
-Requires jQuery 1.10+ (see the compatibility note in the doc).
+Requires jQuery 1.10+ (or less, see the compatibility note in the doc).  
+Default ccs + js files = 10Kb gzipped.
 
 A reminder of options/methods lies below. For detailed documentation, visit http://iamceege.github.io/tooltipster/
 
