@@ -10,7 +10,7 @@ Default ccs + js files = 9Kb gzipped.
 A reminder of options/methods lies below. For detailed documentation, visit http://iamceege.github.io/tooltipster/
 
 Standard options
--------------------------
+----------------
 
 animation  
 animationDuration  
@@ -43,7 +43,7 @@ updateAnimation
 zIndex  
 
 Other options
--------------------------
+-------------
 
 (these are available when you use sideTip, the default plugin)
 
@@ -56,7 +56,7 @@ minWidth
 side  
 
 Instance methods
--------------------------
+----------------
 
 close([callback])  
 content([myNewContent])  
@@ -73,7 +73,7 @@ reposition()
 status()   
 
 Global methods
--------------------------
+--------------
 
 instances([selector || element])  
 instancesLatest()  
