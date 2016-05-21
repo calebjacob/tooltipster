@@ -19,7 +19,6 @@ contentAsHTML
 contentCloning  
 debug  
 delay  
-displayPlugin  
 functionInit  
 functionBefore  
 functionReady  
@@ -27,6 +26,7 @@ functionAfter
 functionFormat  
 interactive  
 multiple  
+plugins  
 repositionOnScroll  
 restoration  
 selfDestruction  
