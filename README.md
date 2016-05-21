@@ -50,6 +50,7 @@ arrow
 distance  
 functionPosition  
 maxWidth  
+minIntersection  
 minWidth  
 side  
 
@@ -57,8 +58,7 @@ Instance methods
 -------------------------
 
 close([callback])  
-content()  
-content(myNewContent)  
+content([myNewContent])  
 destroy()  
 disable()  
 elementOrigin()  
@@ -67,8 +67,7 @@ enable()
 instance()  
 on, one, off, triggerHandler  
 open([callback])  
-option(optionName)  
-option(optionName, optionValue)  
+option(optionName [, optionValue])  
 reposition()   
 status()   
 
@@ -77,5 +76,6 @@ Global methods
 
 instances([selector || element])  
 instancesLatest()  
+on, one, off, triggerHandler  
 origins()  
 setDefaults({})  
