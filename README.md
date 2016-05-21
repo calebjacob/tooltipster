@@ -14,7 +14,6 @@ Standard options
 
 animation  
 animationDuration  
-closeOnClick  
 content  
 contentAsHTML  
 contentCloning  
@@ -43,8 +42,10 @@ triggerOpen
 updateAnimation  
 zIndex  
 
-Other options (available with the default display plugin)
+Other options
 -------------------------
+
+(these are available when you use sideTip, the default plugin)
 
 arrow  
 distance  

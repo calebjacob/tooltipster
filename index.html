@@ -165,22 +165,20 @@
 			
 			<h3>2. Set up your HTML</h3>
 			
-			<p>To spot the elements which will get a tooltip, aka the "origins", we will give them a <span class="code">.tooltip</span> class. You may use another class name or even other means of selection, your choice. After that, we will set the <span class="code">title</span> attribute to whatever we'd like our tooltip to say. Here are a few examples:</p>
+			<p>To spot the elements which will get a tooltip, aka the "origins", we will give them a <span class="code">'tooltip'</span> class. You may use another class name or even other means of selection, your choice. After that, we will set the <span class="code">title</span> attribute to whatever we'd like our tooltip to say. Here are a couple examples:</p>
 			
 			<pre class="prettyprint">
-// Adding a tooltip to an image:
+// Putting a tooltip on an image:
 &lt;img src="my-image.png" class="tooltip" title="This is my image's tooltip message!" /&gt;
 
-// Adding a tooltip on some text (span, div or whatever):
+// Putting a tooltip on some text (span, div or whatever):
 &lt;span class="tooltip" title="This is my span's tooltip message!"&gt;Some text&lt;/span&gt;
-
-// Adding a tooltip to a link that already has a class:
-&lt;a href="http://calebjacob.com" class="ketchup tooltip" title="This is my link's tooltip message!"&gt;Link&lt;/a&gt;
 </pre>
+			<p>Note: if you use Twitter's Bootstrap, use another class name because <span class="code">'tooltip'</span> will create a conflict.</p>
 			
 			<h3>3. Activate Tooltipster</h3>
 			
-			<p>The last thing we have to do is activate Tooltipster. To do this, add the following script right before your closing <span class="code">&lt;/head&#62;</span> tag (using whatever selector you'd like - in this case we're still using the <span class="code">.tooltip</span> class):</p>
+			<p>The last thing we have to do is activate Tooltipster. To do this, add the following script right before your closing <span class="code">&lt;/head&#62;</span> tag (using whatever selector you like - in this case we're still using the <span class="code">'tooltip'</span> class):</p>
 			
 			<pre class="prettyprint">
 &lt;head&#62;
@@ -215,7 +213,7 @@ $('.tooltip').tooltipster({
 			
 			<h3 id="further">5. Using HTML tags inside your tooltips</h3>
 			
-			<p>Tooltipster allows you to use any HTML markup inside your tooltips. It means that you can insert things like images and text formatting tags. To achieve this, the preferred method is to provide your content as an HTML element (which may be jQuery-wrapped) in the options. Advanced users will resort to templates. Example:</p>
+			<p>Tooltipster allows you to use any HTML markup inside your tooltips. It means that you can insert things like images and text formatting tags. The preferred method to achieve this is to provide your content as an HTML element (which may be jQuery-wrapped) in the options. Example:</p>
 			
 			<pre class="prettyprint">
 &lt;head&#62;
@@ -224,19 +222,24 @@ $('.tooltip').tooltipster({
         $(document).ready(function() {
             
             $('#origin').tooltipster({
-                content: $('&lt;span&gt;&lt;img src="myimage.png" /&gt; &lt;strong&gt;This text is in bold case !&lt;/strong&gt;&lt;/span&gt;')
+                content: $('#tooltip_content').detach()
             });
         });
     &lt;/script&#62;
 &lt;/head&#62;
 
 &lt;body&#62;
-    &lt;div id="origin"&#62; 
+    &lt;div id="origin"&#62;
         This div has a tooltip with HTML when you hover over it!
     &lt;/div&#62;
+    &lt;span id="tooltip_content"&#62;
+       &lt;img src="myimage.png" /&gt; &lt;strong&gt;This is the content of my tooltip!&lt;/strong&gt;
+    &lt;/span&#62;
 &lt;/body&#62;</pre>
 
-			<p>Another way of achieving this is to put encoded HTML markup directly in your title attribute and set the <span class="code">contentAsHTML</span> option to <span class="code">true</span>. In all cases, make sure you have tight control over the content you wish to display in the tooltip, as unwanted <span class="code">&lt;script&gt;</span> or <span class="code">&lt;iframe&gt;</span> tags for example would be a serious security issue for your website.</p>
+			<p>Tip: you might wish to make the <span class="code">#tooltip_content</span> span initially invisible with <span class="code">display:none</span>. In that case, don't forget to make it visible again before you give it to Tooltipster: <span class="code">content: $('#tooltip_content').detach().show()</span></p>
+			
+			<p>Another way of achieving this is to put encoded HTML markup directly in your title attribute and set the <span class="code">contentAsHTML</span> option to <span class="code">true</span>:</p>
 
 			<pre class="prettyprint">
 &lt;head&#62;
@@ -252,11 +255,13 @@ $('.tooltip').tooltipster({
 &lt;/head&#62;
 
 &lt;body&#62;
-    &lt;div id="origin" title="&amp;lt;span&amp;gt;&amp;lt;img src=&amp;quot;myimage.png&amp;quot; /&amp;gt; &amp;lt;strong&amp;gt; This text is in bold case !&amp;lt;/strong&amp;gt; &amp;lt;/span&amp;gt;" &gt;
+    &lt;div id="origin" title="&amp;lt;span&amp;gt;&amp;lt;img src=&amp;quot;myimage.png&amp;quot; /&amp;gt; &amp;lt;strong&amp;gt; This is the content of my tooltip!&amp;lt;/strong&amp;gt; &amp;lt;/span&amp;gt;" &gt;
         This div has a tooltip with HTML when you hover over it!
     &lt;/div&#62;
 &lt;/body&#62;</pre>
 		
+			<p>In all cases, make sure you have tight control over the HTML content you wish to display in the tooltip, as unwanted <span class="code">&lt;script&gt;</span> or <span class="code">&lt;iframe&gt;</span> tags for example would be a serious security issue for your website.</p>
+			
 		</section>
 		
 		<section id="options">

@@ -122,14 +122,14 @@ module.exports = function(grunt) {
 					expand: true,
 					ext: '.min.js',
 					extDot: 'last',
-					src: ['dist/js/*.js']
+					src: ['dist/js/!(*.min).js']
 				}]
 			}
 		}
 	});
 	
 	grunt.registerTask('default', [
-		'clean',
+		// 'clean',
 		'copy',
 		'string-replace',
 		'concat:bundle',
