@@ -100,8 +100,7 @@ module.exports = function(grunt) {
 			},
 			manifests: {
 				files: {
-					'bower.json': 'bower.json',
-					'tooltipster.jquery.json': 'tooltipster.jquery.json'
+					'bower.json': 'bower.json'
 				},
 				options: {
 					replacements: [{
