@@ -606,7 +606,7 @@ $('.tooltip').tooltipster({
 				<tr>
 					<td><h4>elementTooltip</h4></td>
 					<td>None</td>
-					<td>Returns the HTML root element of the tooltip if it is open, `undefined` otherwise.</td>
+					<td>Returns the HTML root element of the tooltip if it is open, `null` if it is closed.</td>
 				</tr>
 				<tr>
 					<td><h4>enable</h4></td>
@@ -700,7 +700,7 @@ $.tooltipster.setDefaults({
 });
 
 
-// The 'instances' method, when used without a second parameter, allows you to access all tooltips present in the page.
+// The `instances` method, when used without a second parameter, allows you to access all tooltips present in the page.
 // That may be useful to close all tooltips at once for example:
 var instances = $.tooltipster.instances();
 $.each(instances, function(i, instance){
@@ -708,9 +708,9 @@ $.each(instances, function(i, instance){
 });
 
 
-$('#my-tooltip').tooltipster();
-$('.tooltip').tooltipster();
-// this method call will only return an array with the instances created for the elements that matched '.tooltip' because that's the latest initializing call.
+$('.tooltip1').tooltipster();
+$('.tooltip2').tooltipster();
+// this method call will only return an array with the instances created for the elements that matched '.tooltip2' because that's the latest initializing call.
 var instances = $.tooltipster.instancesLatest();
 </pre>
 		
@@ -794,7 +794,7 @@ $('#myelement').tooltipster('content', 'My new content');</pre>
 			<p>Here's an example of how you could launch a specific tooltip on page load and close it when any key on your keyboard is pressed.</p>
 			
 			<pre class="prettyprint">
-&lt;span class="tooltip" id="example" title="My tooltip content"&#62;Example&lt;/span&#62;
+&lt;span id="example" class="tooltip" title="My tooltip content"&#62;Example&lt;/span&#62;
 </pre>
 			<pre class="prettyprint">
 $(document).ready(function() {
@@ -856,31 +856,27 @@ $('.tooltip').tooltipster({
         // we set a variable so the data is only loaded once via Ajax, not every time the tooltip opens
         if ($origin.data('loaded') !== true) {
 
-            $.ajax({
-                type: 'POST',
-                url: 'example.php',
-                success: function(data) {
+            $.get('ajax.php', function(data) {
 
-                    // update the content of our tooltip with the returned data and cache it.
-                    // if you are still confused about what 'instance' is, bear with us,
-                    // it will be detailed in the "Object-oriented Tooltipster" section.
-                    instance.content(data);
-                    
-                    $origin.data('loaded', true);
-                }
+                // update the content of our tooltip with the returned data and cache it.
+                // if you are still confused about what 'instance' is, bear with us,
+                // it will be detailed in the "Object-oriented Tooltipster" section.
+                instance.content(data);
+                
+                $origin.data('loaded', true);
             });
         }
     }
 });</pre>
 			
-			<p>In addition to this, you may provide a function as the callback argument of the open/close methods. If the tooltip is already in the state you are asking for (open & stable / closed), the callback is executed immediately. Please note that if the open/close action is somehow cancelled before it has completed its animation, the callback function will never be called.</p>
+			<p>In addition to this, you may provide a function as the callback argument of the open/close methods. If the tooltip is already in the state you are asking for (open & stable/closed), the callback is executed immediately. Please note that if the open/close action is somehow cancelled before it has completed its animation, the callback function will never be called.</p>
 			<pre class="prettyprint">
 $(document).ready(function() {
    
     $('.tooltip').tooltipster();
 
     $('#example').tooltipster('open', function(instance, helper) {
-        alert('The tooltip is now fully shown. The content is: ' + instance.content());
+        alert('The tooltip is now fully shown. Its content is: ' + instance.content());
     });
     
     $(window).keypress(function() {
@@ -937,20 +933,20 @@ $(document).ready(function() {
 			
 			<pre class="prettyprint">
 {
-    container: ['window' || 'document' || 'overflow'],
+    container: 'window' || 'document' || 'overflow',
     contentOverflow: 'initial',
     coord: {
-        left: [number],
-        top: [number]
+        left: number,
+        top: number
     },
-    distance: [number],
-    side: [string],
+    distance: number,
+    side: string,
     size: {
-        height: [number],
-        width: [number]
+        height: number,
+        width: number
     },
-    sizeMode: ['natural' || 'constrained'],
-    target: [number]
+    sizeMode: 'natural' || 'constrained',
+    target: number
 }</pre>
 			
 			<p><span class="code">container</span> tells you if, in Tooltipster's proposition, the tooltip will be contained in the viewport, if it has to overflow into the document, or if it has to overflow the document itself. This property is for your information only, editing it will have no effect.</p>
@@ -975,45 +971,49 @@ $(document).ready(function() {
 {
     document: {
         size: {
-            height: [integer],
-            width: [integer]
+            height: integer,
+            width: integer
         }
     },
     window: {
         scroll: {
-            left: [integer],
-            top: [integer]
+            left: integer,
+            top: integer
         },
         size: {
-            height: [integer],
-            width: [integer]
+            height: integer,
+            width: integer
         }
     },
     origin: {
         // the origin has a fixed lineage if itself or one of its ancestors has a fixed position
-        fixedLineage: [boolean],
+        fixedLineage: boolean,
         offset: {
-            bottom: [integer],
-            left: [integer],
-            right: [integer],
-            top: [integer]
+            // this is the distance between the bottom side of the origin and the top of the document
+            bottom: integer,
+            left: integer,
+            // this is the distance between the right side of the origin and the left of the document
+            right: integer,
+            top: integer
         },
         size: {
-            height: [integer],
-            width: [integer]
+            height: integer,
+            width: integer
         },
         // if the origin is a map area, this will hold the associated image element
-        usemapImage: [HTMLobject || null],
+        usemapImage: HTMLobject || null,
         windowOffset: {
-            bottom: [integer],
-            left: [integer],
-            right: [integer],
-            top: [integer]
+            // this is the distance between the bottom side of the origin and the top of the viewport
+            bottom: integer,
+            left: integer,
+            // this is the distance between the right side of the origin and the left of the viewport
+            right: integer,
+            top: integer
         }
     }
 }</pre>
 			
-			<p>You may look at the source code of this documentation to see how the positioning demo at the top of this page was made. Here is the simplest example, let's just move the tooltip by 10 pixels to the bottom-right:</p>
+			<p>You may look at the source code of this documentation to see how the custom positioning demo at the top of this page was made. Here is the simplest example, let's just move the tooltip by 10 pixels to the bottom-right:</p>
 			
 			<pre class="prettyprint">
 $('#my-tooltip').tooltipster({
@@ -1030,7 +1030,7 @@ $('#my-tooltip').tooltipster({
 			<p>You may want to write options on a per-tooltip basis, directly in your HTML. Of course, you should try to do this for options which are "inlinable" only. Anyway, that's a great opportunity to make use of the <span class="code">functionInit</span> option and the <span class="code">option</span> method, here's how it goes:</p>
 			
 			<pre class="prettyprint">
-&lt;span class="tooltip" data-tooltipster='{"side":"left","animation":"slide"}'&gt;&lt;/span&gt;
+&lt;span class="tooltip" data-tooltipster='{"side":"left","animation":"slide"}' title="Hello"&gt;World&lt;/span&gt;
 </pre>
 
 			<pre class="prettyprint">
@@ -1056,12 +1056,12 @@ $('.tooltip').tooltipster({
 			<p>Sometimes it's easier to work with data sets that you will format before display, rather than format them on the server side. For example, what if you could turn this:</p>
 			
 			<pre class="prettyprint">
-&lt;span class="tooltip" id="example" title="We have 3 people today. Say hello to Sarah, John, Matthew"&#62;People&lt;/span&#62;
+&lt;span id="example" title="We have 3 people today. Say hello to Sarah, John, Matthew"&#62;People&lt;/span&#62;
 </pre>
 			<p>into this:</p>
 			
 			<pre class="prettyprint">
-&lt;span class="tooltip" id="example" title='["Sarah", "John", "Matthew"]'&#62;People&lt;/span&#62;
+&lt;span id="example" title='["Sarah", "John", "Matthew"]'&#62;People&lt;/span&#62;
 </pre>
 			
 			<p>...with exactly the same result in the tooltip? A first way of doing this is to format upon initialization:</p>
@@ -1070,12 +1070,13 @@ $('.tooltip').tooltipster({
 $('#example').tooltipster({
     functionInit: function(instance, helper){
 
-        // turn the content into an array and use it to make a sentence (typically we'd use a template for this)
+        // parse the content
         var content = instance.content(),
             people = JSON.parse(content),
+            // and use it to make a sentence
             newContent = 'We have ' + people.length + ' people today. Say hello to ' + people.join(', ');
         
-        // save for later, when we need to display it
+        // save the edited content
         instance.content(newContent);
     }
 });
@@ -1215,7 +1216,7 @@ $('#my-element').tooltipster({
 			
 			<p>If you go the delegation way, you will rely on the bubbling of events (mouseenter or click) triggered on their origin. That may be an issue if these events are stopped from bubbling at some point, and you might run into race conditions depending on how you handle things. And of course, the tooltips won't be initialized until their origin is hovered/clicked, which may be an issue if you wish to manipulate them programmatically or if you use a plugin which is supposed to start working before the tooltip opens.</p>
 			
-			<p>If you understand these caveats and are willing to proceed, the code below will do the work. You might want to change ".tooltip" to something else and switch from <span class="code">'mouseenter'</span> to <span class="code">'click'</span> if you want a click trigger.</p>
+			<p>If you understand these caveats and are willing to proceed, the code below will do the work. You might want to change <span class="code">'.tooltip'</span> to something else and switch from <span class="code">'mouseenter'</span> to <span class="code">'click'</span> if you want a click trigger.</p>
 			
 			<pre class="prettyprint">
 $('body').on('mouseenter', '.tooltip:not(.tooltipstered)', function(){
@@ -1421,11 +1422,11 @@ $.tooltipster.on('start', function(event) {
 			
 			<h3 id="svg">Tooltips on SVG elements <a href="#usecases">&#8657;</a></h3>
 			
-			<p>Browsers do not always make our life easy when it comes to working with SVG. Determining the coordinates of SVG paths, polylines or polygons is especially difficult since the native <span class="code">getBoundingClientRect</span>, <span class="code">getBBox</span> and other methods produce inaccurate results in most browsers (as of today in 2015). The result is that by default, the position of tooltips on SVG elements may be completely off.</p>
+			<p>Browsers do not always make our life easy when it comes to working with SVG. Determining the coordinates of SVG paths, polylines or polygons is especially difficult since the native <span class="code">getBoundingClientRect</span>, <span class="code">getBBox</span> and other methods produce inaccurate results in most browsers (as of today in 2016). The result is that by default, the position of tooltips on SVG elements may be completely off.</p>
 			
 			<p>Fortunately, Tooltipster includes the native support of an SVG library which provides the best results in that matter: <strong>SVG.js</strong>.<br />Just include <a href="https://github.com/wout/svg.js" target="_blank">SVG.js</a> and its <a href="https://github.com/fuzzyma/svg.screenbbox.js" target="_blank">ScreenBBox</a> plugin in your page and that's it, Tooltipster will use them out of the box for optimal results.</p>
 			
-			<p>For those who seek even more control over positioning, the <span class="code">position</span> and <span class="code">geometry</span> events (as well as the corresponding <span class="code">functionPosition</span> option) allow you to set the exact position of the tooltip yourself.</p>
+			<p>For those who seek even more control over positioning, the <span class="code">position</span> event (or the corresponding <span class="code">functionPosition</span> option) and the <span class="code">geometry</span> event allow you to set the exact position of the tooltip yourself.</p>
 			
 			<h3 id="accessibility">Making tooltips accessible to persons with disabilities <a href="#usecases">&#8657;</a></h3>
 			
