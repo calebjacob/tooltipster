@@ -2,7 +2,6 @@
 
 body {
 	background-color: #dcdcdc;
-	color: #0b0b0b;
 	font-size: 16px;
 	line-height: 22px;
 }
@@ -16,10 +15,6 @@ body {
 	text-align: left;
 	display: block;
 	overflow: hidden;
-}
-
-.inline:hover {
-	background: khaki;
 }
 
 .item {

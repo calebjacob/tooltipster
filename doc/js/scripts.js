@@ -33,7 +33,6 @@ $(function() {
 			'</div>'
 		),
 		// setting a same value to minWidth and maxWidth will result in a fixed width
-		minWidth: 400,
 		maxWidth: 400,
 		side: 'right'
 	});

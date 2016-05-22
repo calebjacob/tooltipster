@@ -54,7 +54,7 @@
 		// collects plugins in their bare object form
 		plugins = {},
 		// don't set manually, it will be updated by Grunt after the manifest
-		semVer = '4.0.0rc43';
+		semVer = '4.0.0rc44';
 	
 	
 	// global methods
@@ -284,6 +284,8 @@
 		this.geometry;
 		// proxy the variable for display plugins who may use it
 		this.IE = IE;
+		// to fix a touch issue
+		this.ignoreNextClick = false;
 		this.mouseIsOverOrigin = false;
 		// a unique namespace per instance
 		this.namespace = 'tooltipster-'+ Math.round(Math.random()*100000);
@@ -294,7 +296,7 @@
 		this.$originParents;
 		// to remove themes if needed
 		this.previousThemes = [];
-		// the state can be either : appearing, stable, disappearing, closed
+		// the state can be either: appearing, stable, disappearing, closed
 		this.state = 'closed';
 		// timeout references
 		this.timeouts = {
@@ -325,7 +327,7 @@
 			// some options may need to be reformatted
 			self._optionsFormat();
 			
-			// note : the content is null (empty) by default and can stay that
+			// note: the content is null (empty) by default and can stay that
 			// way if the plugin remains initialized but not fed any content. The
 			// tooltip will just not appear.
 			
@@ -347,7 +349,7 @@
 			
 			// If content is provided in the options, it has precedence over the
 			// title attribute.
-			// Note : an empty string is considered content, only 'null' represents
+			// Note: an empty string is considered content, only 'null' represents
 			// the absence of content.
 			// Also, an existing title="" attribute will result in an empty string
 			// content
@@ -634,7 +636,7 @@
 			// clone if asked. Cloning the object makes sure that each instance has its
 			// own version of the content (in case a same object were provided for several
 			// instances)
-			// reminder : typeof null === object
+			// reminder: typeof null === object
 			if (content instanceof $ && this.options.contentCloning) {
 				content = content.clone(true);
 			}
@@ -1018,8 +1020,11 @@
 			
 			var self = this;
 			
-			// if the destruction process has not begun
-			if (!self.destroying) {
+			// if the destruction process has not begun and if this was not
+			// triggered by an unwanted emulated click event
+			if (	!self.destroying
+				&& (!event || !self.ignoreNextClick)
+			) {
 				
 				// check that the origin is still in the DOM
 				if (bodyContains(self.$origin)) {
@@ -1233,7 +1238,7 @@
 									// if the user touches the body, close
 									if (deviceHasTouchCapability) {
 										
-										// timeout 0 : to prevent immediate closing if the method was called
+										// timeout 0: to prevent immediate closing if the method was called
 										// on a click event and if options.delay == 0 (because of bubbling)
 										setTimeout(function() {
 											
@@ -1298,14 +1303,37 @@
 								// to close the tooltip
 								if (self.options.triggerClose.click) {
 									
-									// explanations : same as above
+									// explanations: same as above
 									setTimeout(function() {
 										
 										if (self.state != 'closed') {
 											
 											$('body').on('click.'+ self.namespace +'-triggerClose touchstart.'+ self.namespace +'-triggerClose', function(event) {
 												if (!self.options.interactive || !$.contains(self.$tooltip[0], event.target)) {
+													
 													self._close(event);
+													
+													// the touchstart event is about to be emulated into a click event. But now the
+													// tooltip is closed, if this emulated click happens on the origin, it will open
+													// the tooltip again right away (at least in Safari, not sure why the other
+													// browsers decide not to reopen it). We could call event.preventDefault() to
+													// prevent the emulation but it could also prevent browser normal behaviors like
+													// scrolling or zooming, so we'll let the click be triggered and just ignore it
+													// in ::_openNow()
+													if (	event.type == 'touchstart'
+														&&	(	self.$origin[0] === event.target
+															||	$.contains(self.$origin[0], event.target)
+														)
+													) {
+														
+														self.ignoreNextClick = true;
+														
+														// the emulated click is triggered a crazy long time after the touch event,
+														// at least on an iPhone4
+														setTimeout(function() {
+															self.ignoreNextClick = false;
+														}, 500);
+													}
 												}
 											});
 										}
@@ -1410,9 +1438,9 @@
 			// in case we're resetting the triggers
 			self.$origin.off('.'+ self.namespace +'-triggerOpen');
 			
-			// for 'click' and 'hover' open triggers : bind on events to open the tooltip.
+			// for 'click' and 'hover' open triggers: bind on events to open the tooltip.
 			// Closing is now handled in _openNow() because of its bindings.
-			// Notes about touch events :
+			// Notes about touch events:
 			// - mouseenter, mouseleave and clicks happen even on pure touch devices
 			//   because they are emulated. deviceIsPureTouch() is a simple attempt
 			//   to detect them.
@@ -1443,8 +1471,8 @@
 			
 			if (self.options.triggerOpen.click) {
 				
-				// note : for touch devices, we do not bind on touchstart, we only rely
-				// on the emulated clicks (triggered by taps)
+				// note: for touch devices, we do not bind on touchstart, we only rely
+				// on the emulated clicks (emulated after touchstart)
 				self.$origin.on('click.'+ self.namespace +'-triggerOpen', function(event) {
 					if (!deviceIsPureTouch() || self.options.touchDevices) {
 						self._openNow(event);
@@ -2172,7 +2200,7 @@
 		
 		// for using in closures
 		var args = Array.prototype.slice.apply(arguments),
-			// common mistake : an HTML element can't be in several tooltips at the same time
+			// common mistake: an HTML element can't be in several tooltips at the same time
 			contentCloningWarning = 'You are using a single HTML element as content for several tooltips. You probably want to set the contentCloning option to TRUE.';
 		
 		// this happens with $(sel).tooltipster(...) when $(sel) does not match anything
@@ -2347,7 +2375,7 @@
 		
 		/**
 		 * Move the tooltip into an invisible div that does not allow overflow to make
-		 * size tests. Note : the tooltip may or may not be attached to the DOM at the
+		 * size tests. Note: the tooltip may or may not be attached to the DOM at the
 		 * moment this method is called, it does not matter.
 		 */
 		_init: function() {
@@ -2370,7 +2398,7 @@
 		 */
 		_forceRedraw: function() {
 			
-			// note : this would work but for Webkit only
+			// note: this would work but for Webkit only
 			//this.$tooltip.close();
 			//this.$tooltip[0].offsetHeight;
 			//this.$tooltip.open();
@@ -3320,6 +3348,16 @@
 				
 				var target,
 					rects = this.instance.$origin[0].getClientRects();
+				
+				// these lines fix a Chrome bug (issue #491)
+				if (rects.length > 1) {
+					var opacity = this.instance.$origin.css('opacity');
+					if(opacity == 1) {
+						this.instance.$origin.css('opacity', 0.99);
+						rects = this.instance.$origin[0].getClientRects();
+						this.instance.$origin.css('opacity', 1);
+					}
+				}
 				
 				// by default, the target will be the middle of the origin
 				if (rects.length < 2) {

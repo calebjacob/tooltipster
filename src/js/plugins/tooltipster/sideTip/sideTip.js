@@ -735,6 +735,16 @@
 				var target,
 					rects = this.instance.$origin[0].getClientRects();
 				
+				// these lines fix a Chrome bug (issue #491)
+				if (rects.length > 1) {
+					var opacity = this.instance.$origin.css('opacity');
+					if(opacity == 1) {
+						this.instance.$origin.css('opacity', 0.99);
+						rects = this.instance.$origin[0].getClientRects();
+						this.instance.$origin.css('opacity', 1);
+					}
+				}
+				
 				// by default, the target will be the middle of the origin
 				if (rects.length < 2) {
 					
