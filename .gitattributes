@@ -1,0 +1,18 @@
+# exclude binary and compiled files from diff
+
+dist/*.* -diff binary
+*.eot -diff binary
+*.jpg -diff binary
+*.png -diff binary
+*.svg -diff binary
+*.ttf -diff binary
+*.woff -diff binary
+
+# exclude unnecessary files from the export
+
+.gitattributes
+.gitignore
+index.html
+/demo export-ignore
+/doc export-ignore
+/src export-ignore
