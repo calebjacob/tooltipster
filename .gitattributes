@@ -10,9 +10,9 @@ dist/*.* -diff binary
 
 # exclude unnecessary files from the export
 
-.gitattributes
-.gitignore
-index.html
+.gitattributes export-ignore
+.gitignore export-ignore
+index.html export-ignore
 /demo export-ignore
 /doc export-ignore
 /src export-ignore
