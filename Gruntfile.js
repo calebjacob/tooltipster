@@ -39,7 +39,7 @@ module.exports = function(grunt) {
 				expand: true,
 				src: ['dist/js/*.min.js'],
 				options: {
-					banner: '/*! <%= pkg.name %> v<%= pkg.version %> */'
+					banner: '/*! <%= pkg.name %> v<%= pkg.versionrc %> */'
 				}
 			},
 			bundle: {
@@ -94,7 +94,7 @@ module.exports = function(grunt) {
 				options: {
 					replacements: [{
 						pattern: 'semVer = \'\'',
-						replacement: 'semVer = \'<%= pkg.version %>\''
+						replacement: 'semVer = \'<%= pkg.versionrc %>\''
 					}]
 				}
 			},
@@ -105,7 +105,7 @@ module.exports = function(grunt) {
 				options: {
 					replacements: [{
 						pattern: /"version": "[\w.]+"/,
-						replacement: '"version" = "<%= pkg.version %>"'
+						replacement: '"version": "<%= pkg.version %>"'
 					}]
 				}
 			}

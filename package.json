@@ -38,5 +38,6 @@
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
-	"version": "4.0.0rc44"
+	"version": "4.0.0",
+	"versionrc": "4.0.0rc44"
 }
