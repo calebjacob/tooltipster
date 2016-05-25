@@ -21,11 +21,11 @@
 	<link rel="stylesheet" type="text/css" href="doc/css/prettify.css" />
 	<link rel="stylesheet" type="text/css" href="doc/css/style.css" />
 	<link rel="stylesheet" type="text/css" href="dist/css/tooltipster.bundle.min.css" />
-	<link rel="stylesheet" type="text/css" href="dist/css/plugins/tooltipster/sideTip/themes/tooltipster-borderless.min.css" />
-	<link rel="stylesheet" type="text/css" href="dist/css/plugins/tooltipster/sideTip/themes/tooltipster-light.min.css" />
-	<link rel="stylesheet" type="text/css" href="dist/css/plugins/tooltipster/sideTip/themes/tooltipster-noir.min.css" />
-	<link rel="stylesheet" type="text/css" href="dist/css/plugins/tooltipster/sideTip/themes/tooltipster-punk.min.css" />
-	<link rel="stylesheet" type="text/css" href="dist/css/plugins/tooltipster/sideTip/themes/tooltipster-shadow.min.css" />
+	<link rel="stylesheet" type="text/css" href="dist/css/plugins/tooltipster/sideTip/themes/tooltipster-sideTip-borderless.min.css" />
+	<link rel="stylesheet" type="text/css" href="dist/css/plugins/tooltipster/sideTip/themes/tooltipster-sideTip-light.min.css" />
+	<link rel="stylesheet" type="text/css" href="dist/css/plugins/tooltipster/sideTip/themes/tooltipster-sideTip-noir.min.css" />
+	<link rel="stylesheet" type="text/css" href="dist/css/plugins/tooltipster/sideTip/themes/tooltipster-sideTip-punk.min.css" />
+	<link rel="stylesheet" type="text/css" href="dist/css/plugins/tooltipster/sideTip/themes/tooltipster-sideTip-shadow.min.css" />
 	
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.0/jquery.min.js"></script>
 	<script type="text/javascript" src="doc/js/jquery.jgfeed.js"></script>
@@ -210,6 +210,8 @@ $('.tooltip').tooltipster({
 });</pre>
 			
 			<p>To bring your own modifications to the style of your tooltips, a <a href="#styling">custom themes section</a> awaits you below.</p>
+			
+			<p>Note: sideTip is the name of the plugin used by default by Tooltipster. We'll see about plugins later.</p>
 			
 			<h3 id="further">5. Using HTML tags inside your tooltips</h3>
 			
@@ -652,9 +654,9 @@ $('.tooltip').tooltipster({
 			</table>
 			<br /><br />
 			
-			<h3>Global methods</h3>
+			<h3>Core methods</h3>
 			
-			<p>Global methods are methods which may affect/handle several tooltips at once. You call them with: <span class="code">$.tooltipster.methodName([argument]);</span></p>
+			<p>Core methods are methods which may affect/handle several tooltips at once. You call them with: <span class="code">$.tooltipster.methodName([argument]);</span></p>
 			<br />
 			
 			<table class="table_methods" border="0" cellpadding="0" cellspacing="0">
@@ -751,14 +753,14 @@ var instances = $.tooltipster.instancesLatest();
 			<pre class="prettyprint lang-css">
 /* This is how you would create a custom secondary theme on top of tooltipster-noir: */
 
-.tooltipster-noir.tooltipster-noir-customized .tooltipster-box {
+.tooltipster-sidetip.tooltipster-noir.tooltipster-noir-customized .tooltipster-box {
 	background: grey;
 	border: 3px solid red;
 	border-radius: 6px;
 	box-shadow: 5px 5px 2px 0 rgba(0,0,0,0.4);
 }
 
-.tooltipster-noir.tooltipster-noir-customized .tooltipster-content {
+.tooltipster-sidetip.tooltipster-noir.tooltipster-noir-customized .tooltipster-content {
 	color: blue;
 	padding: 8px;
 }</pre>
@@ -1234,9 +1236,9 @@ $('body').on('mouseenter', '.tooltip:not(.tooltipstered)', function(){
 			
 			<p>Handle your listeners on a per-instance basis using jQuery's syntax: <span class="code">instance.on()</span>, <span class="code">instance.one()</span>, <span class="code">instance.off()</span> and <span class="code">instance.triggerHandler()</span>.</p>
 			
-			<p>Global listeners that listen to all instances are possible: <span class="code">$.tooltipster.on()</span>, <span class="code">$.tooltipster.one()</span>, <span class="code">$.tooltipster.off()</span>, <span class="code">$.tooltipster.triggerHandler()</span>.</p>
+			<p>Core listeners that listen to all instances are possible: <span class="code">$.tooltipster.on()</span>, <span class="code">$.tooltipster.one()</span>, <span class="code">$.tooltipster.off()</span>, <span class="code">$.tooltipster.triggerHandler()</span>.</p>
 			
-			<p> Remark: the events are sent to the global listeners first. Besides, the instance emitters and the global emitter are different objects, so unbinding a listener from the global emitter will not unbind it from instance emitters, if you ever bound it to both.</p>
+			<p> Remark: the events are sent to the core listeners first. Besides, the instance emitters and the core emitter are different objects, so unbinding a listener from the core emitter will not unbind it from instance emitters, if you ever bound it to both.</p>
 			
 			<h4 id="event-types">Event types</h4>
 			
@@ -1259,7 +1261,7 @@ $('body').on('mouseenter', '.tooltip:not(.tooltipstered)', function(){
 			
 			<p><span class="code">geometry</span> happens when Tooltipster determines the size and coordinates of the origin, in order to know where to place the tooltip. The computed properties (left, top, width and height) are passed in the <span class="code">event.geometry</span> object. It has a special <span class="code">event.edit</span> property which is a function you may use to provide this information yourself. Just provide the edited geometry object as first argument. In some cases, this may be easier to use than <span class="code">functionPosition</span> as it allows you to provide a specific target without having to compute the final position yourself.</p>
 			
-			<p><span class="code">init</span> is triggered upon tooltip initialization and may thus be heard only by a global listener.</p>
+			<p><span class="code">init</span> is triggered upon tooltip initialization and may thus be heard only by a core listener.</p>
 			
 			<p><span class="code">state</span> happens every time the tooltip enters a different state. The state value is held in <span class="code">event.state</span> and may be <span class="code">appearing</span>, <span class="code">stable</span>, <span class="code">disappearing</span> or <span class="code">closed</span>.</p>
 			
@@ -1419,7 +1421,7 @@ $.tooltipster.on('start', function(event) {
 });
 </pre>
 			
-			<p>For your convenience, this has been turned into a Tooltipster plugin <a href="https://github.com/louisameline/tooltipster.discovery" target="_blank">available here</a>.</p>
+			<p>For your convenience, this has been turned into a Tooltipster plugin <a href="https://github.com/louisameline/tooltipster-discovery" target="_blank">available here</a>.</p>
 			
 			<h3 id="svg">Tooltips on SVG elements <a href="#usecases">&#8657;</a></h3>
 			

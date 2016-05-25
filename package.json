@@ -16,15 +16,18 @@
 		"grunt-contrib-copy": "1.0.0",
 		"grunt-contrib-cssmin": "1.0.1",
 		"grunt-contrib-uglify": "1.0.1",
-		"grunt-string-replace": "1.2.1"
+		"grunt-string-replace": "1.2.1",
+		"grunt-umd": "2.3.5"
 	},
 	"homepage": "https://github.com/iamceege/tooltipster",
 	"keywords": [
+		"ecosystem:jquery",
+		"jquery-plugin",
 		"tooltip",
 		"tooltips"
 	],
 	"license": "MIT",
-	"main": "dist/js/tooltipster.full.min.js",
+	"main": "dist/js/tooltipster.bundle.min.js",
 	"maintainers": [{
 		"name" : "Louis Ameline",
 		"email" : "evangun2001@yahoo.fr",
@@ -38,5 +41,5 @@
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
-	"version": "4.0.0rc44"
+	"version": "4.0.0rc45"
 }

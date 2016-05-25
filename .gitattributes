@@ -15,4 +15,5 @@ dist/*.* -diff binary
 index.html export-ignore
 /demo export-ignore
 /doc export-ignore
+/tools export-ignore
 /src export-ignore

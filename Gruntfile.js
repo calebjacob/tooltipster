@@ -7,6 +7,7 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-cssmin');
 	grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-string-replace');
+	grunt.loadNpmTasks('grunt-umd');
 	
 	grunt.initConfig({
 		clean: {
@@ -37,20 +38,34 @@ module.exports = function(grunt) {
 		concat: {
 			banner: {
 				expand: true,
+				src: ['dist/js/!(*.min).js'],
+				options: {
+					banner:
+						'/**\n' +
+						' * tooltipster http://iamceege.github.io/tooltipster/\n' +
+						' * A rockin\' custom tooltip jQuery plugin\n' +
+						' * Developed by Caleb Jacob and Louis Ameline\n' +
+						' * MIT license\n' +
+						' */\n'
+				}
+			},
+			bannerMin: {
+				expand: true,
 				src: ['dist/js/*.min.js'],
 				options: {
 					banner: '/*! <%= pkg.name %> v<%= pkg.version %> */'
 				}
 			},
 			bundle: {
+				// bundle = core + sideTip
 				files: [
 					{
 						dest: 'dist/css/tooltipster.bundle.css',
-						src: ['src/css/core.js', 'src/css/plugins/tooltipster/sideTip/defaults.css']
+						src: ['dist/css/tooltipster.core.css', 'src/css/plugins/tooltipster/sideTip/tooltipster-sideTip.css']
 					},
 					{
 						dest: 'dist/js/tooltipster.bundle.js',
-						src: ['dist/js/tooltipster.core.js', 'src/js/plugins/tooltipster/sideTip/sideTip.js']
+						src: ['dist/js/tooltipster.core.js', 'src/js/plugins/tooltipster/sideTip/tooltipster-sideTip.js']
 					}
 				]
 			},
@@ -58,8 +73,8 @@ module.exports = function(grunt) {
 		copy: {
 			dist: {
 				files: {
-					'dist/css/tooltipster.core.css': 'src/css/core.css',
-					'dist/js/tooltipster.core.js': 'src/js/core.js'
+					'dist/css/tooltipster.core.css': 'src/css/tooltipster.css',
+					'dist/js/tooltipster.core.js': 'src/js/tooltipster.js'
 				},
 			},
 		},
@@ -68,7 +83,7 @@ module.exports = function(grunt) {
 				files: [
 					{
 						dest: 'dist/css/tooltipster.core.min.css',
-						src: 'src/css/core.css'
+						src: 'dist/css/tooltipster.core.css'
 					},
 					{
 						dest: 'dist/css/tooltipster.bundle.min.css',
@@ -93,8 +108,8 @@ module.exports = function(grunt) {
 				},
 				options: {
 					replacements: [{
-						pattern: 'semVer = \'\'',
-						replacement: 'semVer = \'<%= pkg.version %>\''
+						pattern: 'semVer: \'\'',
+						replacement: 'semVer: \'<%= pkg.version %>\''
 					}]
 				}
 			}
@@ -113,6 +128,18 @@ module.exports = function(grunt) {
 					src: ['dist/js/!(*.min).js']
 				}]
 			}
+		},
+		umd: {
+			dist: {
+				options: {
+					deps: {
+						'default': [{'jQuery': '$'}]
+					},
+					expand: true,
+					src: 'dist/js/!(*.min).js',
+					dest: '.'
+				}
+			}
 		}
 	});
 	
@@ -121,9 +148,11 @@ module.exports = function(grunt) {
 		'copy',
 		'string-replace',
 		'concat:bundle',
-		'cssmin',
+		'umd',
 		'uglify',
 		'concat:banner',
+		'concat:bannerMin',
+		'cssmin',
 		'compress'
 	]);
 };
