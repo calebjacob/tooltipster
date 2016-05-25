@@ -35,6 +35,7 @@ var defaults = {
 		functionReady: null,
 		functionAfter: null,
 		functionFormat: null,
+		IEmin: 6,
 		interactive: false,
 		multiple: false,
 		// must be 'body' for now, or an element positioned at (0, 0)
@@ -80,22 +81,21 @@ var defaults = {
 		semVer: '4.0.0rc45',
 		window: win
 	},
-	core = function() {};
-
-// core methods
-core.prototype = {
-	_init: function() {
+	core = function() {
 		
 		// core variables
 		
 		// the core emitter
-		this.$emitter = $({}),
+		this.$emitter = $({});
 		// proxy env variables for plugins who might use them
 		this.env = env;
 		this.instancesLatestArr = [];
 		// collects plugins in their bare object form
 		this.plugins = {};
-	},
+	};
+
+// core methods
+core.prototype = {
 	/**
 	 * A function to proxy the methods of an object onto another
 	 *
@@ -291,7 +291,6 @@ core.prototype = {
 
 // $.tooltipster will be used to call core methods
 $.tooltipster = new core();
-$.tooltipster._init();
 
 // the Tooltipster instance class (mind the capital T)
 $.Tooltipster = function(element, options) {
@@ -369,98 +368,107 @@ $.Tooltipster.prototype = {
 		// some options may need to be reformatted
 		self._optionsFormat();
 		
-		// note: the content is null (empty) by default and can stay that
-		// way if the plugin remains initialized but not fed any content. The
-		// tooltip will just not appear.
-		
-		// let's save the initial value of the title attribute for later
-		// restoration if need be.
-		var initialTitle = null;
-		
-		// it will already have been saved in case of multiple tooltips
-		if (self.$origin.data('tooltipster-initialTitle') === undefined) {
+		// don't run on old IE if asked no to
+		if (	!env.IE
+			||	env.IE >= self.options.IEmin
+		) {
 			
-			initialTitle = self.$origin.attr('title');
+			// note: the content is null (empty) by default and can stay that
+			// way if the plugin remains initialized but not fed any content. The
+			// tooltip will just not appear.
 			
-			// we do not want initialTitle to have the value "undefined" because
-			// of how jQuery's .data() method works
-			if (initialTitle === undefined) initialTitle = null;
+			// let's save the initial value of the title attribute for later
+			// restoration if need be.
+			var initialTitle = null;
 			
-			self.$origin.data('tooltipster-initialTitle', initialTitle);
-		}
-		
-		// If content is provided in the options, it has precedence over the
-		// title attribute.
-		// Note: an empty string is considered content, only 'null' represents
-		// the absence of content.
-		// Also, an existing title="" attribute will result in an empty string
-		// content
-		if (self.options.content !== null) {
-			self._contentSet(self.options.content);
-		}
-		else {
-			self._contentSet(initialTitle);
-		}
-		
-		self.$origin
-			// strip the title off of the element to prevent the default tooltips
-			// from popping up
-			.removeAttr('title')
-			// to be able to find all instances on the page later (upon window
-			// events in particular)
-			.addClass('tooltipstered');
-		
-		// jQuery < v3.0's addClass and hasClass do not work on SVG elements.
-		// However, $('.tooltipstered') does find elements having the class.
-		if (!self.$origin.hasClass('tooltipstered')) {
-			
-			var c = self.$origin.attr('class') || '';
-			
-			if (c.indexOf('tooltipstered') == -1) {
-				self.$origin.attr('class', c +' tooltipstered')
-			}
-		}
-		
-		// set listeners on the origin
-		self._prepareOrigin();
-		
-		// set the garbage collector
-		self._prepareGC();
-		
-		// init plugins
-		$.each(self.options.plugins, function(i, pluginName) {
-			
-			var plugin = $.tooltipster.plugin(pluginName);
-			
-			if (plugin) {
+			// it will already have been saved in case of multiple tooltips
+			if (self.$origin.data('tooltipster-initialTitle') === undefined) {
 				
-				if (plugin.instance) {
-					
-					var fn = function() {};
-					fn.prototype = plugin.instance;
-					
-					var p = new fn();
-					p._init(self);
-					
-					// proxy public methods on the instance to allow new instance methods
-					$.tooltipster._bridge(plugin.instance, p, self, plugin.name);
-				}
+				initialTitle = self.$origin.attr('title');
+				
+				// we do not want initialTitle to have the value "undefined" because
+				// of how jQuery's .data() method works
+				if (initialTitle === undefined) initialTitle = null;
+				
+				self.$origin.data('tooltipster-initialTitle', initialTitle);
+			}
+			
+			// If content is provided in the options, it has precedence over the
+			// title attribute.
+			// Note: an empty string is considered content, only 'null' represents
+			// the absence of content.
+			// Also, an existing title="" attribute will result in an empty string
+			// content
+			if (self.options.content !== null) {
+				self._contentSet(self.options.content);
 			}
 			else {
-				throw new Error('The "'+ pluginName +'" plugin is not defined');
+				self._contentSet(initialTitle);
 			}
-		});
-		
-		self
-			// prepare the tooltip when it gets created. This event must
-			// be fired by a plugin
-			._on('created', function() {
-				self._prepareTooltip();
-			})
-			// save position information when it's sent by a plugin
-			._on('repositioned', function(e) {
-				self.tooltipCoord = e.position;
+			
+			self.$origin
+				// strip the title off of the element to prevent the default tooltips
+				// from popping up
+				.removeAttr('title')
+				// to be able to find all instances on the page later (upon window
+				// events in particular)
+				.addClass('tooltipstered');
+			
+			// jQuery < v3.0's addClass and hasClass do not work on SVG elements.
+			// However, $('.tooltipstered') does find elements having the class.
+			if (!self.$origin.hasClass('tooltipstered')) {
+				
+				var c = self.$origin.attr('class') || '';
+				
+				if (c.indexOf('tooltipstered') == -1) {
+					self.$origin.attr('class', c +' tooltipstered')
+				}
+			}
+			
+			// set listeners on the origin
+			self._prepareOrigin();
+			
+			// set the garbage collector
+			self._prepareGC();
+			
+			// init plugins
+			$.each(self.options.plugins, function(i, pluginName) {
+				
+				var plugin = $.tooltipster.plugin(pluginName);
+				
+				if (plugin) {
+					
+					if (plugin.instance) {
+						
+						var fn = function() {};
+						fn.prototype = plugin.instance;
+						
+						var p = new fn();
+						p._init(self);
+						
+						// proxy public methods on the instance to allow new instance methods
+						$.tooltipster._bridge(plugin.instance, p, self, plugin.name);
+					}
+				}
+				else {
+					throw new Error('The "'+ pluginName +'" plugin is not defined');
+				}
 			});
+			
+			self
+				// prepare the tooltip when it gets created. This event must
+				// be fired by a plugin
+				._on('created', function() {
+					self._prepareTooltip();
+				})
+				// save position information when it's sent by a plugin
+				._on('repositioned', function(e) {
+					self.tooltipCoord = e.position;
+				});
+		}
+		else {
+			self.options.disabled = true;
+		}
 	},
 	
 	_close: function(event, callback) {
