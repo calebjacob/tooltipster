@@ -135,7 +135,6 @@ module.exports = function(grunt) {
 					deps: {
 						'default': [{'jQuery': '$'}]
 					},
-					expand: true,
 					src: 'dist/js/!(*.min).js',
 					dest: '.'
 				}
