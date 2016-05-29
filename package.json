@@ -17,7 +17,7 @@
 		"grunt-contrib-cssmin": "1.0.1",
 		"grunt-contrib-uglify": "1.0.1",
 		"grunt-string-replace": "1.2.1",
-		"grunt-umd": "2.3.5"
+		"grunt-umd": "2.3.6"
 	},
 	"homepage": "https://github.com/iamceege/tooltipster",
 	"keywords": [
@@ -41,5 +41,5 @@
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
-	"version": "4.0.0rc45"
+	"version": "4.0.0rc46"
 }

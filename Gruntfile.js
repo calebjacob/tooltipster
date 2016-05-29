@@ -11,7 +11,7 @@ module.exports = function(grunt) {
 	
 	grunt.initConfig({
 		clean: {
-			dist: ["dist"],
+			dist: ["dist"]
 		},
 		compress: {
 			dist: {
@@ -26,7 +26,7 @@ module.exports = function(grunt) {
 						expand: true,
 						ext: '.js.gz',
 						extDot: 'last',
-						src: ['dist/js/*.min.js']
+						src: ['dist/js/**/*.min.js']
 					}
 				],
 				options: {
@@ -36,6 +36,7 @@ module.exports = function(grunt) {
 			}
 		},
 		concat: {
+			// on the core and bundle files
 			banner: {
 				expand: true,
 				src: ['dist/js/!(*.min).js'],
@@ -49,6 +50,7 @@ module.exports = function(grunt) {
 						' */\n'
 				}
 			},
+			// on the core and bundle min files
 			bannerMin: {
 				expand: true,
 				src: ['dist/js/*.min.js'],
@@ -56,8 +58,8 @@ module.exports = function(grunt) {
 					banner: '/*! <%= pkg.name %> v<%= pkg.version %> */'
 				}
 			},
+			// bundle = core + sideTip
 			bundle: {
-				// bundle = core + sideTip
 				files: [
 					{
 						dest: 'dist/css/tooltipster.bundle.css',
@@ -69,14 +71,22 @@ module.exports = function(grunt) {
 					}
 				]
 			},
+			UMDReturn: {
+				expand: true,
+				src: ['dist/js/**/!(*.min).js'],
+				options: {
+					footer: 'return $;'
+				}
+			}
 		},
 		copy: {
 			dist: {
 				files: {
 					'dist/css/tooltipster.core.css': 'src/css/tooltipster.css',
-					'dist/js/tooltipster.core.js': 'src/js/tooltipster.js'
-				},
-			},
+					'dist/js/tooltipster.core.js': 'src/js/tooltipster.js',
+					'dist/js/plugins/tooltipster/SVG/tooltipster-SVG.js': 'src/js/plugins/tooltipster/SVG/tooltipster-SVG.js'
+				}
+			}
 		},
 		cssmin: {
 			dist: {
@@ -125,18 +135,28 @@ module.exports = function(grunt) {
 					expand: true,
 					ext: '.min.js',
 					extDot: 'last',
-					src: ['dist/js/!(*.min).js']
+					src: ['dist/js/**/!(*.min).js']
 				}]
 			}
 		},
 		umd: {
+			// core and bundle
 			dist: {
 				options: {
 					deps: {
-						'default': [{'jQuery': '$'}]
+						default: [{'jQuery': '$'}]
 					},
-					src: 'dist/js/!(*.min).js',
-					dest: '.'
+					src: 'dist/js/**/!(*.min).js'
+				}
+			},
+			// SVG pluging
+			svg: {
+				options: {
+					deps: {
+						default: [{'tooltipster': '$'}],
+						global: [{jQuery: '$'}]
+					},
+					src: 'dist/js/plugins/tooltipster/SVG/tooltipster-SVG.js'
 				}
 			}
 		}
@@ -147,6 +167,7 @@ module.exports = function(grunt) {
 		'copy',
 		'string-replace',
 		'concat:bundle',
+		'concat:UMDReturn',
 		'umd',
 		'uglify',
 		'concat:banner',

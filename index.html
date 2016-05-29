@@ -1430,10 +1430,20 @@ $.tooltipster.on('start', function(event) {
 			
 			<h3 id="svg">Tooltips on SVG elements <a href="#usecases">&#8657;</a></h3>
 			
-			<p>Browsers do not always make our life easy when it comes to working with SVG. Determining the coordinates of SVG paths, polylines or polygons is especially difficult since the native <span class="code">getBoundingClientRect</span>, <span class="code">getBBox</span> and other methods produce inaccurate results in most browsers (as of today in 2016). The result is that by default, the position of tooltips on SVG elements may be completely off.</p>
+			<p>If you are going to work with SVG, you'll want to include our SVG plugin that brings fixes and improvements for SVG support:</p>
 			
-			<p>Fortunately, Tooltipster includes the native support of an SVG library which provides the best results in that matter: <strong>SVG.js</strong>.<br />Just include <a href="https://github.com/wout/svg.js" target="_blank">SVG.js</a> and its <a href="https://github.com/fuzzyma/svg.screenbbox.js" target="_blank">ScreenBBox</a> plugin in your page and that's it, Tooltipster will use them out of the box for optimal results.</p>
+			<pre class="prettyprint">
+&lt;head&#62;
+    &lt;script type="text/javascript" src="http://code.jquery.com/jquery-1.10.0.min.js"&#62;&lt;/script&#62;
+    &lt;script type="text/javascript" src="tooltipster/dist/js/tooltipster.bundle.min.js"&#62;&lt;/script&#62;
+    &lt;script type="text/javascript" src="tooltipster/dist/js/plugins/tooltipster/SVG/tooltipster-SVG.min.js"&#62;&lt;/script&#62;
+&lt;/head&#62;
+</pre>
 			
+			<p>If you want optimal results, you should also include <a href="https://github.com/wout/svg.js" target="_blank">SVG.js</a> and its <a href="https://github.com/fuzzyma/svg.screenbbox.js" target="_blank">ScreenBBox</a> plugin in your page.</p>
+			
+			<p>Why? Because browsers do not always make our life easy when it comes to working with SVG. Determining the coordinates of SVG paths, polylines or polygons is especially difficult since the native <span class="code">getBoundingClientRect</span>, <span class="code">getBBox</span> and other methods produce inaccurate results in most browsers (as of today in 2016). The result is that by default, the position of tooltips on SVG elements may be completely off. Fortunately, SVG.js helps in that matter and our plugin leverages its power out of the box. Just include the files in your page and that's it, Tooltipster will use them out of the box for optimal results.</p>
+
 			<p>For those who seek even more control over positioning, the <span class="code">position</span> event (or the corresponding <span class="code">functionPosition</span> option) and the <span class="code">geometry</span> event allow you to set the exact position of the tooltip yourself.</p>
 			
 			<h3 id="accessibility">Making tooltips accessible to persons with disabilities <a href="#usecases">&#8657;</a></h3>

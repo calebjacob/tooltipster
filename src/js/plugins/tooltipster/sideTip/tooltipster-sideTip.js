@@ -824,3 +824,5 @@ $.tooltipster.plugin({
 		}
 	}
 });
+
+/* a build task will add "return $;" here */

@@ -13,6 +13,7 @@
 	<script type="text/javascript" src="./svg.screenbox.js"></script>
 	<script type="text/javascript" src="//code.jquery.com/jquery-1.10.0.min.js"></script>
 	<script type="text/javascript" src="../dist/js/tooltipster.bundle.js"></script>
+	<script type="text/javascript" src="../dist/js/plugins/tooltipster/SVG/tooltipster-SVG.js"></script>
 	
 	<script type="text/javascript">
 		
@@ -174,8 +175,8 @@
 			
 			$(path.node)
 				.attr('id', 'triangle')
+				.append('<title>Triangle</title>')
 				.tooltipster({
-					content: 'Triangle',
 					theme: 'tooltipster-shadow'
 				});
 		});
