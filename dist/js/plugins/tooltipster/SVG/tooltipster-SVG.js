@@ -1,0 +1,121 @@
+(function (root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    // AMD. Register as an anonymous module unless amdModuleId is set
+    define(["tooltipster"], function (a0) {
+      return (factory(a0));
+    });
+  } else if (typeof exports === 'object') {
+    // Node. Does not work with strict CommonJS, but
+    // only CommonJS-like environments that support module.exports,
+    // like Node.
+    module.exports = factory(require("tooltipster"));
+  } else {
+    factory(jQuery);
+  }
+}(this, function ($) {
+
+(function (root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    // AMD. Register as an anonymous module unless amdModuleId is set
+    define(["jQuery"], function (a0) {
+      return (factory(a0));
+    });
+  } else if (typeof exports === 'object') {
+    // Node. Does not work with strict CommonJS, but
+    // only CommonJS-like environments that support module.exports,
+    // like Node.
+    module.exports = factory(require("jQuery"));
+  } else {
+    factory(jQuery);
+  }
+}(this, function ($) {
+
+$.tooltipster.plugin({
+	name: 'tooltipster.SVG',
+	core: {
+		_init: function() {
+			
+			$.tooltipster.on('init', function(event) {
+				
+				var window = $.tooltipster.env.window,
+					$origin = $(event.origin);
+				
+				if (	window.SVGElement
+					&&	event.origin instanceof window.SVGElement
+				) {
+					
+					// jQuery < v3.0's addClass and hasClass do not work on SVG elements.
+					// However, $('.tooltipstered') does find elements having the class.
+					if (!$origin.hasClass('tooltipstered')) {
+						
+						var c = $origin.attr('class') || '';
+						
+						if (c.indexOf('tooltipstered') == -1) {
+							$origin.attr('class', c + ' tooltipstered');
+						}
+					}
+					
+					// auto-activation of the plugin on the instance
+					if ($.inArray('tooltipster.SVG', event.instance.option('plugins')) === -1) {
+						event.instance._plugin('tooltipster.SVG');
+					}
+					
+					// if there is no content yet, let's look for a <title> child element
+					if (event.instance.content() === null) {
+						
+						// TODO: when there are several <title> tags (not supported in
+						// today's browsers yet though, still an RFC drat), pick the right
+						// one based on the "lang" attribute 
+						var content = $origin.find('title').text();
+						event.instance.content(content);
+					}
+					
+					// rectify the geometry if SVG.js and its screenBBox plugin have been included
+					event.instance
+						._on('geometry', function(event) {
+							
+							// SVG coordinates may need fixing but we need svg.screenbox.js
+							// to provide it. SVGElement is IE8+
+							if (window.SVG.svgjs) {
+								
+								if (!window.SVG.parser) {
+									window.SVG.prepare();
+								}
+								
+								var svgEl = window.SVG.adopt(event.origin);
+								
+								// not all figures need (and have) screenBBox
+								if (svgEl && svgEl.screenBBox) {
+									
+									var bbox = svgEl.screenBBox();
+									
+									event.edit({
+										height: bbox.height,
+										left: bbox.x,
+										top: bbox.y,
+										width: bbox.width
+									});
+								}
+							}
+						})
+						// if jQuery < v3.0, we have to remove the class ourselves
+						._on('destroyed', function() {
+							
+							if (!$origin.hasClass('tooltipstered')) {
+								var c = $origin.attr('class').replace('tooltipstered', '');
+								$origin.attr('class', c);
+							}
+						});
+				}
+			});
+		}
+	}
+});
+
+/* a build task will add "return $;" here */
+return $;
+
+}));
+
+
+}));

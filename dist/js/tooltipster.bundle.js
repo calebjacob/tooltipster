@@ -78,7 +78,7 @@ var defaults = {
 		deviceHasTouchCapability: !!('ontouchstart' in win),
 		IE: false,
 		// don't set manually, it will be updated by a build task after the manifest
-		semVer: '4.0.0rc45',
+		semVer: '4.0.0rc46',
 		window: win
 	},
 	core = function() {
@@ -386,7 +386,7 @@ $.Tooltipster.prototype = {
 				
 				initialTitle = self.$origin.attr('title');
 				
-				// we do not want initialTitle to have the value "undefined" because
+				// we do not want initialTitle to be "undefined" because
 				// of how jQuery's .data() method works
 				if (initialTitle === undefined) initialTitle = null;
 				
@@ -414,17 +414,6 @@ $.Tooltipster.prototype = {
 				// events in particular)
 				.addClass('tooltipstered');
 			
-			// jQuery < v3.0's addClass and hasClass do not work on SVG elements.
-			// However, $('.tooltipstered') does find elements having the class.
-			if (!self.$origin.hasClass('tooltipstered')) {
-				
-				var c = self.$origin.attr('class') || '';
-				
-				if (c.indexOf('tooltipstered') == -1) {
-					self.$origin.attr('class', c +' tooltipstered')
-				}
-			}
-			
 			// set listeners on the origin
 			self._prepareOrigin();
 			
@@ -433,26 +422,7 @@ $.Tooltipster.prototype = {
 			
 			// init plugins
 			$.each(self.options.plugins, function(i, pluginName) {
-				
-				var plugin = $.tooltipster.plugin(pluginName);
-				
-				if (plugin) {
-					
-					if (plugin.instance) {
-						
-						var fn = function() {};
-						fn.prototype = plugin.instance;
-						
-						var p = new fn();
-						p._init(self);
-						
-						// proxy public methods on the instance to allow new instance methods
-						$.tooltipster._bridge(plugin.instance, p, self, plugin.name);
-					}
-				}
-				else {
-					throw new Error('The "'+ pluginName +'" plugin is not defined');
-				}
+				self._plugin(pluginName);
 			});
 			
 			self
@@ -879,32 +849,6 @@ $.Tooltipster.prototype = {
 						
 						break;
 				}
-			}
-		}
-		
-		// SVG coordinates may need fixing but we need svg.screenbox.js
-		// to provide it. SVGElement is IE8+
-		if (	env.window.SVGElement
-			&&	$target[0] instanceof SVGElement
-			&&	SVG.svgjs
-		) {
-			
-			if (!SVG.parser) {
-				SVG.prepare();
-			}
-			
-			var svgEl = SVG.adopt($target[0]);
-			
-			// not all figures need (and have) screenBBox
-			if (svgEl && svgEl.screenBBox) {
-				
-				var bbox = svgEl.screenBBox();
-				
-				geo.origin.size.height = bbox.height;
-				geo.origin.size.width = bbox.width;
-				
-				geo.origin.windowOffset.left = bbox.x;
-				geo.origin.windowOffset.top = bbox.y;
 			}
 		}
 		
@@ -1454,6 +1398,29 @@ $.Tooltipster.prototype = {
 		this._trigger('options');
 	},
 	
+	_plugin: function(pluginName) {
+		
+		var plugin = $.tooltipster.plugin(pluginName);
+		
+		if (plugin) {
+			
+			if (plugin.instance) {
+				
+				var fn = function() {};
+				fn.prototype = plugin.instance;
+				
+				var p = new fn();
+				p._init(this);
+				
+				// proxy public methods on the instance to allow new instance methods
+				$.tooltipster._bridge(plugin.instance, p, this, plugin.name);
+			}
+		}
+		else {
+			throw new Error('The "'+ pluginName +'" plugin is not defined');
+		}
+	},
+	
 	/**
 	 * Sets or cancels the garbage collector interval
 	 */
@@ -1964,15 +1931,7 @@ $.Tooltipster.prototype = {
 							
 							// final cleaning
 							
-							// normal elements
-							if (self.$origin.hasClass('tooltipstered')) {
-								self.$origin.removeClass('tooltipstered')
-							}
-							// SVG elements
-							else {
-								var c = self.$origin.attr('class').replace('tooltipstered', '');
-								self.$origin.attr('class', c);
-							}
+							self.$origin.removeClass('tooltipstered');
 							
 							self.$origin
 								.removeData('tooltipster-ns')
@@ -2391,7 +2350,7 @@ $.fn.tooltipster = function() {
 						});
 					}
 					
-					// and now the event, for the core emitter
+					// and now the event, for the plugins and core emitter
 					obj._trigger('init');
 				}
 				
@@ -2649,6 +2608,9 @@ function supportsTransitions() {
 	return false;
 }
 
+// we'll return jQuery for plugins not to have to declare it as a dependency,
+// but it's done by a build task since it should be included only once at the
+// end when we concatenate the core file with a plugin
 // sideTip is Tooltipster's default plugin.
 // This file will be UMDified by a build task.
 
@@ -3476,5 +3438,7 @@ $.tooltipster.plugin({
 	}
 });
 
+/* a build task will add "return $;" here */
+return $;
 
 }));
