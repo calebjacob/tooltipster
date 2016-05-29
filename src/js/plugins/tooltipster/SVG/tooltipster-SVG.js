@@ -32,10 +32,13 @@ $.tooltipster.plugin({
 					if (event.instance.content() === null) {
 						
 						// TODO: when there are several <title> tags (not supported in
-						// today's browsers yet though, still an RFC drat), pick the right
-						// one based on the "lang" attribute 
-						var content = $origin.find('title').text();
-						event.instance.content(content);
+						// today's browsers yet though, still an RFC draft), pick the right
+						// one based on its "lang" attribute 
+						var $title = $origin.find('title');
+						
+						if ($title[0]) {
+							event.instance.content($title.text());
+						}
 					}
 					
 					// rectify the geometry if SVG.js and its screenBBox plugin have been included
