@@ -32,7 +32,7 @@
 	<script type="text/javascript" src="doc/js/prettify.js"></script>
 	<script type="text/javascript" src="doc/js/lang-css.js"></script>
 	<script type="text/javascript" src="doc/js/scripts.js"></script>
-	<script type="text/javascript" src="dist/js/tooltipster.bundle.min.js"></script>
+	<script type="text/javascript" src="dist/js/tooltipster.bundle.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.5.3/clipboard.js"></script>
 	
 	<!--[if lt IE 9]>
@@ -138,7 +138,7 @@
 					<span id="demo-complex" title="I also stick to fixed-positioned, moving and resizing elements! Try scrolling!">Click</span> Position tracking system
 				</li>
 				<li>
-					<span id="demo-position">Hover</span> <div id="demo-position-grid">Custom positioning</div>
+					<span id="demo-position">Hover</span> <div id="demo-position-grid">Custom position</div>
 				</li>
 				<li>...&amp; more!</li>
 			</ul>
@@ -933,11 +933,13 @@ $(document).ready(function() {
 			
 			<p>When the tooltip needs to be positioned or repositioned, Tooltipster runs all kinds of tests to find the best option. But before the computed position is applied, you have the option to edit it using the <span class="code">functionPosition</span> option.</p>
 			
-			<p>When you provide custom coordinates for the tooltip and its arrow, they have to be relative to the top and left edges of the viewport. This makes custom positioning in Tooltipster both very fast and very simple. Doing your calculations, <a href="https://developer.mozilla.org/fr/docs/Web/API/Element/getBoundingClientRect" target="_blank"><span class="code">element.getBoundingClientRect</span></a> will probably become your new best friend, so make sure you check it out.</p>
+			<p>When you provide custom coordinates for the tooltip and its arrow, they have to be relative to the top and left edges of the viewport. This makes custom positioning in Tooltipster both very fast and very simple. Doing your calculations, <a href="https://developer.mozilla.org/fr/docs/Web/API/Element/getBoundingClientRect" target="_blank"><span class="code">element.getBoundingClientRect</span></a> will become your new best friend, so make sure you check it out.</p>
 			
 			<p>Your <span class="code">functionPosition</span> callback is called with three parameters. The first two ones are <span class="code">instance</span> and a <span class="code">helper</span>, <a href="#callback_arguments">as usual</a>. The third argument is an object with the position properties proposed by Tooltipster, that you may edit. <b>You must return</b> the edited third argument for the changes to get applied.</p>
 			
-			<p>This third argument is in the form:</p>
+			<p>Note: <span class="code">helper.tooltipClone</span> is a clone of the tooltip which exists in the DOM at the time the callback is called.</p>
+			
+			<p>The third argument is in the form:</p>
 			
 			<pre class="prettyprint">
 {

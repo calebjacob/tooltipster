@@ -1095,8 +1095,7 @@ $.Tooltipster.prototype = {
 						// if the tooltip isn't already open, open it
 						else {
 							
-							// a plugin must bind on this and make the tooltip available in
-							// the DOM (if it isn't yet)
+							// a plugin must bind on this and store the tooltip in this.$tooltip
 							self._stateSet('appearing');
 							
 							// the timer (if any) will start when the tooltip has fully appeared
@@ -1104,17 +1103,10 @@ $.Tooltipster.prototype = {
 							extraTime = self.options.animationDuration[0];
 							
 							self.$tooltip.css({
-								// must not overflow the window until the positioning method
-								// is called
-								height: 0,
-								left: 0,
-								top: 0,
-								overflow: 'hidden',
-								width: 0,
 								zIndex: self.options.zIndex
 							});
 							
-							// insert the content
+							// insert the content inside the tooltip
 							self._contentInsert();
 							
 							// reposition the tooltip and attach to the DOM
@@ -1133,16 +1125,15 @@ $.Tooltipster.prototype = {
 								// happens when delay[0]==0 though
 								self.$tooltip
 									.addClass('tooltipster-'+ self.options.animation)
-									.addClass('tooltipster-initial');
-								
-								self.$tooltip.css({
-									'-moz-animation-duration': self.options.animationDuration[0] + 'ms',
-									'-ms-animation-duration': self.options.animationDuration[0] + 'ms',
-									'-o-animation-duration': self.options.animationDuration[0] + 'ms',
-									'-webkit-animation-duration': self.options.animationDuration[0] + 'ms',
-									'animation-duration': self.options.animationDuration[0] + 'ms',
-									'transition-duration': self.options.animationDuration[0] + 'ms'
-								});
+									.addClass('tooltipster-initial')
+									.css({
+										'-moz-animation-duration': self.options.animationDuration[0] + 'ms',
+										'-ms-animation-duration': self.options.animationDuration[0] + 'ms',
+										'-o-animation-duration': self.options.animationDuration[0] + 'ms',
+										'-webkit-animation-duration': self.options.animationDuration[0] + 'ms',
+										'animation-duration': self.options.animationDuration[0] + 'ms',
+										'transition-duration': self.options.animationDuration[0] + 'ms'
+									});
 								
 								setTimeout(
 									function() {
@@ -1166,9 +1157,7 @@ $.Tooltipster.prototype = {
 							}
 							else {
 								
-								// old browsers will have to live with this. If the display
-								// plugin wants no fading, it will have to cancel it the dirty
-								// way, sorry
+								// old browsers will have to live with this
 								self.$tooltip
 									.css('display', 'none')
 									.fadeIn(self.options.animationDuration[0], finish);
@@ -2353,9 +2342,9 @@ function Ruler($tooltip) {
 	
 	this.$container;
 	this.constraints = null;
-	this.$tooltip = $tooltip;
+	this.$tooltip;
 	
-	this._init();
+	this._init($tooltip);
 }
 
 Ruler.prototype = {
@@ -2364,16 +2353,32 @@ Ruler.prototype = {
 	 * Move the tooltip into an invisible div that does not allow overflow to make
 	 * size tests. Note: the tooltip may or may not be attached to the DOM at the
 	 * moment this method is called, it does not matter.
+	 * 
+	 * @param {object} $tooltip The object to test. May be just a clone of the
+	 * actual tooltip.
 	 */
-	_init: function() {
+	_init: function($tooltip) {
+		
+		this.$tooltip = $tooltip;
+		
+		this.$tooltip
+			.css({
+				// for some reason we have to specify top and left 0
+				left: 0,
+				// any overflow will be ignored while measuring
+				overflow: 'hidden',
+				// positions at (0,0) without the div using 100% of the available width
+				position: 'absolute',
+				top: 0
+			})
+			// overflow must be auto during the test. We re-set this in case
+			// it were modified by the user
+			.find('.tooltipster-content')
+				.css('overflow', 'auto');
 		
 		this.$container = $('<div class="tooltipster-ruler"></div>')
 			.append(this.$tooltip)
 			.appendTo('body');
-		
-		// overflow must be auto during the test
-		this.$tooltip.find('.tooltipster-content')
-			.css('overflow', 'auto');
 	},
 	
 	/**
@@ -2413,14 +2418,12 @@ Ruler.prototype = {
 		
 		this.$tooltip.css({
 			// we disable display:flex, otherwise the content would overflow without
-			// creating horizontal scrolling (that we need to detect).
+			// creating horizontal scrolling (which we need to detect).
 			display: 'block',
 			// reset any previous height
 			height: '',
-			left: 0,
 			// we'll check if horizontal scrolling occurs
 			overflow: 'auto',
-			top: 0,
 			// we'll set the width and see what height is generated and if there
 			// is horizontal overflow
 			width: width
@@ -2460,9 +2463,7 @@ Ruler.prototype = {
 		this.$tooltip.css({
 			display: '',
 			height: '',
-			left: 0,
 			overflow: 'visible',
-			top: 0,
 			width: ''
 		});
 		

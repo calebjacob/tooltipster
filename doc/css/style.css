@@ -379,7 +379,6 @@ Demos
 	width: 50%;
 	font-weight: 400;
 	margin-bottom: 1em;
-	overflow: hidden;
 	padding-top: 1.4em;
 	padding-right: 2em;
 	position: relative;
@@ -459,11 +458,11 @@ Demos
 	border-bottom: none;
 	box-sizing: border-box;
 	display: inline-block;
-	left: 100px;
+	left: 80px;
 	padding: 5px 20px;
 	position: absolute;
 	top: 20px;
-	width: 250px;
+	width: 220px;
 }
 
 #grouped_icons input {

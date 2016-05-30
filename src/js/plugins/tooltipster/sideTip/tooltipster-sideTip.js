@@ -164,8 +164,6 @@ $.tooltipster.plugin({
 			
 			this.instance.$tooltip = $html;
 			
-			this.instance.$tooltip.appendTo(this.options.parent);
-			
 			// tell the instance that the tooltip element has been created
 			this.instance._trigger('created');
 		},
@@ -264,9 +262,17 @@ $.tooltipster.plugin({
 				testResults = {
 					document: {},
 					window: {}
-				},
-			// start position tests session
-				ruler = $.tooltipster._getRuler(self.instance.$tooltip);
+				};
+			
+			// detach the tooltip while we make tests on a clone
+			self.instance.$tooltip.detach();
+			
+			// we could actually provide the original element to the Ruler and
+			// not a clone, but it just feels right to keep it out of the
+			// machinery.
+			var $clone = self.instance.$tooltip.clone(),
+				// start position tests session
+				ruler = $.tooltipster._getRuler($clone);
 			
 			// find which side can contain the tooltip without overflow.
 			// We'll compute things relatively to window, then document if need be.
@@ -293,19 +299,19 @@ $.tooltipster.plugin({
 					
 					// this may have an effect on the size of the tooltip if there are css
 					// rules for the arrow or something else
-					self._sideChange(side);
+					self._sideChange($clone, side);
 					
 					$.each(['natural', 'constrained'], function(i, mode) {
 						
 						// whether the tooltip can fit without any adjustments
 						var fits = false,
-						// check if the origin has enough surface on screen for the tooltip to
-						// aim at it without overflowing the viewport (this is due to the thickness
-						// of the arrow represented by the minIntersection length).
-						// If not, the tooltip will have to be partly or entirely off screen in
-						// order to stay docked to the origin
+							// check if the origin has enough surface on screen for the tooltip to
+							// aim at it without overflowing the viewport (this is due to the thickness
+							// of the arrow represented by the minIntersection length).
+							// If not, the tooltip will have to be partly or entirely off screen in
+							// order to stay docked to the origin
 							whole,
-						// get the size of the tooltip with or without size constraints
+							// get the size of the tooltip with or without size constraints
 							rulerConfigured = (mode == 'natural') ?
 								ruler.free() :
 								ruler.constrain(
@@ -548,7 +554,7 @@ $.tooltipster.plugin({
 			// the size of the tooltip, and the custom functionPosition may want to detect the
 			// size of something before making a decision. So let's make things easier for the
 			// implementor
-			self._sideChange(finalResult.side);
+			self._sideChange($clone, finalResult.side);
 			
 			// now unneeded, we don't want it passed to functionPosition
 			delete finalResult.fits;
@@ -564,6 +570,7 @@ $.tooltipster.plugin({
 			// add some variables to the helper for the custom function
 			helper.origin = self.instance.$origin[0];
 			helper.tooltip = self.instance.$tooltip[0];
+			helper.tooltipClone = $clone[0];
 			helper.tooltipParent = self.options.parent[0];
 			
 			var edit = function(result) {
@@ -583,6 +590,9 @@ $.tooltipster.plugin({
 				
 				if (r) finalResult = r;
 			}
+			
+			// end the positioning tests session
+			ruler.destroy();
 			
 			
 			// compute the position of the target relatively to the
@@ -645,10 +655,9 @@ $.tooltipster.plugin({
 				top: originParentOffset.top + (finalResult.coord.top - helper.geo.origin.windowOffset.top)
 			};
 			
-			// set position values
+			// set position values on the original tooltip element
 			
-			// again, in case functionPosition changed the side
-			self._sideChange(finalResult.side);
+			self._sideChange(self.instance.$tooltip, finalResult.side);
 			
 			if (helper.geo.origin.fixedLineage) {
 				self.instance.$tooltip
@@ -687,9 +696,6 @@ $.tooltipster.plugin({
 					width: finalResult.size.width
 				});
 			
-			// end positioning tests session
-			ruler.destroy();
-			
 			// append the tooltip HTML element to its parent
 			self.instance.$tooltip.appendTo(self.instance.options.parent);
 			
@@ -707,9 +713,9 @@ $.tooltipster.plugin({
 		 *
 		 * @param {string} side
 		 */
-		_sideChange: function(side) {
+		_sideChange: function($obj, side) {
 			
-			this.instance.$tooltip
+			$obj
 				.removeClass('tooltipster-bottom')
 				.removeClass('tooltipster-left')
 				.removeClass('tooltipster-right')

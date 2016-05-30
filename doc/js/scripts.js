@@ -179,10 +179,8 @@ $(function() {
 		});
 	
 	$('#demo-position').tooltipster({
-		content: $('<div>Most accurate tooltips ever! Great to create menus too :)<br /><br />A<br />B<br />C<br />D</div>'),
+		content: $('<div>Most accurate tooltips ever! Great to create menus too :)<br /><br />A<br />B<br />C</div>'),
 		// 8 extra pixels for the arrow to overflow the grid
-		maxWidth: 258,
-		side: ['right'],
 		functionPosition: function(instance, helper, data){
 			
 			// this function is pretty dumb and does not check if there is actually
@@ -190,7 +188,7 @@ $(function() {
 			// snap to the grid. You might want to do something smarter in your app!
 			
 			var gridBcr = $('#demo-position-grid')[0].getBoundingClientRect(),
-				arrowSize = parseInt($(helper.tooltip).find('.tooltipster-box').css('margin-left'));
+				arrowSize = parseInt($(helper.tooltipClone).find('.tooltipster-box').css('margin-left'));
 			
 			// override these
 			data.coord = {
@@ -200,7 +198,9 @@ $(function() {
 			};
 			
 			return data;
-		}
+		},
+		maxWidth: 228,
+		side: ['right']
 	});
 	
 	// nested demo
