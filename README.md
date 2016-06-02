@@ -18,6 +18,7 @@ contentAsHTML
 contentCloning  
 debug  
 delay  
+delayTouch  
 functionInit  
 functionBefore  
 functionReady  
@@ -32,7 +33,6 @@ restoration
 selfDestruction  
 timer  
 theme  
-touchDevices  
 trackerInterval  
 trackOrigin  
 trackTooltip  

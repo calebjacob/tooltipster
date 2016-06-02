@@ -29,6 +29,74 @@
 				trackTooltip: true
 			});
 			
+			$('#custom_mouse_hover').tooltipster({
+				trigger: 'custom',
+				triggerOpen: {
+					mouseenter: true
+				},
+				triggerClose: {
+					mouseleave: true
+				}
+			});
+			$('#custom_mouse_click').tooltipster({
+				trigger: 'custom',
+				triggerOpen: {
+					click: true
+				},
+				triggerClose: {
+					click: true
+				}
+			});
+			$('#custom_touch_hover').tooltipster({
+				delayTouch: 0,
+				trigger: 'custom',
+				triggerOpen: {
+					touchstart: true
+				},
+				triggerClose: {
+					touchleave: true
+				}
+			});
+			$('#custom_touch_hoverinteractive').tooltipster({
+				interactive: true,
+				trigger: 'custom',
+				triggerOpen: {
+					touchstart: true
+				},
+				triggerClose: {
+					touchleave: true
+				}
+			});
+			$('#custom_touch_tap').tooltipster({
+				trigger: 'custom',
+				triggerOpen: {
+					tap: true
+				},
+				triggerClose: {
+					tap: true
+				}
+			});
+			$('#custom_touch_tapinteractive').tooltipster({
+				interactive: true,
+				trigger: 'custom',
+				triggerOpen: {
+					tap: true
+				},
+				triggerClose: {
+					tap: true
+				}
+			});
+			$('#custom_touch_clicktapscroll').tooltipster({
+				trigger: 'custom',
+				triggerOpen: {
+					click: true,
+					tap: true
+				},
+				triggerClose: {
+					scroll: true
+				}
+			});
+			
 			$('.inline').tooltipster({
 				content: 'Second',
 				multiple: true,
@@ -187,7 +255,17 @@
 		<a href="http://google.com" class="tooltip hover" title="Inline element">Google</a>
 	</section>
 	
-	<div id="hi" style="width: 100px; height: 100px; margin: 0 0 0 500px; background: #f00; position: fixed; top: 100px; right: 100px;" class="tooltip hover" title="Fixed origin"></div>
+	<div id="square" class="tooltip hover" title="Fixed origin"></div>
+	
+	<section class="container">
+		<p><span id="custom_mouse_hover" class="circle" title="Hello"></span> Mouseenter + mouseleave</p>
+		<p><span id="custom_mouse_click" class="circle" title="Hello"></span> Mouse click</p>
+		<p><span id="custom_touch_hover" class="circle" title="Hello"></span> Touchstart + touchleave + delay 0</p>
+		<p><span id="custom_touch_tap" class="circle" title="Hello"></span> Touch tap in & out</p>
+		<p><span id="custom_touch_hoverinteractive" class="circle" title="Hello"></span> Touchstart + touchleave + interactive</p>
+		<p><span id="custom_touch_tapinteractive" class="circle" title="Hello"></span> Tap in & out + interactive</p>
+		<p><span id="custom_touch_clicktapscroll" class="circle" title="Hello"></span> Click/Tap in & scroll out</p>
+	</section>
 	
 	<section class="container">
 		<img src="geometry.jpg" usemap="#map" />
@@ -202,7 +280,7 @@
 		<!-- this paragraph is a demonstration of issue #491 and our included fix for it -->
 		<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Odio placeat sunt quasi laudantium. <strong class="tooltip hover inline target" title="First"><i>Voluptatum</i> <i>consectetur</i> <i>tempor</i> <i>voluptatem</i> rem, sapiente, neque vero esse dicta veritatis accusamus reprehenderit eos deserunt eleifend!</strong> Obcaecati at in ad sit odio aliquid expedita quibusdam asperiores ducimus eos, tenetur quasi dolores quae iste quaerat, maxime consectetur!</p>
 	</section>
-	
+		
 	<section id="scrollable" class="container">
 		<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo. Quisque sit amet est et sapien ullamcorper pharetra. Vestibulum erat wisi, condimentum sed, commodo vitae, ornare sit amet, wisi. Aenean fermentum, elit eget tincidunt condimentum, eros ipsum rutrum orci, sagittis tempus lacus enim ac dui. Donec non enim in turpis pulvinar facilisis. Ut felis. Praesent dapibus, neque id cursus faucibus, tortor neque egestas augue, eu vulputate magna eros eu erat. Aliquam erat volutpat. Nam dui mi, tincidunt quis, accumsan porttitor, facilisis luctus, metus</p>
 		<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.</p>

@@ -26,14 +26,16 @@
 	<link rel="stylesheet" type="text/css" href="dist/css/plugins/tooltipster/sideTip/themes/tooltipster-sideTip-noir.min.css" />
 	<link rel="stylesheet" type="text/css" href="dist/css/plugins/tooltipster/sideTip/themes/tooltipster-sideTip-punk.min.css" />
 	<link rel="stylesheet" type="text/css" href="dist/css/plugins/tooltipster/sideTip/themes/tooltipster-sideTip-shadow.min.css" />
+	<link rel="stylesheet" href="doc/js/jquery-ui-draggable/jquery-ui.min.css">
 	
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.0/jquery.min.js"></script>
+	<script type="text/javascript" src="dist/js/tooltipster.bundle.js"></script>
+	<script type="text/javascript" src="doc/js/scripts.js"></script>
+	<script type="text/javascript" src="doc/js/jquery-ui-draggable/jquery-ui.min.js"></script>
+	<script type="text/javascript" src="doc/js/jquery.ui.touch-punch.min.js"></script>
 	<script type="text/javascript" src="doc/js/jquery.jgfeed.js"></script>
 	<script type="text/javascript" src="doc/js/prettify.js"></script>
 	<script type="text/javascript" src="doc/js/lang-css.js"></script>
-	<script type="text/javascript" src="doc/js/scripts.js"></script>
-	<script type="text/javascript" src="dist/js/tooltipster.bundle.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.5.3/clipboard.js"></script>
 	
 	<!--[if lt IE 9]>
 		<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -102,16 +104,19 @@
 			<h2>Demos</h2>
 			<ul>
 				<li>
-					<span id="demo-default" title="Hi! This is a tooltip.">Hover</span> Default settings
-				</li>
-				<li>
-					<span id="demo-html">Hover</span> Fixed width, side &amp; HTML
+					<span id="demo-default" title="Hi! I am a tooltip.">Hover</span> Default settings
 				</li>
 				<li id="test">
-					<span id="demo-events" title="Press any key on your keyboard or click anywhere in the page to close this">Click</span> Custom open/close triggers
+					<span id="demo-events" title="Press any key on your keyboard or click anywhere in the page to close me">Click</span> Custom open/close triggers
 				</li>
 				<li>
-					<span id="demo-touch" title="I would have never been born on a touch device :'(">Hover</span> Disable touch devices
+					<span id="demo-html">Hover</span> HTML, side, fixed size
+				</li>
+				<li>
+					<span id="demo-smart">Drag</span> Smart positioning
+				</li>
+				<li>
+					<span id="demo-touch">Click</span> Mouse, touch & hybrid devices
 				</li>
 				<li>
 					<span id="demo-theme" title="Build custom themes and CSS powered animations!">Hover</span> Custom themes &amp; animations
@@ -135,13 +140,14 @@
 				</li>
 				<li id="demo-complex-li">
 					<span id="demo-complex-placeholder"></span>
-					<span id="demo-complex" title="I also stick to fixed-positioned, moving and resizing elements! Try scrolling!">Click</span> Position tracking system
+					<span id="demo-complex" title="I also stick to fixed-positioned, moving and resizing elements. Try scrolling!">Click</span> Position tracking system
 				</li>
 				<li>
 					<span id="demo-position">Hover</span> <div id="demo-position-grid">Custom position</div>
 				</li>
 				<li>...&amp; more!</li>
 			</ul>
+			<br class="clear" />
 		</section>
 		
 		<section id="getting-started">
@@ -190,7 +196,7 @@
     &lt;/script&#62;
 &lt;/head&#62;</pre>
 			
-			<h3 id="theming">4. Styling your tooltips</h3>
+			<h3 id="theming">4. Style your tooltips</h3>
 			<p>On top of its default style, Tooltipster is packaged with five themes to choose from.</p>
 			
 			<div id="themes">
@@ -213,7 +219,7 @@ $('.tooltip').tooltipster({
 			
 			<p>Note: sideTip is the name of the plugin used by default by Tooltipster. We'll see about plugins later.</p>
 			
-			<h3 id="further">5. Using HTML tags inside your tooltips</h3>
+			<h3 id="further">5. Use HTML inside your tooltips</h3>
 			
 			<p>Tooltipster allows you to use any HTML markup inside your tooltips. It means that you can insert things like images and text formatting tags. The preferred method to achieve this is to use an HTML element as content. Example:</p>
 			
@@ -262,8 +268,22 @@ $('.tooltip').tooltipster({
         This div has a tooltip with HTML when you hover over it!
     &lt;/div&#62;
 &lt;/body&#62;</pre>
-		
+			
 			<p>In all cases, make sure you have tight control over the HTML content you wish to display in the tooltip, as unwanted <span class="code">&lt;script&gt;</span> or <span class="code">&lt;iframe&gt;</span> tags for example would be a serious security issue for your website.</p>
+			
+			<h3>6. Use plugins</h3>
+			
+			<p>
+				Tooltipster's features may be extended through the use of plugins. They may add new styles, new options, new methods, new behaviors, etc.<br />
+				Some popular plugins for Tooltipster are:
+			</p>
+			
+			<p><span class="code">sideTip</span> Shipped with Tooltipster and used by default</p>
+			<p><span class="code">SVG</span> Shipped with Tooltipster, adds SVG support, not enabled by default (see <a href="#svg">the SVG section</a>)</p>
+			<p><span class="code">follower</span> Lets the tooltip follow the cursor. Available <a href="https://github.com/louisameline/tooltipster-follower" target="_blank">here</a> (still experimental)</p>
+			<p><span class="code">discovery</span> Demonstrated in the <a href="#grouped">Grouped tooltips</a> section and available <a href="https://github.com/louisameline/tooltipster-discovery" target="_blank">here</a></p>
+			
+			<p>For more information about plugins, read our <a href="#plugins">plugins section</a>.</p>
 			
 		</section>
 		
@@ -330,7 +350,12 @@ $('.tooltip').tooltipster({
 				<tr>
 					<td><h4>delay</h4></td>
 					<td>integer,<br />integer[]</td>
-					<td>Delay how long it takes (in milliseconds) for the tooltip to start its opening and closing animations when the 'hover' triggers are used. If you wish to specify different delays for opening and closing, you may provide an array of two different values. <strong>Default: 300</strong></td>
+					<td>Upon mouse interaction, this is the delay before the tooltip starts its opening and closing animations when the 'hover' trigger is used <span class="tooltip" title="More specifically: when the 'triggerOpen.mouseenter' and/or 'triggerClose.mouseleave' are used">(<span class="red">*</span>)</span>. If you wish to specify different delays for opening and closing, you may provide an array of two different values. <strong>Default: 300</strong></td>
+				</tr>
+				<tr>
+					<td><h4>delayTouch</h4></td>
+					<td>integer,<br />integer[]</td>
+					<td>Upon touch interaction, this is the delay before the tooltip starts its opening and closing animations when the 'hover' trigger is used <span class="tooltip" title="More specifically: when the 'triggerOpen.touchstart' and/or 'triggerClose.touchleave' are used">(<span class="red">*</span>)</span>. If you wish to specify different delays for opening and closing, you may provide an array of two different values. <strong>Default: [300, 500]</strong></td>
 				</tr>
 				<tr>
 					<td><h4>distance</h4></td>
@@ -385,7 +410,7 @@ $('.tooltip').tooltipster({
 				<tr>
 					<td><h4>minIntersection</h4></td>
 					<td>integer</td>
-					<td>Corresponds to the minimum distance to enforce between the center of the arrow and the edges of the tooltip. Mainly used when you create an arrow bigger than those of the default themes. <strong>Default: 16</strong></td>
+					<td>Corresponds to the minimum distance to enforce between the center of the arrow and the edges of the tooltip. Mainly used to create an arrow bigger than those of the default themes. <strong>Default: 16</strong></td>
 				</tr>
 				<tr>
 					<td><h4>minWidth</h4></td>
@@ -433,11 +458,6 @@ $('.tooltip').tooltipster({
 					<td>Set a theme that will override the default tooltip appearance. You may provide an array of strings to apply several themes at once (see the <a href="#theming">themes section</a>). <strong>Default: empty array</strong></td>
 				</tr>
 				<tr>
-					<td><h4>touchDevices</h4></td>
-					<td>boolean</td>
-					<td>If set to false, tooltips will not open on pure-touch devices, unless you open them yourself with the 'open' method. Touch gestures on devices which also have a mouse will still open the tooltips though. <strong>Default: true</strong></td>
-				</tr>
-				<tr>
 					<td><h4>trackerInterval</h4></td>
 					<td>integer</td>
 					<td>Sets how often the tracker should run (see trackOrigin and trackTooltip), in milliseconds. The tracker runs even if trackOrigin and trackTooltip are false to check if the origin has not been removed while the tooltip was open, so you shouldn't set too high or too low values unless you need to. <strong>Default: 500</strong></td>
@@ -455,47 +475,17 @@ $('.tooltip').tooltipster({
 				<tr>
 					<td><h4>trigger</h4></td>
 					<td>'hover',<br />'click',<br />'custom'</td>
-					<td>Sets when the tooltip should be opened and closed. 'hover' and 'click' correspond to predefined sets of built-in triggers, while 'custom' helps you create a customized behavior. See the <a href="#triggers">triggers section</a> to learn how to use custom triggers. <strong>Default: 'hover'</strong></td>
+					<td>Sets when the tooltip should open and close. 'hover' and 'click' correspond to predefined sets of built-in triggers, while 'custom' lets you create your own, for a completely customized behavior. See the <a href="#triggers">triggers section</a> to learn how to use custom triggers. <strong>Default: 'hover'</strong></td>
 				</tr>
 				<tr>
 					<td><h4>triggerClose</h4></td>
 					<td>object</td>
-					<td>When 'trigger' is set to 'custom', all built-in open and close triggers are disabled by default. This option allows you to reactivate specific triggers to help you create a customized behavior. This option only applies if 'trigger' is set to 'custom'. See the <a href="#triggers">triggers section</a> to learn how to use custom triggers.</td>
-				</tr>
-				<tr>
-					<td><h4>triggerClose.click</h4></td>
-					<td>boolean</td>
-					<td>Closes the tooltip if a click happens anywhere in the page. If 'interactive' is true, a click happening inside the tooltip will not close it though. <strong>Default: false</strong></td>
-				</tr>
-				<tr>
-					<td><h4>triggerClose.mouseleave</h4></td>
-					<td>boolean</td>
-					<td>Closes the tooltip after the mouse has gone away from the origin. The 'delay' option is taken into account as the delay before closing. <strong>Default: false</strong></td>
-				</tr>
-				<tr>
-					<td><h4>triggerClose.originClick</h4></td>
-					<td>boolean</td>
-					<td>Closes the tooltip if its origin is clicked. This mimics a behavior that browsers usually have and is meant to be used with the 'hover' trigger. <strong>Default: false</strong></td>
-				</tr>
-				<tr>
-					<td><h4>triggerClose.scroll</h4></td>
-					<td>boolean</td>
-					<td>Closes the tooltip if scrolling happens in the window or in a scrollable area which is a parent of the origin. <strong>Default: false</strong></td>
+					<td>When 'trigger' is set to 'custom', all built-in close triggers are disabled by default. This option allows you to reactivate the triggers of your choice to create a customized behavior. Only applies if 'trigger' is set to 'custom'. See the <a href="#triggers">triggers section</a>.</td>
 				</tr>
 				<tr>
 					<td><h4>triggerOpen</h4></td>
 					<td>object</td>
-					<td>Similar to 'triggerClose'. See the <a href="#triggers">triggers section</a></td>
-				</tr>
-				<tr>
-					<td><h4>triggerOpen.click</h4></td>
-					<td>boolean</td>
-					<td>Opens the tooltip when the origin is clicked. <strong>Default: false</strong></td>
-				</tr>
-				<tr>
-					<td><h4>triggerOpen.hover</h4></td>
-					<td>boolean</td>
-					<td>Opens the tooltip when the origin is hovered. The 'delay' option is taken into account. <strong>Default: false</strong></td>
+					<td>Similar to 'triggerClose'.</td>
 				</tr>
 				<tr>
 					<td><h4>updateAnimation</h4></td>
@@ -731,9 +721,10 @@ var instances = $.tooltipster.instancesLatest();
 			<ul>
 				<li><a href="#styling">Styling your tooltips with a custom look</a></li>
 				<li><a href="#apicontent">Updating a tooltip's content</a></li>
-				<li><a href="#triggers">Setting when a tooltip should open and close</a></li>
 				<li><a href="#ajax">Using AJAX to generate your tooltip content</a></li>
 				<li><a href="#sides">Forcing or disabling sides</a></li>
+				<li><a href="#triggers">Opening and closing a tooltip: the built-in triggers</a></li>
+				<li><a href="#openclose">Opening and closing a tooltip: the method calls</a></li>
 				<li><a href="#positioning">Achieving custom positioning</a></li>
 				<li><a href="#data-attributes">Specifying options through data-attributes</a></li>
 				<li><a href="#formatting">Working with data sets</a></li>
@@ -742,6 +733,7 @@ var instances = $.tooltipster.instancesLatest();
 				<li><a href="#multiple">Using multiple tooltips on a single element</a></li>
 				<li><a href="#delegation">Dynamic live binding on newly created elements</a></li>
 				<li><a href="#events">Event-driven Tooltipster</a></li>
+				<li><a href="#plugins">Tooltipster's plugin system</a></li>
 				<li><a href="#nested">Nested tooltips</a></li>
 				<li><a href="#grouped">Grouped tooltips</a></li>
 				<li><a href="#svg">Tooltips on SVG elements</a></li>
@@ -784,18 +776,16 @@ $('.tooltip').tooltipster({
 			<p>It's easy as pie to update a tooltip's content - whether it's open or closed. Depending on your selector, you can update multiple tooltips at once or just one:</p>
 			
 			<pre class="prettyprint">
-$('#myelement').tooltipster('content', 'My new content');</pre>
+$('#myelement').tooltipster('content', 'My new content');
+
+// or when you have the instance object of the tooltip:
+instance.content('My new content');
+</pre>
 			<p>Tooltipster plays a subtle animation when the content changes. This animation may be changed or disabled through the <span class="code">updateAnimation</span> option.</p>
 			
-			<h3 id="triggers">Setting when a tooltip should open and close <a href="#usecases">&#8657;</a></h3>
+			<h3 id="openclose">Opening and closing a tooltip: the method calls</h3>
 			
-			<h4 id="triggers_predefined">Predefined behaviors</h4>
-			
-			<p>The easiest way is to use the <span class="code">trigger</span> option and set it to one of the two predefined values: <span class="code">'hover'</span> or <span class="code">'click'</span>. You can see how they perform with our demos at the top of this page. Note that these two behaviors also apply to their touch-gesture equivalents.</p>
-			
-			<h4 id="triggers_predefined">Opening and closing the tooltip yourself</h4>
-			
-			<p>In parallel to (or instead of) using the predefined behaviors, you may want to open/close a tooltip yourself on a specific occasion.</p>
+			<p>In parallel to (or instead of) using the built-in triggers, you may want to open/close a tooltip yourself on a specific occasion.</p>
 			
 			<p>To achieve this, Tooltipster has the <span class="code">open</span> and <span class="code">close</span> methods. Both of them may receive an optional callback argument, which represents a function you'd like to be called when the tooltip is done animating.</p>
 			
@@ -810,7 +800,7 @@ $(document).ready(function() {
    // first on page load, initialize all tooltips
    $('.tooltip').tooltipster();
    
-   // then immediately open the tooltip named "example"
+   // then immediately open the tooltip of the element named "example"
    $('#example').tooltipster('open');
    
    // as soon as a key is pressed on the keyboard, close the tooltip.
@@ -819,34 +809,6 @@ $(document).ready(function() {
    });
 });
 </pre>
-			
-			<h4 id="triggers_custom">Advanced: choosing which built-in triggers to activate</h4>
-			
-			<p>Let's assume that we'd like a tooltip to open upon hovering, but close only when either a click or scrolling happens. Can it be done through configuration only? Yes.</p>
-			
-			<p>
-				First of all, you have to understand how the predefined <span class="code">'hover'</span> and <span class="code">'click'</span> work. Well, they don't do anything by themselves!<br />
-				<span class="code">'hover'</span> just tells Tooltipster to use the <span class="code">'hover'</span> open trigger and the <span class="code">'mouseleave'</span> and <span class="code">'originClick'</span> close triggers.<br />
-				<span class="code">'click'</span> just tells Tooltipster to use the <span class="code">'click'</span> open trigger and the <span class="code">'click'</span> close trigger.<br />
-			</p>
-			
-			<p>When you set the <span class="code">trigger</span> option to <span class="code">'custom'</span>, there are no longer any activated open/close triggers. That's when the <span class="code">triggerOpen</span> and <span class="code">triggerClose</span> options come into play: they allow you to reactivate the triggers of your choice.</p>
-			
-			<p>Now that we know that, let's get back to what our example and just write:</p>
-			
-			<pre class="prettyprint">
-$('#example').tooltipster({
-    trigger: 'custom',
-    triggerOpen: {
-        hover: true
-    },
-    triggerClose: {
-        click: true,
-        scroll: true
-    }
-});</pre>
-			
-			<p>Remark: in this example, if you omitted the <span class="code">triggerClose</span> option, you would cause the tooltip to never close, unless you called its <span class="code">close</span> method yourself.<br />Omitting the <span class="code">triggerOpen</span> as well would effectively give you fully manual control over the tooltip.</p>
 			
 			<h3 id="ajax">Using AJAX to generate your tooltip content <a href="#usecases">&#8657;</a></h3>
 			
@@ -857,6 +819,7 @@ $('#example').tooltipster({
 			<pre class="prettyprint">
 $('.tooltip').tooltipster({
     content: 'Loading...',
+    // 'instance' is basically the tooltip. More details in the "Object-oriented Tooltipster" section.
     functionBefore: function(instance, helper) {
         
         var $origin = $(helper.origin);
@@ -864,13 +827,12 @@ $('.tooltip').tooltipster({
         // we set a variable so the data is only loaded once via Ajax, not every time the tooltip opens
         if ($origin.data('loaded') !== true) {
 
-            $.get('ajax.php', function(data) {
+            $.get('http://example.com/ajax.php', function(data) {
 
-                // update the content of our tooltip with the returned data and cache it.
-                // if you are still confused about what 'instance' is, bear with us,
-                // it will be detailed in the "Object-oriented Tooltipster" section.
+                // call the 'content' method to update the content of our tooltip with the returned data
                 instance.content(data);
-                
+
+                // to remember that the data has been loaded
                 $origin.data('loaded', true);
             });
         }
@@ -926,6 +888,107 @@ $(document).ready(function() {
 			
 			<p>If there is not enough space anywhere, Tooltipster will try to see if it can overflow the viewport on your preferred sides without overflowing the document. If it's still impossible, it will overflow the document on your preferred side.</p>
 			
+			
+			<h3 id="triggers">Opening and closing a tooltip: the built-in triggers <a href="#usecases">&#8657;</a></h3>
+			
+			<h4 id="triggers_predefined">Predefined behaviors</h4>
+			
+			<p>The easiest way to set when a tooltip should open or close is to set the <span class="code">trigger</span> option to one of the two predefined values: <span class="code">'hover'</span> or <span class="code">'click'</span>.</p>
+			
+			<p>You can see how they perform with our demos at the top of this page. Note that these two behaviors also apply to their touch-gesture equivalents.</p>
+			
+			<p>If you feel that you need a different behavior or more flexibility, set the <span class="code">trigger</span> option to <span class="code">'custom'</span> and read on.</p>
+			
+			<h4 id="triggers_custom">Creating a customized behavior</h4>
+			
+			<p>There are many actions that may cause a tooltip to open or close, should we want to. These action are called "open triggers" and "close triggers".</p>
+			
+			<p>Tooltipster supports a number of them out of the box, the list lies below. Plugins may provide support for additional triggers.</p>
+			
+			<h5>1) Open triggers</h5>
+			
+			<p><span class="code">click</span> When the origin is clicked by a mouse.</p>
+			<p><span class="code">mouseenter</span> When a mouse comes over the origin. The <span class="code">delay</span> option is taken into account as the delay before opening.</p>
+			<p><span class="code">touchstart</span> When the origin is pressed on a touch screen. The <span class="code">delayTouch</span> option is taken into account as the delay before opening.</p>
+			<p><span class="code">tap</span> When the origin is tapped (ie pressed and then released) on a touch screen.</p>
+			
+			<h5>2) Close triggers</h5>
+			
+			<p><span class="code">click</span> When a mouse click happens anywhere in the page. However, if the <span class="code">interactive</span> option is set to <span class="code">true</span>, a click happening inside the tooltip will not close it.</p>
+			<p><span class="code">mouseleave</span> When the mouse goes away from the origin. The <span class="code">delay</span> option is taken into account as the delay before closing.</p>
+			<p><span class="code">originClick</span> When the origin is clicked by a mouse. This mimics a behavior that browsers usually have and is meant to be used with the <span class="code">mouseenter</span> open trigger.</p>
+			<p><span class="code">scroll</span> When scrolling happens in the window or in a scrollable area which is a parent of the origin.</p>
+			<p><span class="code">tap</span> When the finger taps (ie presses and releases) anywhere in the touch screen.</p>
+			<p><span class="code">touchleave</span> When the finger is removed from the touch screen or if the interaction was stopped by the device. The 'delayTouch' option is taken into account as the delay before closing.</p>
+			
+			<h5>Examples</h5>
+			
+			<p>Once that the <span class="code">trigger</span> option is set to <span class="code">'custom'</span>, all open and close triggers are disabled by default. Use the <span class="code">triggerOpen</span> and <span class="code">triggerClose</span> options to reactivate the triggers of your choice, as shown below.</p>
+			
+			<p>Let's assume that you'd like a tooltip to open upon mouse hovering, but close only when either a mouse click or scrolling happens. Write this:</p>
+			
+			<pre class="prettyprint">
+$('#example').tooltipster({
+    trigger: 'custom',
+    triggerOpen: {
+        mouseenter: true
+    },
+    triggerClose: {
+        click: true,
+        scroll: true
+    }
+});</pre>
+			
+			<p>This works well on desktops but not on touch devices, because we have not enabled any touch triggers. Let's fix this by enabling the <span class="code">touchstart</span> and <span class="code">tap</span> triggers as well:</p>
+			
+			<pre class="prettyprint">
+$('#example').tooltipster({
+    trigger: 'custom',
+    triggerOpen: {
+        mouseenter: true,
+        touchstart: true
+    },
+    triggerClose: {
+        click: true,
+        scroll: true,
+        tap: true
+    }
+});</pre>
+			
+			<h5>« Ok but wait... then what do the predefined 'hover' and 'click' behaviors do exactly? »</h5>
+			
+			<p>Good question. Setting <span class="code">trigger: 'hover'</span> or <span class="code">trigger: 'click'</span> is nothing but a shorthand.</p>
+			
+			<p>Having <span class="code">trigger: 'hover'</span> is actually the same as having:</p>
+			
+			<pre class="prettyprint">
+$('#example').tooltipster({
+    trigger: 'custom',
+    triggerOpen: {
+        mouseenter: true,
+        touchstart: true
+    },
+    triggerClose: {
+        mouseleave: true,
+        originClick: true,
+        touchleave: true
+    }
+});</pre>
+			
+			<p>And having <span class="code">trigger: 'click'</span> is the same as having:</p>
+			
+			<pre class="prettyprint">
+$('#example').tooltipster({
+    trigger: 'custom',
+    triggerOpen: {
+        click: true,
+        tap: true
+    },
+    triggerClose: {
+        click: true,
+        tap: true
+    }
+});</pre>
 			
 			<h3 id="positioning">Achieving custom positioning <a href="#usecases">&#8657;</a></h3>
 			
@@ -1226,10 +1289,10 @@ $('#my-element').tooltipster({
 			
 			<p>If you go the delegation way, you will rely on the bubbling of events (mouseenter or click) triggered on their origin. That may be an issue if these events are stopped from bubbling at some point, and you might run into race conditions depending on how you handle things. And of course, the tooltips won't be initialized until their origin is hovered/clicked, which may be an issue if you wish to manipulate them programmatically or if you use a plugin which is supposed to start working before the tooltip opens.</p>
 			
-			<p>If you understand these caveats and are willing to proceed, the code below will do the work. You might want to change <span class="code">'.tooltip'</span> to something else and switch from <span class="code">'mouseenter'</span> to <span class="code">'click'</span> if you want a click trigger.</p>
+			<p>If you understand these caveats and are willing to proceed, the code below will do the work. You might want to change <span class="code">'.tooltip'</span> to something else and switch from <span class="code">'mouseenter touchstart'</span> to <span class="code">'click touchend'</span> if you want a click trigger.</p>
 			
 			<pre class="prettyprint">
-$('body').on('mouseenter', '.tooltip:not(.tooltipstered)', function(){
+$('body').on('mouseenter touchstart', '.tooltip:not(.tooltipstered)', function(){
     $(this)
         .tooltipster({ ... })
         .tooltipster('open');
@@ -1319,6 +1382,41 @@ $("#my-tooltip").tooltipster({
     functionBefore: doThat
 });
 </pre>
+			
+			<h3 id="plugins">Tooltipster's plugin system <a href="#usecases">&#8657;</a></h3>
+			
+			<h4>General information</h4>
+			
+			<p>Tooltipster is composed of a core and one or several plugins.</p>
+			
+			<p>By default, <span class="code">sideTip</span> is the only plugin used by Tooltipster.  <span class="code">sideTip</span> takes care of positioning tooltips on a side of their origin.<br />
+				In fact, the name of our main file is <span class="code">tooltipster.bundle.js</span> because it is a bundle of <span class="code">tooltipster-core</span> and <span class="code">tooltipster-sideTip</span>.</p>
+			
+			<p>Most of the time, using a plugin requires that you specify its name in the options of the plugin:</p>
+			
+			<pre class="prettyprint">
+$('#example').tooltipster({
+    plugins: ['pluginNamespace.pluginName']
+});
+</pre>
+			
+			<p>The plugin's namespace exists to resolve conflicts, in case two plugins decided to have the same name or methods with the same name.</p>
+			
+			<p>Several plugins may be used at the same time and listed together in the <span class="code">plugins</span> option. However, plugins are sometimes incompatible, for example <span class="code">sideTip</span> and <span class="code">follower</span> (a tooltip obviously can't be positioned on a side and follow the cursor at the same time).</p>
+			
+			<p>Sometimes, when a plugin adds no options or instance methods, or is auto-activated, you might not have to declare it in the options. Anyway, each plugin will give you its installation instructions.</p>
+			
+			<p>Under the hood, Tooltipster's plugin system is built on our event system. The plugins register to the core and when something happens, the core triggers an event that plugins may react to. A manual for plugin makers will be released soon.</p>
+			
+			<p>Let us know if you decide to create and share your own plugin, we will list it here!</p>
+			
+			<h4>A note about sideTip</h4>
+			
+			<p>The default <span class="code">sideTip</span> plugin adds a few options to Tooltipster. For the sake of simplicity, these options were listed previously among the core's options in the <a href="#options">Options</a> section. But if you decide not to use <span class="code">sideTip</span>, these options will actually not be available anymore, except if another plugin offers options of the same name. These specific options are:</p>
+			
+			<p><span class="code">arrow</span>, <span class="code">distance</span>, <span class="code">functionPosition</span>, <span class="code">minIntersection</span>, <span class="code">minWidth</span>, <span class="code">maxWidth</span>, <span class="code">side</span></p>
+			
+			<p>The <span class="code">position</span> event is also specific to <span class="code">sideTip</span>.</p>
 			
 			<h3 id="nested">Nested tooltips <a href="#usecases">&#8657;</a></h3>
 			
@@ -1432,7 +1530,7 @@ $.tooltipster.on('start', function(event) {
 			
 			<h3 id="svg">Tooltips on SVG elements <a href="#usecases">&#8657;</a></h3>
 			
-			<p>If you are going to work with SVG, you'll want to include our SVG plugin that brings fixes and improvements for SVG support:</p>
+			<p>If you are going to work with SVG, you'll want to include our SVG plugin that brings fixes and improvements for SVG elements:</p>
 			
 			<pre class="prettyprint">
 &lt;head&#62;
@@ -1442,7 +1540,7 @@ $.tooltipster.on('start', function(event) {
 &lt;/head&#62;
 </pre>
 			
-			<p>If you want optimal results, you should also include <a href="https://github.com/wout/svg.js" target="_blank">SVG.js</a> and its <a href="https://github.com/fuzzyma/svg.screenbbox.js" target="_blank">ScreenBBox</a> plugin in your page.</p>
+			<p>If you want optimal results, you should consider including <a href="https://github.com/wout/svg.js" target="_blank">SVG.js</a> and its <a href="https://github.com/fuzzyma/svg.screenbbox.js" target="_blank">ScreenBBox</a> plugin in your page.</p>
 			
 			<p>Why? Because browsers do not always make our life easy when it comes to working with SVG. Determining the coordinates of SVG paths, polylines or polygons is especially difficult since the native <span class="code">getBoundingClientRect</span>, <span class="code">getBBox</span> and other methods produce inaccurate results in most browsers (as of today in 2016). The result is that by default, the position of tooltips on SVG elements may be completely off. Fortunately, SVG.js helps in that matter and our plugin leverages its power out of the box. Just include the files in your page and that's it, Tooltipster will use them out of the box for optimal results.</p>
 

@@ -6,6 +6,16 @@ body {
 	line-height: 22px;
 }
 
+.circle {
+	background: red;
+	border-radius: 50px;
+	display: inline-block;
+	height: 50px;
+	margin-right: 10px;
+	vertical-align: middle;
+	width: 50px;
+}
+
 .container, #container {
 	width: 978px;
 	margin: 10px auto;
@@ -46,4 +56,13 @@ body {
 	border: 1px solid gray;
 	height: 250px;
 	overflow: scroll;
+}
+
+#square {
+	background: red;
+	height: 50px;
+	position: fixed;
+	right: 30px;
+	top: 30px;
+	width: 50px;
 }

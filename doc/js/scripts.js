@@ -21,6 +21,28 @@ $(function() {
 	
 	$('#demo-default').tooltipster({});
 	
+	$('#demo-smart').draggable({
+		easing: 'none',
+		grid: [20, 20],
+		helper: 'clone',
+		revert: true,
+		scroll: false,
+		start: function(event, ui) {
+			ui.helper
+				.tooltipster({
+					content: 'Move my origin next to the edges of the screen and see how I adapt.<br />My behavior may even be tuned through my options.',
+					contentAsHTML: true,
+					trackerInterval: 10,
+					trackOrigin: true,
+					trigger: 'custom'
+				})
+				.tooltipster('open');
+		},
+		stop: function(event, ui) {
+			ui.helper.tooltipster('destroy');
+		}
+	});
+	
 	$('#demo-html').tooltipster({
 		content: $(
 			'<div>' +
@@ -98,14 +120,23 @@ $(function() {
 	});
 	
 	$('#demo-touch').tooltipster({
-		touchDevices: false
+		trigger: 'click',
+		functionBefore: function(instance, helper){
+			if (helper.event.type == 'click') {
+				instance.content('You opened me with a regular mouse click :)');
+			}
+			else {
+				instance.content('You opened me by a tap on the screen :)');
+			}
+		}
 	});
 	$('#demo-imagemaparea').tooltipster();
 	
 	$('#demo-multiple').tooltipster({
 		animation: 'swing',
 		content: 'North',
-		side: 'top'
+		side: 'top',
+		theme: 'tooltipster-borderless'
 	});
 	$('#demo-multiple').tooltipster({
 		content: 'East',
@@ -179,7 +210,7 @@ $(function() {
 		});
 	
 	$('#demo-position').tooltipster({
-		content: $('<div>Most accurate tooltips ever! Great to create menus too :)<br /><br />A<br />B<br />C</div>'),
+		content: $('<div>I am the most accurate tooltip ever! Let me fit to your layout the way you want to. I\'m great to create menus too :)</div>'),
 		// 8 extra pixels for the arrow to overflow the grid
 		functionPosition: function(instance, helper, data){
 			
