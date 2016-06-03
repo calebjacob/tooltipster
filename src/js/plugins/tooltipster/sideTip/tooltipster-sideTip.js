@@ -30,41 +30,10 @@ $.tooltipster.plugin({
 				// the side of the tooltip).
 				minIntersection: 16,
 				minWidth: 0,
-				side: 'top'
-				/*
-				// TODO: these rules let the user choose what to do when the tooltip content
-				// overflows. Right now the order of fallbacks is fixed :
-				// - we're looking for a spot where the natural size of the tooltip can fit
-				//   ('window.natural')
-				// - if can't find one, we check if setting a constrained width on the
-				//   tooltip could solve the problem without having the content overflowing
-				//   ('window.constrain')
-				// - if it does not work, we let the tooltip overflow the window in its
-				//   natural size, in the limits of the document ('document.switch')
-				// - if it does not work, we see if a constrained width could make the
-				//   tooltip fit in the document without its content overflowing
-				//   ('document.constrain')
-				// - and if that can't be done, we just let the tooltip on the preferred
-				//   side with a natural size, overflowing the document
-				//   ('document.overflow')
-				positioningRules: [
-					'window.natural',
-					// or try to see if the tooltip could be displayed somewhere with a
-					// constrained width without its content overflowing
-					'window.constrain',
-					// TODO : window.scroll should be a possible rule, rather than fall
-					// back to overflowing in the rest of the document. The content would
-					// have horizontal and/or vertical scrollbars but the tooltip would not
-					// overflow the window. It would require to set a max-height on the
-					// content div, etc.
-					//'window.scroll',
-					'document.switch',
-					'document.constrain',
-					// TODO - similar to 'window.scroll'
-					//'document.scroll'
-					'document.overflow'
-				]
-				*/
+				side: 'top',
+				// set to false to position the tooltip relatively to the document rather
+				// than the window when we open it
+				viewportAware: true
 			};
 		},
 		
@@ -247,8 +216,15 @@ $.tooltipster.plugin({
 		 * tooltip is eventually appended to its parent (since the element may be
 		 * detached from the DOM at the moment the method is called).
 		 *
-		 * Plugin creators will at least have to use self.instance.$tooltip
-		 *
+		 * We'll evaluate positioning scenarios to find which side can contain the
+		 * tooltip in the best way. We'll consider things relatively to the window
+		 * (unless the user asks not to), then to the document (if need be, or if the
+		 * user explicitly requires the tests to run on the document). For each
+		 * scenario, measures are taken, allowing us to know how well the tooltip
+		 * is going to fit. After that, a sorting function will let us know what
+		 * the best scenario is (we also allow the user to choose his favorite
+		 * scenario by using an event).
+		 * 
 		 * @param {object} helper An object that contains variables that plugin
 		 * creators may find useful (see below)
 		 * @param {object} helper.geo An object with many layout properties
@@ -259,12 +235,12 @@ $.tooltipster.plugin({
 			
 			var self = this,
 				finalResult,
-				testResults = {
-					document: {},
-					window: {}
-				};
+				// to know where to put the tooltip, we need to know on which point
+				// of the x or y axis we should center it. That coordinate is the target
+				targets = self._targetFind(helper),
+				testResults = [];
 			
-			// detach the tooltip while we make tests on a clone
+			// make sure the tooltip is detached while we make tests on a clone
 			self.instance.$tooltip.detach();
 			
 			// we could actually provide the original element to the Ruler and
@@ -272,191 +248,268 @@ $.tooltipster.plugin({
 			// machinery.
 			var $clone = self.instance.$tooltip.clone(),
 				// start position tests session
-				ruler = $.tooltipster._getRuler($clone);
+				ruler = $.tooltipster._getRuler($clone),
+				satisfied = false;
 			
-			// find which side can contain the tooltip without overflow.
-			// We'll compute things relatively to window, then document if need be.
+			// start evaluating scenarios
 			$.each(['window', 'document'], function(i, container) {
 				
-				var stop = false;
+				var takeTest = null;
 				
-				for (var i=0; i < self.options.side.length; i++) {
-					
-					var distance = {
-							horizontal: 0,
-							vertical: 0
-						},
-						side = self.options.side[i];
-					
-					if (side == 'top' || side == 'bottom') {
-						distance.vertical = self.options.distance[side];
-					}
-					else {
-						distance.horizontal = self.options.distance[side];
-					}
-					
-					testResults[container][side] = {};
-					
-					// this may have an effect on the size of the tooltip if there are css
-					// rules for the arrow or something else
-					self._sideChange($clone, side);
-					
-					$.each(['natural', 'constrained'], function(i, mode) {
-						
-						// whether the tooltip can fit without any adjustments
-						var fits = false,
-							// check if the origin has enough surface on screen for the tooltip to
-							// aim at it without overflowing the viewport (this is due to the thickness
-							// of the arrow represented by the minIntersection length).
-							// If not, the tooltip will have to be partly or entirely off screen in
-							// order to stay docked to the origin
-							whole,
-							// get the size of the tooltip with or without size constraints
-							rulerConfigured = (mode == 'natural') ?
-								ruler.free() :
-								ruler.constrain(
-									helper.geo.available[container][side].width - distance.horizontal,
-									helper.geo.available[container][side].height - distance.vertical
-								),
-							rulerResults = rulerConfigured.measure(),
-							outerSize = {
-								height: rulerResults.size.height + distance.vertical,
-								width: rulerResults.size.width + distance.horizontal
-							};
-						
-						
-						if (side == 'top' || side == 'bottom') {
-							
-							whole = (
-								helper.geo.origin.windowOffset.right >= self.options.minIntersection
-								&&	helper.geo.window.size.width - helper.geo.origin.windowOffset.left >= self.options.minIntersection
-							);
-						}
-						else {
-							whole = (
-								helper.geo.origin.windowOffset.bottom >= self.options.minIntersection
-								&&	helper.geo.window.size.height - helper.geo.origin.windowOffset.top >= self.options.minIntersection
-							);
-						}
-						
-						if (mode == 'natural') {
-							
-							if(		helper.geo.available[container][side].width >= outerSize.width
-								&&	helper.geo.available[container][side].height >= outerSize.height
-							) {
-								fits = true;
-								naturalFits = true;
-							}
-						}
-						else {
-							
-							fits = rulerResults.fits;
-							
-							if (fits) {
-								constrainedFits = true;
-							}
-						}
-						
-						testResults[container][side][mode] = {
-							fits: fits,
-							whole: whole,
-							distance: distance,
-							outerSize: outerSize,
-							size: rulerResults.size
-						};
-						
-						// we don't need to compute more positions if we have
-						// a natural one fully on screen
-						if (mode == 'natural' && fits && whole) {
-							stop = true;
-							return false;
-						}
-					});
-					
-					// if we don't need to compute more sides
-					if (stop) {
-						// break the $.each loop
-						return false;
-					}
-				}
-			});
-			
-			// Based on tests, pick the side we'll use.
-			
-			// TODO: let the user choose the order of the positioning rules.
-			// These 2 loops are gross WIP, still thinking about
-			// a good way to make the order of fallbacks customizable
-			$.each(['window', 'document'], function(i, container) {
+				// let the user decide to keep on testing or not
+				self.instance._trigger({
+					container: container,
+					helper: helper,
+					satisfied: satisfied,
+					takeTest: function(bool) {
+						takeTest = bool;
+					},
+					testResults: testResults,
+					type: 'positionTest'
+				});
 				
-				for (var i=0; i < self.options.side.length; i++) {
+				if (	takeTest == true
+					||	(	takeTest != false
+						&&	satisfied == false
+							// skip the window scenarios if asked. If they are reintegrated by
+							// the callback of the positionTest event, they will have to be
+							// excluded using the callback of positionTested
+						&&	(container != 'window' || self.options.viewportAware)
+					)
+				) {
 					
-					var side = self.options.side[i];
-					
-					$.each(['natural', 'constrained'], function(i, mode) {
-						
-						if (	testResults[container][side]
-							&&	testResults[container][side][mode]
-							&&	testResults[container][side][mode].fits
-								// prefer whole tooltips to (partly) off screen ones
-							&&	testResults[container][side][mode].whole
-						) {
-							finalResult = testResults[container][side][mode];
-							finalResult.container = container;
-							finalResult.mode = mode;
-							finalResult.side = side;
-							return false;
-						}
-					});
-					
-					if (finalResult) {
-						return false;
-					}
-				}
-			});
-			if (!finalResult) {
-				$.each(['window', 'document'], function(i, container) {
-					
+					// for each allowed side
 					for (var i=0; i < self.options.side.length; i++) {
 						
-						var side = self.options.side[i];
+						var distance = {
+								horizontal: 0,
+								vertical: 0
+							},
+							side = self.options.side[i];
+						
+						if (side == 'top' || side == 'bottom') {
+							distance.vertical = self.options.distance[side];
+						}
+						else {
+							distance.horizontal = self.options.distance[side];
+						}
+						
+						// this may have an effect on the size of the tooltip if there are css
+						// rules for the arrow or something else
+						self._sideChange($clone, side);
 						
 						$.each(['natural', 'constrained'], function(i, mode) {
 							
-							if (	testResults[container][side]
-								&&	testResults[container][side][mode]
-								&&	testResults[container][side][mode].fits
+							takeTest = null;
+							
+							// emit an event on the instance
+							self.instance._trigger({
+								container: container,
+								helper: helper,
+								mode: mode,
+								satisfied: satisfied,
+								side: side,
+								takeTest: function(bool) {
+									takeTest = bool;
+								},
+								testResults: testResults,
+								type: 'positionTest'
+							});
+							
+							if (	takeTest == true
+								||	(	takeTest != false
+									&&	satisfied == false
+								)
 							) {
-								finalResult = testResults[container][side][mode];
-								finalResult.container = container;
-								finalResult.mode = mode;
-								finalResult.side = side;
-								return false;
+								
+								var testResult = {
+									container: container,
+									distance: distance.horizontal || distance.vertical,
+									// whether the tooltip can fit in the size of the viewport (does not mean
+									// that we'll be able to make it initially entirely visible, see 'whole')
+									fits: null,
+									mode: mode,
+									outerSize: null,
+									side: side,
+									size: null,
+									target: targets[side],
+									// check if the origin has enough surface on screen for the tooltip to
+									// aim at it without overflowing the viewport (this is due to the thickness
+									// of the arrow represented by the minIntersection length).
+									// If not, the tooltip will have to be partly or entirely off screen in
+									// order to stay docked to the origin. This value will stay null when the
+									// container is the document, as it is not relevant
+									whole: null
+								};
+								
+								// get the size of the tooltip with or without size constraints
+								var rulerConfigured = (mode == 'natural') ?
+										ruler.free() :
+										ruler.constrain(
+											helper.geo.available[container][side].width - distance.horizontal,
+											helper.geo.available[container][side].height - distance.vertical
+										),
+									rulerResults = rulerConfigured.measure();
+								
+								testResult.size = rulerResults.size;
+								testResult.outerSize = {
+									height: rulerResults.size.height + distance.vertical,
+									width: rulerResults.size.width + distance.horizontal
+								};
+								
+								if (mode == 'natural') {
+									
+									if(		helper.geo.available[container][side].width >= testResult.outerSize.width
+										&&	helper.geo.available[container][side].height >= testResult.outerSize.height
+									) {
+										testResult.fits = true;
+									}
+									else {
+										testResult.fits = false;
+									}
+								}
+								else {
+									testResult.fits = rulerResults.fits;
+								}
+								
+								if (container == 'window') {
+									
+									if (!testResult.fits) {
+										testResult.whole = false;
+									}
+									else {
+										if (side == 'top' || side == 'bottom') {
+											
+											testResult.whole = (
+												helper.geo.origin.windowOffset.right >= self.options.minIntersection
+												&&	helper.geo.window.size.width - helper.geo.origin.windowOffset.left >= self.options.minIntersection
+											);
+										}
+										else {
+											testResult.whole = (
+												helper.geo.origin.windowOffset.bottom >= self.options.minIntersection
+												&&	helper.geo.window.size.height - helper.geo.origin.windowOffset.top >= self.options.minIntersection
+											);
+										}
+									}
+								}
+								
+								testResults.push(testResult);
+								
+								// we don't need to compute more positions if we have
+								// a natural one fully on screen
+								if (testResult.mode == 'natural' && testResult.fits && testResult.whole) {
+									satisfied = true;
+								}
 							}
 						});
+					}
+				}
+			});
+			
+			// allow the user to eliminate the unwanted scenarios
+			self.instance._trigger({
+				helper: helper,
+				testResults: testResults,
+				type: 'positionTested'
+			});
+			
+			/**
+			 * Sort the scenarios to find the favorite one.
+			 * 
+			 * The favorite scenario is when we can fully display the tooltip on screen,
+			 * even if it means that the middle of the tooltip is no longer centered on
+			 * the middle of the origin (when the origin is near the edge of the screen
+			 * or even partly off screen). We want the tooltip on the preferred side,
+			 * even if it means that we have to use a constrained size rather than a
+			 * natural one (as long as it fits). When the origin is off screen on top,
+			 * the tooltip will be positioned at the bottom (if allowed), if the origin
+			 * is off screen on the right, it will be positioned on the left, etc.
+			 * If there are no scenarios where the tooltip can fit on screen, or if the
+			 * user does not want the tooltip to fit on screen (viewportAware == false),
+			 * we fall back to the scenarios relative to the document.
+			 * 
+			 * When the tooltip is bigger than the viewport in either dimension, we stop
+			 * looking at the window scenarios and consider the document scenarios only,
+			 * with the same logic to find on which side it would fit best.
+			 * 
+			 * If the tooltip cannot fit the document on any side, we force it at the
+			 * bottom, so at least the user can scroll to see it.
+ 			 */
+			testResults.sort(function(a, b) {
+				
+				// best if it's whole (the tooltip fits and adapts to the viewport)
+				if (a.whole && !b.whole) {
+					return -1;
+				}
+				else if (!a.whole && b.whole) {
+					return 1;
+				}
+				else if (a.whole && b.whole) {
+					
+					var ai = self.options.side.indexOf(a.side),
+						bi = self.options.side.indexOf(b.side);
+					
+					// use the user's sides fallback array
+					if (ai < bi) {
+						return -1;
+					}
+					else if (ai > bi) {
+						return 1;
+					}
+					else {
+						// will be used if the user forced the tests to continue
+						return a.mode == 'natural' ? -1 : 1;
+					}
+				}
+				else {
+					
+					// better if it fits
+					if (a.fits && !b.fits) {
+						return -1;
+					}
+					else if (!a.fits && b.fits) {
+						return 1;
+					}
+					else if (a.fits && b.fits) {
 						
-						if (finalResult) {
-							return false;
+						var ai = self.options.side.indexOf(a.side),
+							bi = self.options.side.indexOf(b.side);
+						
+						// use the user's sides fallback array
+						if (ai < bi) {
+							return -1;
+						}
+						else if (ai > bi) {
+							return 1;
+						}
+						else {
+							// will be used if the user forced the tests to continue
+							return a.mode == 'natural' ? -1 : 1;
 						}
 					}
-				});
-			}
+					else {
+						
+						// if everything failed, this will give a preference to the case where
+						// the tooltip overflows the document at the bottom
+						if (	a.container == 'document'
+							&&	a.side == 'bottom'
+							&&	a.mode == 'natural'
+						) {
+							return -1;
+						}
+						else {
+							return 1;
+						}
+					}
+				}
+			});
 			
-			// if everything failed, this falls back on the preferred side but the
-			// tooltip will overflow the document
-			if (!finalResult) {
-				finalResult = testResults.document[self.options.side[0]].natural;
-				finalResult.container = 'overflow';
-				finalResult.mode = 'natural';
-				finalResult.side = self.options.side[0];
-			}
+			finalResult = testResults[0];
 			
-			// first, let's find the coordinates of the tooltip relatively to the
-			// window.
+			
+			// now let's find the coordinates of the tooltip relatively to the window
 			finalResult.coord = {};
-			
-			// to know where to put the tooltip, we need to know on which point
-			// of the x or y axis we should center it. That coordinate is the target
-			finalResult.target = self._targetFind(helper, finalResult.side);
 			
 			switch (finalResult.side) {
 				
@@ -478,7 +531,7 @@ $.tooltipster.plugin({
 					break;
 				
 				case 'right':
-					finalResult.coord.left = helper.geo.origin.windowOffset.left + helper.geo.origin.size.width + finalResult.distance.horizontal;
+					finalResult.coord.left = helper.geo.origin.windowOffset.right + finalResult.distance;
 					break;
 				
 				case 'top':
@@ -486,14 +539,15 @@ $.tooltipster.plugin({
 					break;
 				
 				case 'bottom':
-					finalResult.coord.top = helper.geo.origin.windowOffset.top + helper.geo.origin.size.height + finalResult.distance.vertical;
+					finalResult.coord.top = helper.geo.origin.windowOffset.bottom + finalResult.distance;
 					break;
 			}
 			
-			// if the tooltip is restricted to the viewport
+			// if the tooltip can potentially be contained within the viewport dimensions
+			// and that we are asked to make it fit on screen
 			if (finalResult.container == 'window') {
 				
-				// but if the tooltip overflows the viewport, we'll move it accordingly (it will
+				// if the tooltip overflows the viewport, we'll move it accordingly (then it will
 				// not be centered on the middle of the origin anymore). We only move horizontally
 				// for top and bottom tooltips and vice versa.
 				if (finalResult.side == 'top' || finalResult.side == 'bottom') {
@@ -545,6 +599,29 @@ $.tooltipster.plugin({
 					}
 				}
 			}
+			else {
+				
+				// there might be overflow here too but it's easier to handle. If there has
+				// to be an overflow, we'll make sure it's on the right side of the screen
+				// (because the browser will extend the document size if there is an overflow
+				// on the right, but not on the left). The sort function above has already
+				// made sure that a bottom document overflow is preferred to a top overflow,
+				// so we don't have to care about it.
+				
+				// if there is an overflow on the right
+				if (finalResult.coord.left > helper.geo.window.size.width - finalResult.size.width) {
+					
+					// this may actually create on overflow on the left but we'll fix it in a sec
+					finalResult.coord.left = helper.geo.window.size.width - finalResult.size.width;
+				}
+				
+				// if there is an overflow on the left
+				if (finalResult.coord.left < 0) {
+					
+					// don't care if it overflows the right after that, we made our best
+					finalResult.coord.left = 0;
+				}
+			}
 			
 			
 			// submit the positioning proposal to the user function which may choose to change
@@ -557,11 +634,10 @@ $.tooltipster.plugin({
 			self._sideChange($clone, finalResult.side);
 			
 			// now unneeded, we don't want it passed to functionPosition
+			delete finalResult.container;
 			delete finalResult.fits;
+			delete finalResult.whole;
 			delete finalResult.outerSize;
-			
-			// simplify this for the functionPosition callback
-			finalResult.distance = finalResult.distance.horizontal || finalResult.distance.vertical;
 			
 			// allow the user to easily prevent its content from overflowing
 			// if he constrains the size of the tooltip
@@ -577,7 +653,7 @@ $.tooltipster.plugin({
 				finalResult = result;
 			};
 			
-			// emit event on the instance
+			// emit an event on the instance
 			self.instance._trigger({
 				type: 'position',
 				edit: edit,
@@ -591,13 +667,13 @@ $.tooltipster.plugin({
 				if (r) finalResult = r;
 			}
 			
-			// end the positioning tests session
+			// end the positioning tests session (the user might have had a
+			// use for it during the position event, now it's over)
 			ruler.destroy();
 			
 			
-			// compute the position of the target relatively to the
-			// tooltip container so we can place the arrow, and make needed
-			// adjustments
+			// compute the position of the target relatively to the tooltip root
+			// element so we can place the arrow and make the needed adjustments
 			var arrowCoord,
 				maxVal;
 			
@@ -733,9 +809,9 @@ $.tooltipster.plugin({
 		 * @param {string} side
 		 * @return {integer}
 		 */
-		_targetFind: function(helper, side) {
+		_targetFind: function(helper) {
 			
-			var target,
+			var target = {},
 				rects = this.instance.$origin[0].getClientRects();
 			
 			// these lines fix a Chrome bug (issue #491)
@@ -751,79 +827,45 @@ $.tooltipster.plugin({
 			// by default, the target will be the middle of the origin
 			if (rects.length < 2) {
 				
-				switch (side) {
-					
-					case 'left':
-					case 'right':
-						target = Math.floor(helper.geo.origin.windowOffset.top + (helper.geo.origin.size.height / 2));
-						break;
-					
-					case 'bottom':
-					case 'top':
-						target = Math.floor(helper.geo.origin.windowOffset.left + (helper.geo.origin.size.width / 2));
-						break;
-				}
+				target.top = Math.floor(helper.geo.origin.windowOffset.left + (helper.geo.origin.size.width / 2));
+				target.bottom = target.top;
+				
+				target.left = Math.floor(helper.geo.origin.windowOffset.top + (helper.geo.origin.size.height / 2));
+				target.right = target.left;
 			}
 			// if multiple client rects exist, the element may be text split
 			// up into multiple lines and the middle of the origin may not be
-			// best option anymore
+			// best option anymore. We need to choose the best target client rect
 			else {
 				
-				var targetRect;
-				
-				// choose the best target client rect
-				switch (side) {
-					
-					case 'top':
-						
-						// first
-						targetRect = rects[0];
-						break;
-					
-					case 'right':
-						
-						// the middle line, rounded down in case there is an even
-						// number of lines (looks more centered => check out the
-						// demo with 4 split lines)
-						if (rects.length > 2) {
-							targetRect = rects[Math.ceil(rects.length / 2) - 1];
-						}
-						else {
-							targetRect = rects[0];
-						}
-						break;
-					
-					case 'bottom':
-						
-						// last
-						targetRect = rects[rects.length - 1];
-						break;
-					
-					case 'left':
-						
-						// the middle line, rounded up
-						if (rects.length > 2) {
-							targetRect = rects[Math.ceil((rects.length + 1) / 2) - 1];
-						}
-						else {
-							targetRect = rects[rects.length - 1];
-						}
-						break;
+				// top: the first
+				var targetRect = rects[0];
+				target.top = Math.floor(targetRect.left + (targetRect.right - targetRect.left) / 2);
+		
+				// right: the middle line, rounded down in case there is an even
+				// number of lines (looks more centered => check out the
+				// demo with 4 split lines)
+				if (rects.length > 2) {
+					targetRect = rects[Math.ceil(rects.length / 2) - 1];
+				}
+				else {
+					targetRect = rects[0];
+				}
+				target.right = Math.floor(targetRect.top + (targetRect.bottom - targetRect.top) / 2);
+		
+				// bottom: the last
+				targetRect = rects[rects.length - 1];
+				target.bottom = Math.floor(targetRect.left + (targetRect.right - targetRect.left) / 2);
+		
+				// left: the middle line, rounded up
+				if (rects.length > 2) {
+					targetRect = rects[Math.ceil((rects.length + 1) / 2) - 1];
+				}
+				else {
+					targetRect = rects[rects.length - 1];
 				}
 				
-				switch (side) {
-					
-					case 'left':
-					case 'right':
-						target = Math.floor(targetRect.top + (targetRect.bottom - targetRect.top) / 2);
-						
-						break;
-					
-					case 'bottom':
-					case 'top':
-						target = Math.floor(targetRect.left + (targetRect.right - targetRect.left) / 2);
-						break;
-				}
+				target.left = Math.floor(targetRect.top + (targetRect.bottom - targetRect.top) / 2);
 			}
 			
 			return target;

@@ -54,6 +54,7 @@ maxWidth
 minIntersection  
 minWidth  
 side  
+viewportAware  
 
 Instance methods
 ----------------

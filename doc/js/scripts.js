@@ -22,15 +22,14 @@ $(function() {
 	$('#demo-default').tooltipster({});
 	
 	$('#demo-smart').draggable({
-		easing: 'none',
-		grid: [20, 20],
+		grid: [30, 30],
 		helper: 'clone',
 		revert: true,
 		scroll: false,
 		start: function(event, ui) {
 			ui.helper
 				.tooltipster({
-					content: 'Move my origin next to the edges of the screen and see how I adapt.<br />My behavior may even be tuned through my options.',
+					content: 'Move my origin next to the edges of the screen and see how I adapt.<br />Besides, there are several options to tune my behavior.',
 					contentAsHTML: true,
 					trackerInterval: 10,
 					trackOrigin: true,
@@ -163,7 +162,7 @@ $(function() {
 	
 	$('#demo-complex')
 		.tooltipster({
-			trackerInterval: 10,
+			trackerInterval: 15,
 			trackOrigin: true,
 			trigger: 'custom'
 		})
