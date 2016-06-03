@@ -91,7 +91,7 @@ var defaults = {
 		),
 		IE: false,
 		// don't set manually, it will be updated by a build task after the manifest
-		semVer: '4.0.0rc46',
+		semVer: '4.0.0rc47',
 		window: win
 	},
 	core = function() {
