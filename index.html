@@ -1648,7 +1648,7 @@ $('#myfield')
 				<li>In IE11 and lower, the size returned by the helper of functionPosition may be greater than the actual size by 1 or 2 pixels if you set a maxWidth.</li>
 				<li>In IE9 and lower, a height returned by functionPosition which would be greater than the natural height of the tooltip would not be enforced due to the lack of display:flex. CSS transitions and animations do not work.</li>
 				<li>In IE8 and lower, some styling like shadows and rounded corners is not available. The size may be off by a couple pixels due to the lack of proper box-sizing.</li>
-				<li>In IE7, the arrow may be misplaced by a couple pixels in some cases.</li>
+				<li>In IE7, the arrow may be misplaced by a couple pixels in some cases. If you constrain the height of the tooltip, the content may overflow by a few pixels due to the complete lack of box-sizing.</li>
 				<li>In IE6, minWidth, maxWidth are not enforced, multiple tooltips do not work. The arrow is not displayed unless you explicitly enable it (and will look bad unless you style it yourself).</li>
 			</ul>
 			

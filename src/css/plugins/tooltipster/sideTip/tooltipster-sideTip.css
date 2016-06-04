@@ -1,4 +1,9 @@
-/* DEFAULT STYLE OF THE SIDETIP PLUGIN */
+/**
+ * DEFAULT STYLE OF THE SIDETIP PLUGIN
+ * 
+ * All styles are "namespaced" with .tooltipster-sidetip to prevent
+ * conflicts between plugins.
+ */
 
 /* .tooltipster-box */
 
@@ -23,7 +28,6 @@
 .tooltipster-sidetip.tooltipster-top .tooltipster-box {
 	margin-bottom: 8px;
 }
-
 
 /* .tooltipster-content */
 
