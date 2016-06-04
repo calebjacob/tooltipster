@@ -142,9 +142,12 @@ $.tooltipster.plugin({
 		 */
 		_optionsFormat: function() {
 			
-			var defaults = this._defaults();
+			var defaults = this._defaults(),
+				// if the plugin options were isolated in a property named after the
+				// plugin, use them (prevents conflicts with other plugins)
+				pluginOptions = this.instance.options[this.name] || this.instance.options;
 			
-			this.options = $.extend(true, {}, defaults, this.instance.options);
+			this.options = $.extend(true, {}, defaults, pluginOptions);
 			
 			// for backward compatibility, deprecated in v4.0.0
 			if (this.options.position) {
@@ -647,7 +650,7 @@ $.tooltipster.plugin({
 			helper.origin = self.instance.$origin[0];
 			helper.tooltip = self.instance.$tooltip[0];
 			helper.tooltipClone = $clone[0];
-			helper.tooltipParent = self.options.parent[0];
+			helper.tooltipParent = self.instance.options.parent[0];
 			
 			var edit = function(result) {
 				finalResult = result;

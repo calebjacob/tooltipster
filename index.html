@@ -221,7 +221,7 @@ $('.tooltip').tooltipster({
 			
 			<h3 id="further">5. Use HTML inside your tooltips</h3>
 			
-			<p>Tooltipster allows you to use any HTML markup inside your tooltips. It means that you can insert things like images and text formatting tags. The preferred method to achieve this is to use an HTML element as content. Example:</p>
+			<p>Tooltipster allows you to use any HTML markup inside your tooltips. It means that you can insert things like images and text formatting tags. The preferred method to achieve this is to provide an HTML element in the options of the tooltip. Example:</p>
 			
 			<pre class="prettyprint">
 &lt;head&#62;
@@ -538,34 +538,9 @@ functionInit(instance, helper){
 			
 			<p>Instance methods are used to manipulate one tooltip in particular. There are two ways to call them.</p>
 			
-			<p>1) Through the HTML element on which they are set: <span class="code">$('#my-tooltip').tooltipster(methodName [, argument1] [, argument2]);</span></p>
-			
-			<p>Example:</p>
-			
-			<pre class="prettyprint">
-// initialize your tooltip as usual:
-$('#my-tooltip').tooltipster({});
-// ...at some point, you may decide to open the tooltip:
-$('#my-tooltip').tooltipster('open');
-// ...and update its content:
-$('#my-tooltip').tooltipster('content', 'My new content');
-
-// NOTE: most methods are actually chainable, as you would expect them to be:
-$('#my-other-tooltip')
-    .tooltipster({})
-    .tooltipster('open')
-    .tooltipster('content', 'My new content');</pre>
+			<p>1) Through the origin's HTML element: <span class="code">$('#my-tooltip').tooltipster(methodName [, argument1] [, argument2]);</span></p>
 			
 			<p>2) Through the tooltip instance, when you have it: <span class="code">instance.methodName([argument1] [, argument2]);</span></p>
-			
-			<p>Example:</p>
-			
-			<pre class="prettyprint">
-$('.tooltip').tooltipster({
-    functionBefore: function(instance, helper) {
-        instance.content('My new content');
-    }
-});</pre>
 			
 			<p>The latter will be discussed in the <a href="#object-oriented">object-oriented section</a>. Users with simple use cases just need to know that it's the recommended way of calling methods when you are inside <span class="code">functionInit</span>, <span class="code">functionBefore</span> and the like. Here is the list of instance methods:</p>
 			<br /><br />
@@ -653,6 +628,31 @@ $('.tooltip').tooltipster({
 				</tr>
 			</table>
 			<br /><br />
+			
+			<p>Example of the first syntax:</p>
+			
+			<pre class="prettyprint">
+// initialize your tooltip as usual:
+$('#my-tooltip').tooltipster({});
+// ...at some point, you may decide to open the tooltip:
+$('#my-tooltip').tooltipster('open');
+// ...and update its content:
+$('#my-tooltip').tooltipster('content', 'My new content');
+
+// NOTE: most methods are actually chainable, as you would expect them to be:
+$('#my-other-tooltip')
+    .tooltipster({})
+    .tooltipster('open')
+    .tooltipster('content', 'My new content');</pre>
+			
+			<p>Example of the second syntax:</p>
+			
+			<pre class="prettyprint">
+$('.tooltip').tooltipster({
+    functionBefore: function(instance, helper) {
+        instance.content('My new content');
+    }
+});</pre>
 			
 			<h3>Core methods</h3>
 			
@@ -783,37 +783,10 @@ $('.tooltip').tooltipster({
 			<pre class="prettyprint">
 $('#myelement').tooltipster('content', 'My new content');
 
-// or when you have the instance object of the tooltip:
+// or when you have the instance of the tooltip:
 instance.content('My new content');
 </pre>
 			<p>Tooltipster plays a subtle animation when the content changes. This animation may be changed or disabled through the <span class="code">updateAnimation</span> option.</p>
-			
-			<h3 id="openclose">Opening and closing a tooltip: the method calls</h3>
-			
-			<p>In parallel to (or instead of) using the built-in triggers, you may want to open/close a tooltip yourself on a specific occasion.</p>
-			
-			<p>To achieve this, Tooltipster has the <span class="code">open</span> and <span class="code">close</span> methods. Both of them may receive an optional callback argument, which represents a function you'd like to be called when the tooltip is done animating.</p>
-			
-			<p>Here's an example of how you could launch a specific tooltip on page load and close it when any key on your keyboard is pressed.</p>
-			
-			<pre class="prettyprint">
-&lt;span id="example" class="tooltip" title="My tooltip content"&#62;Example&lt;/span&#62;
-</pre>
-			<pre class="prettyprint">
-$(document).ready(function() {
-   
-   // first on page load, initialize all tooltips
-   $('.tooltip').tooltipster();
-   
-   // then immediately open the tooltip of the element named "example"
-   $('#example').tooltipster('open');
-   
-   // as soon as a key is pressed on the keyboard, close the tooltip.
-   $(window).keypress(function() {
-      $('#example').tooltipster('close');
-   });
-});
-</pre>
 			
 			<h3 id="ajax">Using AJAX to generate your tooltip content <a href="#usecases">&#8657;</a></h3>
 			
@@ -885,14 +858,6 @@ $(document).ready(function() {
 			
 			<p>Secondly if you want to disable totally one or more sides. For example, with <span class="code">['top', 'right', 'left']</span>, the tooltip will never be positioned on the bottom. With <span class="code">['right']</span>, the tooltip will always be on the right, even if it has to overflow the document.</p>
 			
-			<h4>Advanced: how Tooltipster determines the best side</h4>
-			
-			<p>If there is not enough space on your preferred side to display your tooltip in its unrestrained size, Tooltipster first tries to see if the tooltip can be resized to fit in the available space without causing the tooltip content to overflow.</p>
-				
-			<p>If there is no way to resize the tooltip fittingly, Tooltipster falls back to the next sides and runs the same tests.</p>
-			
-			<p>If there is not enough space anywhere, Tooltipster will try to see if it can overflow the viewport on your preferred sides without overflowing the document. If it's still impossible, it will overflow the document on your preferred side.</p>
-			
 			
 			<h3 id="triggers">Opening and closing a tooltip: the built-in triggers <a href="#usecases">&#8657;</a></h3>
 			
@@ -924,7 +889,7 @@ $(document).ready(function() {
 			<p><span class="code">originClick</span> When the origin is clicked by a mouse. This mimics a behavior that browsers usually have and is meant to be used with the <span class="code">mouseenter</span> open trigger.</p>
 			<p><span class="code">scroll</span> When scrolling happens in the window or in a scrollable area which is a parent of the origin.</p>
 			<p><span class="code">tap</span> When the finger taps (ie presses and releases) anywhere in the touch screen.</p>
-			<p><span class="code">touchleave</span> When the finger is removed from the touch screen or if the interaction was stopped by the device. The 'delayTouch' option is taken into account as the delay before closing.</p>
+			<p><span class="code">touchleave</span> When the finger is removed from the touch screen or if the interaction was stopped by the device. The <span class="code">delayTouch</span> option is taken into account as the delay before closing.</p>
 			
 			<h5>Examples</h5>
 			
@@ -994,6 +959,33 @@ $('#example').tooltipster({
         tap: true
     }
 });</pre>
+			
+			<h3 id="openclose">Opening and closing a tooltip: the method calls</h3>
+			
+			<p>In parallel to (or instead of) using the built-in triggers, you may want to open/close a tooltip yourself on a specific occasion.</p>
+			
+			<p>To achieve this, Tooltipster has the <span class="code">open</span> and <span class="code">close</span> methods. Both of them may receive an optional callback argument, which represents a function you'd like to be called when the tooltip is done animating.</p>
+			
+			<p>Here's an example of how you could launch a specific tooltip on page load and close it when any key on your keyboard is pressed.</p>
+			
+			<pre class="prettyprint">
+&lt;span id="example" class="tooltip" title="My tooltip content"&#62;Example&lt;/span&#62;
+</pre>
+			<pre class="prettyprint">
+$(document).ready(function() {
+   
+   // first on page load, initialize all tooltips
+   $('.tooltip').tooltipster();
+   
+   // then immediately open the tooltip of the element named "example"
+   $('#example').tooltipster('open');
+   
+   // as soon as a key is pressed on the keyboard, close the tooltip.
+   $(window).keypress(function() {
+      $('#example').tooltipster('close');
+   });
+});
+</pre>
 			
 			<h3 id="positioning">Achieving custom positioning <a href="#usecases">&#8657;</a></h3>
 			
@@ -1125,6 +1117,8 @@ $('.tooltip').tooltipster({
         }
     }
 });</pre>
+			
+			<p>Pro tip: for more flexibility, achieve the same with the event system: <span class="code">$.tooltipster.on('init', function(event) {...});</span>. See the <a href="#events">event-driven section</a>.</p>
 			
 			<h3 id="formatting">Working with data sets <a href="#usecases">&#8657;</a></h3>
 			
@@ -1306,9 +1300,43 @@ $('body').on('mouseenter touchstart', '.tooltip:not(.tooltipstered)', function()
 			
 			<p>Advanced users may take advantage of the many events that Tooltipster triggers during its tasks. Events and listeners give you more flexibility and greater control over Tooltipster's mechanics.</p>
 			
-			<p>Handle your listeners on a per-instance basis using jQuery's syntax: <span class="code">instance.on()</span>, <span class="code">instance.one()</span>, <span class="code">instance.off()</span> and <span class="code">instance.triggerHandler()</span>.</p>
+			<p>For example, instead of having to provide a single monolithic callback to <span class="code">functionBefore</span> and the like, events allow you to easily bind and unbind several callbacks at any time. This:</p>
+			
+			<pre class="prettyprint">
+$("#my-tooltip").tooltipster({
+    functionBefore: function(instance, helper){
+        doThis();
+        doThat();
+    }
+});
+</pre>
+			
+			<p>... can be written like that:</p>
+			
+			
+			<pre class="prettyprint">
+var instance = $("#my-tooltip").tooltipster({}).tooltipster('instance');
+
+instance
+    .on('before', doThis)
+    .on('before', doThat);
+</pre>
+			
+			<p>Set your listeners on a per-instance basis using jQuery's syntax: <span class="code">instance.on()</span>, <span class="code">instance.one()</span>, <span class="code">instance.off()</span> and <span class="code">instance.triggerHandler()</span>.</p>
 			
 			<p>Core listeners that listen to all instances are possible: <span class="code">$.tooltipster.on()</span>, <span class="code">$.tooltipster.one()</span>, <span class="code">$.tooltipster.off()</span>, <span class="code">$.tooltipster.triggerHandler()</span>.</p>
+			
+			<p>Core listeners are great way to set default callbacks without writing something like <span class="code">$.tooltipster.setDefaults({ functionBefore: myFunction })</span>, which could potentially be overriden at initialization. For example, both <span class="code">doThis</span> and <span class="code">doThat</span> will be called here:</p>
+			
+			<pre class="prettyprint">
+$.tooltipster.on('init', function(event){
+    doThis();
+});
+
+$("#my-tooltip").tooltipster({
+    functionInit: doThat
+});
+</pre>
 			
 			<p> Remark: the events are sent to the core listeners first. Besides, the instance emitters and the core emitter are different objects, so unbinding a listener from the core emitter will not unbind it from instance emitters, if you ever bound it to both.</p>
 			
@@ -1319,7 +1347,7 @@ $('body').on('mouseenter touchstart', '.tooltip:not(.tooltipstered)', function()
 				Others are new: <span class="code">close</span>, <span class="code">closing</span>, <span class="code">destroyed</span>, <span class="code">created</span>, <span class="code">geometry</span>, <span class="code">positionTest</span>, <span class="code">positionTested</span>, <span class="code">reposition</span>, <span class="code">repositioned</span>, <span class="code">scroll</span>, <span class="code">start</span>, <span class="code">state</span> and <span class="code">updated</span>.
 			</p>
 			
-			<p>Your listeners will get one argument, the event, which holds useful properties: <span class="code">event.type</span>, <span class="code">event.instance</span>, <span class="code">event.event</span> (when there is one, similarly to the usual <span class="code">helper.event</span>) and potentially others as described below. Alphabetically:</p>
+			<p>Your listeners will get one argument, the event, which holds useful properties: <span class="code">event.type</span>, <span class="code">event.instance</span>, <span class="code">event.origin</span>, <span class="code">event.event</span> (when there is one, similarly to the usual <span class="code">helper.event</span>) and potentially others as described below. Alphabetically:</p>
 			
 			<p><span class="code">before</span> has a special <span class="code">event.stop</span> property which is a function you may call to prevent the tooltip from opening.</p>
 			
@@ -1351,43 +1379,8 @@ $('body').on('mouseenter touchstart', '.tooltip:not(.tooltipstered)', function()
 			
 			<p><span class="code">scroll</span> happens whenever a parent of the origin is scrolled. The native scroll event is passed as <span class="code">event.event</span>.</p>
 			
-			<p><span class="code">start</span> happens when the <span class="code">hover</span> open trigger is used and that the origin gets hovered. The event has a special <span class="code">event.stop</span> property which is a function you may call to prevent the tooltip from opening.</p>
+			<p><span class="code">start</span> happens when the <span class="code">mouseenter</span> or <span class="code">touchstart</span> open triggers are used and that the origin gets mouseover/touched. The event has a special <span class="code">event.stop</span> property which is a function you may call to prevent the tooltip from opening.</p>
 			
-			<h4 id="event-examples">Examples</h4>
-			
-			<p>The best thing about events is that instead of having to provide a single callback to <span class="code">functionBefore</span> and the like, you may easily bind and unbind several handlers to the event emitter at any time. For example, instead of doing this:</p>
-			
-			<pre class="prettyprint">
-$("#my-tooltip").tooltipster({
-    functionBefore: function(instance, helper){
-        doThis();
-        doThat();
-    }
-});
-</pre>
-			
-			<p>... you can write:</p>
-			
-			
-			<pre class="prettyprint">
-var instance = $("#my-tooltip").tooltipster().instance();
-
-instance
-    .on('before', doThis)
-    .on('before', doThat);
-</pre>
-			
-			<p>This is also a great way to set default callbacks without writing something like <span class="code">$.tooltipster.setDefaults({ functionBefore: myFunction })</span>, which could potentially be overriden at initialization. For example, both <span class="code">doThis</span> and <span class="code">doThat</span> will be called here:</p>
-			
-			<pre class="prettyprint">
-$.tooltipster.on('before', function(event){
-    doThis();
-});
-
-$("#my-tooltip").tooltipster({
-    functionBefore: doThat
-});
-</pre>
 			
 			<h3 id="plugins">Tooltipster's plugin system <a href="#usecases">&#8657;</a></h3>
 			
@@ -1406,7 +1399,7 @@ $('#example').tooltipster({
 });
 </pre>
 			
-			<p>The plugin's namespace exists to resolve conflicts, in case two plugins decided to have the same name, or two methods with the same name.</p>
+			<p>The plugin's namespace exists to resolve conflicts, in case two plugins decided to have the same name, or options/methods of the same name.</p>
 			
 			<p>Several plugins may be used at the same time and be listed together in the <span class="code">plugins</span> option. However, plugins are sometimes incompatible, for example <span class="code">sideTip</span> and <span class="code">follower</span> (a tooltip obviously can't be positioned on a side and follow the cursor at the same time).</p>
 			
