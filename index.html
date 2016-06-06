@@ -281,6 +281,7 @@ $('.tooltip').tooltipster({
 			<p><span class="code">sideTip</span> Shipped with Tooltipster and used by default</p>
 			<p><span class="code">SVG</span> Shipped with Tooltipster, adds SVG support, not enabled by default (see <a href="#svg">the SVG section</a>)</p>
 			<p><span class="code">follower</span> Lets the tooltip follow the cursor. Available <a href="https://github.com/louisameline/tooltipster-follower" target="_blank">here</a> (still experimental)</p>
+			<p><span class="code">scrollableTip</span> Makes the tooltip scrollable when it gets too big. Available <a href="https://github.com/louisameline/tooltipster-scrollableTip" target="_blank">here</a></p>
 			<p><span class="code">discovery</span> Creates groups of tooltips for faster display. Demonstrated in the <a href="#grouped">Grouped tooltips</a> section and available <a href="https://github.com/louisameline/tooltipster-discovery" target="_blank">here</a></p>
 			
 			<p>For more information about plugins, read our <a href="#plugins">plugins section</a>.</p>
@@ -1003,7 +1004,6 @@ $(document).ready(function() {
 			
 			<pre class="prettyprint">
 {
-    contentOverflow: 'initial',
     coord: {
         left: number,
         top: number
@@ -1018,13 +1018,11 @@ $(document).ready(function() {
     target: number
 }</pre>
 			
-			<p><span class="code">contentOverflow</span> sets the CSS overflow strategy for the content in the tooltip. If you set a constrained size to the tooltip yourself, you might want to change the value to <span class="code">'auto'</span> for example.</p>
-			
 			<p><span class="code">coords</span> properties determine the position of the tooltip and are relative to the viewport.</p>
 			
 			<p><span class="code">distance</span> is the offset that will be applied between the origin and the tooltip.</p>
 			
-			<p><span class="code">mode</span> sets if the tooltip is in its natural size, or is going to get size properties set by Tooltipster. Editing the <span class="code">size</span> property without having <span class="code">mode</span> set to <span class="code">'constrained'</span> will produce unexpected results.</p>
+			<p><span class="code">mode</span> (read-only) indicates if Tooltipster adapted the size of the tooltip for it to fit in.</p>
 			
 			<p><span class="code">side</span> is the side Tooltipster has judged best for your tooltip, according to your requirements.</p>
 			
@@ -1084,10 +1082,10 @@ $(document).ready(function() {
 			
 			<pre class="prettyprint">
 $('#my-tooltip').tooltipster({
-    functionPosition: function(instance, helper, data){
-        data.coords.top += 10;
-        data.coords.left += 10;
-        return data;
+    functionPosition: function(instance, helper, position){
+        position.coords.top += 10;
+        position.coords.left += 10;
+        return position;
     }
 });
 </pre>

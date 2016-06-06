@@ -316,9 +316,7 @@ $.Tooltipster = function(element, options) {
 	this.garbageCollector;
 	// various position and size data recomputed before each repositioning
 	this.geometry;
-	// to fix a touch issue
-	this.ignoreNextClick = false;
-	this.pointerIsOverOrigin = false;
+	this.pointerIsOverOrigin = true;
 	// a unique namespace per instance
 	this.namespace = 'tooltipster-'+ Math.round(Math.random()*100000);
 	this.options;
@@ -550,6 +548,8 @@ $.Tooltipster.prototype = {
 						
 						self.$origin.off('.'+ self.namespace +'-triggerClose');
 						
+						self._off('dismissable');
+						
 						// a plugin that would like to remove the tooltip from the
 						// DOM when closed should bind on this
 						self._stateSet('closed');
@@ -563,8 +563,7 @@ $.Tooltipster.prototype = {
 						// call our constructor custom callback function
 						if (self.options.functionAfter) {
 							self.options.functionAfter.call(self, self, {
-								event: event,
-								origin: self.$origin[0]
+								event: event
 							});
 						}
 						
@@ -1001,7 +1000,7 @@ $.Tooltipster.prototype = {
 					
 					self.timeouts.open = setTimeout(function() {
 						// open only if the pointer (mouse or touch) is still over the origin
-						if (self.pointerIsOverOrigin && self._touchIsMeaningfulEvent(event)) {
+						if (!self.pointerIsOverOrigin && self._touchIsMeaningfulEvent(event)) {
 							self._openNow(event);
 						}
 					}, delay[0]);
@@ -1225,6 +1224,33 @@ $.Tooltipster.prototype = {
 								||	(self.options.triggerClose.touchleave && env.deviceHasTouchCapability)
 							) {
 								
+								// we use an event to allow users/plugins to control when the mouseleave/touchleave
+								// close triggers will come to action. It allows to have more triggering elements
+								// than just the origin and the tooltip for example, or to cancel/delay the closing,
+								// or to make the tooltip interactive even if it wasn't when it was open, etc.
+								self._on('dismissable', function(event) {
+									
+									if (event.dismissable) {
+										
+										if (event.delay) {
+											
+											timeout = setTimeout(function() {
+												// event.event may be undefined
+												self._close(event.event);
+											}, event.delay);
+											
+											self.timeouts.close.push(timeout);
+										}
+										else {
+											self._close(event);
+										}
+									}
+									else {
+										clearTimeout(timeout);
+									}
+								});
+								
+								// now set the listeners that will trigger 'dismissable' events
 								var $elements = self.$origin,
 									eventNamesIn = '',
 									eventNamesOut = '',
@@ -1258,17 +1284,12 @@ $.Tooltipster.prototype = {
 												self.options.delay :
 												self.options.delayTouch;
 											
-											if (delay[1]) {
-												
-												timeout = setTimeout(function() {
-													self._close(event);
-												}, delay[1]);
-												
-												self.timeouts.close.push(timeout);
-											}
-											else {
-												self._close(event);
-											}
+											self._trigger({
+												delay: delay[1],
+												dismissable: true,
+												event: event,
+												type: 'dismissable'
+											});
 										}
 									})
 									// suspend the mouseleave timeout when the pointer comes back
@@ -1279,7 +1300,11 @@ $.Tooltipster.prototype = {
 										if (	self._touchIsTouchEvent(event)
 											||	!self._touchIsEmulatedEvent(event)
 										) {
-											clearTimeout(timeout);
+											self._trigger({
+												dismissable: false,
+												event: event,
+												type: 'dismissable'
+											});
 										}
 									});
 							}
@@ -1300,8 +1325,7 @@ $.Tooltipster.prototype = {
 								});
 							}
 							
-							// here we'll set the same bindings for both clicks and touch on the body
-							// to close the tooltip
+							// set the same bindings for click and touch on the body to close the tooltip
 							if (	self.options.triggerClose.click
 								||	(self.options.triggerClose.tap && env.deviceHasTouchCapability)
 							) {
@@ -1546,7 +1570,7 @@ $.Tooltipster.prototype = {
 				if (	self._touchIsTouchEvent(event)
 					||	!self._touchIsEmulatedEvent(event)
 				) {
-					self.pointerIsOverOrigin = true;
+					self.pointerIsOverOrigin = false;
 					self._open(event);
 				}
 			});
@@ -1568,7 +1592,7 @@ $.Tooltipster.prototype = {
 			self.$origin.on(eventNames, function(event) {
 				
 				if (self._touchIsMeaningfulEvent(event)) {
-					self.pointerIsOverOrigin = false;
+					self.pointerIsOverOrigin = true;
 				}
 			});
 		}
@@ -1949,6 +1973,7 @@ $.Tooltipster.prototype = {
 		// add properties to the event
 		args[0].instance = this;
 		args[0].origin = this.$origin ? this.$origin[0] : null;
+		args[0].tooltip = this.$tooltip ? this.$tooltip[0] : null;
 		
 		// note: the order of emitters matters
 		this.$emitterPrivate.trigger.apply(this.$emitterPrivate, args);
