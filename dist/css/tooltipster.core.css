@@ -19,6 +19,8 @@
 }
 
 .tooltipster-content {
+	/* prevents an overflow if the user adds padding to the div */
+	box-sizing: border-box;
 	/* these make sure we'll be able to detect any overflow */
 	max-height: 100%;
 	max-width: 100%;

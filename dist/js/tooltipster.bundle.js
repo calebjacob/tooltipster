@@ -91,7 +91,7 @@ var defaults = {
 		),
 		IE: false,
 		// don't set manually, it will be updated by a build task after the manifest
-		semVer: '4.0.0rc47',
+		semVer: '4.0.0rc48',
 		window: win
 	},
 	core = function() {
@@ -338,9 +338,7 @@ $.Tooltipster = function(element, options) {
 	this.garbageCollector;
 	// various position and size data recomputed before each repositioning
 	this.geometry;
-	// to fix a touch issue
-	this.ignoreNextClick = false;
-	this.pointerIsOverOrigin = false;
+	this.pointerIsOverOrigin = true;
 	// a unique namespace per instance
 	this.namespace = 'tooltipster-'+ Math.round(Math.random()*100000);
 	this.options;
@@ -572,6 +570,8 @@ $.Tooltipster.prototype = {
 						
 						self.$origin.off('.'+ self.namespace +'-triggerClose');
 						
+						self._off('dismissable');
+						
 						// a plugin that would like to remove the tooltip from the
 						// DOM when closed should bind on this
 						self._stateSet('closed');
@@ -585,8 +585,7 @@ $.Tooltipster.prototype = {
 						// call our constructor custom callback function
 						if (self.options.functionAfter) {
 							self.options.functionAfter.call(self, self, {
-								event: event,
-								origin: self.$origin[0]
+								event: event
 							});
 						}
 						
@@ -1023,7 +1022,7 @@ $.Tooltipster.prototype = {
 					
 					self.timeouts.open = setTimeout(function() {
 						// open only if the pointer (mouse or touch) is still over the origin
-						if (self.pointerIsOverOrigin && self._touchIsMeaningfulEvent(event)) {
+						if (!self.pointerIsOverOrigin && self._touchIsMeaningfulEvent(event)) {
 							self._openNow(event);
 						}
 					}, delay[0]);
@@ -1247,6 +1246,33 @@ $.Tooltipster.prototype = {
 								||	(self.options.triggerClose.touchleave && env.deviceHasTouchCapability)
 							) {
 								
+								// we use an event to allow users/plugins to control when the mouseleave/touchleave
+								// close triggers will come to action. It allows to have more triggering elements
+								// than just the origin and the tooltip for example, or to cancel/delay the closing,
+								// or to make the tooltip interactive even if it wasn't when it was open, etc.
+								self._on('dismissable', function(event) {
+									
+									if (event.dismissable) {
+										
+										if (event.delay) {
+											
+											timeout = setTimeout(function() {
+												// event.event may be undefined
+												self._close(event.event);
+											}, event.delay);
+											
+											self.timeouts.close.push(timeout);
+										}
+										else {
+											self._close(event);
+										}
+									}
+									else {
+										clearTimeout(timeout);
+									}
+								});
+								
+								// now set the listeners that will trigger 'dismissable' events
 								var $elements = self.$origin,
 									eventNamesIn = '',
 									eventNamesOut = '',
@@ -1280,17 +1306,12 @@ $.Tooltipster.prototype = {
 												self.options.delay :
 												self.options.delayTouch;
 											
-											if (delay[1]) {
-												
-												timeout = setTimeout(function() {
-													self._close(event);
-												}, delay[1]);
-												
-												self.timeouts.close.push(timeout);
-											}
-											else {
-												self._close(event);
-											}
+											self._trigger({
+												delay: delay[1],
+												dismissable: true,
+												event: event,
+												type: 'dismissable'
+											});
 										}
 									})
 									// suspend the mouseleave timeout when the pointer comes back
@@ -1301,7 +1322,11 @@ $.Tooltipster.prototype = {
 										if (	self._touchIsTouchEvent(event)
 											||	!self._touchIsEmulatedEvent(event)
 										) {
-											clearTimeout(timeout);
+											self._trigger({
+												dismissable: false,
+												event: event,
+												type: 'dismissable'
+											});
 										}
 									});
 							}
@@ -1322,8 +1347,7 @@ $.Tooltipster.prototype = {
 								});
 							}
 							
-							// here we'll set the same bindings for both clicks and touch on the body
-							// to close the tooltip
+							// set the same bindings for click and touch on the body to close the tooltip
 							if (	self.options.triggerClose.click
 								||	(self.options.triggerClose.tap && env.deviceHasTouchCapability)
 							) {
@@ -1568,7 +1592,7 @@ $.Tooltipster.prototype = {
 				if (	self._touchIsTouchEvent(event)
 					||	!self._touchIsEmulatedEvent(event)
 				) {
-					self.pointerIsOverOrigin = true;
+					self.pointerIsOverOrigin = false;
 					self._open(event);
 				}
 			});
@@ -1590,7 +1614,7 @@ $.Tooltipster.prototype = {
 			self.$origin.on(eventNames, function(event) {
 				
 				if (self._touchIsMeaningfulEvent(event)) {
-					self.pointerIsOverOrigin = false;
+					self.pointerIsOverOrigin = true;
 				}
 			});
 		}
@@ -1971,6 +1995,7 @@ $.Tooltipster.prototype = {
 		// add properties to the event
 		args[0].instance = this;
 		args[0].origin = this.$origin ? this.$origin[0] : null;
+		args[0].tooltip = this.$tooltip ? this.$tooltip[0] : null;
 		
 		// note: the order of emitters matters
 		this.$emitterPrivate.trigger.apply(this.$emitterPrivate, args);
@@ -2909,6 +2934,7 @@ $.tooltipster.plugin({
 			
 			// remove the tooltip from the DOM
 			this.instance.$tooltip.remove();
+			this.instance.$tooltip = null;
 		},
 		
 		/**
@@ -2963,9 +2989,12 @@ $.tooltipster.plugin({
 		 */
 		_optionsFormat: function() {
 			
-			var defaults = this._defaults();
+			var defaults = this._defaults(),
+				// if the plugin options were isolated in a property named after the
+				// plugin, use them (prevents conflicts with other plugins)
+				pluginOptions = this.instance.options[this.name] || this.instance.options;
 			
-			this.options = $.extend(true, {}, defaults, this.instance.options);
+			this.options = $.extend(true, {}, defaults, pluginOptions);
 			
 			// for backward compatibility, deprecated in v4.0.0
 			if (this.options.position) {
@@ -3085,7 +3114,7 @@ $.tooltipster.plugin({
 					takeTest: function(bool) {
 						takeTest = bool;
 					},
-					testResults: testResults,
+					results: testResults,
 					type: 'positionTest'
 				});
 				
@@ -3133,7 +3162,7 @@ $.tooltipster.plugin({
 								takeTest: function(bool) {
 									takeTest = bool;
 								},
-								testResults: testResults,
+								results: testResults,
 								type: 'positionTest'
 							});
 							
@@ -3145,7 +3174,9 @@ $.tooltipster.plugin({
 								
 								var testResult = {
 									container: container,
-									distance: distance.horizontal || distance.vertical,
+									// we let the distance as an object here, it can make things a little easier
+									// during the user's calculations at positionTest/positionTested
+									distance: distance,
 									// whether the tooltip can fit in the size of the viewport (does not mean
 									// that we'll be able to make it initially entirely visible, see 'whole')
 									fits: null,
@@ -3202,13 +3233,13 @@ $.tooltipster.plugin({
 										if (side == 'top' || side == 'bottom') {
 											
 											testResult.whole = (
-												helper.geo.origin.windowOffset.right >= self.options.minIntersection
+													helper.geo.origin.windowOffset.right >= self.options.minIntersection
 												&&	helper.geo.window.size.width - helper.geo.origin.windowOffset.left >= self.options.minIntersection
 											);
 										}
 										else {
 											testResult.whole = (
-												helper.geo.origin.windowOffset.bottom >= self.options.minIntersection
+													helper.geo.origin.windowOffset.bottom >= self.options.minIntersection
 												&&	helper.geo.window.size.height - helper.geo.origin.windowOffset.top >= self.options.minIntersection
 											);
 										}
@@ -3217,10 +3248,21 @@ $.tooltipster.plugin({
 								
 								testResults.push(testResult);
 								
-								// we don't need to compute more positions if we have
-								// a natural one fully on screen
-								if (testResult.mode == 'natural' && testResult.fits && testResult.whole) {
+								// we don't need to compute more positions if we have one fully on screen
+								if (testResult.whole) {
 									satisfied = true;
+								}
+								else {
+									// don't run the constrained test unless the natural width was greater
+									// than the available width, otherwise it's pointless as we know it
+									// wouldn't fit either
+									if (	testResult.mode == 'natural'
+										&&	(	testResult.fits
+											||	testResult.size.width <= helper.geo.available[container][side].width
+										)
+									) {
+										return false;
+									}
 								}
 							}
 						});
@@ -3228,10 +3270,15 @@ $.tooltipster.plugin({
 				}
 			});
 			
-			// allow the user to eliminate the unwanted scenarios
+			// the user may eliminate the unwanted scenarios from testResults, but he's
+			// not supposed to alter them at this point. functionPosition and the
+			// position event serve that purpose.
 			self.instance._trigger({
+				edit: function(r) {
+					testResults = r;
+				},
 				helper: helper,
-				testResults: testResults,
+				results: testResults,
 				type: 'positionTested'
 			});
 			
@@ -3352,7 +3399,7 @@ $.tooltipster.plugin({
 					break;
 				
 				case 'right':
-					finalResult.coord.left = helper.geo.origin.windowOffset.right + finalResult.distance;
+					finalResult.coord.left = helper.geo.origin.windowOffset.right + finalResult.distance.horizontal;
 					break;
 				
 				case 'top':
@@ -3360,7 +3407,7 @@ $.tooltipster.plugin({
 					break;
 				
 				case 'bottom':
-					finalResult.coord.top = helper.geo.origin.windowOffset.bottom + finalResult.distance;
+					finalResult.coord.top = helper.geo.origin.windowOffset.bottom + finalResult.distance.vertical;
 					break;
 			}
 			
@@ -3460,32 +3507,36 @@ $.tooltipster.plugin({
 			delete finalResult.whole;
 			delete finalResult.outerSize;
 			
-			// allow the user to easily prevent its content from overflowing
-			// if he constrains the size of the tooltip
-			finalResult.contentOverflow = 'initial';
+			// keep only the distance on the relevant side, for clarity
+			finalResult.distance = finalResult.distance.horizontal || finalResult.distance.vertical;
 			
-			// add some variables to the helper for the custom function
-			helper.origin = self.instance.$origin[0];
-			helper.tooltip = self.instance.$tooltip[0];
+			// add some variables to the helper
 			helper.tooltipClone = $clone[0];
-			helper.tooltipParent = self.options.parent[0];
+			helper.tooltipParent = self.instance.options.parent[0];
 			
-			var edit = function(result) {
-				finalResult = result;
-			};
+			// beginners may not be comfortable with the concept of editing the object
+			//  passed by reference, so we provide an edit function and pass a clone
+			var finalResultClone = $.extend(true, {}, finalResult);
 			
 			// emit an event on the instance
 			self.instance._trigger({
+				helper: helper,
 				type: 'position',
-				edit: edit,
-				position: finalResult
+				edit: function(result) {
+					finalResult = result;
+				},
+				position: finalResultClone
 			});
 			
 			if (self.options.functionPosition) {
 				
-				var r = self.options.functionPosition.call(self, self.instance, helper, $.extend(true, {}, finalResult));
+				// add some variables to the helper for the functionPosition callback
+				helper.origin = self.instance.$origin[0];
+				helper.tooltip = self.instance.$tooltip[0];
 				
-				if (r) finalResult = r;
+				var result = self.options.functionPosition.call(self, self.instance, helper, finalResultClone);
+				
+				if (result) finalResult = result;
 			}
 			
 			// end the positioning tests session (the user might have had a
@@ -3571,9 +3622,6 @@ $.tooltipster.plugin({
 					left: finalResult.coord.left,
 					top: finalResult.coord.top
 				})
-				.find('.tooltipster-box')
-					.css('overflow', finalResult.contentOverflow)
-					.end()
 				.find('.tooltipster-arrow')
 					.css({
 						'left': '',

@@ -19,6 +19,8 @@
 }
 
 .tooltipster-content {
+	/* prevents an overflow if the user adds padding to the div */
+	box-sizing: border-box;
 	/* these make sure we'll be able to detect any overflow */
 	max-height: 100%;
 	max-width: 100%;
@@ -228,7 +230,12 @@
 	animation: tooltipster-scaling 600ms;
 }
 
-/* DEFAULT STYLE OF THE SIDETIP PLUGIN */
+/**
+ * DEFAULT STYLE OF THE SIDETIP PLUGIN
+ * 
+ * All styles are "namespaced" with .tooltipster-sidetip to prevent
+ * conflicts between plugins.
+ */
 
 /* .tooltipster-box */
 
@@ -253,7 +260,6 @@
 .tooltipster-sidetip.tooltipster-top .tooltipster-box {
 	margin-bottom: 8px;
 }
-
 
 /* .tooltipster-content */
 
