@@ -234,6 +234,10 @@ $(function() {
 		side: ['right']
 	});
 	
+	$('#demo-plugin').tooltipster({
+		plugins: ['laa.follower']
+	});
+	
 	// nested demo
 	$('#nesting').tooltipster({
 		content: $('<span>Hover me too!</span>'),
