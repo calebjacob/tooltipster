@@ -74,24 +74,25 @@ var defaults = {
 	win = (window !== undefined) ? window : null,
 	// env will be proxied by the core for plugins to have access its properties
 	env = {
-		// this is a function because a mouse may be plugged at any time, we
-		// need to re-evaluate every time
-		deviceIsPureTouch: function() {
-			return (!env.deviceHasMouse && env.deviceHasTouchCapability);
-		},
-		deviceHasMouse: false,
+		hasMouse: false,
 		// detect if this device can trigger touch events. Better have a false
 		// positive (unused listeners, that's ok) than a false negative.
 		// https://github.com/Modernizr/Modernizr/blob/master/feature-detects/touchevents.js
 		// http://stackoverflow.com/questions/4817029/whats-the-best-way-to-detect-a-touch-screen-device-using-javascript
-		deviceHasTouchCapability: !!(
+		hasTouchCapability: !!(
 				'ontouchstart' in win
 			||	(win.DocumentTouch && document instanceof DocumentTouch)
 			||	navigator.maxTouchPoints
 		),
+		hasTransitions: transitionSupport(),
 		IE: false,
+		// this is a function because a mouse may be plugged at any time, we
+		// need to re-evaluate every time
+		isPureTouch: function() {
+			return (!env.hasMouse && env.hasTouchCapability);
+		},
 		// don't set manually, it will be updated by a build task after the manifest
-		semVer: '4.0.0rc48',
+		semVer: '4.0.0rc49',
 		window: win
 	},
 	core = function() {
@@ -338,7 +339,8 @@ $.Tooltipster = function(element, options) {
 	this.garbageCollector;
 	// various position and size data recomputed before each repositioning
 	this.geometry;
-	this.pointerIsOverOrigin = true;
+	// the tooltip position, saved after each repositioning by a plugin
+	this.lastPosition;
 	// a unique namespace per instance
 	this.namespace = 'tooltipster-'+ Math.round(Math.random()*100000);
 	this.options;
@@ -346,6 +348,7 @@ $.Tooltipster = function(element, options) {
 	this.$origin;
 	// will be used to support origins in scrollable areas
 	this.$originParents;
+	this.pointerIsOverOrigin = false;
 	// to remove themes if needed
 	this.previousThemes = [];
 	// the state can be either: appearing, stable, disappearing, closed
@@ -362,8 +365,6 @@ $.Tooltipster = function(element, options) {
 	this.touchEvents = [];
 	// the reference to the tracker interval
 	this.tracker = null;
-	// the tooltip left/top coordinates, saved after each repositioning
-	this.tooltipCoord;
 	
 	// launch
 	this._init(element, options);
@@ -439,7 +440,7 @@ $.Tooltipster.prototype = {
 			});
 			
 			// to detect swiping
-			if (env.deviceHasTouchCapability) {
+			if (env.hasTouchCapability) {
 				$('body').on('touchmove.'+ self.namespace +'-triggerOpen', function(event) {
 					self._touchRecordEvent(event);
 				});
@@ -453,7 +454,7 @@ $.Tooltipster.prototype = {
 				})
 				// save position information when it's sent by a plugin
 				._on('repositioned', function(e) {
-					self.tooltipCoord = e.position;
+					self.lastPosition = e.position;
 				});
 		}
 		else {
@@ -593,7 +594,7 @@ $.Tooltipster.prototype = {
 						finishCallbacks();
 					};
 					
-					if (supportsTransitions()) {
+					if (env.hasTransitions) {
 						
 						self.$tooltip.css({
 							'-moz-animation-duration': self.options.animationDuration[1] + 'ms',
@@ -995,6 +996,14 @@ $.Tooltipster.prototype = {
 		return this;
 	},
 	
+	/**
+	 * For internal use by plugins, if needed
+	 */
+	_one: function() {
+		this.$emitterPrivate.one.apply(this.$emitterPrivate, Array.prototype.slice.apply(arguments));
+		return this;
+	},
+	
 	// when using the mouseenter/touchstart open triggers, this function will schedule the
 	// opening of the tooltip after the delay, if there is one
 	_open: function(event) {
@@ -1004,31 +1013,51 @@ $.Tooltipster.prototype = {
 		
 		if (self.state != 'stable' && self.state != 'appearing') {
 			
-			self._trigger({
-				type: 'start',
-				event: event,
-				stop: function() {
-					ok = false;
-				}
-			});
-			
-			if (ok) {
+			// if a timeout is not already running
+			if (!self.timeouts.open) {
 				
-				var delay = (event.type.indexOf('touch') == 0) ?
-					self.options.delayTouch :
-					self.options.delay;
+				self._trigger({
+					type: 'start',
+					event: event,
+					stop: function() {
+						ok = false;
+					}
+				});
 				
-				if (delay[0]) {
+				if (ok) {
 					
-					self.timeouts.open = setTimeout(function() {
-						// open only if the pointer (mouse or touch) is still over the origin
-						if (!self.pointerIsOverOrigin && self._touchIsMeaningfulEvent(event)) {
-							self._openNow(event);
-						}
-					}, delay[0]);
-				}
-				else {
-					self._openNow(event);
+					var delay = (event.type.indexOf('touch') == 0) ?
+						self.options.delayTouch :
+						self.options.delay;
+					
+					if (delay[0]) {
+						
+						self.timeouts.open = setTimeout(function() {
+							
+							self.timeouts.open = null;
+							
+							// open only if the pointer (mouse or touch) is still over the origin.
+							// The check on the "meaningful event" can only be made here, after some
+							// time has passed (to know if the touch was a swipe or not)
+							if (self.pointerIsOverOrigin && self._touchIsMeaningfulEvent(event)) {
+								
+								// signal that we go on
+								self._trigger('startend');
+								
+								self._openNow(event);
+							}
+							else {
+								// signal that we cancel
+								self._trigger('startcancel');
+							}
+						}, delay[0]);
+					}
+					else {
+						// signal that we go on
+						self._trigger('startend');
+						
+						self._openNow(event);
+					}
 				}
 			}
 		}
@@ -1118,7 +1147,7 @@ $.Tooltipster.prototype = {
 								
 								self._stateSet('appearing');
 								
-								if (supportsTransitions()) {
+								if (env.hasTransitions) {
 									
 									self.$tooltip
 										.clearQueue()
@@ -1164,7 +1193,7 @@ $.Tooltipster.prototype = {
 							// animate in the tooltip. If the display plugin wants no css
 							// animations, it may override the animation option with a
 							// dummy value that will produce no effect
-							if (supportsTransitions()) {
+							if (env.hasTransitions) {
 								
 								// note: there seems to be an issue with start animations which
 								// are randomly not played on fast devices in both Chrome and FF,
@@ -1243,7 +1272,7 @@ $.Tooltipster.prototype = {
 							
 							
 							if (	self.options.triggerClose.mouseleave
-								||	(self.options.triggerClose.touchleave && env.deviceHasTouchCapability)
+								||	(self.options.triggerClose.touchleave && env.hasTouchCapability)
 							) {
 								
 								// we use an event to allow users/plugins to control when the mouseleave/touchleave
@@ -1287,7 +1316,7 @@ $.Tooltipster.prototype = {
 									eventNamesIn += 'mouseenter.'+ self.namespace +'-triggerClose ';
 									eventNamesOut += 'mouseleave.'+ self.namespace +'-triggerClose ';
 								}
-								if (self.options.triggerClose.touchleave && env.deviceHasTouchCapability) {
+								if (self.options.triggerClose.touchleave && env.hasTouchCapability) {
 									eventNamesIn += 'touchstart.'+ self.namespace +'-triggerClose';
 									eventNamesOut += 'touchend.'+ self.namespace +'-triggerClose touchcancel.'+ self.namespace +'-triggerClose';
 								}
@@ -1349,7 +1378,7 @@ $.Tooltipster.prototype = {
 							
 							// set the same bindings for click and touch on the body to close the tooltip
 							if (	self.options.triggerClose.click
-								||	(self.options.triggerClose.tap && env.deviceHasTouchCapability)
+								||	(self.options.triggerClose.tap && env.hasTouchCapability)
 							) {
 								
 								// don't set right away since the click/tap event which triggered this method
@@ -1363,7 +1392,7 @@ $.Tooltipster.prototype = {
 										if (self.options.triggerClose.click) {
 											eventNames += 'click.'+ self.namespace +'-triggerClose ';
 										}
-										if (self.options.triggerClose.tap && env.deviceHasTouchCapability) {
+										if (self.options.triggerClose.tap && env.hasTouchCapability) {
 											eventNames += 'touchend.'+ self.namespace +'-triggerClose';
 										}
 										
@@ -1380,7 +1409,7 @@ $.Tooltipster.prototype = {
 										});
 										
 										// needed to detect and ignore swiping
-										if (self.options.triggerClose.tap && env.deviceHasTouchCapability) {
+										if (self.options.triggerClose.tap && env.hasTouchCapability) {
 											
 											$('body').on('touchstart.'+ self.namespace +'-triggerClose', function(event) {
 												self._touchRecordEvent(event);
@@ -1543,7 +1572,7 @@ $.Tooltipster.prototype = {
 		// if the device is touch capable, even if only mouse triggers
 		// are asked, we need to listen to touch events to know if the mouse
 		// events are actually emulated (so we can ignore them)
-		if (env.deviceHasTouchCapability) {
+		if (env.hasTouchCapability) {
 			
 			self.$origin.on(
 				'touchstart.'+ self.namespace +'-triggerOpen ' +
@@ -1557,14 +1586,14 @@ $.Tooltipster.prototype = {
 		
 		// mouse click and touch tap work the same way
 		if (	self.options.triggerOpen.click
-			||	(self.options.triggerOpen.tap && env.deviceHasTouchCapability)
+			||	(self.options.triggerOpen.tap && env.hasTouchCapability)
 		) {
 			
 			var eventNames = '';
 			if (self.options.triggerOpen.click) {
 				eventNames += 'click.'+ self.namespace +'-triggerOpen ';
 			}
-			if (self.options.triggerOpen.tap && env.deviceHasTouchCapability) {
+			if (self.options.triggerOpen.tap && env.hasTouchCapability) {
 				eventNames += 'touchend.'+ self.namespace +'-triggerOpen';
 			}
 			
@@ -1577,14 +1606,14 @@ $.Tooltipster.prototype = {
 		
 		// mouseenter and touch start work the same way
 		if (	self.options.triggerOpen.mouseenter
-			||	(self.options.triggerOpen.touchstart && env.deviceHasTouchCapability)
+			||	(self.options.triggerOpen.touchstart && env.hasTouchCapability)
 		) {
 			
 			var eventNames = '';
 			if (self.options.triggerOpen.mouseenter) {
 				eventNames += 'mouseenter.'+ self.namespace +'-triggerOpen ';
 			}
-			if (self.options.triggerOpen.touchstart && env.deviceHasTouchCapability) {
+			if (self.options.triggerOpen.touchstart && env.hasTouchCapability) {
 				eventNames += 'touchstart.'+ self.namespace +'-triggerOpen';
 			}
 			
@@ -1592,7 +1621,7 @@ $.Tooltipster.prototype = {
 				if (	self._touchIsTouchEvent(event)
 					||	!self._touchIsEmulatedEvent(event)
 				) {
-					self.pointerIsOverOrigin = false;
+					self.pointerIsOverOrigin = true;
 					self._open(event);
 				}
 			});
@@ -1600,21 +1629,21 @@ $.Tooltipster.prototype = {
 		
 		// info for the mouseleave/touchleave close triggers when they use a delay
 		if (	self.options.triggerClose.mouseleave
-			||	(self.options.triggerClose.touchleave && env.deviceHasTouchCapability)
+			||	(self.options.triggerClose.touchleave && env.hasTouchCapability)
 		) {
 			
 			var eventNames = '';
 			if (self.options.triggerClose.mouseleave) {
 				eventNames += 'mouseleave.'+ self.namespace +'-triggerOpen ';
 			}
-			if (self.options.triggerClose.touchleave && env.deviceHasTouchCapability) {
+			if (self.options.triggerClose.touchleave && env.hasTouchCapability) {
 				eventNames += 'touchend.'+ self.namespace +'-triggerOpen touchcancel.'+ self.namespace +'-triggerOpen';
 			}
 			
 			self.$origin.on(eventNames, function(event) {
 				
 				if (self._touchIsMeaningfulEvent(event)) {
-					self.pointerIsOverOrigin = true;
+					self.pointerIsOverOrigin = false;
 				}
 			});
 		}
@@ -1759,8 +1788,8 @@ $.Tooltipster.prototype = {
 						
 						// add the offset to the position initially computed by the display plugin
 						self.$tooltip.css({
-							left: self.tooltipCoord.left + offsetLeft,
-							top: self.tooltipCoord.top + offsetTop
+							left: self.lastPosition.coord.left + offsetLeft,
+							top: self.lastPosition.coord.top + offsetTop
 						});
 					}
 				}
@@ -2026,7 +2055,7 @@ $.Tooltipster.prototype = {
 				// if we want to play a little animation showing the content changed
 				if (self.options.updateAnimation) {
 					
-					if (supportsTransitions()) {
+					if (env.hasTransitions) {
 						
 						// keep the reference in the local scope
 						var animation = self.options.updateAnimation;
@@ -2464,8 +2493,9 @@ $.fn.tooltipster = function() {
 						
 						if (	this.length > 1
 							&&	args[0] == 'content'
-							&&	typeof args[1] == 'object'
-							&&	args[1] !== null
+							&&	(	args[1] instanceof $
+								|| (typeof args[1] == 'object' && args[1] != null && args[1].tagName)
+							)
 							&&	!self.options.contentCloning
 							&&	self.options.debug
 						) {
@@ -2521,8 +2551,9 @@ $.fn.tooltipster = function() {
 				debug = (debugIsSet && args[0].debug) || (!debugIsSet && defaults.debug);
 			
 			if (	this.length > 1
-				&&	typeof content == 'object'
-				&&	content !== null
+				&&	(	content instanceof $
+					|| (typeof content == 'object' && content != null && content.tagName)
+				)
 				&&	!contentCloning
 				&&	debug
 			) {
@@ -2816,7 +2847,7 @@ function bodyContains(ref) {
 
 // we'll assume the device has no mouse until we detect any mouse movement
 $('body').one('mousemove', function() {
-	env.deviceHasMouse = true;
+	env.hasMouse = true;
 });
 
 // detect IE versions for dirty fixes
@@ -2826,8 +2857,9 @@ else if (uA.toLowerCase().indexOf('trident') !== -1 && uA.indexOf(' rv:11') !== 
 else if (uA.toLowerCase().indexOf('edge/') != -1) env.IE = parseInt(uA.toLowerCase().split('edge/')[1]);
 
 // detecting support for CSS transitions
-function supportsTransitions() {
-	var b = env.window.document.body || env.window.document.documentElement,
+function transitionSupport() {
+	// env.window is not defined yet when this is called
+	var b = win.document.body || win.document.documentElement,
 		s = b.style,
 		p = 'transition',
 		v = ['Moz', 'Webkit', 'Khtml', 'O', 'ms'];
@@ -2928,7 +2960,7 @@ $.tooltipster.plugin({
 			
 			// detach our content object first, so the next jQuery's remove()
 			// call does not unbind its event handlers
-			if (typeof this.instance.Content == 'object' && this.instance.Content !== null) {
+			if (this.instance.Content instanceof $) {
 				this.instance.Content.detach();
 			}
 			
@@ -3155,14 +3187,15 @@ $.tooltipster.plugin({
 							// emit an event on the instance
 							self.instance._trigger({
 								container: container,
+								event: event,
 								helper: helper,
 								mode: mode,
+								results: testResults,
 								satisfied: satisfied,
 								side: side,
 								takeTest: function(bool) {
 									takeTest = bool;
 								},
-								results: testResults,
 								type: 'positionTest'
 							});
 							
@@ -3277,6 +3310,7 @@ $.tooltipster.plugin({
 				edit: function(r) {
 					testResults = r;
 				},
+				event: event,
 				helper: helper,
 				results: testResults,
 				type: 'positionTested'
@@ -3290,7 +3324,7 @@ $.tooltipster.plugin({
 			 * the middle of the origin (when the origin is near the edge of the screen
 			 * or even partly off screen). We want the tooltip on the preferred side,
 			 * even if it means that we have to use a constrained size rather than a
-			 * natural one (as long as it fits). When the origin is off screen on top,
+			 * natural one (as long as it fits). When the origin is off screen at the top
 			 * the tooltip will be positioned at the bottom (if allowed), if the origin
 			 * is off screen on the right, it will be positioned on the left, etc.
 			 * If there are no scenarios where the tooltip can fit on screen, or if the
@@ -3501,18 +3535,27 @@ $.tooltipster.plugin({
 			// implementor
 			self._sideChange($clone, finalResult.side);
 			
-			// now unneeded, we don't want it passed to functionPosition
-			delete finalResult.container;
-			delete finalResult.fits;
-			delete finalResult.whole;
-			delete finalResult.outerSize;
-			
-			// keep only the distance on the relevant side, for clarity
-			finalResult.distance = finalResult.distance.horizontal || finalResult.distance.vertical;
-			
 			// add some variables to the helper
 			helper.tooltipClone = $clone[0];
 			helper.tooltipParent = self.instance.options.parent[0];
+			// move informative values to the helper
+			helper.mode = finalResult.mode;
+			helper.whole = finalResult.whole;
+			// add some variables to the helper for the functionPosition callback (these
+			// will also be added to the event fired by self.instance._trigger but that's
+			// ok, we're just being consistent)
+			helper.origin = self.instance.$origin[0];
+			helper.tooltip = self.instance.$tooltip[0];
+			
+			// leave only the actionable values in there for functionPosition
+			delete finalResult.container;
+			delete finalResult.fits;
+			delete finalResult.mode;
+			delete finalResult.outerSize;
+			delete finalResult.whole;
+			
+			// keep only the distance on the relevant side, for clarity
+			finalResult.distance = finalResult.distance.horizontal || finalResult.distance.vertical;
 			
 			// beginners may not be comfortable with the concept of editing the object
 			//  passed by reference, so we provide an edit function and pass a clone
@@ -3520,19 +3563,17 @@ $.tooltipster.plugin({
 			
 			// emit an event on the instance
 			self.instance._trigger({
-				helper: helper,
-				type: 'position',
 				edit: function(result) {
 					finalResult = result;
 				},
-				position: finalResultClone
+				event: event,
+				helper: helper,
+				position: finalResultClone,
+				type: 'position'
 			});
 			
 			if (self.options.functionPosition) {
 				
-				// add some variables to the helper for the functionPosition callback
-				helper.origin = self.instance.$origin[0];
-				helper.tooltip = self.instance.$tooltip[0];
 				
 				var result = self.options.functionPosition.call(self, self.instance, helper, finalResultClone);
 				
@@ -3620,7 +3661,15 @@ $.tooltipster.plugin({
 			self.instance.$tooltip
 				.css({
 					left: finalResult.coord.left,
-					top: finalResult.coord.top
+					top: finalResult.coord.top,
+					// we need to set a size even if the tooltip is in its natural size
+					// because when the tooltip is positioned beyond the width of the body
+					// (which is by default the width of the window; it will happen when
+					// you scroll the window horizontally to get to the origin), its text
+					// content will otherwise break lines at each word to keep up with the
+					// body overflow strategy.
+					height: finalResult.size.height,
+					width: finalResult.size.width
 				})
 				.find('.tooltipster-arrow')
 					.css({
@@ -3628,18 +3677,6 @@ $.tooltipster.plugin({
 						'top': ''
 					})
 					.css(arrowCoord.prop, arrowCoord.val);
-			
-			// we need to set a size even if the tooltip is in its natural size
-			// because when the tooltip is positioned beyond the width of the body
-			// (which is by default the width of the window; it will happen when
-			// you scroll the window horizontally to get to the origin), its text
-			// content will otherwise break lines at each word to keep up with the
-			// body overflow strategy.
-			self.instance.$tooltip
-				.css({
-					height: finalResult.size.height,
-					width: finalResult.size.width
-				});
 			
 			// append the tooltip HTML element to its parent
 			self.instance.$tooltip.appendTo(self.instance.options.parent);
