@@ -73,8 +73,8 @@ option(optionName [, optionValue])
 reposition()   
 status()   
 
-Global methods
---------------
+Core methods
+------------
 
 instances([selector || element])  
 instancesLatest()  

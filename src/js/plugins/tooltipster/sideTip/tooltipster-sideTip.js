@@ -82,7 +82,7 @@ $.tooltipster.plugin({
 			
 			// detach our content object first, so the next jQuery's remove()
 			// call does not unbind its event handlers
-			if (typeof this.instance.Content == 'object' && this.instance.Content !== null) {
+			if (this.instance.Content instanceof $) {
 				this.instance.Content.detach();
 			}
 			
@@ -309,14 +309,15 @@ $.tooltipster.plugin({
 							// emit an event on the instance
 							self.instance._trigger({
 								container: container,
+								event: event,
 								helper: helper,
 								mode: mode,
+								results: testResults,
 								satisfied: satisfied,
 								side: side,
 								takeTest: function(bool) {
 									takeTest = bool;
 								},
-								results: testResults,
 								type: 'positionTest'
 							});
 							
@@ -431,6 +432,7 @@ $.tooltipster.plugin({
 				edit: function(r) {
 					testResults = r;
 				},
+				event: event,
 				helper: helper,
 				results: testResults,
 				type: 'positionTested'
@@ -444,7 +446,7 @@ $.tooltipster.plugin({
 			 * the middle of the origin (when the origin is near the edge of the screen
 			 * or even partly off screen). We want the tooltip on the preferred side,
 			 * even if it means that we have to use a constrained size rather than a
-			 * natural one (as long as it fits). When the origin is off screen on top,
+			 * natural one (as long as it fits). When the origin is off screen at the top
 			 * the tooltip will be positioned at the bottom (if allowed), if the origin
 			 * is off screen on the right, it will be positioned on the left, etc.
 			 * If there are no scenarios where the tooltip can fit on screen, or if the
@@ -655,18 +657,27 @@ $.tooltipster.plugin({
 			// implementor
 			self._sideChange($clone, finalResult.side);
 			
-			// now unneeded, we don't want it passed to functionPosition
-			delete finalResult.container;
-			delete finalResult.fits;
-			delete finalResult.whole;
-			delete finalResult.outerSize;
-			
-			// keep only the distance on the relevant side, for clarity
-			finalResult.distance = finalResult.distance.horizontal || finalResult.distance.vertical;
-			
 			// add some variables to the helper
 			helper.tooltipClone = $clone[0];
 			helper.tooltipParent = self.instance.options.parent[0];
+			// move informative values to the helper
+			helper.mode = finalResult.mode;
+			helper.whole = finalResult.whole;
+			// add some variables to the helper for the functionPosition callback (these
+			// will also be added to the event fired by self.instance._trigger but that's
+			// ok, we're just being consistent)
+			helper.origin = self.instance.$origin[0];
+			helper.tooltip = self.instance.$tooltip[0];
+			
+			// leave only the actionable values in there for functionPosition
+			delete finalResult.container;
+			delete finalResult.fits;
+			delete finalResult.mode;
+			delete finalResult.outerSize;
+			delete finalResult.whole;
+			
+			// keep only the distance on the relevant side, for clarity
+			finalResult.distance = finalResult.distance.horizontal || finalResult.distance.vertical;
 			
 			// beginners may not be comfortable with the concept of editing the object
 			//  passed by reference, so we provide an edit function and pass a clone
@@ -674,19 +685,17 @@ $.tooltipster.plugin({
 			
 			// emit an event on the instance
 			self.instance._trigger({
-				helper: helper,
-				type: 'position',
 				edit: function(result) {
 					finalResult = result;
 				},
-				position: finalResultClone
+				event: event,
+				helper: helper,
+				position: finalResultClone,
+				type: 'position'
 			});
 			
 			if (self.options.functionPosition) {
 				
-				// add some variables to the helper for the functionPosition callback
-				helper.origin = self.instance.$origin[0];
-				helper.tooltip = self.instance.$tooltip[0];
 				
 				var result = self.options.functionPosition.call(self, self.instance, helper, finalResultClone);
 				
@@ -774,7 +783,15 @@ $.tooltipster.plugin({
 			self.instance.$tooltip
 				.css({
 					left: finalResult.coord.left,
-					top: finalResult.coord.top
+					top: finalResult.coord.top,
+					// we need to set a size even if the tooltip is in its natural size
+					// because when the tooltip is positioned beyond the width of the body
+					// (which is by default the width of the window; it will happen when
+					// you scroll the window horizontally to get to the origin), its text
+					// content will otherwise break lines at each word to keep up with the
+					// body overflow strategy.
+					height: finalResult.size.height,
+					width: finalResult.size.width
 				})
 				.find('.tooltipster-arrow')
 					.css({
@@ -782,18 +799,6 @@ $.tooltipster.plugin({
 						'top': ''
 					})
 					.css(arrowCoord.prop, arrowCoord.val);
-			
-			// we need to set a size even if the tooltip is in its natural size
-			// because when the tooltip is positioned beyond the width of the body
-			// (which is by default the width of the window; it will happen when
-			// you scroll the window horizontally to get to the origin), its text
-			// content will otherwise break lines at each word to keep up with the
-			// body overflow strategy.
-			self.instance.$tooltip
-				.css({
-					height: finalResult.size.height,
-					width: finalResult.size.width
-				});
 			
 			// append the tooltip HTML element to its parent
 			self.instance.$tooltip.appendTo(self.instance.options.parent);

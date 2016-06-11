@@ -279,7 +279,7 @@ $('.tooltip').tooltipster({
 			</p>
 			
 			<p><span class="code">sideTip</span> Shipped with Tooltipster and used by default</p>
-			<p><span class="code">SVG</span> Shipped with Tooltipster, adds SVG support, not enabled by default (see <a href="#svg">the SVG section</a>)</p>
+			<p><span class="code">SVG</span> Shipped with Tooltipster, adds SVG support, not enabled by default (see the <a href="#svg">SVG section</a>)</p>
 			<p><span class="code">follower</span> Lets the tooltip follow the cursor. Available <a href="https://github.com/louisameline/tooltipster-follower" target="_blank">here</a> (still experimental)</p>
 			<p><span class="code">scrollableTip</span> Makes the tooltip scrollable when it gets too big. Available <a href="https://github.com/louisameline/tooltipster-scrollableTip" target="_blank">here</a></p>
 			<p><span class="code">discovery</span> Creates groups of tooltips for faster display. Demonstrated in the <a href="#grouped">Grouped tooltips</a> section and available <a href="https://github.com/louisameline/tooltipster-discovery" target="_blank">here</a></p>
@@ -998,39 +998,13 @@ $(document).ready(function() {
 			
 			<p>Your <span class="code">functionPosition</span> callback is called with three parameters. The first two ones are <span class="code">instance</span> and a <span class="code">helper</span>, <a href="#callback_arguments">as usual</a>. The third argument is an object with the position properties proposed by Tooltipster, that you may edit. <b>You must return</b> the edited third argument for the changes to get applied.</p>
 			
-			<p>Note: <span class="code">helper.tooltipClone</span> is a clone of the tooltip which exists in the DOM at the time the callback is called.</p>
+			<p><span class="code">helper.mode</span> (will be <span class="code">'natural'</span> or <span class="code">'constrained'</span>) indicates if Tooltipster adapted the size of the tooltip for it to fit in.</p>
 			
-			<p>The third argument is in the form:</p>
+			<p><span class="code">helper.tooltipClone</span> is a clone of the tooltip which exists in the DOM at the time the callback is called.</p>
 			
-			<pre class="prettyprint">
-{
-    coord: {
-        left: number,
-        top: number
-    },
-    distance: number,
-    mode: 'natural' || 'constrained',
-    side: string,
-    size: {
-        height: number,
-        width: number
-    },
-    target: number
-}</pre>
+			<p><span class="code">helper.whole</span> (boolean) indicates if the tooltip is fully on screen.</p>
 			
-			<p><span class="code">coords</span> properties determine the position of the tooltip and are relative to the viewport.</p>
-			
-			<p><span class="code">distance</span> is the offset that will be applied between the origin and the tooltip.</p>
-			
-			<p><span class="code">mode</span> (read-only) indicates if Tooltipster adapted the size of the tooltip for it to fit in.</p>
-			
-			<p><span class="code">side</span> is the side Tooltipster has judged best for your tooltip, according to your requirements.</p>
-			
-			<p><span class="code">size</span> properties tell you the size that your tooltip will have. It is either the natural size of the tooltip, or a size that has been set by Tooltipster to fit best on screen according to your requirements.</p>
-			
-			<p><span class="code">target</span> represents the location Tooltipster thinks the tooltip should ideally be centered on, and the arrow aiming at. It is given as the distance from the relevant edge of the viewport (left edge if the side is "top" or "bottom", top edge if the side is "left" or "right"). The target is usually the middle of the origin, but can be somewhere else when the origin is actually a portion of text split in several lines. Editing this value will change the location the arrow is aiming at but will not change the position of the tooltip itself (use <span class="code">coords</span> for that).</p>
-			
-			<p>As a further help, you will also find useful precalculated data about the page layout in <span class="code">helper.geo</span>. It will help you avoid putting the tooltip accidentally off screen, for example. This object is in this form:</p>
+			<p><span class="code">helper.geo</span> includes useful pre-calculated data about the page layout. It will help you avoid putting the tooltip accidentally off screen, for example. This object is in this form:</p>
 			
 			<pre class="prettyprint">
 {
@@ -1077,6 +1051,33 @@ $(document).ready(function() {
         }
     }
 }</pre>
+			
+			<p>The third argument is in the form:</p>
+			
+			<pre class="prettyprint">
+{
+    coord: {
+        left: number,
+        top: number
+    },
+    distance: number,
+    side: string,
+    size: {
+        height: number,
+        width: number
+    },
+    target: number
+}</pre>
+			
+			<p><span class="code">coords</span> properties determine the position of the tooltip and are relative to the viewport.</p>
+			
+			<p><span class="code">distance</span> is the offset that will be applied between the origin and the tooltip.</p>
+			
+			<p><span class="code">side</span> is the side Tooltipster has judged best for your tooltip, according to your requirements.</p>
+			
+			<p><span class="code">size</span> properties tell you the size that your tooltip will have. It is either the natural size of the tooltip, or a size that has been set by Tooltipster to fit best on screen according to your requirements.</p>
+			
+			<p><span class="code">target</span> represents the location Tooltipster thinks the tooltip should ideally be centered on, and the arrow aiming at. It is given as the distance from the relevant edge of the viewport (left edge if the side is "top" or "bottom", top edge if the side is "left" or "right"). The target is usually the middle of the origin, but can be somewhere else when the origin is actually a portion of text split in several lines. Editing this value will change the location the arrow is aiming at but will not change the position of the tooltip itself (use <span class="code">coords</span> for that).</p>
 			
 			<p>You may look at the source code of this documentation to see how the custom positioning demo at the top of this page was made. Here is the simplest example, let's just move the tooltip by 10 pixels to the bottom-right:</p>
 			
@@ -1342,10 +1343,10 @@ $("#my-tooltip").tooltipster({
 			
 			<p>
 				The <span class="code">init</span>, <span class="code">before</span>, <span class="code">ready</span>, <span class="code">after</span>, <span class="code">format</span> and <span class="code">position</span> events will sound familiar: they happen at the same time as their equivalent <span class="code">functionInit</span>, etc.<br />
-				Others are new: <span class="code">close</span>, <span class="code">closing</span>, <span class="code">destroyed</span>, <span class="code">created</span>, <span class="code">geometry</span>, <span class="code">positionTest</span>, <span class="code">positionTested</span>, <span class="code">reposition</span>, <span class="code">repositioned</span>, <span class="code">scroll</span>, <span class="code">start</span>, <span class="code">state</span> and <span class="code">updated</span>.
+				But there are many others that you or plugin makers can use. Your listeners will get one argument, the event, which holds useful properties: <span class="code">event.type</span>, <span class="code">event.instance</span>, <span class="code">event.origin</span>, <span class="code">event.event</span> (when there is one, similarly to the usual <span class="code">helper.event</span>) and potentially others as described below. These are all the possible events:
 			</p>
 			
-			<p>Your listeners will get one argument, the event, which holds useful properties: <span class="code">event.type</span>, <span class="code">event.instance</span>, <span class="code">event.origin</span>, <span class="code">event.event</span> (when there is one, similarly to the usual <span class="code">helper.event</span>) and potentially others as described below. Alphabetically:</p>
+			<br /><br />
 			
 			<p><span class="code">before</span> has a special <span class="code">event.stop</span> property which is a function you may call to prevent the tooltip from opening.</p>
 			
@@ -1355,13 +1356,15 @@ $("#my-tooltip").tooltipster({
 			
 			<p><span class="code">created</span> is meant for plugin makers and happens when an HTML element has been created for the tooltip.</p>
 			
+			<p><span class="code">dismissable</span> events affect the closing of the tooltip when the <span class="code">mouseleave</span> and <span class="code">touchleave</span> close triggers are used. Read the source for more information.</p>
+			
 			<p><span class="code">format</span> has a special <span class="code">event.format</span> property which is a function you may use to format the content before display. Just provide your formatted content as first argument. For your convenience, the original content is provided in the <span class="code">event.content</span> property.</p>
 			
 			<p><span class="code">geometry</span> happens when Tooltipster determines the size and coordinates of the origin, in order to know where to place the tooltip. The computed properties (left, top, width and height) are passed in the <span class="code">event.geometry</span> object. It has a special <span class="code">event.edit</span> property which is a function you may use to provide this information yourself. Just provide the edited geometry object as first argument. In some cases, this may be easier to use than <span class="code">functionPosition</span> as it allows you to provide a specific target without having to compute the final position yourself.</p>
 			
 			<p><span class="code">init</span> is triggered upon tooltip initialization and may thus be heard only by a core listener.</p>
 			
-			<p><span class="code">state</span> happens every time the tooltip enters a different state. The state value is held in <span class="code">event.state</span> and may be <span class="code">appearing</span>, <span class="code">stable</span>, <span class="code">disappearing</span> or <span class="code">closed</span>.</p>
+			<p><span class="code">state</span> happens every time the tooltip enters a different state. The state value is held in <span class="code">event.state</span> and may be <span class="code">'appearing'</span>, <span class="code">'stable'</span>, <span class="code">'disappearing'</span> or <span class="code">'closed'</span>.</p>
 			
 			<p><span class="code">updated</span> happens when a call to the <span class="code">content</span> method has updated the content. The event has a special <span class="code">event.content</span> property.</p>
 			
@@ -1378,6 +1381,10 @@ $("#my-tooltip").tooltipster({
 			<p><span class="code">scroll</span> happens whenever a parent of the origin is scrolled. The native scroll event is passed as <span class="code">event.event</span>.</p>
 			
 			<p><span class="code">start</span> happens when the <span class="code">mouseenter</span> or <span class="code">touchstart</span> open triggers are used and that the origin gets mouseover/touched. The event has a special <span class="code">event.stop</span> property which is a function you may call to prevent the tooltip from opening.</p>
+			
+			<p><span class="code">startcancel</span> happens after <span class="code">start</span> at the end of the opening delay (see the <span class="code">delay</span> option) if the tooltip is not to be opened.</p>
+			
+			<p><span class="code">startend</span> happens after <span class="code">start</span> at the end of the opening delay (see the <span class="code">delay</span> option) if the tooltip may be opened.</p>
 			
 			
 			<h3 id="plugins">Tooltipster's plugin system <a href="#usecases">&#8657;</a></h3>
@@ -1407,7 +1414,7 @@ $('#example').tooltipster({
 			
 			<p>Let us know if you decide to create and share your own plugin, we will list it here!</p>
 			
-			<h4>A note about sideTip</h4>
+			<h4 id="plugins_sidetip">A note about sideTip</h4>
 			
 			<p>The default <span class="code">sideTip</span> plugin adds a few options to Tooltipster. For the sake of simplicity, these options were listed previously among the core's options in the <a href="#options">Options</a> section. But if you decide not to use <span class="code">sideTip</span>, these options will actually not be available anymore, except if another plugin offers options of the same name. These specific options are:</p>
 			
@@ -1615,6 +1622,10 @@ $('#myfield')
 			<p>Head on over to Tooltipster's issue tracker on GitHub: <a href="https://github.com/iamceege/tooltipster/issues">https://github.com/iamceege/tooltipster/issues</a></p>
 			
 			<p>Before opening a new issue, please be sure to search through the backlog to see if your bug has already been submitted. Thank you! :)</p>
+			
+			<h4 id="faq_interactive">"I can't click in the tooltip"</h4>
+			
+			<p>Please use the <span class="code">interactive</span> option.</p>
 			
 			<h4 id="faq_sizeissue">"The first time it opens, the position of the tooltip is incorrect. After that, it's ok"</h4>
 			

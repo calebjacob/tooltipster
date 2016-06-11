@@ -53,11 +53,6 @@ $(function() {
 				'</p>' +
 			'</div>'
 		),
-		functionPosition: function(event, helper, result){
-			result.mode = 'constrained';
-			result.size = { height: 100, width: 200 };
-			return result;
-		},
 		interactive: true,
 		// setting a same value to minWidth and maxWidth will result in a fixed width
 		maxWidth: 400,

@@ -1,5 +1,3 @@
-/* This theme was made for Tooltipster's default display plugin */
-
 .tooltipster-sidetip.tooltipster-borderless .tooltipster-box {
 	border: none; 
 	background: #1b1b1b;
@@ -20,10 +18,6 @@
 
 .tooltipster-sidetip.tooltipster-borderless.tooltipster-top .tooltipster-box {
 	margin-bottom: 8px;
-}
-
-.tooltipster-sidetip.tooltipster-borderless .tooltipster-content {
-	color: white;
 }
 
 .tooltipster-sidetip.tooltipster-borderless .tooltipster-arrow {
