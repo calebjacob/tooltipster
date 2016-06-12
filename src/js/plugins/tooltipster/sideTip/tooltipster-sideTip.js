@@ -10,6 +10,7 @@ $.tooltipster._plugin({
 		 * Defaults are provided as a function for an easy override by inheritance
 		 *
 		 * @return {object} An object with the defaults options
+		 * @private
 		 */
 		__defaults: function() {
 			
@@ -32,6 +33,8 @@ $.tooltipster._plugin({
 				// the side of the tooltip).
 				minIntersection: 16,
 				minWidth: 0,
+				// deprecated in 4.0.0. Listed for _optionsExtract to pick it up
+				position: null,
 				side: 'top',
 				// set to false to position the tooltip relatively to the document rather
 				// than the window when we open it
@@ -42,8 +45,8 @@ $.tooltipster._plugin({
 		/**
 		 * Run once: at instantiation of the plugin
 		 *
-		 * @param {object} instance The tooltipster object that instantiated
-		 * this plugin
+		 * @param {object} instance The tooltipster object that instantiated this plugin
+		 * @private
 		 */
 		__init: function(instance) {
 			
@@ -59,7 +62,7 @@ $.tooltipster._plugin({
 			// initial formatting
 			self.__optionsFormat();
 			
-			self.__instance._on('state', function(event) {
+			self.__instance._on('state.'+ self.__namespace, function(event) {
 				
 				if (event.state == 'closed') {
 					self.__close();
@@ -72,15 +75,20 @@ $.tooltipster._plugin({
 			});
 			
 			// reformat every time the options are changed
-			self.__instance._on('options', function() {
+			self.__instance._on('options.'+ self.__namespace, function() {
 				self.__optionsFormat();
 			});
 			
-			self.__instance._on('reposition', function(e) {
+			self.__instance._on('reposition.'+ self.__namespace, function(e) {
 				self.__reposition(e.event, e.helper);
 			});
 		},
 		
+		/**
+		 * Called when the tooltip has closed
+		 * 
+		 * @private
+		 */
 		__close: function() {
 			
 			// detach our content object first, so the next jQuery's remove()
@@ -95,9 +103,9 @@ $.tooltipster._plugin({
 		},
 		
 		/**
-		 * Contains the HTML markup of the tooltip.
-		 *
-		 * @return {object} The tooltip, as a jQuery-wrapped HTML element
+		 * Creates the HTML element of the tooltip.
+		 * 
+		 * @private
 		 */
 		__create: function() {
 			
@@ -141,19 +149,25 @@ $.tooltipster._plugin({
 			this.__instance._trigger('created');
 		},
 		
+		/**
+		 * Used when the plugin is to be unplugged
+		 *
+		 * @private
+		 */
 		__destroy: function() {
-			
-			
+			this.__instance._off('.'+ self.__namespace);
 		},
 		
 		/**
 		 * (Re)compute this.__options from the options declared to the instance
+		 *
+		 * @private
 		 */
 		__optionsFormat: function() {
 			
 			var self = this;
 			
-			// get the defaults
+			// get the options
 			self.__options = self.__instance._optionsExtract(pluginName, self.__defaults());
 			
 			// for backward compatibility, deprecated in v4.0.0
@@ -235,6 +249,7 @@ $.tooltipster._plugin({
 		 * @param {object} helper.geo An object with many layout properties
 		 * about objects of interest (window, document, origin). This should help
 		 * plugin users compute the optimal position of the tooltip
+		 * @private
 		 */
 		__reposition: function(event, helper) {
 			
@@ -816,7 +831,9 @@ $.tooltipster._plugin({
 		 * been made an independant method for easy inheritance in custom plugins based
 		 * on this default plugin.
 		 *
+		 * @param {object} $obj
 		 * @param {string} side
+		 * @private
 		 */
 		__sideChange: function($obj, side) {
 			
@@ -835,8 +852,9 @@ $.tooltipster._plugin({
 		 * tooltip will be centered on that position and the arrow will be
 		 * positioned there (as much as possible).
 		 *
-		 * @param {string} side
+		 * @param {object} helper
 		 * @return {integer}
+		 * @private
 		 */
 		__targetFind: function(helper) {
 			
