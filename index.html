@@ -30,8 +30,9 @@
 	<link rel="stylesheet" href="doc/js/jquery-ui-draggable/jquery-ui.min.css">
 	
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.0/jquery.min.js"></script>
-	<script type="text/javascript" src="dist/js/tooltipster.bundle.min.js"></script>
+	<script type="text/javascript" src="dist/js/tooltipster.bundle.js"></script>
 	<script type="text/javascript" src="//louisameline.github.io/tooltipster-follower/dist/js/tooltipster-follower.min.js"></script>
+	<script type="text/javascript" src="//louisameline.github.io/tooltipster-discovery/tooltipster-discovery.min.js"></script>
 	<script type="text/javascript" src="doc/js/scripts.js"></script>
 	<script type="text/javascript" src="doc/js/jquery-ui-draggable/jquery-ui.min.js"></script>
 	<script type="text/javascript" src="doc/js/jquery.ui.touch-punch.min.js"></script>
@@ -224,7 +225,7 @@ $('.tooltip').tooltipster({
 			
 			<p>Note: "sideTip" is the name of the plugin used by default by Tooltipster. We'll see about plugins later.</p>
 			
-			<h3 id="further">5. Use HTML inside your tooltips</h3>
+			<h3 id="html">5. Use HTML inside your tooltips</h3>
 			
 			<p>Tooltipster allows you to use any HTML markup inside your tooltips. It means that you can insert things like images and text formatting tags. The preferred method to achieve this is to provide an HTML element in the options of the tooltip. Example:</p>
 			
@@ -285,7 +286,7 @@ $('.tooltip').tooltipster({
 			
 			<p><span class="code">sideTip</span> Shipped with Tooltipster and used by default</p>
 			<p><span class="code">SVG</span> Shipped with Tooltipster, adds SVG support, not enabled by default (see the <a href="#svg">SVG section</a>)</p>
-			<p><span class="code">follower</span> Lets the tooltip follow the cursor. Available <a href="https://github.com/louisameline/tooltipster-follower" target="_blank">here</a> (still experimental)</p>
+			<p><span class="code">follower</span> Lets the tooltip follow the cursor. Available <a href="https://github.com/louisameline/tooltipster-follower" target="_blank">here</a></p>
 			<p><span class="code">scrollableTip</span> Makes the tooltip scrollable when it gets too big. Available <a href="https://github.com/louisameline/tooltipster-scrollableTip" target="_blank">here</a></p>
 			<p><span class="code">discovery</span> Creates groups of tooltips for faster display. Demonstrated in the <a href="#grouped">Grouped tooltips</a> section and available <a href="https://github.com/louisameline/tooltipster-discovery" target="_blank">here</a></p>
 			
@@ -1418,6 +1419,41 @@ $('#example').tooltipster({
 			<p>Under the hood, Tooltipster's plugin system is built on our event system. The plugins register to the core and when something happens, the core triggers an event that plugins may react to. A manual for plugin makers will be released soon.</p>
 			
 			<p>Let us know if you decide to create and share your own plugin, we will list it here!</p>
+			
+			<h4 id="plugins_conflicts">Handling conflicts between plugins</h4>
+			
+			<p>Several plugins may have the same name. To resolve the conflict, provide the namespace of the plugin when you declare it in the options. You can get the namespace of a plugin by looking at its source file. For example:</p>
+
+<pre class="prettyprint">
+$('#example').tooltipster({
+    plugins: ['laa.follower']
+});
+</pre>
+			
+			<p>Several plugins may have options of the same name. To resolve the conflict, wrap the options of plugins under a property with their full name. For example:</p>
+			
+<pre class="prettyprint">
+$('#example').tooltipster({
+    content: 'Hello',
+    theme: 'tooltipster-noir',
+    'laa.follower': {
+        anchor: 'top-center'
+    },
+    'some.otherPlugin': {
+        anchor: 'value'
+    }
+});
+</pre>
+	
+			<p>Several plugins may have methods of the same name. To resolve the conflict, use the instance object of the tooltip and specify the full name of the desired plugin in your calls. For example:</p>
+
+<pre class="prettyprint">
+$('#example').tooltipster({
+    functionBefore: function(instance, helper) {
+        instance['laa.follower'].methodName();
+    }
+});
+</pre>
 			
 			<h4 id="plugins_sidetip">A note about sideTip</h4>
 			

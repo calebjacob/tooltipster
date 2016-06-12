@@ -1,15 +1,17 @@
 // sideTip is Tooltipster's default plugin.
 // This file will be UMDified by a build task.
 
-$.tooltipster.plugin({
-	name: 'tooltipster.sideTip',
+var pluginName = 'tooltipster.sideTip';
+
+$.tooltipster._plugin({
+	name: pluginName,
 	instance: {
 		/**
 		 * Defaults are provided as a function for an easy override by inheritance
 		 *
 		 * @return {object} An object with the defaults options
 		 */
-		_defaults: function() {
+		__defaults: function() {
 			
 			return {
 				// if the tooltip should display an arrow that points to the origin
@@ -43,52 +45,53 @@ $.tooltipster.plugin({
 		 * @param {object} instance The tooltipster object that instantiated
 		 * this plugin
 		 */
-		_init: function(instance) {
+		__init: function(instance) {
 			
 			var self = this;
 			
 			// list of instance variables
 			
-			self.instance = instance;
-			self.options;
-			self.previousState = 'closed';
+			self.__instance = instance;
+			self.__namespace = 'tooltipster-sideTip-'+ Math.round(Math.random()*1000000);
+			self.__previousState = 'closed';
+			self.__options;
 			
 			// initial formatting
-			self._optionsFormat();
+			self.__optionsFormat();
 			
-			self.instance._on('state', function(event) {
+			self.__instance._on('state', function(event) {
 				
 				if (event.state == 'closed') {
-					self._close();
+					self.__close();
 				}
-				else if (event.state == 'appearing' && self.previousState == 'closed') {
-					self._create();
+				else if (event.state == 'appearing' && self.__previousState == 'closed') {
+					self.__create();
 				}
 				
-				self.previousState = event.state;
+				self.__previousState = event.state;
 			});
 			
 			// reformat every time the options are changed
-			self.instance._on('options', function() {
-				self._optionsFormat();
+			self.__instance._on('options', function() {
+				self.__optionsFormat();
 			});
 			
-			self.instance._on('reposition', function(e) {
-				self._reposition(e.event, e.helper);
+			self.__instance._on('reposition', function(e) {
+				self.__reposition(e.event, e.helper);
 			});
 		},
 		
-		_close: function() {
+		__close: function() {
 			
 			// detach our content object first, so the next jQuery's remove()
 			// call does not unbind its event handlers
-			if (this.instance.Content instanceof $) {
-				this.instance.Content.detach();
+			if (this.__instance.content() instanceof $) {
+				this.__instance.content().detach();
 			}
 			
 			// remove the tooltip from the DOM
-			this.instance.$tooltip.remove();
-			this.instance.$tooltip = null;
+			this.__instance._$tooltip.remove();
+			this.__instance._$tooltip = null;
 		},
 		
 		/**
@@ -96,7 +99,7 @@ $.tooltipster.plugin({
 		 *
 		 * @return {object} The tooltip, as a jQuery-wrapped HTML element
 		 */
-		_create: function() {
+		__create: function() {
 			
 			// note: we wrap with a .tooltipster-box div to be able to set a margin on it
 			// (.tooltipster-base must not have one)
@@ -115,7 +118,7 @@ $.tooltipster.plugin({
 			);
 			
 			// hide arrow if asked
-			if (!this.options.arrow) {
+			if (!this.__options.arrow) {
 				$html
 					.find('.tooltipster-box')
 						.css('margin', 0)
@@ -125,59 +128,57 @@ $.tooltipster.plugin({
 			}
 			
 			// apply min/max width if asked
-			if (this.options.minWidth) {
-				$html.css('min-width', this.options.minWidth + 'px');
+			if (this.__options.minWidth) {
+				$html.css('min-width', this.__options.minWidth + 'px');
 			}
-			if (this.options.maxWidth) {
-				$html.css('max-width', this.options.maxWidth + 'px');
+			if (this.__options.maxWidth) {
+				$html.css('max-width', this.__options.maxWidth + 'px');
 			}
 			
-			this.instance.$tooltip = $html;
+			this.__instance._$tooltip = $html;
 			
 			// tell the instance that the tooltip element has been created
-			this.instance._trigger('created');
+			this.__instance._trigger('created');
+		},
+		
+		__destroy: function() {
+			
+			
 		},
 		
 		/**
-		 * (Re)compute this.options from the options declared to the instance
+		 * (Re)compute this.__options from the options declared to the instance
 		 */
-		_optionsFormat: function() {
+		__optionsFormat: function() {
 			
-			var defaults = this._defaults(),
-				// if the plugin options were isolated in a property named after the
-				// plugin, use them (prevents conflicts with other plugins)
-				pluginOptions = this.instance.options[this.name] || this.instance.options;
+			var self = this;
 			
-			this.options = $.extend(true, {}, defaults, pluginOptions);
+			// get the defaults
+			self.__options = self.__instance._optionsExtract(pluginName, self.__defaults());
 			
 			// for backward compatibility, deprecated in v4.0.0
-			if (this.options.position) {
-				this.options.side = this.options.position;
-			}
-			// $.extend merges arrays, we don't want that, we only want the
-			// array provided by the user
-			if (typeof this.instance.options.side == 'object') {
-				this.options.side = this.instance.options.side;
+			if (self.__options.position) {
+				self.__options.side = self.__options.position;
 			}
 			
 			// options formatting
 			
 			// format distance as a four-cell array if it ain't one yet and then make
 			// it an object with top/bottom/left/right properties
-			if (typeof this.options.distance != 'object') {
-				this.options.distance = [this.options.distance];
+			if (typeof self.__options.distance != 'object') {
+				self.__options.distance = [self.__options.distance];
 			}
-			if (this.options.distance.length < 4) {
+			if (self.__options.distance.length < 4) {
 				
-				if (this.options.distance[1] === undefined) this.options.distance[1] = this.options.distance[0];
-				if (this.options.distance[2] === undefined) this.options.distance[2] = this.options.distance[0];
-				if (this.options.distance[3] === undefined) this.options.distance[3] = this.options.distance[1];
+				if (self.__options.distance[1] === undefined) self.__options.distance[1] = self.__options.distance[0];
+				if (self.__options.distance[2] === undefined) self.__options.distance[2] = self.__options.distance[0];
+				if (self.__options.distance[3] === undefined) self.__options.distance[3] = self.__options.distance[1];
 				
-				this.options.distance = {
-					top: this.options.distance[0],
-					right: this.options.distance[1],
-					bottom: this.options.distance[2],
-					left: this.options.distance[3]
+				self.__options.distance = {
+					top: self.__options.distance[0],
+					right: self.__options.distance[1],
+					bottom: self.__options.distance[2],
+					left: self.__options.distance[3]
 				};
 			}
 			
@@ -186,7 +187,7 @@ $.tooltipster.plugin({
 			// 'right' into ['right', 'left', 'top', 'bottom']
 			// 'bottom' into ['bottom', 'top', 'right', 'left']
 			// 'left' into ['left', 'right', 'top', 'bottom']
-			if (typeof this.options.side == 'string') {
+			if (typeof self.__options.side == 'string') {
 				
 				var opposites = {
 					'top': 'bottom',
@@ -195,22 +196,22 @@ $.tooltipster.plugin({
 					'left': 'right'
 				};
 				
-				this.options.side = [this.options.side, opposites[this.options.side]];
+				self.__options.side = [self.__options.side, opposites[self.__options.side]];
 				
-				if (this.options.side[0] == 'left' || this.options.side[0] == 'right') {
-					this.options.side.push('top', 'bottom');
+				if (self.__options.side[0] == 'left' || self.__options.side[0] == 'right') {
+					self.__options.side.push('top', 'bottom');
 				}
 				else {
-					this.options.side.push('right', 'left');
+					self.__options.side.push('right', 'left');
 				}
 			}
 			
 			// misc
 			// disable the arrow in IE6 unless the arrow option was explicitly set to true
-			if (	$.tooltipster.env.IE === 6
-				&&	this.options.arrow !== true
+			if (	$.tooltipster._env.IE === 6
+				&&	self.__options.arrow !== true
 			) {
-				this.options.arrow = false;
+				self.__options.arrow = false;
 			}
 		},
 		
@@ -235,22 +236,22 @@ $.tooltipster.plugin({
 		 * about objects of interest (window, document, origin). This should help
 		 * plugin users compute the optimal position of the tooltip
 		 */
-		_reposition: function(event, helper) {
+		__reposition: function(event, helper) {
 			
 			var self = this,
 				finalResult,
 				// to know where to put the tooltip, we need to know on which point
 				// of the x or y axis we should center it. That coordinate is the target
-				targets = self._targetFind(helper),
+				targets = self.__targetFind(helper),
 				testResults = [];
 			
 			// make sure the tooltip is detached while we make tests on a clone
-			self.instance.$tooltip.detach();
+			self.__instance._$tooltip.detach();
 			
 			// we could actually provide the original element to the Ruler and
 			// not a clone, but it just feels right to keep it out of the
 			// machinery.
-			var $clone = self.instance.$tooltip.clone(),
+			var $clone = self.__instance._$tooltip.clone(),
 				// start position tests session
 				ruler = $.tooltipster._getRuler($clone),
 				satisfied = false;
@@ -261,7 +262,7 @@ $.tooltipster.plugin({
 				var takeTest = null;
 				
 				// let the user decide to keep on testing or not
-				self.instance._trigger({
+				self.__instance._trigger({
 					container: container,
 					helper: helper,
 					satisfied: satisfied,
@@ -278,36 +279,36 @@ $.tooltipster.plugin({
 							// skip the window scenarios if asked. If they are reintegrated by
 							// the callback of the positionTest event, they will have to be
 							// excluded using the callback of positionTested
-						&&	(container != 'window' || self.options.viewportAware)
+						&&	(container != 'window' || self.__options.viewportAware)
 					)
 				) {
 					
 					// for each allowed side
-					for (var i=0; i < self.options.side.length; i++) {
+					for (var i=0; i < self.__options.side.length; i++) {
 						
 						var distance = {
 								horizontal: 0,
 								vertical: 0
 							},
-							side = self.options.side[i];
+							side = self.__options.side[i];
 						
 						if (side == 'top' || side == 'bottom') {
-							distance.vertical = self.options.distance[side];
+							distance.vertical = self.__options.distance[side];
 						}
 						else {
-							distance.horizontal = self.options.distance[side];
+							distance.horizontal = self.__options.distance[side];
 						}
 						
 						// this may have an effect on the size of the tooltip if there are css
 						// rules for the arrow or something else
-						self._sideChange($clone, side);
+						self.__sideChange($clone, side);
 						
 						$.each(['natural', 'constrained'], function(i, mode) {
 							
 							takeTest = null;
 							
 							// emit an event on the instance
-							self.instance._trigger({
+							self.__instance._trigger({
 								container: container,
 								event: event,
 								helper: helper,
@@ -388,14 +389,14 @@ $.tooltipster.plugin({
 										if (side == 'top' || side == 'bottom') {
 											
 											testResult.whole = (
-													helper.geo.origin.windowOffset.right >= self.options.minIntersection
-												&&	helper.geo.window.size.width - helper.geo.origin.windowOffset.left >= self.options.minIntersection
+													helper.geo.origin.windowOffset.right >= self.__options.minIntersection
+												&&	helper.geo.window.size.width - helper.geo.origin.windowOffset.left >= self.__options.minIntersection
 											);
 										}
 										else {
 											testResult.whole = (
-													helper.geo.origin.windowOffset.bottom >= self.options.minIntersection
-												&&	helper.geo.window.size.height - helper.geo.origin.windowOffset.top >= self.options.minIntersection
+													helper.geo.origin.windowOffset.bottom >= self.__options.minIntersection
+												&&	helper.geo.window.size.height - helper.geo.origin.windowOffset.top >= self.__options.minIntersection
 											);
 										}
 									}
@@ -428,7 +429,7 @@ $.tooltipster.plugin({
 			// the user may eliminate the unwanted scenarios from testResults, but he's
 			// not supposed to alter them at this point. functionPosition and the
 			// position event serve that purpose.
-			self.instance._trigger({
+			self.__instance._trigger({
 				edit: function(r) {
 					testResults = r;
 				},
@@ -471,8 +472,8 @@ $.tooltipster.plugin({
 				}
 				else if (a.whole && b.whole) {
 					
-					var ai = self.options.side.indexOf(a.side),
-						bi = self.options.side.indexOf(b.side);
+					var ai = self.__options.side.indexOf(a.side),
+						bi = self.__options.side.indexOf(b.side);
 					
 					// use the user's sides fallback array
 					if (ai < bi) {
@@ -497,8 +498,8 @@ $.tooltipster.plugin({
 					}
 					else if (a.fits && b.fits) {
 						
-						var ai = self.options.side.indexOf(a.side),
-							bi = self.options.side.indexOf(b.side);
+						var ai = self.__options.side.indexOf(a.side),
+							bi = self.__options.side.indexOf(b.side);
 						
 						// use the user's sides fallback array
 						if (ai < bi) {
@@ -581,21 +582,21 @@ $.tooltipster.plugin({
 						
 						// prevent the overflow unless the origin itself gets off screen (minus the
 						// margin needed to keep the arrow pointing at the target)
-						if (helper.geo.origin.windowOffset.right - this.options.minIntersection >= 0) {
+						if (helper.geo.origin.windowOffset.right - this.__options.minIntersection >= 0) {
 							finalResult.coord.left = 0;
 						}
 						else {
-							finalResult.coord.left = helper.geo.origin.windowOffset.right - this.options.minIntersection - 1;
+							finalResult.coord.left = helper.geo.origin.windowOffset.right - this.__options.minIntersection - 1;
 						}
 					}
 					// or an overflow on the right
 					else if (finalResult.coord.left > helper.geo.window.size.width - finalResult.size.width) {
 						
-						if (helper.geo.origin.windowOffset.left + this.options.minIntersection <= helper.geo.window.size.width) {
+						if (helper.geo.origin.windowOffset.left + this.__options.minIntersection <= helper.geo.window.size.width) {
 							finalResult.coord.left = helper.geo.window.size.width - finalResult.size.width;
 						}
 						else {
-							finalResult.coord.left = helper.geo.origin.windowOffset.left + this.options.minIntersection + 1 - finalResult.size.width;
+							finalResult.coord.left = helper.geo.origin.windowOffset.left + this.__options.minIntersection + 1 - finalResult.size.width;
 						}
 					}
 				}
@@ -604,21 +605,21 @@ $.tooltipster.plugin({
 					// overflow at the top
 					if (finalResult.coord.top < 0) {
 						
-						if (helper.geo.origin.windowOffset.bottom - this.options.minIntersection >= 0) {
+						if (helper.geo.origin.windowOffset.bottom - this.__options.minIntersection >= 0) {
 							finalResult.coord.top = 0;
 						}
 						else {
-							finalResult.coord.top = helper.geo.origin.windowOffset.bottom - this.options.minIntersection - 1;
+							finalResult.coord.top = helper.geo.origin.windowOffset.bottom - this.__options.minIntersection - 1;
 						}
 					}
 					// or at the bottom
 					else if (finalResult.coord.top > helper.geo.window.size.height - finalResult.size.height) {
 						
-						if (helper.geo.origin.windowOffset.top + this.options.minIntersection <= helper.geo.window.size.height) {
+						if (helper.geo.origin.windowOffset.top + this.__options.minIntersection <= helper.geo.window.size.height) {
 							finalResult.coord.top = helper.geo.window.size.height - finalResult.size.height;
 						}
 						else {
-							finalResult.coord.top = helper.geo.origin.windowOffset.top + this.options.minIntersection + 1 - finalResult.size.height;
+							finalResult.coord.top = helper.geo.origin.windowOffset.top + this.__options.minIntersection + 1 - finalResult.size.height;
 						}
 					}
 				}
@@ -655,19 +656,19 @@ $.tooltipster.plugin({
 			// the size of the tooltip, and the custom functionPosition may want to detect the
 			// size of something before making a decision. So let's make things easier for the
 			// implementor
-			self._sideChange($clone, finalResult.side);
+			self.__sideChange($clone, finalResult.side);
 			
 			// add some variables to the helper
 			helper.tooltipClone = $clone[0];
-			helper.tooltipParent = self.instance.options.parent[0];
+			helper.tooltipParent = self.__instance.option('parent').parent[0];
 			// move informative values to the helper
 			helper.mode = finalResult.mode;
 			helper.whole = finalResult.whole;
 			// add some variables to the helper for the functionPosition callback (these
-			// will also be added to the event fired by self.instance._trigger but that's
+			// will also be added to the event fired by self.__instance._trigger but that's
 			// ok, we're just being consistent)
-			helper.origin = self.instance.$origin[0];
-			helper.tooltip = self.instance.$tooltip[0];
+			helper.origin = self.__instance._$origin[0];
+			helper.tooltip = self.__instance._$tooltip[0];
 			
 			// leave only the actionable values in there for functionPosition
 			delete finalResult.container;
@@ -684,7 +685,7 @@ $.tooltipster.plugin({
 			var finalResultClone = $.extend(true, {}, finalResult);
 			
 			// emit an event on the instance
-			self.instance._trigger({
+			self.__instance._trigger({
 				edit: function(result) {
 					finalResult = result;
 				},
@@ -694,10 +695,10 @@ $.tooltipster.plugin({
 				type: 'position'
 			});
 			
-			if (self.options.functionPosition) {
+			if (self.__options.functionPosition) {
 				
 				
-				var result = self.options.functionPosition.call(self, self.instance, helper, finalResultClone);
+				var result = self.__options.functionPosition.call(self, self.__instance, helper, finalResultClone);
 				
 				if (result) finalResult = result;
 			}
@@ -718,7 +719,7 @@ $.tooltipster.plugin({
 					prop: 'left',
 					val: finalResult.target - finalResult.coord.left
 				};
-				maxVal = finalResult.size.width - this.options.minIntersection;
+				maxVal = finalResult.size.width - this.__options.minIntersection;
 			}
 			else {
 				
@@ -726,13 +727,13 @@ $.tooltipster.plugin({
 					prop: 'top',
 					val: finalResult.target - finalResult.coord.top
 				};
-				maxVal = finalResult.size.height - this.options.minIntersection;
+				maxVal = finalResult.size.height - this.__options.minIntersection;
 			}
 			
 			// cannot lie beyond the boundaries of the tooltip, minus the
 			// arrow margin
-			if (arrowCoord.val < this.options.minIntersection) {
-				arrowCoord.val = this.options.minIntersection;
+			if (arrowCoord.val < this.__options.minIntersection) {
+				arrowCoord.val = this.__options.minIntersection;
 			}
 			else if (arrowCoord.val > maxVal) {
 				arrowCoord.val = maxVal;
@@ -768,19 +769,19 @@ $.tooltipster.plugin({
 			
 			// set position values on the original tooltip element
 			
-			self._sideChange(self.instance.$tooltip, finalResult.side);
+			self.__sideChange(self.__instance._$tooltip, finalResult.side);
 			
 			if (helper.geo.origin.fixedLineage) {
-				self.instance.$tooltip
+				self.__instance._$tooltip
 					.css('position', 'fixed');
 			}
 			else {
 				// CSS default
-				self.instance.$tooltip
+				self.__instance._$tooltip
 					.css('position', '');
 			}
 			
-			self.instance.$tooltip
+			self.__instance._$tooltip
 				.css({
 					left: finalResult.coord.left,
 					top: finalResult.coord.top,
@@ -801,9 +802,9 @@ $.tooltipster.plugin({
 					.css(arrowCoord.prop, arrowCoord.val);
 			
 			// append the tooltip HTML element to its parent
-			self.instance.$tooltip.appendTo(self.instance.options.parent);
+			self.__instance._$tooltip.appendTo(self.__instance.option('parent'));
 			
-			self.instance._trigger({
+			self.__instance._trigger({
 				type: 'repositioned',
 				event: event,
 				position: finalResult
@@ -817,7 +818,7 @@ $.tooltipster.plugin({
 		 *
 		 * @param {string} side
 		 */
-		_sideChange: function($obj, side) {
+		__sideChange: function($obj, side) {
 			
 			$obj
 				.removeClass('tooltipster-bottom')
@@ -837,18 +838,18 @@ $.tooltipster.plugin({
 		 * @param {string} side
 		 * @return {integer}
 		 */
-		_targetFind: function(helper) {
+		__targetFind: function(helper) {
 			
 			var target = {},
-				rects = this.instance.$origin[0].getClientRects();
+				rects = this.__instance._$origin[0].getClientRects();
 			
 			// these lines fix a Chrome bug (issue #491)
 			if (rects.length > 1) {
-				var opacity = this.instance.$origin.css('opacity');
+				var opacity = this.__instance._$origin.css('opacity');
 				if(opacity == 1) {
-					this.instance.$origin.css('opacity', 0.99);
-					rects = this.instance.$origin[0].getClientRects();
-					this.instance.$origin.css('opacity', 1);
+					this.__instance._$origin.css('opacity', 0.99);
+					rects = this.__instance._$origin[0].getClientRects();
+					this.__instance._$origin.css('opacity', 1);
 				}
 			}
 			

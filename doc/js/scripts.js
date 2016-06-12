@@ -53,7 +53,6 @@ $(function() {
 				'</p>' +
 			'</div>'
 		),
-		interactive: true,
 		// setting a same value to minWidth and maxWidth will result in a fixed width
 		maxWidth: 400,
 		side: 'right'
@@ -210,7 +209,7 @@ $(function() {
 		});
 	
 	$('#demo-position').tooltipster({
-		content: $('<div>I am the most accurate tooltip ever! Let me fit to your layout the way you want to. I\'m great to create menus too :)</div>'),
+		content: $('<div>I\'m the most accurate tooltip ever! Let me fit to your layout the way you want to. I\'m great to create menus too :)</div>'),
 		// 8 extra pixels for the arrow to overflow the grid
 		functionPosition: function(instance, helper, data){
 			
@@ -235,7 +234,7 @@ $(function() {
 	});
 	
 	$('#demo-plugin').tooltipster({
-		plugins: ['laa.follower']
+		plugins: ['follower']
 	});
 	
 	// nested demo
@@ -260,43 +259,7 @@ $(function() {
 		delay: 1000
 	});
 	
-	$.tooltipster.on('start', function(event) {
-		
-		if ($(event.instance.elementOrigin()).hasClass('tooltip_group')) {
-			
-			var instances = $.tooltipster.instances('.tooltip_group'),
-				open = false,
-				duration;
-			
-			$.each(instances, function (i, instance) {
-					
-				if (instance !== event.instance) {
-					
-					if (instance.status().open){
-						
-						open = true;
-						
-						duration = instance.option('animationDuration');
-						
-						instance.option('animationDuration', 0);
-						instance.close();
-						instance.option('animationDuration', duration);
-					}
-				}
-			});
-			
-			if (open) {
-				
-				duration = event.instance.option('animationDuration');
-				
-				event.instance.option('animationDuration', 0);
-				event.instance.open();
-				event.instance.option('animationDuration', duration);
-				
-				event.stop();
-			}
-		}
-	});
+	$.tooltipster.group('tooltip_group');
 	
 	// themes
 	
