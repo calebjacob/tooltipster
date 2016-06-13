@@ -86,7 +86,7 @@ var defaults = {
 		hasTransitions: transitionSupport(),
 		IE: false,
 		// don't set manually, it will be updated by a build task after the manifest
-		semVer: '4.0.0rc50',
+		semVer: '4.0.0',
 		window: win
 	},
 	core = function() {
@@ -576,7 +576,7 @@ $.Tooltipster.prototype = {
 	/**
 	 * Insert the content into the appropriate HTML element of the tooltip
 	 * 
-	 * @returns {$.Tooltipster}
+	 * @returns {self}
 	 * @private
 	 */
 	__contentInsert: function() {
@@ -620,7 +620,7 @@ $.Tooltipster.prototype = {
 	 * Save the content, cloning it beforehand if need be
 	 * 
 	 * @param content
-	 * @returns {$.Tooltipster}
+	 * @returns {self}
 	 * @private
 	 */
 	__contentSet: function(content) {
@@ -925,7 +925,7 @@ $.Tooltipster.prototype = {
 	/**
 	 * Some options may need to be formated before being used
 	 * 
-	 * @returns {$.Tooltipster}
+	 * @returns {self}
 	 * @private
 	 */
 	__optionsFormat: function() {
@@ -986,7 +986,7 @@ $.Tooltipster.prototype = {
 	/**
 	 * Schedules or cancels the garbage collector task
 	 *
-	 * @returns {$.Tooltipster}
+	 * @returns {self}
 	 * @private
 	 */
 	__prepareGC: function() {
@@ -1029,7 +1029,7 @@ $.Tooltipster.prototype = {
 	 * because of the bindings that may be needed on the tooltip
 	 * itself
 	 *
-	 * @returns {$.Tooltipster}
+	 * @returns {self}
 	 * @private
 	 */
 	__prepareOrigin: function() {
@@ -1129,7 +1129,7 @@ $.Tooltipster.prototype = {
 	 * opened, and present after it has been closed: it's the display
 	 * plugin that takes care of handling it.
 	 * 
-	 * @returns {$.Tooltipster}
+	 * @returns {self}
 	 * @private
 	 */
 	__prepareTooltip: function() {
@@ -1166,7 +1166,7 @@ $.Tooltipster.prototype = {
 	 * tooltip is open)
 	 *
 	 * @param {object} event
-	 * @returns {$.Tooltipster}
+	 * @returns {self}
 	 * @private
 	 */
 	__scrollHandler: function(event) {
@@ -1287,7 +1287,7 @@ $.Tooltipster.prototype = {
 	 * Changes the state of the tooltip
 	 *
 	 * @param {string} state
-	 * @returns {$.Tooltipster}
+	 * @returns {self}
 	 * @private
 	 */
 	__stateSet: function(state) {
@@ -1305,7 +1305,7 @@ $.Tooltipster.prototype = {
 	/**
 	 * Clear appearance timeouts
 	 *
-	 * @returns {$.Tooltipster}
+	 * @returns {self}
 	 * @private
 	 */
 	__timeoutsClear: function() {
@@ -1328,7 +1328,7 @@ $.Tooltipster.prototype = {
 	/**
 	 * Start the tracker that will make checks at regular intervals
 	 * 
-	 * @returns {$.Tooltipster}
+	 * @returns {self}
 	 * @private
 	 */
 	__trackerStart: function() {
@@ -1412,7 +1412,7 @@ $.Tooltipster.prototype = {
 	 * 
 	 * @param event
 	 * @param callback
-	 * @returns {$.Tooltipster}
+	 * @returns {self}
 	 * @protected
 	 */
 	_close: function(event, callback) {
@@ -1592,7 +1592,7 @@ $.Tooltipster.prototype = {
 	/**
 	 * For internal use by plugins, if needed
 	 * 
-	 * @returns {$.Tooltipster}
+	 * @returns {self}
 	 * @protected
 	 */
 	_off: function() {
@@ -1603,7 +1603,7 @@ $.Tooltipster.prototype = {
 	/**
 	 * For internal use by plugins, if needed
 	 *
-	 * @returns {$.Tooltipster}
+	 * @returns {self}
 	 * @protected
 	 */
 	_on: function() {
@@ -1614,7 +1614,7 @@ $.Tooltipster.prototype = {
 	/**
 	 * For internal use by plugins, if needed
 	 *
-	 * @returns {$.Tooltipster}
+	 * @returns {self}
 	 * @protected
 	 */
 	_one: function() {
@@ -1627,7 +1627,7 @@ $.Tooltipster.prototype = {
 	 *
 	 * @param event
 	 * @param callback
-	 * @returns {$.Tooltipster}
+	 * @returns {self}
 	 * @protected
 	 */
 	_open: function(event, callback) {
@@ -2018,7 +2018,7 @@ $.Tooltipster.prototype = {
 	 * schedule the opening of the tooltip after the delay, if there is one
 	 *
 	 * @param event
-	 * @returns {$.Tooltipster}
+	 * @returns {self}
 	 * @protected
  	 */
 	_openShortly: function(event) {
@@ -2146,7 +2146,7 @@ $.Tooltipster.prototype = {
 	 * on existing instances
 	 * 
 	 * @param {object} pluginName
-	 * @returns {$.Tooltipster}
+	 * @returns {self}
 	 * @protected
 	 */
 	_plug: function(pluginName) {
@@ -2237,7 +2237,7 @@ $.Tooltipster.prototype = {
 	 * Store touch events for a while to detect swiping and emulated mouse events
 	 * 
 	 * @param {object} event
-	 * @returns {$.Tooltipster}
+	 * @returns {self}
 	 * @protected
 	 */
 	_touchRecordEvent: function(event) {
@@ -2288,7 +2288,7 @@ $.Tooltipster.prototype = {
 	/**
 	 * Triggers an event on the instance emitters
 	 * 
-	 * @returns {$.Tooltipster}
+	 * @returns {self}
 	 * @protected
 	 */
 	_trigger: function() {
@@ -2315,7 +2315,7 @@ $.Tooltipster.prototype = {
 	/**
 	 * Deactivate a plugin on this instance
 	 * 
-	 * @returns {$.Tooltipster}
+	 * @returns {self}
 	 * @protected
 	 */
 	_unplug: function(pluginName) {
@@ -2357,7 +2357,7 @@ $.Tooltipster.prototype = {
 	
 	/**
 	 * @see self::_close
-	 * @returns {$.Tooltipster}
+	 * @returns {self}
 	 * @public
 	 */
 	close: function(callback) {
@@ -2375,7 +2375,7 @@ $.Tooltipster.prototype = {
 	/**
 	 * Sets or gets the content of the tooltip
 	 * 
-	 * @returns {mixed|$.Tooltipster}
+	 * @returns {mixed|self}
 	 * @public
 	 */
 	content: function(content) {
@@ -2450,7 +2450,7 @@ $.Tooltipster.prototype = {
 	/**
 	 * Destroys the tooltip
 	 * 
-	 * @returns {$.Tooltipster}
+	 * @returns {self}
 	 * @public
 	 */
 	destroy: function() {
@@ -2559,7 +2559,7 @@ $.Tooltipster.prototype = {
 	/**
 	 * Disables the tooltip
 	 * 
-	 * @returns {$.Tooltipster}
+	 * @returns {self}
 	 * @public
 	 */
 	disable: function() {
@@ -2583,7 +2583,7 @@ $.Tooltipster.prototype = {
 	/**
 	 * Returns the HTML element of the origin
 	 *
-	 * @returns {$.Tooltipster}
+	 * @returns {self}
 	 * @public
 	 */
 	elementOrigin: function() {
@@ -2599,7 +2599,7 @@ $.Tooltipster.prototype = {
 	/**
 	 * Returns the HTML element of the tooltip
 	 *
-	 * @returns {$.Tooltipster}
+	 * @returns {self}
 	 * @public
 	 */
 	elementTooltip: function() {
@@ -2609,7 +2609,7 @@ $.Tooltipster.prototype = {
 	/**
 	 * Enables the tooltip
 	 * 
-	 * @returns {$.Tooltipster}
+	 * @returns {self}
 	 * @public
 	 */
 	enable: function() {
@@ -2621,7 +2621,7 @@ $.Tooltipster.prototype = {
 	 * Alias, deprecated in 4.0.0
 	 * 
 	 * @param {function} callback
-	 * @returns {$.Tooltipster}
+	 * @returns {self}
 	 * @public
 	 */
 	hide: function(callback) {
@@ -2631,7 +2631,7 @@ $.Tooltipster.prototype = {
 	/**
 	 * Returns the instance
 	 * 
-	 * @returns {$.Tooltipster}
+	 * @returns {self}
 	 * @public
 	 */
 	instance: function() {
@@ -2641,7 +2641,7 @@ $.Tooltipster.prototype = {
 	/**
 	 * For public use only, not to be used by plugins (use ::_off() instead)
 	 * 
-	 * @returns {$.Tooltipster}
+	 * @returns {self}
 	 * @public
 	 */
 	off: function() {
@@ -2656,7 +2656,7 @@ $.Tooltipster.prototype = {
 	/**
 	 * For public use only, not to be used by plugins (use ::_on() instead)
 	 *
-	 * @returns {$.Tooltipster}
+	 * @returns {self}
 	 * @public
 	 */
 	on: function() {
@@ -2674,7 +2674,7 @@ $.Tooltipster.prototype = {
 	/**
 	 * For public use only, not to be used by plugins
 	 *
-	 * @returns {$.Tooltipster}
+	 * @returns {self}
 	 * @public
 	 */
 	one: function() {
@@ -2691,7 +2691,7 @@ $.Tooltipster.prototype = {
 	
 	/**
 	 * @see self::_open
-	 * @returns {$.Tooltipster}
+	 * @returns {self}
 	 * @public
 	 */
 	open: function(callback) {
@@ -2711,7 +2711,7 @@ $.Tooltipster.prototype = {
 	 * 
 	 * @param {string} o Option name
 	 * @param {mixed} val optional A new value for the option
-	 * @return {mixed|$.Tooltipster} If val is omitted, the value of the option
+	 * @return {mixed|self} If val is omitted, the value of the option
 	 * is returned, otherwise the instance itself is returned
 	 * @public
 	 */ 
@@ -2760,7 +2760,7 @@ $.Tooltipster.prototype = {
 	 * @param {boolean} tooltipIsDetached For internal use only. Set this to true if you
 	 * know that the tooltip not being in the DOM is not an issue (typically when the
 	 * tooltip element has just been created but has not been added to the DOM yet).
-	 * @returns {$.Tooltipster}
+	 * @returns {self}
 	 * @public
 	 */
 	reposition: function(event, tooltipIsDetached) {
@@ -2803,7 +2803,7 @@ $.Tooltipster.prototype = {
 	 * Alias, deprecated in 4.0.0
 	 *
 	 * @param callback
-	 * @returns {$.Tooltipster}
+	 * @returns {self}
 	 * @public
 	 */
 	show: function(callback) {
@@ -2830,7 +2830,7 @@ $.Tooltipster.prototype = {
 	/**
 	 * For public use only, not to be used by plugins
 	 *
-	 * @returns {$.Tooltipster}
+	 * @returns {self}
 	 * @public
 	 */
 	triggerHandler: function() {
