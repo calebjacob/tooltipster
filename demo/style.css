@@ -36,6 +36,12 @@ body {
 	color: #fff;
 }
 
+#circle {
+	display: block;
+	margin: auto;
+	position: relative;
+}
+
 #genderChart1 {
 	height: 300px;
 	width: 300px;

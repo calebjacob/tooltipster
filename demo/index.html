@@ -247,6 +247,11 @@
 				.tooltipster({
 					theme: 'tooltipster-shadow'
 				});
+			
+			$('#circle circle').tooltipster({
+				restoration: 'previous'
+			});
+			$('#circle tspan').tooltipster();
 		});
 	</script>
 </head>
@@ -307,6 +312,16 @@
 		SVG
 		<div id="genderChart1"></div>
 		<div id="drawing"></div>
+		<svg id="circle">
+			<text y="20">
+				<tspan x="10" title="line 1">tspan line 1</tspan>
+				<tspan x="10" dy="15" title="line 2">tspan line 2</tspan>
+				<tspan x="10" dy="15" title="line 3">tspan line 3</tspan>
+			</text>
+			<circle cx="150" cy="50" r="40" stroke="black" stroke-width="3" fill="red">
+				<title>Circle</title>
+			</circle>
+		</svg>
 	</section>
 </body>
 </html>
