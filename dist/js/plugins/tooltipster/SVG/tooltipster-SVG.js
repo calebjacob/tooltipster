@@ -57,6 +57,7 @@ $.tooltipster._plugin({
 			var self = this;
 			
 			//list of instance variables
+			self.__hadTitleTag = false;
 			self.__instance = instance;
 			
 			// jQuery < v3.0's addClass and hasClass do not work on SVG elements.
@@ -76,10 +77,17 @@ $.tooltipster._plugin({
 				// TODO: when there are several <title> tags (not supported in
 				// today's browsers yet though, still an RFC draft), pick the right
 				// one based on its "lang" attribute 
-				var $title = self.__instance._$origin.find('title');
+				var $title = self.__instance._$origin.find('>title');
 				
 				if ($title[0]) {
-					self.__instance.content($title.text());
+					
+					var title = $title.text();
+					
+					self.__hadTitleTag = true;
+					self.__instance._$origin.data('tooltipster-initialTitle', title);
+					self.__instance.content(title);
+					
+					$title.remove();
 				}
 			}
 			
@@ -115,18 +123,35 @@ $.tooltipster._plugin({
 				})
 				// if jQuery < v3.0, we have to remove the class ourselves
 				._on('destroyed.'+ self.namespace, function() {
-					self.destroy();
+					self.__destroy();
 				});
 		},
 		
 		__destroy: function() {
 			
-			if (!self.__instance._$origin.hasClass('tooltipstered')) {
-				var c = self.__instance._$origin.attr('class').replace('tooltipstered', '');
-				self.__instance._$origin.attr('class', c);
+			if (!this.__instance._$origin.hasClass('tooltipstered')) {
+				var c = this.__instance._$origin.attr('class').replace('tooltipstered', '');
+				this.__instance._$origin.attr('class', c);
 			}
 			
-			self.__instance._off('.'+ self.namespace);
+			this.__instance._off('.'+ this.namespace);
+			
+			// if the content was provided as a title tag, we may need to restore it
+			if (this.__hadTitleTag) {
+				
+				// if a title attribute was restored, we just need to replace it with a tag
+				var title = this.__instance._$origin.attr('title');
+				
+				if (title) {
+					
+					// must be namespaced to work
+					$(document.createElementNS('http://www.w3.org/2000/svg', 'title'))
+						.text(title)
+						.appendTo(this.__instance._$origin);
+					
+					this.__instance._$origin.removeAttr('title');
+				}
+			}
 		}
 	}
 });

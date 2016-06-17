@@ -86,7 +86,7 @@ var defaults = {
 		hasTransitions: transitionSupport(),
 		IE: false,
 		// don't set manually, it will be updated by a build task after the manifest
-		semVer: '4.0.1',
+		semVer: '4.0.2',
 		window: win
 	},
 	core = function() {
@@ -2468,13 +2468,6 @@ $.Tooltipster.prototype = {
 					self.__destroying = false;
 					self.__destroyed = true;
 					
-					// last event
-					self._trigger('destroyed');
-					
-					// unbind private and public event listeners
-					self._off();
-					self.off();
-					
 					self._$origin
 						.removeData(self.__namespace)
 						// remove the open trigger listeners
@@ -2528,13 +2521,20 @@ $.Tooltipster.prototype = {
 						}
 					}
 					
+					// last event
+					self._trigger('destroyed');
+					
+					// unbind private and public event listeners
+					self._off();
+					self.off();
+					
 					// remove external references, just in case
 					self.__Content = null;
-					self._$origin = null;
 					self.__$emitterPrivate = null;
 					self.__$emitterPublic = null;
-					self._$tooltip = null;
 					self.__options.parent = null;
+					self._$origin = null;
+					self._$tooltip = null;
 					
 					// make sure the object is no longer referenced in there to prevent
 					// memory leaks
