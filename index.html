@@ -1077,7 +1077,7 @@ $(document).ready(function() {
     target: number
 }</pre>
 			
-			<p><span class="code">coords</span> properties determine the position of the tooltip and are relative to the viewport.</p>
+			<p><span class="code">coord</span> properties determine the position of the tooltip and are relative to the viewport.</p>
 			
 			<p><span class="code">distance</span> is the offset that will be applied between the origin and the tooltip.</p>
 			
@@ -1085,15 +1085,15 @@ $(document).ready(function() {
 			
 			<p><span class="code">size</span> properties tell you the size that your tooltip will have. It is either the natural size of the tooltip, or a size that has been set by Tooltipster to fit best on screen according to your requirements.</p>
 			
-			<p><span class="code">target</span> represents the location Tooltipster thinks the tooltip should ideally be centered on, and the arrow aiming at. It is given as the distance from the relevant edge of the viewport (left edge if the side is "top" or "bottom", top edge if the side is "left" or "right"). The target is usually the middle of the origin, but can be somewhere else when the origin is actually a portion of text split in several lines. Editing this value will change the location the arrow is aiming at but will not change the position of the tooltip itself (use <span class="code">coords</span> for that).</p>
+			<p><span class="code">target</span> represents the location Tooltipster thinks the tooltip should ideally be centered on, and the arrow aiming at. It is given as the distance from the relevant edge of the viewport (left edge if the side is "top" or "bottom", top edge if the side is "left" or "right"). The target is usually the middle of the origin, but can be somewhere else when the origin is actually a portion of text split in several lines. Editing this value will change the location the arrow is aiming at but will not change the position of the tooltip itself (use <span class="code">coord</span> for that).</p>
 			
 			<p>You may look at the source code of this documentation to see how the custom positioning demo at the top of this page was made. Here is the simplest example, let's just move the tooltip by 10 pixels to the bottom-right:</p>
 			
 			<pre class="prettyprint">
 $('#my-tooltip').tooltipster({
     functionPosition: function(instance, helper, position){
-        position.coords.top += 10;
-        position.coords.left += 10;
+        position.coord.top += 10;
+        position.coord.left += 10;
         return position;
     }
 });
