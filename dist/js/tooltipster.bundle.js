@@ -2465,6 +2465,8 @@ $.Tooltipster.prototype = {
 				
 				self._close(null, function() {
 					
+					self._trigger('destroy');
+					
 					self.__destroying = false;
 					self.__destroyed = true;
 					
