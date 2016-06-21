@@ -90,35 +90,41 @@ $.tooltipster._plugin({
 					}
 				})
 				// if jQuery < v3.0, we have to remove the class ourselves
-				._on('destroyed.'+ self.namespace, function() {
+				._on('destroy.'+ self.namespace, function() {
 					self.__destroy();
 				});
 		},
 		
 		__destroy: function() {
 			
-			if (!this.__instance._$origin.hasClass('tooltipstered')) {
-				var c = this.__instance._$origin.attr('class').replace('tooltipstered', '');
-				this.__instance._$origin.attr('class', c);
+			var self = this;
+			
+			if (!self.__instance._$origin.hasClass('tooltipstered')) {
+				var c = self.__instance._$origin.attr('class').replace('tooltipstered', '');
+				self.__instance._$origin.attr('class', c);
 			}
 			
-			this.__instance._off('.'+ this.namespace);
+			self.__instance._off('.'+ self.namespace);
 			
 			// if the content was provided as a title tag, we may need to restore it
-			if (this.__hadTitleTag) {
+			if (self.__hadTitleTag) {
 				
-				// if a title attribute was restored, we just need to replace it with a tag
-				var title = this.__instance._$origin.attr('title');
-				
-				if (title) {
+				// this must happen after Tooltipster restored (or not) the title attr
+				self.__instance.one('destroyed', function() {
 					
-					// must be namespaced to work
-					$(document.createElementNS('http://www.w3.org/2000/svg', 'title'))
-						.text(title)
-						.appendTo(this.__instance._$origin);
+					// if a title attribute was restored, we just need to replace it with a tag
+					var title = self.__instance._$origin.attr('title');
 					
-					this.__instance._$origin.removeAttr('title');
-				}
+					if (title) {
+						
+						// must be namespaced to work
+						$(document.createElementNS('http://www.w3.org/2000/svg', 'title'))
+							.text(title)
+							.appendTo(self.__instance._$origin);
+						
+						self.__instance._$origin.removeAttr('title');
+					}
+				});
 			}
 		}
 	}
