@@ -643,16 +643,16 @@ functionInit(instance, helper){
 			<pre class="prettyprint">
 // initialize your tooltip as usual:
 $('#my-tooltip').tooltipster({});
-// ...at some point, you may decide to open the tooltip:
-$('#my-tooltip').tooltipster('open');
-// ...and update its content:
+// at some point you may decide to update its content:
 $('#my-tooltip').tooltipster('content', 'My new content');
+// ...and open it:
+$('#my-tooltip').tooltipster('open');
 
 // NOTE: most methods are actually chainable, as you would expect them to be:
 $('#my-other-tooltip')
     .tooltipster({})
-    .tooltipster('open')
-    .tooltipster('content', 'My new content');</pre>
+    .tooltipster('content', 'My new content')
+    .tooltipster('open');</pre>
 			
 			<p>Example of the second syntax:</p>
 			
