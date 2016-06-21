@@ -1292,10 +1292,10 @@ $('#my-element').tooltipster({
 			
 			<p>If you go the delegation way, you will rely on the bubbling of events (mouseenter or click) triggered on their origin. That may be an issue if these events are stopped from bubbling at some point, and you might run into race conditions depending on how you handle things. And of course, the tooltips won't be initialized until their origin is hovered/clicked, which may be an issue if you wish to manipulate them programmatically or if you use a plugin which is supposed to start working before the tooltip opens.</p>
 			
-			<p>If you understand these caveats and are willing to proceed, the code below will do the work. You might want to change <span class="code">'.tooltip'</span> to something else and switch from <span class="code">'mouseenter touchstart'</span> to <span class="code">'click touchend'</span> if you want a click trigger.</p>
+			<p>If you understand these caveats and are willing to proceed, the code below will do the work. You might want to change <span class="code">'.tooltip'</span> to something else and switch from <span class="code">'mouseenter'</span> to <span class="code">'click'</span> if you want a click trigger.</p>
 			
 			<pre class="prettyprint">
-$('body').on('mouseenter touchstart', '.tooltip:not(.tooltipstered)', function(){
+$('body').on('mouseenter', '.tooltip:not(.tooltipstered)', function(){
     $(this)
         .tooltipster({ ... })
         .tooltipster('open');
