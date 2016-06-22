@@ -657,7 +657,7 @@ $.Tooltipster.prototype = {
 			$document = $(env.window.document),
 			$window = $(env.window),
 			$parent = $target,
-		// some useful properties of important elements
+			// some useful properties of important elements
 			geo = {
 				// available space for the tooltip, see down below
 				available: {
@@ -1324,7 +1324,7 @@ $.Tooltipster.prototype = {
 			// if the origin or tooltip elements have been removed.
 			// Note: we could destroy the instance now if the origin has
 			// been removed but we'll leave that task to our garbage collector
-			if (!bodyContains(self._$origin) || !bodyContains(self.__namespace)) {
+			if (!bodyContains(self._$origin) || !bodyContains(self._$tooltip)) {
 				self._close();
 			}
 			// if everything is alright
@@ -2751,7 +2751,7 @@ $.Tooltipster.prototype = {
 			
 			// if the tooltip has not been removed from DOM manually (or if it
 			// has been detached on purpose)
-			if (bodyContains(self.__namespace) || tooltipIsDetached) {
+			if (bodyContains(self._$tooltip) || tooltipIsDetached) {
 				
 				if (!tooltipIsDetached) {
 					// detach in case the tooltip overflows the window and adds
@@ -3214,14 +3214,17 @@ function areEqual(a,b) {
 /**
  * A fast function to check if an element is still in the DOM. It
  * tries to use an id as ids are indexed by the browser, or falls
- * back to jQuery's `contains` method.
+ * back to jQuery's `contains` method. May fail if two elements
+ * have the same id, but so be it
  *
- * @param {string|object} ref An id or a jQuery-wrapped HTML element
+ * @param {object} $obj A jQuery-wrapped HTML element
  * @return {boolean}
  */
-function bodyContains(ref) {
-	var id = (typeof ref === 'string') ? ref : ref.attr('id');
-	return id ? !!env.window.document.getElementById(id) : $.contains(env.window.document.body, ref[0]);
+function bodyContains($obj) {
+	var id = $obj.attr('id'),
+		el = id ? env.window.document.getElementById(id) : null;
+	// must also check that the element with the id is the one we want
+	return el ? el === $obj[0] : $.contains(env.window.document.body, $obj[0]);
 }
 
 // detect IE versions for dirty fixes
