@@ -236,9 +236,9 @@ $('.tooltip').tooltipster({
         $(document).ready(function() {
             
             $('#origin').tooltipster({
-                // we detach the content from the page and give it to Tooltipster
+                // we detach the element from the page and give it to Tooltipster to serve as content
                 content: $('#tooltip_content').detach(),
-                // if you use a same element as content for several tooltips, set this option to true
+                // if you use a single element as content for several tooltips, set this option to true
                 contentCloning: false
             });
         });
