@@ -86,7 +86,7 @@ var defaults = {
 		hasTransitions: transitionSupport(),
 		IE: false,
 		// don't set manually, it will be updated by a build task after the manifest
-		semVer: '4.0.4',
+		semVer: '4.0.5',
 		window: win
 	},
 	core = function() {
@@ -1836,7 +1836,6 @@ $.Tooltipster.prototype = {
 								});
 							});
 							
-							
 							if (	self.__options.triggerClose.mouseleave
 								||	(self.__options.triggerClose.touchleave && env.hasTouchCapability)
 							) {
@@ -3170,12 +3169,14 @@ Ruler.prototype = {
 		
 		this.__forceRedraw();
 		
-		var tooltipBrc = this.__$tooltip[0].getBoundingClientRect(),
+		var tooltipBcr = this.__$tooltip[0].getBoundingClientRect(),
 			result = { size: {
-				// brc.width/height are not defined in IE8- but in this
-				// case, brc.right/bottom will have the same value
-				height: tooltipBrc.bottom,
-				width: tooltipBrc.right
+				// bcr.width/height are not defined in IE8- but in this
+				// case, bcr.right/bottom will have the same value
+				// except in iOS 8+ where tooltipBcr.bottom is wrong after scrolling
+				// for reasons yet to be determined
+				height: tooltipBcr.height || tooltipBcr.bottom,
+				width: tooltipBcr.right
 			}};
 		
 		if (this.constraints) {
@@ -3192,20 +3193,20 @@ Ruler.prototype = {
 			
 			var $content = this.__$tooltip.find('.tooltipster-content'),
 				height = this.__$tooltip.outerHeight(),
-				contentBrc = $content[0].getBoundingClientRect(),
+				contentBcr = $content[0].getBoundingClientRect(),
 				fits = {
 					height: height <= this.constraints.height,
 					width: (
 						// this condition accounts for min-width property that
 						// may apply
-						tooltipBrc.width <= this.constraints.width
+						tooltipBcr.width <= this.constraints.width
 							// the -1 is here because scrollWidth actually returns
-							// a rounded value, and may be greater than brc.width if
+							// a rounded value, and may be greater than bcr.width if
 							// it was rounded up. This may cause an issue for contents
 							// which actually really overflow  by 1px or so, but that
 							// should be rare. Not sure how to solve this efficiently.
 							// See http://blogs.msdn.com/b/ie/archive/2012/02/17/sub-pixel-rendering-and-the-css-object-model.aspx
-						&&	contentBrc.width >= $content[0].scrollWidth - 1
+						&&	contentBcr.width >= $content[0].scrollWidth - 1
 					)
 				};
 			
