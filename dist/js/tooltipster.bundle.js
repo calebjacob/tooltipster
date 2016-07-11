@@ -86,7 +86,7 @@ var defaults = {
 		hasTransitions: transitionSupport(),
 		IE: false,
 		// don't set manually, it will be updated by a build task after the manifest
-		semVer: '4.0.5',
+		semVer: '4.0.6',
 		window: win
 	},
 	core = function() {
@@ -3173,10 +3173,10 @@ Ruler.prototype = {
 			result = { size: {
 				// bcr.width/height are not defined in IE8- but in this
 				// case, bcr.right/bottom will have the same value
-				// except in iOS 8+ where tooltipBcr.bottom is wrong after scrolling
-				// for reasons yet to be determined
+				// except in iOS 8+ where tooltipBcr.bottom/right are wrong
+				// after scrolling for reasons yet to be determined
 				height: tooltipBcr.height || tooltipBcr.bottom,
-				width: tooltipBcr.right
+				width: tooltipBcr.width || tooltipBcr.right
 			}};
 		
 		if (this.constraints) {
