@@ -235,7 +235,7 @@ $('.tooltip').tooltipster({
     &lt;script&#62;
         $(document).ready(function() {
             
-            $('#origin').tooltipster({
+            $('#tooltip').tooltipster({
                 // we detach the element from the page and give it to Tooltipster to serve as content
                 content: $('#tooltip_content').detach(),
                 // if you use a single element as content for several tooltips, set this option to true
@@ -246,17 +246,51 @@ $('.tooltip').tooltipster({
 &lt;/head&#62;
 
 &lt;body&#62;
-    &lt;div id="origin"&#62;
+    &lt;div id="tooltip"&#62;
         This div has a tooltip with HTML when you hover over it!
     &lt;/div&#62;
     &lt;span id="tooltip_content"&#62;
        &lt;img src="myimage.png" /&gt; &lt;strong&gt;This is the content of my tooltip!&lt;/strong&gt;
     &lt;/span&#62;
 &lt;/body&#62;</pre>
-
+			
 			<p>Tip: you might wish to make the <span class="code">#tooltip_content</span> span initially invisible with <span class="code">display:none</span>. In that case, don't forget to make it visible again before you give it to Tooltipster: <span class="code">content: $('#tooltip_content').detach().show()</span></p>
 			
-			<p>Another way of achieving this is to put encoded HTML markup directly in your title attribute and set the <span class="code">contentAsHTML</span> option to <span class="code">true</span>:</p>
+			<p>If you have several different tooltips that you'd like to initialize with a single call, you can adapt your HTML and use the <span class="code">functionInit</span> option:</p>
+			
+			<pre class="prettyprint">
+&lt;head&#62;
+    ...
+    &lt;script&#62;
+        $(document).ready(function() {
+            
+            $('.tooltip').tooltipster({
+                functionInit: function(instance, helper){
+                    var content = $(helper.origin).find('.tooltip_content').detach();
+                    instance.content(content);
+                }
+            });
+        });
+    &lt;/script&#62;
+&lt;/head&#62;
+
+&lt;body&#62;
+    &lt;div class="tooltip"&#62;
+        This div has a tooltip with HTML when you hover over it!
+        &lt;span class="tooltip_content"&#62;
+           &lt;img src="myimage.png" /&gt; &lt;strong&gt;This is the content of my tooltip!&lt;/strong&gt;
+        &lt;/span&#62;
+    &lt;/div&#62;
+				
+    &lt;div class="tooltip"&#62;
+        This other div also has tooltip with HTML
+        &lt;span class="tooltip_content"&#62;
+           &lt;img src="otherimage.png" /&gt; &lt;strong&gt;This is the text of the second tooltip!&lt;/strong&gt;
+        &lt;/span&#62;
+    &lt;/div&#62;
+&lt;/body&#62;</pre>
+			
+			<p>Another way is to put encoded HTML markup directly in your title attribute and set the <span class="code">contentAsHTML</span> option to <span class="code">true</span>:</p>
 
 			<pre class="prettyprint">
 &lt;head&#62;
@@ -264,7 +298,7 @@ $('.tooltip').tooltipster({
     &lt;script&#62;
         $(document).ready(function() {
 
-            $('#origin').tooltipster({
+            $('#tooltip').tooltipster({
                 contentAsHTML: true
             });
         });
@@ -272,7 +306,7 @@ $('.tooltip').tooltipster({
 &lt;/head&#62;
 
 &lt;body&#62;
-    &lt;div id="origin" title="&amp;lt;span&amp;gt;&amp;lt;img src=&amp;quot;myimage.png&amp;quot; /&amp;gt; &amp;lt;strong&amp;gt; This is the content of my tooltip!&amp;lt;/strong&amp;gt; &amp;lt;/span&amp;gt;" &gt;
+    &lt;div id="tooltip" title="&amp;lt;span&amp;gt;&amp;lt;img src=&amp;quot;myimage.png&amp;quot; /&amp;gt; &amp;lt;strong&amp;gt; This is the content of my tooltip!&amp;lt;/strong&amp;gt; &amp;lt;/span&amp;gt;" &gt;
         This div has a tooltip with HTML when you hover over it!
     &lt;/div&#62;
 &lt;/body&#62;</pre>
