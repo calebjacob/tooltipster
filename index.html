@@ -1398,6 +1398,10 @@ $("#my-tooltip").tooltipster({
 			
 			<p><span class="code">created</span> is meant for plugin makers and happens when an HTML element has been created for the tooltip.</p>
 			
+			<p><span class="code">destroy</span> events happen when the tooltip is closed about to be destroyed.</p>
+			
+			<p><span class="code">destroyed</span> events happen when the tooltip has been destroyed.</p>
+			
 			<p><span class="code">dismissable</span> events affect the closing of the tooltip when the <span class="code">mouseleave</span> and <span class="code">touchleave</span> close triggers are used. Read the source for more information.</p>
 			
 			<p><span class="code">format</span> has a special <span class="code">event.format</span> property which is a function you may use to format the content before display. Just provide your formatted content as first argument. For your convenience, the original content is provided in the <span class="code">event.content</span> property.</p>
@@ -1405,10 +1409,6 @@ $("#my-tooltip").tooltipster({
 			<p><span class="code">geometry</span> happens when Tooltipster determines the size and coordinates of the origin, in order to know where to place the tooltip. The computed properties (left, top, width and height) are passed in the <span class="code">event.geometry</span> object. It has a special <span class="code">event.edit</span> property which is a function you may use to provide this information yourself. Just provide the edited geometry object as first argument. In some cases, this may be easier to use than <span class="code">functionPosition</span> as it allows you to provide a specific target without having to compute the final position yourself.</p>
 			
 			<p><span class="code">init</span> is triggered upon tooltip initialization and may thus be heard only by a core listener.</p>
-			
-			<p><span class="code">state</span> happens every time the tooltip enters a different state. The state value is held in <span class="code">event.state</span> and may be <span class="code">'appearing'</span>, <span class="code">'stable'</span>, <span class="code">'disappearing'</span> or <span class="code">'closed'</span>.</p>
-			
-			<p><span class="code">updated</span> happens when a call to the <span class="code">content</span> method has updated the content. The event has a special <span class="code">event.content</span> property.</p>
 			
 			<p><span class="code">position</span> happens during the positioning process and can be used to provide a custom position (see <span class="code">functionPosition</span>). The proposed position is present in <span class="code">event.position</span>. The special <span class="code">event.edit</span> property is the function you may call with your edited positioning values as first argument.</p>
 			
@@ -1427,6 +1427,10 @@ $("#my-tooltip").tooltipster({
 			<p><span class="code">startcancel</span> happens after <span class="code">start</span> at the end of the opening delay (see the <span class="code">delay</span> option) if the tooltip is not to be opened.</p>
 			
 			<p><span class="code">startend</span> happens after <span class="code">start</span> at the end of the opening delay (see the <span class="code">delay</span> option) if the tooltip may be opened.</p>
+			
+			<p><span class="code">state</span> happens every time the tooltip enters a different state. The state value is held in <span class="code">event.state</span> and may be <span class="code">'appearing'</span>, <span class="code">'stable'</span>, <span class="code">'disappearing'</span> or <span class="code">'closed'</span>.</p>
+			
+			<p><span class="code">updated</span> happens when a call to the <span class="code">content</span> method has updated the content. The event has a special <span class="code">event.content</span> property.</p>
 			
 			
 			<h3 id="plugins">Tooltipster's plugin system <a href="#usecases">&#8657;</a></h3>

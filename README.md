@@ -81,3 +81,34 @@ instancesLatest()
 on, one, off, triggerHandler  
 origins()  
 setDefaults({})  
+
+Events
+------
+
+after  
+before  
+close  
+closing  
+created  
+destroy  
+destroyed  
+dismissable  
+format  
+geometry  
+init  
+state  
+ready  
+reposition  
+repositioned  
+scroll  
+start  
+startcancel  
+startend  
+updated
+
+sideTip events
+--------------
+
+position  
+positionTest  
+positionTested
