@@ -86,7 +86,7 @@ var defaults = {
 		hasTransitions: transitionSupport(),
 		IE: false,
 		// don't set manually, it will be updated by a build task after the manifest
-		semVer: '4.0.6',
+		semVer: '4.1.0',
 		window: win
 	},
 	core = function() {
@@ -528,7 +528,20 @@ $.Tooltipster.prototype = {
 				self.__contentSet(self.__options.content);
 			}
 			else {
-				self.__contentSet(initialTitle);
+				
+				var selector = self._$origin.attr('data-tooltip-content'),
+					$el;
+				
+				if (selector){
+					$el = $(selector);
+				}
+				
+				if ($el && $el[0]) {
+					self.__contentSet($el.first());
+				}
+				else {
+					self.__contentSet(initialTitle);
+				}
 			}
 			
 			self._$origin
