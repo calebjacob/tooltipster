@@ -299,6 +299,10 @@ div#github {
 	transition: none;
 }
 
+#templates {
+	display: none;
+}
+
 pre {
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;

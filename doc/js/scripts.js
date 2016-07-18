@@ -43,16 +43,6 @@ $(function() {
 	});
 	
 	$('#demo-html').tooltipster({
-		content: $(
-			'<div>' +
-				'<img src="doc/images/spiderman.png" width="50" height="50" />' +
-				'<p style="text-align:left;">' +
-					'<strong>Lorem ipsum dolor sit amet</strong>' +
-					'<br />' +
-					'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu.' +
-				'</p>' +
-			'</div>'
-		),
 		// setting a same value to minWidth and maxWidth will result in a fixed width
 		maxWidth: 400,
 		side: 'right'
@@ -209,7 +199,6 @@ $(function() {
 		});
 	
 	$('#demo-position').tooltipster({
-		content: $('<div>I\'m the most accurate tooltip ever! Let me fit to your layout the way you want to. I\'m great to create menus too :)</div>'),
 		// 8 extra pixels for the arrow to overflow the grid
 		functionPosition: function(instance, helper, data){
 			

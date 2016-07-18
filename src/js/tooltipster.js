@@ -506,7 +506,20 @@ $.Tooltipster.prototype = {
 				self.__contentSet(self.__options.content);
 			}
 			else {
-				self.__contentSet(initialTitle);
+				
+				var selector = self._$origin.attr('data-tooltip-content'),
+					$el;
+				
+				if (selector){
+					$el = $(selector);
+				}
+				
+				if ($el && $el[0]) {
+					self.__contentSet($el.first());
+				}
+				else {
+					self.__contentSet(initialTitle);
+				}
 			}
 			
 			self._$origin

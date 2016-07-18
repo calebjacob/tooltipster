@@ -113,7 +113,7 @@
 					<span id="demo-events" title="Press any key on your keyboard or click anywhere in the page to close me">Click</span> Custom open/close triggers
 				</li>
 				<li>
-					<span id="demo-html">Hover</span> HTML, side, fixed size
+					<span id="demo-html" data-tooltip-content="#demo-html-content">Hover</span> HTML, side, fixed size
 				</li>
 				<li>
 					<span id="demo-smart">Drag</span> Smart positioning
@@ -146,7 +146,7 @@
 					<span id="demo-complex" title="I also stick to fixed-positioned, moving and resizing elements. Try scrolling!">Click</span> Position tracking system
 				</li>
 				<li>
-					<span id="demo-position">Hover</span> <div id="demo-position-grid">Custom position</div>
+					<span id="demo-position" data-tooltip-content="#demo-position-content">Hover</span> <div id="demo-position-grid">Custom position</div>
 				</li>
 				<li>
 					<span id="demo-plugin" title="I use a plugin to follow the mouse!">Hover</span> Extensible with plugins
@@ -155,6 +155,17 @@
 			</ul>
 			<br class="clear" />
 		</section>
+		
+		<div id="templates">
+			<div id="demo-html-content">
+				<img src="doc/images/spiderman.png" width="50" height="50" />
+				<p style="text-align:left;">
+					<strong>Lorem ipsum dolor sit amet</strong><br />
+					Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu.
+				</p>
+			</div>
+			<span id="demo-position-content">I'm the most accurate tooltip ever! Let me fit to your layout the way you want to. I'm great to create menus too :)</span>
+		</div>
 		
 		<section id="getting-started">
 			
@@ -227,82 +238,29 @@ $('.tooltip').tooltipster({
 			
 			<h3 id="html">5. Use HTML inside your tooltips</h3>
 			
-			<p>Tooltipster allows you to use any HTML markup inside your tooltips. It means that you can insert things like images and text formatting tags. To achieve this, you may either provide HTML content in the options, or set HTML content with a method call.</p>
+			<p>Tooltipster allows you to use any HTML markup inside your tooltips. It means that you can insert things like images and text formatting tags.</p>
 			
-			<h4>a) Providing the HTML content in the options</h4>
+			<p>Instead of a <span class="code">title</span> attribute, use a <span class="code">data-tooltip-content</span> attribute to provide a selector that corresponds to the HTML element of your page that should be used as content. This is your HTML:</p>
 			
 			<pre class="prettyprint">
-&lt;head&#62;
-    ...
-    &lt;script&#62;
-        $(document).ready(function() {
-            
-            $('#tooltip').tooltipster({
-                // we detach the element from the page and give it to Tooltipster to serve as content
-                content: $('#tooltip_content').detach(),
-                // if you use a single element as content for several tooltips, set this option to true
-                contentCloning: false
-            });
-        });
-    &lt;/script&#62;
-&lt;/head&#62;
+&lt;span class="tooltip" data-tooltip-content="#tooltip_content"&#62;This span has a tooltip with HTML when you hover over it!&lt;/span&#62;
 
-&lt;body&#62;
-    &lt;div id="tooltip"&#62;
-        This div has a tooltip with HTML when you hover over it!
-    &lt;/div&#62;
+&lt;div class="tooltip_templates"&#62;
     &lt;span id="tooltip_content"&#62;
-       &lt;img src="myimage.png" /&gt; &lt;strong&gt;This is the content of my tooltip!&lt;/strong&gt;
+        &lt;img src="myimage.png" /&gt; &lt;strong&gt;This is the content of my tooltip!&lt;/strong&gt;
     &lt;/span&#62;
-&lt;/body&#62;</pre>
+&lt;/div&#62;</pre>
 			
-			<p>Tip: you might wish to make the <span class="code">#tooltip_content</span> span initially invisible with <span class="code">display:none</span>. In that case, don't forget to make it visible again before you give it to Tooltipster: <span class="code">content: $('#tooltip_content').detach().show()</span></p>
+			<p>In your CSS file, add <span class="code">.tooltip_templates { display: none; }</span> so that the content does not get displayed outside of the tooltip.</p>
 			
-			<p>Notice: make sure you have tight control over the HTML content you wish to display in the tooltip, as unwanted <span class="code">&lt;script&gt;</span> or <span class="code">&lt;iframe&gt;</span> tags for example would be a serious security issue for your website.</p>
-			
-			<h4>b) Setting HTML content with a method call</h4>
-			
-			<p>While the previous method works fine when you handle one tooltip at a time, it becomes tedious when you have plenty. That's when you should start using method calls, typically during <span class="code">functionInit</span>:</p>
+			<p>Important: if you have two tooltips that have the same <span class="code">data-tooltip-content</span> attribute (that is to say, want to both use the same HTML element), please set the <span class="code">contentCloning</span> option to <span class="code">true</span> when you initialize your tooltips:</p>
 			
 			<pre class="prettyprint">
-&lt;head&#62;
-    ...
-    &lt;script&#62;
-        $(document).ready(function() {
-            
-            $('.tooltip').tooltipster({
-                functionInit: function(instance, helper){
-                    var content = $(helper.origin).find('.tooltip_content').detach();
-                    instance.content(content);
-                }
-            });
-        });
-    &lt;/script&#62;
-&lt;/head&#62;
-
-&lt;body&#62;
-    &lt;div class="tooltip"&#62;
-        This div has a tooltip with HTML when you hover over it!
-        &lt;span class="tooltip_content"&#62;
-           &lt;img src="myimage.png" /&gt; &lt;strong&gt;This is the content of my tooltip!&lt;/strong&gt;
-        &lt;/span&#62;
-    &lt;/div&#62;
-				
-    &lt;div class="tooltip"&#62;
-        This other div also has tooltip with HTML
-        &lt;span class="tooltip_content"&#62;
-           &lt;img src="otherimage.png" /&gt; &lt;strong&gt;This is the text of the second tooltip!&lt;/strong&gt;
-        &lt;/span&#62;
-    &lt;/div&#62;
-&lt;/body&#62;</pre>
+$('.tooltip').tooltipster({
+    contentCloning: true
+});</pre>
 			
-			<h4>Bonus: a plugin to make it easier</h4>
-			
-			<p>The <span class="code">htmlTitle</span> plugin for Tooltipster simplifies and automates method b). You can check it out <a href="https://github.com/louisameline/tooltipster-htmlTitle" target="_blank">here</a>.</p>
-			
-			<h4>Deprecated: writing encoded HTML in the title attribute.</h4>
-			
-			<p>If you write encoded HTML in the <span class="code">title</span> attribute and set the <span class="code">contentAsHTML</span> option to <span class="code">true</span>, it will be displayed as HTML in the tooltip.</p>
+			<p>Note: there are alternative ways of setting HTML content in the tooltip, discussed in <a href="#htmlcontentalt">this section</a>.</p>
 			
 			<h3>6. Use plugins</h3>
 			
@@ -314,7 +272,6 @@ $('.tooltip').tooltipster({
 			<p><span class="code">sideTip</span> Shipped with Tooltipster and used by default</p>
 			<p><span class="code">SVG</span> Shipped with Tooltipster, adds SVG support, not enabled by default (see the <a href="#svg">SVG section</a>)</p>
 			<p><span class="code">follower</span> Lets the tooltip follow the cursor. Available <a href="https://github.com/louisameline/tooltipster-follower" target="_blank">here</a></p>
-			<p><span class="code">htmlTitle</span> Makes it easier to choose which HTML element should be used as content for a tooltip. Available <a href="https://github.com/louisameline/tooltipster-htmlTitle" target="_blank">here</a></p>
 			<p><span class="code">scrollableTip</span> Makes the tooltip scrollable when it gets too big. Available <a href="https://github.com/louisameline/tooltipster-scrollableTip" target="_blank">here</a></p>
 			<p><span class="code">discovery</span> Creates groups of tooltips for faster display. Demonstrated in the <a href="#grouped">Grouped tooltips</a> section and available <a href="https://github.com/louisameline/tooltipster-discovery" target="_blank">here</a></p>
 			
@@ -766,6 +723,7 @@ var instances = $.tooltipster.instancesLatest();
 				<li><a href="#triggers">Opening and closing a tooltip: the built-in triggers</a></li>
 				<li><a href="#openclose">Opening and closing a tooltip: the method calls</a></li>
 				<li><a href="#positioning">Achieving custom positioning</a></li>
+				<li><a href="#htmlcontentalt">Alternative ways of setting HTML content</a></li>
 				<li><a href="#data-attributes">Specifying options through data-attributes</a></li>
 				<li><a href="#formatting">Working with data sets</a></li>
 				<li><a href="#status">Status: getting information about the tooltip</a></li>
@@ -1124,6 +1082,47 @@ $('#my-tooltip').tooltipster({
     }
 });
 </pre>
+			
+			<h3 id="htmlcontentalt">Alternative ways of setting HTML content <a href="#usecases">&#8657;</a></h3></h3>
+			
+			<p>Instead of using the <span class="code">data-tooltip-content</span> attribute, you may:</p>
+			
+			<h4>a) Provide HTML content in the options</h4>
+			
+			<pre class="prettyprint">
+$('#tooltip').tooltipster({
+    content: $('#tooltip_content'),
+   // if you use a single element as content for several tooltips, set this option to true
+   contentCloning: false
+});
+</pre>
+			
+			<h4>b) Set HTML content with a method call</h4>
+			
+			<p>Tooltipster's <span class="code">content</span> method allows you to edit the content of the tooltip at any time with greater flexibility. If you had this HTML for example:</p>
+			
+			<pre class="prettyprint">
+&lt;div class="tooltip"&#62;
+    This div has a tooltip with HTML when you hover over it!
+    &lt;span class="tooltip_content"&#62;
+       &lt;img src="myimage.png" /&gt; &lt;strong&gt;This is the content of my tooltip!&lt;/strong&gt;
+    &lt;/span&#62;
+&lt;/div&#62;</pre>
+			
+			<p>You could do this upon initialization:</p>
+
+			<pre class="prettyprint">
+$('.tooltip').tooltipster({
+    functionInit: function(instance, helper){
+        var content = $(helper.origin).find('.tooltip_content').detach();
+            instance.content(content);
+        }
+    });
+});</pre>
+			
+			<h4>c) Deprecated: writing encoded HTML in the title attribute.</h4>
+			
+			<p>If you write encoded HTML in the <span class="code">title</span> attribute and set the <span class="code">contentAsHTML</span> option to <span class="code">true</span>, it will be displayed as HTML in the tooltip.</p>
 			
 			<h3 id="data-attributes">Specifiying options through data-attributes <a href="#usecases">&#8657;</a></h3>
 			
