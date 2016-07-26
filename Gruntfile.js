@@ -144,7 +144,8 @@ module.exports = function(grunt) {
 			dist: {
 				options: {
 					deps: {
-						default: [{'jQuery': '$'}]
+						default: [{'jquery': '$'}],
+						global: [{jQuery: '$'}]
 					},
 					src: 'dist/js/**/!(*.min).js'
 				}
