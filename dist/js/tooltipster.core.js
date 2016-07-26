@@ -7,14 +7,14 @@
 (function (root, factory) {
   if (typeof define === 'function' && define.amd) {
     // AMD. Register as an anonymous module unless amdModuleId is set
-    define(["jQuery"], function (a0) {
+    define(["jquery"], function (a0) {
       return (factory(a0));
     });
   } else if (typeof exports === 'object') {
     // Node. Does not work with strict CommonJS, but
     // only CommonJS-like environments that support module.exports,
     // like Node.
-    module.exports = factory(require("jQuery"));
+    module.exports = factory(require("jquery"));
   } else {
     factory(jQuery);
   }
@@ -86,7 +86,7 @@ var defaults = {
 		hasTransitions: transitionSupport(),
 		IE: false,
 		// don't set manually, it will be updated by a build task after the manifest
-		semVer: '4.1.0',
+		semVer: '4.1.1',
 		window: win
 	},
 	core = function() {
