@@ -47,9 +47,10 @@ var defaults = {
 		updateAnimation: 'rotate',
 		zIndex: 9999999
 	},
-	// we'll avoid using window as a global. To run in Node,
-	// window must be mocked up through $.tooltipster.__setWindow
-	win = (window !== undefined) ? window : null,
+	// we'll avoid using the 'window' global as a good practice but npm's
+	// jquery@<2.1.0 package actually requires a 'window' global, so not sure
+	// it's useful at all
+	win = (typeof window != 'undefined') ? window : null,
 	// env will be proxied by the core for plugins to have access its properties
 	env = {
 		// detect if this device can trigger touch events. Better have a false
@@ -57,9 +58,11 @@ var defaults = {
 		// https://github.com/Modernizr/Modernizr/blob/master/feature-detects/touchevents.js
 		// http://stackoverflow.com/questions/4817029/whats-the-best-way-to-detect-a-touch-screen-device-using-javascript
 		hasTouchCapability: !!(
-				'ontouchstart' in win
-			||	(win.DocumentTouch && document instanceof DocumentTouch)
-			||	navigator.maxTouchPoints
+			win
+			&&	(	'ontouchstart' in win
+				||	(win.DocumentTouch && win.document instanceof win.DocumentTouch)
+				||	win.navigator.maxTouchPoints
+			)
 		),
 		hasTransitions: transitionSupport(),
 		IE: false,
@@ -3249,7 +3252,10 @@ else if (uA.toLowerCase().indexOf('edge/') != -1) env.IE = parseInt(uA.toLowerCa
 
 // detecting support for CSS transitions
 function transitionSupport() {
+	
 	// env.window is not defined yet when this is called
+	if (!win) return false;
+	
 	var b = win.document.body || win.document.documentElement,
 		s = b.style,
 		p = 'transition',

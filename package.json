@@ -35,7 +35,7 @@
 	}],
 	"name": "tooltipster",
 	"peerDependencies": {
-		"jquery": ">=1.10.0"
+		"jquery": ">=1.11.0"
 	},
 	"repository": {
 		"type": "git",
@@ -44,5 +44,5 @@
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
-	"version": "4.1.1"
+	"version": "4.1.2"
 }
