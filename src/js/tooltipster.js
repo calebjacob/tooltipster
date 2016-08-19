@@ -1533,7 +1533,8 @@ $.Tooltipster.prototype = {
 						// call our constructor custom callback function
 						if (self.__options.functionAfter) {
 							self.__options.functionAfter.call(self, self, {
-								event: event
+								event: event,
+								origin: self._$origin[0]
 							});
 						}
 						
