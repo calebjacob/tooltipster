@@ -89,7 +89,7 @@ var defaults = {
 		hasTransitions: transitionSupport(),
 		IE: false,
 		// don't set manually, it will be updated by a build task after the manifest
-		semVer: '4.1.2',
+		semVer: '4.1.3',
 		window: win
 	},
 	core = function() {
@@ -1555,7 +1555,8 @@ $.Tooltipster.prototype = {
 						// call our constructor custom callback function
 						if (self.__options.functionAfter) {
 							self.__options.functionAfter.call(self, self, {
-								event: event
+								event: event,
+								origin: self._$origin[0]
 							});
 						}
 						
