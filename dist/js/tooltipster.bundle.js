@@ -89,7 +89,7 @@ var defaults = {
 		hasTransitions: transitionSupport(),
 		IE: false,
 		// don't set manually, it will be updated by a build task after the manifest
-		semVer: '4.1.3',
+		semVer: '4.1.4',
 		window: win
 	},
 	core = function() {
@@ -875,8 +875,8 @@ $.Tooltipster.prototype = {
 		geo.origin.windowOffset.right = geo.origin.windowOffset.left + geo.origin.size.width;
 		geo.origin.windowOffset.bottom = geo.origin.windowOffset.top + geo.origin.size.height;
 		
-		geo.origin.offset.left = geo.origin.windowOffset.left + env.window.scrollX;
-		geo.origin.offset.top = geo.origin.windowOffset.top + env.window.scrollY;
+		geo.origin.offset.left = geo.origin.windowOffset.left + geo.window.scroll.left;
+		geo.origin.offset.top = geo.origin.windowOffset.top + geo.window.scroll.top;
 		geo.origin.offset.bottom = geo.origin.offset.top + geo.origin.size.height;
 		geo.origin.offset.right = geo.origin.offset.left + geo.origin.size.width;
 		
