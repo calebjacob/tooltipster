@@ -11,7 +11,11 @@ module.exports = function(grunt) {
 	
 	grunt.initConfig({
 		clean: {
-			dist: ["dist"]
+			// clear all files
+			dist: ["dist"],
+			// this file is minified by the globbing pattern but is actually not needed
+			// as sideTip's base style is included in the bundle file
+			sideTip: ['dist/css/plugins/tooltipster/sideTip/tooltipster-sideTip.min.css']
 		},
 		compress: {
 			dist: {
@@ -164,7 +168,7 @@ module.exports = function(grunt) {
 	});
 	
 	grunt.registerTask('default', [
-		// 'clean',
+		// 'clean:dist',
 		'copy',
 		'string-replace',
 		'concat:bundle',
@@ -174,6 +178,7 @@ module.exports = function(grunt) {
 		'concat:banner',
 		'concat:bannerMin',
 		'cssmin',
+		'clean:sideTip',
 		'compress'
 	]);
 };
