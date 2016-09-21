@@ -801,7 +801,8 @@ $('.tooltip').tooltipster({
 
             $.get('http://example.com/ajax.php', function(data) {
 
-                // call the 'content' method to update the content of our tooltip with the returned data
+                // call the 'content' method to update the content of our tooltip with the returned data.
+                // note: this content update will trigger an update animation (see the updateAnimation option)
                 instance.content(data);
 
                 // to remember that the data has been loaded
