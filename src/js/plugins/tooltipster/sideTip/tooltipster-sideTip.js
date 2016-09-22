@@ -269,7 +269,13 @@ $.tooltipster._plugin({
 			var $clone = self.__instance._$tooltip.clone(),
 				// start position tests session
 				ruler = $.tooltipster._getRuler($clone),
-				satisfied = false;
+				satisfied = false,
+				animation = self.__instance.option('animation');
+			
+			// an animation class could contain properties that distort the size
+			if (animation) {
+				$clone.removeClass('tooltipster-'+ animation);
+			}
 			
 			// start evaluating scenarios
 			$.each(['window', 'document'], function(i, container) {
