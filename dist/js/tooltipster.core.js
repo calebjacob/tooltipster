@@ -89,7 +89,7 @@ var defaults = {
 		hasTransitions: transitionSupport(),
 		IE: false,
 		// don't set manually, it will be updated by a build task after the manifest
-		semVer: '4.1.4',
+		semVer: '4.1.5',
 		window: win
 	},
 	core = function() {
@@ -2787,27 +2787,31 @@ $.Tooltipster.prototype = {
 		
 		if (!self.__destroyed) {
 			
-			// if the tooltip has not been removed from DOM manually (or if it
-			// has been detached on purpose)
-			if (bodyContains(self._$tooltip) || tooltipIsDetached) {
+			// if the tooltip is still open and the origin is still in the DOM
+			if (self.__state != 'closed' && bodyContains(self._$origin)) {
 				
-				if (!tooltipIsDetached) {
-					// detach in case the tooltip overflows the window and adds
-					// scrollbars to it, so __geometry can be accurate
-					self._$tooltip.detach();
-				}
-				
-				// refresh the geometry object before passing it as a helper
-				self.__Geometry = self.__geometry();
-				
-				// let a plugin fo the rest
-				self._trigger({
-					type: 'reposition',
-					event: event,
-					helper: {
-						geo: self.__Geometry
+				// if the tooltip has not been removed from DOM manually (or if it
+				// has been detached on purpose)
+				if (tooltipIsDetached || bodyContains(self._$tooltip)) {
+					
+					if (!tooltipIsDetached) {
+						// detach in case the tooltip overflows the window and adds
+						// scrollbars to it, so __geometry can be accurate
+						self._$tooltip.detach();
 					}
-				});
+					
+					// refresh the geometry object before passing it as a helper
+					self.__Geometry = self.__geometry();
+					
+					// let a plugin fo the rest
+					self._trigger({
+						type: 'reposition',
+						event: event,
+						helper: {
+							geo: self.__Geometry
+						}
+					});
+				}
 			}
 		}
 		else {
@@ -3230,8 +3234,13 @@ Ruler.prototype = {
 			result.fits = fits.height && fits.width;
 		}
 		
-		// old versions of IE get the width wrong for some reason
-		if (env.IE && env.IE <= 11) {
+		// old versions of IE get the width wrong for some reason and it causes
+		// the text to be broken to a new line, so we round it up. If the width
+		// is the width of the screen though, we can assume it is accurate.
+		if (	env.IE
+			&&	env.IE <= 11
+			&&	result.size.width !== env.window.document.documentElement.clientWidth
+		) {
 			result.size.width = Math.ceil(result.size.width) + 1;
 		}
 		
