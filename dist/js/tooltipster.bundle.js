@@ -89,7 +89,7 @@ var defaults = {
 		hasTransitions: transitionSupport(),
 		IE: false,
 		// don't set manually, it will be updated by a build task after the manifest
-		semVer: '4.1.5',
+		semVer: '4.1.6',
 		window: win
 	},
 	core = function() {
@@ -1835,17 +1835,7 @@ $.Tooltipster.prototype = {
 							$(env.window)
 								// reposition on resize
 								.on('resize.'+ self.__namespace +'-triggerClose', function(e) {
-									
-									var $ae = $(document.activeElement);
-									
-									// reposition only if the resize event was not triggered upon the opening
-									// of a virtual keyboard due to an input field being focused within the tooltip
-									// (otherwise the repositioning would lose the focus)
-									if (	(!$ae.is('input') && !$ae.is('textarea'))
-										||	!$.contains(self._$tooltip[0], $ae[0])
-									) {
-										self.reposition(e);
-									}
+									self.reposition(e);
 								})
 								// same as below for parents
 								.on('scroll.'+ self.__namespace +'-triggerClose', function(e) {
