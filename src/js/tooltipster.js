@@ -1813,7 +1813,17 @@ $.Tooltipster.prototype = {
 							$(env.window)
 								// reposition on resize
 								.on('resize.'+ self.__namespace +'-triggerClose', function(e) {
-									self.reposition(e);
+									
+									var $ae = $(document.activeElement);
+									
+									// reposition only if the resize event was not triggered upon the opening
+									// of a virtual keyboard due to an input field being focused within the tooltip
+									// (otherwise the repositioning would lose the focus)
+									if (	(!$ae.is('input') && !$ae.is('textarea'))
+										||	!$.contains(self._$tooltip[0], $ae[0])
+									) {
+										self.reposition(e);
+									}
 								})
 								// same as below for parents
 								.on('scroll.'+ self.__namespace +'-triggerClose', function(e) {
