@@ -1172,106 +1172,111 @@ $.Tooltipster.prototype = {
 		}
 		else {
 			
-			// if the scroll happened on the window
-			if (event.target === env.window.document) {
+			// if the origin or tooltip have been removed: do nothing, the tracker will
+			// take care of it later
+			if (bodyContains(self._$origin) && bodyContains(self._$tooltip)) {
 				
-				// if the origin has a fixed lineage, window scroll will have no
-				// effect on its position nor on the position of the tooltip
-				if (!self.__Geometry.origin.fixedLineage) {
+				// if the scroll happened on the window
+				if (event.target === env.window.document) {
 					
-					// we don't need to do anything unless repositionOnScroll is true
-					// because the tooltip will already have moved with the window
-					// (and of course with the origin)
-					if (self.__options.repositionOnScroll) {
-						self.reposition(event);
+					// if the origin has a fixed lineage, window scroll will have no
+					// effect on its position nor on the position of the tooltip
+					if (!self.__Geometry.origin.fixedLineage) {
+						
+						// we don't need to do anything unless repositionOnScroll is true
+						// because the tooltip will already have moved with the window
+						// (and of course with the origin)
+						if (self.__options.repositionOnScroll) {
+							self.reposition(event);
+						}
 					}
 				}
-			}
-			// if the scroll happened on another parent of the tooltip, it means
-			// that it's in a scrollable area and now needs to have its position
-			// adjusted or recomputed, depending ont the repositionOnScroll
-			// option. Also, if the origin is partly hidden due to a parent that
-			// hides its overflow, we'll just hide (not close) the tooltip.
-			else {
-				
-				var g = self.__geometry(),
-					overflows = false;
-				
-				// a fixed position origin is not affected by the overflow hiding
-				// of a parent
-				if (self._$origin.css('position') != 'fixed') {
-					
-					self.__$originParents.each(function(i, el) {
-						
-						var $el = $(el),
-							overflowX = $el.css('overflow-x'),
-							overflowY = $el.css('overflow-y');
-						
-						if (overflowX != 'visible' || overflowY != 'visible') {
-							
-							var bcr = el.getBoundingClientRect();
-							
-							if (overflowX != 'visible') {
-								
-								if (	g.origin.windowOffset.left < bcr.left
-									||	g.origin.windowOffset.right > bcr.right
-								) {
-									overflows = true;
-									return false;
-								}
-							}
-							
-							if (overflowY != 'visible') {
-								
-								if (	g.origin.windowOffset.top < bcr.top
-									||	g.origin.windowOffset.bottom > bcr.bottom
-								) {
-									overflows = true;
-									return false;
-								}
-							}
-						}
-						
-						// no need to go further if fixed, for the same reason as above
-						if ($el.css('position') == 'fixed') {
-							return false;
-						}
-					});
-				}
-				
-				if (overflows) {
-					self._$tooltip.css('visibility', 'hidden');
-				}
+				// if the scroll happened on another parent of the tooltip, it means
+				// that it's in a scrollable area and now needs to have its position
+				// adjusted or recomputed, depending ont the repositionOnScroll
+				// option. Also, if the origin is partly hidden due to a parent that
+				// hides its overflow, we'll just hide (not close) the tooltip.
 				else {
-					self._$tooltip.css('visibility', 'visible');
 					
-					// reposition
-					if (self.__options.repositionOnScroll) {
-						self.reposition(event);
-					}
-					// or just adjust offset
-					else {
+					var g = self.__geometry(),
+						overflows = false;
+					
+					// a fixed position origin is not affected by the overflow hiding
+					// of a parent
+					if (self._$origin.css('position') != 'fixed') {
 						
-						// we have to use offset and not windowOffset because this way,
-						// only the scroll distance of the scrollable areas are taken into
-						// account (the scrolltop value of the main window must be
-						// ignored since the tooltip already moves with it)
-						var offsetLeft = g.origin.offset.left - self.__Geometry.origin.offset.left,
-							offsetTop = g.origin.offset.top - self.__Geometry.origin.offset.top;
-						
-						// add the offset to the position initially computed by the display plugin
-						self._$tooltip.css({
-							left: self.__lastPosition.coord.left + offsetLeft,
-							top: self.__lastPosition.coord.top + offsetTop
+						self.__$originParents.each(function(i, el) {
+							
+							var $el = $(el),
+								overflowX = $el.css('overflow-x'),
+								overflowY = $el.css('overflow-y');
+							
+							if (overflowX != 'visible' || overflowY != 'visible') {
+								
+								var bcr = el.getBoundingClientRect();
+								
+								if (overflowX != 'visible') {
+									
+									if (	g.origin.windowOffset.left < bcr.left
+										||	g.origin.windowOffset.right > bcr.right
+									) {
+										overflows = true;
+										return false;
+									}
+								}
+								
+								if (overflowY != 'visible') {
+									
+									if (	g.origin.windowOffset.top < bcr.top
+										||	g.origin.windowOffset.bottom > bcr.bottom
+									) {
+										overflows = true;
+										return false;
+									}
+								}
+							}
+							
+							// no need to go further if fixed, for the same reason as above
+							if ($el.css('position') == 'fixed') {
+								return false;
+							}
 						});
 					}
+					
+					if (overflows) {
+						self._$tooltip.css('visibility', 'hidden');
+					}
+					else {
+						self._$tooltip.css('visibility', 'visible');
+						
+						// reposition
+						if (self.__options.repositionOnScroll) {
+							self.reposition(event);
+						}
+						// or just adjust offset
+						else {
+							
+							// we have to use offset and not windowOffset because this way,
+							// only the scroll distance of the scrollable areas are taken into
+							// account (the scrolltop value of the main window must be
+							// ignored since the tooltip already moves with it)
+							var offsetLeft = g.origin.offset.left - self.__Geometry.origin.offset.left,
+								offsetTop = g.origin.offset.top - self.__Geometry.origin.offset.top;
+							
+							// add the offset to the position initially computed by the display plugin
+							self._$tooltip.css({
+								left: self.__lastPosition.coord.left + offsetLeft,
+								top: self.__lastPosition.coord.top + offsetTop
+							});
+						}
+					}
 				}
+				
+				self._trigger({
+					type: 'scroll',
+					event: event
+				});
 			}
-			
-			self._trigger({
-				type: 'scroll',
-				event: event
-			});
 		}
 		
 		return self;
