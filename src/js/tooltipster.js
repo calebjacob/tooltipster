@@ -17,7 +17,7 @@ var defaults = {
 		IEmin: 6,
 		interactive: false,
 		multiple: false,
-		// must be 'body' for now (default), or an element positioned at (0, 0)
+		// will default to document.body, or must be an element positioned at (0, 0)
 		// in the document, typically like the very top views of an app.
 		parent: null,
 		plugins: ['sideTip'],
@@ -1966,7 +1966,9 @@ $.Tooltipster.prototype = {
 									
 									if (self.__state != 'closed') {
 										
-										var eventNames = '';
+										var eventNames = '',
+											$body = $(env.window.document.body);
+										
 										if (self.__options.triggerClose.click) {
 											eventNames += 'click.'+ self.__namespace +'-triggerClose ';
 										}
@@ -1974,7 +1976,7 @@ $.Tooltipster.prototype = {
 											eventNames += 'touchend.'+ self.__namespace +'-triggerClose';
 										}
 										
-										$(env.window.document.body).on(eventNames, function(event) {
+										$body.on(eventNames, function(event) {
 											
 											if (self._touchIsMeaningfulEvent(event)) {
 												
@@ -1989,7 +1991,7 @@ $.Tooltipster.prototype = {
 										// needed to detect and ignore swiping
 										if (self.__options.triggerClose.tap && env.hasTouchCapability) {
 											
-											$(env.window.document.body).on('touchstart.'+ self.__namespace +'-triggerClose', function(event) {
+											$body.on('touchstart.'+ self.__namespace +'-triggerClose', function(event) {
 												self._touchRecordEvent(event);
 											});
 										}
