@@ -2931,9 +2931,6 @@ $.fn.tooltipster = function() {
 						return false;
 					}
 				}
-				else {
-					throw new Error('You called Tooltipster\'s "'+ args[0] +'" method on an uninitialized element');
-				}
 			});
 			
 			return (v !== '#*$~&') ? v : this;
