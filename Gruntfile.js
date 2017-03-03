@@ -40,7 +40,7 @@ module.exports = function(grunt) {
 			}
 		},
 		concat: {
-			// on the core and bundle files
+			// on the main and bundle files
 			banner: {
 				expand: true,
 				src: ['dist/js/!(*.min).js'],
@@ -54,7 +54,7 @@ module.exports = function(grunt) {
 						' */\n'
 				}
 			},
-			// on the core and bundle min files
+			// on the main and bundle min files
 			bannerMin: {
 				expand: true,
 				src: ['dist/js/*.min.js'],
@@ -62,16 +62,16 @@ module.exports = function(grunt) {
 					banner: '/*! <%= pkg.name %> v<%= pkg.version %> */'
 				}
 			},
-			// bundle = core + sideTip
+			// bundle = main + sideTip
 			bundle: {
 				files: [
 					{
 						dest: 'dist/css/tooltipster.bundle.css',
-						src: ['dist/css/tooltipster.core.css', 'src/css/plugins/tooltipster/sideTip/tooltipster-sideTip.css']
+						src: ['dist/css/tooltipster.main.css', 'src/css/plugins/tooltipster/sideTip/tooltipster-sideTip.css']
 					},
 					{
 						dest: 'dist/js/tooltipster.bundle.js',
-						src: ['dist/js/tooltipster.core.js', 'src/js/plugins/tooltipster/sideTip/tooltipster-sideTip.js']
+						src: ['dist/js/tooltipster.main.js', 'src/js/plugins/tooltipster/sideTip/tooltipster-sideTip.js']
 					}
 				]
 			},
@@ -86,8 +86,8 @@ module.exports = function(grunt) {
 		copy: {
 			dist: {
 				files: {
-					'dist/css/tooltipster.core.css': 'src/css/tooltipster.css',
-					'dist/js/tooltipster.core.js': 'src/js/tooltipster.js',
+					'dist/css/tooltipster.main.css': 'src/css/tooltipster.css',
+					'dist/js/tooltipster.main.js': 'src/js/tooltipster.js',
 					'dist/js/plugins/tooltipster/SVG/tooltipster-SVG.js': 'src/js/plugins/tooltipster/SVG/tooltipster-SVG.js'
 				}
 			}
@@ -96,8 +96,8 @@ module.exports = function(grunt) {
 			dist: {
 				files: [
 					{
-						dest: 'dist/css/tooltipster.core.min.css',
-						src: 'dist/css/tooltipster.core.css'
+						dest: 'dist/css/tooltipster.main.min.css',
+						src: 'dist/css/tooltipster.main.css'
 					},
 					{
 						dest: 'dist/css/tooltipster.bundle.min.css',
@@ -118,7 +118,7 @@ module.exports = function(grunt) {
 		'string-replace': {
 			dist: {
 				files: {
-					'dist/js/tooltipster.core.js': 'dist/js/tooltipster.core.js'
+					'dist/js/tooltipster.main.js': 'dist/js/tooltipster.main.js'
 				},
 				options: {
 					replacements: [{
@@ -144,7 +144,7 @@ module.exports = function(grunt) {
 			}
 		},
 		umd: {
-			// core and bundle
+			// main and bundle
 			dist: {
 				options: {
 					deps: {

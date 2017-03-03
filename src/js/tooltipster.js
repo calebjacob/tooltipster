@@ -410,9 +410,8 @@ $.Tooltipster = function(element, options) {
 	this.__Content;
 	// for the size tracker
 	this.__contentBcr;
-	// to disable the tooltip once the destruction has begun
+	// to disable the tooltip after destruction
 	this.__destroyed = false;
-	this.__destroying = false;
 	// we can't emit directly on the instance because if a method with the same
 	// name as the event exists, it will be called by jQuery. Se we use a plain
 	// object as emitter. This emitter is for internal use by plugins,
@@ -1414,10 +1413,11 @@ $.Tooltipster.prototype = {
 	 * 
 	 * @param event
 	 * @param callback
+	 * @param force Set to true to override a potential refusal of the user's function
 	 * @returns {self}
 	 * @protected
 	 */
-	_close: function(event, callback) {
+	_close: function(event, callback, force) {
 		
 		var self = this,
 			ok = true;
@@ -1430,8 +1430,8 @@ $.Tooltipster.prototype = {
 			}
 		});
 		
-		// a destroying tooltip may not refuse to close
-		if (ok || self.__destroying) {
+		// a destroying tooltip (force == true) may not refuse to close
+		if (ok || force) {
 			
 			// save the method custom callback and cancel any open method custom callbacks
 			if (callback) self.__callbacks.close.push(callback);
@@ -1626,10 +1626,10 @@ $.Tooltipster.prototype = {
 	},
 	
 	/**
-	 * Opens the tooltip right away
+	 * Opens the tooltip right away.
 	 *
 	 * @param event
-	 * @param callback
+	 * @param callback Will be called when the opening animation is over
 	 * @returns {self}
 	 * @protected
 	 */
@@ -2473,94 +2473,90 @@ $.Tooltipster.prototype = {
 		
 		if (!self.__destroyed) {
 			
-			if (!self.__destroying) {
+			// no closing delay
+			self.option('animationDuration', 0)
+				// forced closing
+				._close(null, null, true)
+				// send event
+				._trigger('destroy');
+			
+			self.__destroyed = true;
+			
+			self._$origin
+				.removeData(self.__namespace)
+				// remove the open trigger listeners
+				.off('.'+ self.__namespace +'-triggerOpen');
+			
+			// remove the touch listener
+			$(env.window.document.body).off('.' + self.__namespace +'-triggerOpen');
+			
+			var ns = self._$origin.data('tooltipster-ns');
+			
+			// if the origin has been removed from DOM, its data may
+			// well have been destroyed in the process and there would
+			// be nothing to clean up or restore
+			if (ns) {
 				
-				self.__destroying = true;
-				
-				self._close(null, function() {
+				// if there are no more tooltips on this element
+				if (ns.length === 1) {
 					
-					self._trigger('destroy');
-					
-					self.__destroying = false;
-					self.__destroyed = true;
-					
-					self._$origin
-						.removeData(self.__namespace)
-						// remove the open trigger listeners
-						.off('.'+ self.__namespace +'-triggerOpen');
-					
-					// remove the touch listener
-					$(env.window.document.body).off('.' + self.__namespace +'-triggerOpen');
-					
-					var ns = self._$origin.data('tooltipster-ns');
-					
-					// if the origin has been removed from DOM, its data may
-					// well have been destroyed in the process and there would
-					// be nothing to clean up or restore
-					if (ns) {
+					// optional restoration of a title attribute
+					var title = null;
+					if (self.__options.restoration == 'previous') {
+						title = self._$origin.data('tooltipster-initialTitle');
+					}
+					else if (self.__options.restoration == 'current') {
 						
-						// if there are no more tooltips on this element
-						if (ns.length === 1) {
-							
-							// optional restoration of a title attribute
-							var title = null;
-							if (self.__options.restoration == 'previous') {
-								title = self._$origin.data('tooltipster-initialTitle');
-							}
-							else if (self.__options.restoration == 'current') {
-								
-								// old school technique to stringify when outerHTML is not supported
-								title = (typeof self.__Content == 'string') ?
-									self.__Content :
-									$('<div></div>').append(self.__Content).html();
-							}
-							
-							if (title) {
-								self._$origin.attr('title', title);
-							}
-							
-							// final cleaning
-							
-							self._$origin.removeClass('tooltipstered');
-							
-							self._$origin
-								.removeData('tooltipster-ns')
-								.removeData('tooltipster-initialTitle');
-						}
-						else {
-							// remove the instance namespace from the list of namespaces of
-							// tooltips present on the element
-							ns = $.grep(ns, function(el, i) {
-								return el !== self.__namespace;
-							});
-							self._$origin.data('tooltipster-ns', ns);
-						}
+						// old school technique to stringify when outerHTML is not supported
+						title = (typeof self.__Content == 'string') ?
+							self.__Content :
+							$('<div></div>').append(self.__Content).html();
 					}
 					
-					// last event
-					self._trigger('destroyed');
+					if (title) {
+						self._$origin.attr('title', title);
+					}
 					
-					// unbind private and public event listeners
-					self._off();
-					self.off();
+					// final cleaning
 					
-					// remove external references, just in case
-					self.__Content = null;
-					self.__$emitterPrivate = null;
-					self.__$emitterPublic = null;
-					self.__options.parent = null;
-					self._$origin = null;
-					self._$tooltip = null;
+					self._$origin.removeClass('tooltipstered');
 					
-					// make sure the object is no longer referenced in there to prevent
-					// memory leaks
-					$.tooltipster.__instancesLatestArr = $.grep($.tooltipster.__instancesLatestArr, function(el, i) {
-						return self !== el;
+					self._$origin
+						.removeData('tooltipster-ns')
+						.removeData('tooltipster-initialTitle');
+				}
+				else {
+					// remove the instance namespace from the list of namespaces of
+					// tooltips present on the element
+					ns = $.grep(ns, function(el, i) {
+						return el !== self.__namespace;
 					});
-					
-					clearInterval(self.__garbageCollector);
-				});
+					self._$origin.data('tooltipster-ns', ns);
+				}
 			}
+			
+			// last event
+			self._trigger('destroyed');
+			
+			// unbind private and public event listeners
+			self._off();
+			self.off();
+			
+			// remove external references, just in case
+			self.__Content = null;
+			self.__$emitterPrivate = null;
+			self.__$emitterPublic = null;
+			self.__options.parent = null;
+			self._$origin = null;
+			self._$tooltip = null;
+			
+			// make sure the object is no longer referenced in there to prevent
+			// memory leaks
+			$.tooltipster.__instancesLatestArr = $.grep($.tooltipster.__instancesLatestArr, function(el, i) {
+				return self !== el;
+			});
+			
+			clearInterval(self.__garbageCollector);
 		}
 		else {
 			self.__destroyError();
@@ -2712,7 +2708,7 @@ $.Tooltipster.prototype = {
 	 */
 	open: function(callback) {
 		
-		if (!this.__destroyed && !this.__destroying) {
+		if (!this.__destroyed) {
 			this._open(null, callback);
 		}
 		else {
@@ -2840,7 +2836,6 @@ $.Tooltipster.prototype = {
 		
 		return {
 			destroyed: this.__destroyed,
-			destroying: this.__destroying,
 			enabled: this.__enabled,
 			open: this.__state !== 'closed',
 			state: this.__state
@@ -3302,4 +3297,4 @@ function transitionSupport() {
 
 // we'll return jQuery for plugins not to have to declare it as a dependency,
 // but it's done by a build task since it should be included only once at the
-// end when we concatenate the core file with a plugin
+// end when we concatenate the main file with a plugin

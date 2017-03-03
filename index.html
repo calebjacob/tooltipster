@@ -527,7 +527,7 @@ functionInit(instance, helper){
 			
 			<p>For advanced use cases, Tooltipster offers a set of methods to manipulate your tooltips. They allow you to create custom triggers, update tooltip content on the fly (whether the tooltip is currently open or not), destroy Tooltipster functionality if needed, reposition tooltips and more.</p>
 			
-			<h3>Instance methods</h3>
+			<h3 id="instance_methods">Instance methods</h3>
 			
 			<p>Instance methods are used to manipulate one tooltip in particular. There are two ways to call them.</p>
 			
@@ -647,7 +647,7 @@ $('.tooltip').tooltipster({
     }
 });</pre>
 			
-			<h3>Core methods</h3>
+			<h3 id="core_methods">Core methods</h3>
 			
 			<p>Core methods are methods which may affect/handle several tooltips at once. You call them with: <span class="code">$.tooltipster.methodName([argument]);</span></p>
 			<br />
@@ -1429,10 +1429,10 @@ $("#my-tooltip").tooltipster({
 			
 			<h4>General information</h4>
 			
-			<p>Tooltipster is composed of a core and one or several plugins.</p>
+			<p>Tooltipster is composed of a main script and one or several plugins.</p>
 			
 			<p>By default, <span class="code">sideTip</span> is the only plugin used by Tooltipster.  <span class="code">sideTip</span> takes care of positioning tooltips on a side of their origin.<br />
-				In fact, the name of our main file is <span class="code">tooltipster.bundle.js</span> because it is a bundle of <span class="code">tooltipster.core</span> and <span class="code">tooltipster-sideTip</span>.</p>
+				In fact, the name of our main file is <span class="code">tooltipster.bundle.js</span> because it is a bundle of <span class="code">tooltipster.main</span> and <span class="code">tooltipster-sideTip</span>.</p>
 			
 			<p>Most of the time, using a plugin requires that you specify its name in the options of the plugin:</p>
 			
@@ -1448,7 +1448,7 @@ $('#example').tooltipster({
 			
 			<p>Sometimes, when a plugin adds no options or instance methods, or is auto-activated, you might not have to declare it in the options. Anyway, each plugin will give you its installation instructions.</p>
 			
-			<p>Under the hood, Tooltipster's plugin system is built on our event system. The plugins register to the core and when something happens, the core triggers an event that plugins may react to. A manual for plugin makers will be released soon.</p>
+			<p>Under the hood, Tooltipster's plugin system is built on our event system. Plugins register to the core and may react to Tooltipster's many events. A manual for plugin makers will be released soon.</p>
 			
 			<p>Let us know if you decide to create and share your own plugin, we will list it here!</p>
 			
@@ -1489,7 +1489,7 @@ $('#example').tooltipster({
 			
 			<h4 id="plugins_sidetip">A note about sideTip</h4>
 			
-			<p>The default <span class="code">sideTip</span> plugin adds a few options to Tooltipster. For the sake of simplicity, these options were listed previously among the core's options in the <a href="#options">Options</a> section. But if you decide not to use <span class="code">sideTip</span>, these options will actually not be available anymore, except if another plugin offers options of the same name. These specific options are:</p>
+			<p>The default <span class="code">sideTip</span> plugin adds a few options to Tooltipster. For the sake of simplicity, these options were listed previously among the main options in the <a href="#options">Options</a> section. But if you decide not to use <span class="code">sideTip</span>, these options will actually not be available anymore, except if another plugin offers options of the same name. These specific options are:</p>
 			
 			<p><span class="code">arrow</span>, <span class="code">distance</span>, <span class="code">functionPosition</span>, <span class="code">minIntersection</span>, <span class="code">minWidth</span>, <span class="code">maxWidth</span>, <span class="code">side</span>, <span class="code">viewportAware</span></p>
 			
