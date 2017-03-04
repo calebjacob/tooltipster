@@ -89,7 +89,7 @@ var defaults = {
 		hasTransitions: transitionSupport(),
 		IE: false,
 		// don't set manually, it will be updated by a build task after the manifest
-		semVer: '4.2.0',
+		semVer: '4.2.1',
 		window: win
 	},
 	core = function() {
