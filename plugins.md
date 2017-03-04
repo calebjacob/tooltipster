@@ -1,7 +1,7 @@
 # Tooltipster plugin creation guide
 
 [TL;DR](#tldr)  
-1. [Find a name for your plugin](#name)  
+1. [Find a name for your plugin](#naming)  
 2. [Determine if you'll work at core or instance level, or both](#level)  
 3. [The `__init` and `__destroy` methods](#magic)  
 4. [Create your public, protected and private methods](#methods)  
@@ -41,7 +41,7 @@ Your plugin might look like this:
 
 Now let's start over with explanations.
 
-## <a name="name"></a>1. Find a name for your plugin
+## <a name="naming"></a>1. Find a name for your plugin
 
 The plugin name must be namespaced in order to resolve conflicts in case somebody writes another plugin of the same name. Use your initials or something random. Preventing conflicts is explained in the [Plugins](http://iamceege.github.io/tooltipster/#plugins) section of the documentation.
 
@@ -127,7 +127,7 @@ There are also two instance protected properties that you can use: `instance._$t
 
 When something happens in Tooltipster, events get fired on the instance and/or core emitters. Most of the time, that's how you will add features: listening for a type of event and reacting to it. All events are listed in the [Events](http://iamceege.github.io/tooltipster/#events) section of the general documentation. And don't forget to use the protected event methods listed above.
 
-For example, when a tooltip must be opened, Tooltipster's main script does nothing but sending a `reposition` event. Then it's `sideTip` who listens to this event and positions the tooltip on a side of the origin, and sends a `repositioned` event when it's done. When `follower` is used instead of `sideTip`, it does more or less the same thing.
+For example, when a tooltip must be opened, Tooltipster's main script does nothing but send a `reposition` event. Then it's `sideTip` who listens to this event and positions the tooltip on a side of the origin, and sends a `repositioned` event when it's done. When `follower` is used instead of `sideTip`, it does more or less the same thing.
 
 ## <a name="options"></a>7. Create new options
 
