@@ -2476,12 +2476,16 @@ $.Tooltipster.prototype = {
 		
 		if (!self.__destroyed) {
 			
-			// no closing delay
-			self.option('animationDuration', 0)
-				// forced closing
-				._close(null, null, true)
-				// send event
-				._trigger('destroy');
+			if(self.__state != 'closed'){
+				
+				// no closing delay
+				self.option('animationDuration', 0)
+					// force closing
+					._close(null, null, true);
+			}
+			
+			// send event
+			self._trigger('destroy');
 			
 			self.__destroyed = true;
 			
