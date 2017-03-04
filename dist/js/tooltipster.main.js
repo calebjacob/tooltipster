@@ -1027,7 +1027,10 @@ $.Tooltipster.prototype = {
 				
 				// auto-destruct if the origin is gone
 				if (!bodyContains(self._$origin)) {
-					self.destroy();
+					
+					self.close(function(){
+						self.destroy();
+					});
 				}
 			}, 20000);
 		}
