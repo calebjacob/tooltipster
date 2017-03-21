@@ -89,7 +89,7 @@ var defaults = {
 		hasTransitions: transitionSupport(),
 		IE: false,
 		// don't set manually, it will be updated by a build task after the manifest
-		semVer: '4.2.2',
+		semVer: '4.2.3',
 		window: win
 	},
 	core = function() {
@@ -3217,9 +3217,10 @@ Ruler.prototype = {
 				// bcr.width/height are not defined in IE8- but in this
 				// case, bcr.right/bottom will have the same value
 				// except in iOS 8+ where tooltipBcr.bottom/right are wrong
-				// after scrolling for reasons yet to be determined
-				height: tooltipBcr.height || tooltipBcr.bottom,
-				width: tooltipBcr.width || tooltipBcr.right
+				// after scrolling for reasons yet to be determined.
+				// tooltipBcr.top/left might not be 0, see issue #514
+				height: tooltipBcr.height || (tooltipBcr.bottom - tooltipBcr.top),
+				width: tooltipBcr.width || (tooltipBcr.right - tooltipBcr.left)
 			}};
 		
 		if (this.constraints) {
@@ -4047,7 +4048,6 @@ $.tooltipster._plugin({
 			
 			if (self.__options.functionPosition) {
 				
-				
 				var result = self.__options.functionPosition.call(self, self.__instance, helper, finalResultClone);
 				
 				if (result) finalResult = result;
@@ -4056,7 +4056,6 @@ $.tooltipster._plugin({
 			// end the positioning tests session (the user might have had a
 			// use for it during the position event, now it's over)
 			ruler.destroy();
-			
 			
 			// compute the position of the target relatively to the tooltip root
 			// element so we can place the arrow and make the needed adjustments

@@ -718,7 +718,6 @@ $.tooltipster._plugin({
 			
 			if (self.__options.functionPosition) {
 				
-				
 				var result = self.__options.functionPosition.call(self, self.__instance, helper, finalResultClone);
 				
 				if (result) finalResult = result;
@@ -727,7 +726,6 @@ $.tooltipster._plugin({
 			// end the positioning tests session (the user might have had a
 			// use for it during the position event, now it's over)
 			ruler.destroy();
-			
 			
 			// compute the position of the target relatively to the tooltip root
 			// element so we can place the arrow and make the needed adjustments
