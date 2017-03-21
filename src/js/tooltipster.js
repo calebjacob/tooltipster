@@ -3195,9 +3195,10 @@ Ruler.prototype = {
 				// bcr.width/height are not defined in IE8- but in this
 				// case, bcr.right/bottom will have the same value
 				// except in iOS 8+ where tooltipBcr.bottom/right are wrong
-				// after scrolling for reasons yet to be determined
-				height: tooltipBcr.height || tooltipBcr.bottom,
-				width: tooltipBcr.width || tooltipBcr.right
+				// after scrolling for reasons yet to be determined.
+				// tooltipBcr.top/left might not be 0, see issue #514
+				height: tooltipBcr.height || (tooltipBcr.bottom - tooltipBcr.top),
+				width: tooltipBcr.width || (tooltipBcr.right - tooltipBcr.left)
 			}};
 		
 		if (this.constraints) {
