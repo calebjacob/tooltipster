@@ -1713,6 +1713,17 @@ $('#myfield')
 				<li>The last solution is to use the <span class="code">trackTooltip</span> option. As it will check the size of the tooltip at regular intervals, this may have an impact on performance. Use this as a last resort.</li>
 			</ul>
 			
+			<h4 id="faq_positioningissue">"The position of the tooltip is consistently incorrect"</h4>
+			
+			<ul>
+				<li>Make sure the cache is not disabled, either client-side (browser settings) or server-side (cache headers). Read above for explanations.</li>
+				<li>Generally speaking, if enabling the <span class="code">trackTooltip</span> option solves it, it's your tooltip content that changes size after opening.</li>
+				<li>Are you sure the position is actually incorrect? Read <a href="https://github.com/iamceege/tooltipster/issues/673" target="_blank">this issue</a>.</li>
+				<li>Is <span class="code">position: relative</span> set on the body? You probably shouldn't do that. Please read <a href="https://github.com/iamceege/tooltipster/issues/514" target="_blank">this issue</a> for instructions.</li>
+			</ul>
+			
+			<p>If the error still occurs, please open an issue on GitHub.</p>
+			
 			<h4>"Shouldn't Tooltipster remove &lt;script> tags from my content to prevent XSS exploits?"</h4>
 			
 			<p>No, it's not Tooltipster's job to tamper with your content in any way. Besides, &lt;script> tags are not the only possible threat (read <a href="https://www.owasp.org/index.php/XSS_(Cross_Site_Scripting)_Prevention_Cheat_Sheet">some good advice</a>).</p>
@@ -1721,7 +1732,7 @@ $('#myfield')
 			
 			<h4>"Tooltipster does not work with disabled &lt;input> and &lt;button> elements"</h4>
 			
-			<p>These elements do not trigger events anymore when they are disabled, which will cause Tooltipster to malfunction. There is no way around it, so we suggest you make them "look" disabled with CSS and Javascript, but do not set the actual `disabled` property on them.</p>
+			<p>These elements do not trigger events anymore when they are disabled, which will cause Tooltipster to malfunction. There is no way around it, so we suggest you make them "look" disabled with CSS and Javascript, but do not set the actual `disabled` property on them. Or you could set <span class="code">pointer-events: none</span> on your disabled element, wrap it in a container and put the tooltip on the container instead.</p>
 			
 			<h4>"How compatible is Tooltipster with old versions of Internet Explorer ?"</h4>
 			
