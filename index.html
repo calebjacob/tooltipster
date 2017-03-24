@@ -1411,7 +1411,7 @@ $("#my-tooltip").tooltipster({
 			
 			<p><span class="code">repositioned</span> happens after Tooltipster repositioned of the tooltip. The event has a special <span class="code">event.position</span> with positioning information.</p>
 			
-			<p><span class="code">scroll</span> happens whenever a parent of the origin is scrolled. The native scroll event is passed as <span class="code">event.event</span>.</p>
+			<p><span class="code">scroll</span> happens whenever a parent of the origin is scrolled. The native scroll event is passed as <span class="code">event.event</span>. If the scroll event was triggered on another element than the window, a special <span class="code">event.geometry</span> property gives you information about the page and the origin.</p>
 			
 			<p><span class="code">start</span> happens when the <span class="code">mouseenter</span> or <span class="code">touchstart</span> open triggers are used and that the origin gets mouseover/touched. The event has a special <span class="code">event.stop</span> property which is a function you may call to prevent the tooltip from opening.</p>
 			
@@ -1751,6 +1751,7 @@ $('#myfield')
 		</section>
 		
 		<footer>
+			Tooltipster, the <a href="http://iamceege.github.io/tooltipster/" class="white">javascript tooltip</a> library.<br />
 			Developed and maintained by <a href="https://plus.google.com/116532683962309427991?rel=author" class="white">Caleb Jacob</a> and <a href="https://github.com/louisameline" class="white">Louis Ameline</a> under the <a href="http://opensource.org/licenses/MIT" class="white">MIT license</a>
 		</footer>
 	</div>
