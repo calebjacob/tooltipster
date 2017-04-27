@@ -2488,6 +2488,10 @@ $.Tooltipster.prototype = {
 					// force closing
 					._close(null, null, true);
 			}
+			else {
+				// there might be an open timeout still running
+				self.__timeoutsClear();
+			}
 			
 			// send event
 			self._trigger('destroy');
