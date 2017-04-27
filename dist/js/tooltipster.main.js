@@ -89,7 +89,7 @@ var defaults = {
 		hasTransitions: transitionSupport(),
 		IE: false,
 		// don't set manually, it will be updated by a build task after the manifest
-		semVer: '4.2.3',
+		semVer: '4.2.4',
 		window: win
 	},
 	core = function() {
@@ -1203,6 +1203,8 @@ $.Tooltipster.prototype = {
 			// take care of it later
 			if (bodyContains(self._$origin) && bodyContains(self._$tooltip)) {
 				
+				var geo = null;
+				
 				// if the scroll happened on the window
 				if (event.target === env.window.document) {
 					
@@ -1225,8 +1227,9 @@ $.Tooltipster.prototype = {
 				// hides its overflow, we'll just hide (not close) the tooltip.
 				else {
 					
-					var g = self.__geometry(),
-						overflows = false;
+					geo = self.__geometry();
+					
+					var overflows = false;
 					
 					// a fixed position origin is not affected by the overflow hiding
 					// of a parent
@@ -1244,8 +1247,8 @@ $.Tooltipster.prototype = {
 								
 								if (overflowX != 'visible') {
 									
-									if (	g.origin.windowOffset.left < bcr.left
-										||	g.origin.windowOffset.right > bcr.right
+									if (	geo.origin.windowOffset.left < bcr.left
+										||	geo.origin.windowOffset.right > bcr.right
 									) {
 										overflows = true;
 										return false;
@@ -1254,8 +1257,8 @@ $.Tooltipster.prototype = {
 								
 								if (overflowY != 'visible') {
 									
-									if (	g.origin.windowOffset.top < bcr.top
-										||	g.origin.windowOffset.bottom > bcr.bottom
+									if (	geo.origin.windowOffset.top < bcr.top
+										||	geo.origin.windowOffset.bottom > bcr.bottom
 									) {
 										overflows = true;
 										return false;
@@ -1274,6 +1277,7 @@ $.Tooltipster.prototype = {
 						self._$tooltip.css('visibility', 'hidden');
 					}
 					else {
+						
 						self._$tooltip.css('visibility', 'visible');
 						
 						// reposition
@@ -1287,8 +1291,8 @@ $.Tooltipster.prototype = {
 							// only the scroll distance of the scrollable areas are taken into
 							// account (the scrolltop value of the main window must be
 							// ignored since the tooltip already moves with it)
-							var offsetLeft = g.origin.offset.left - self.__Geometry.origin.offset.left,
-								offsetTop = g.origin.offset.top - self.__Geometry.origin.offset.top;
+							var offsetLeft = geo.origin.offset.left - self.__Geometry.origin.offset.left,
+								offsetTop = geo.origin.offset.top - self.__Geometry.origin.offset.top;
 							
 							// add the offset to the position initially computed by the display plugin
 							self._$tooltip.css({
@@ -1301,7 +1305,8 @@ $.Tooltipster.prototype = {
 				
 				self._trigger({
 					type: 'scroll',
-					event: event
+					event: event,
+					geo: geo
 				});
 			}
 		}
@@ -2504,6 +2509,10 @@ $.Tooltipster.prototype = {
 				self.option('animationDuration', 0)
 					// force closing
 					._close(null, null, true);
+			}
+			else {
+				// there might be an open timeout still running
+				self.__timeoutsClear();
 			}
 			
 			// send event
