@@ -1483,7 +1483,11 @@ $.Tooltipster.prototype = {
 				// the opening animation, which is not great.
 				if (self.__state == 'disappearing') {
 					
-					if (newClosingTime > self.__closingTime) {
+					if (	newClosingTime > self.__closingTime
+						// in case closing is actually overdue because the script
+						// execution was suspended. See #679
+						&&	self.__options.animationDuration[1] > 0
+					) {
 						necessary = false;
 					}
 				}
