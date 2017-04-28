@@ -89,7 +89,7 @@ var defaults = {
 		hasTransitions: transitionSupport(),
 		IE: false,
 		// don't set manually, it will be updated by a build task after the manifest
-		semVer: '4.2.4',
+		semVer: '4.2.5',
 		window: win
 	},
 	core = function() {
@@ -1505,7 +1505,11 @@ $.Tooltipster.prototype = {
 				// the opening animation, which is not great.
 				if (self.__state == 'disappearing') {
 					
-					if (newClosingTime > self.__closingTime) {
+					if (	newClosingTime > self.__closingTime
+						// in case closing is actually overdue because the script
+						// execution was suspended. See #679
+						&&	self.__options.animationDuration[1] > 0
+					) {
 						necessary = false;
 					}
 				}
