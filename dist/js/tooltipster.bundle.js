@@ -16,7 +16,7 @@
     // like Node.
     module.exports = factory(require("jquery"));
   } else {
-    factory(jQuery);
+    factory(root["jQuery"]);
   }
 }(this, function ($) {
 
@@ -1855,17 +1855,7 @@ $.Tooltipster.prototype = {
 							$(env.window)
 								// reposition on resize
 								.on('resize.'+ self.__namespace +'-triggerClose', function(e) {
-									
-									var $ae = $(document.activeElement);
-									
-									// reposition only if the resize event was not triggered upon the opening
-									// of a virtual keyboard due to an input field being focused within the tooltip
-									// (otherwise the repositioning would lose the focus)
-									if (	(!$ae.is('input') && !$ae.is('textarea'))
-										||	!$.contains(self._$tooltip[0], $ae[0])
-									) {
-										self.reposition(e);
-									}
+									self.reposition(e);
 								})
 								// same as below for parents
 								.on('scroll.'+ self.__namespace +'-triggerClose', function(e) {
@@ -2831,9 +2821,9 @@ $.Tooltipster.prototype = {
 				if (tooltipIsDetached || bodyContains(self._$tooltip)) {
 					
 					if (!tooltipIsDetached) {
-						// detach in case the tooltip overflows the window and adds
+						// hide tooltip in case the tooltip overflows the window and adds
 						// scrollbars to it, so __geometry can be accurate
-						self._$tooltip.detach();
+						self._$tooltip.hide();
 					}
 					
 					// refresh the geometry object before passing it as a helper
@@ -3603,13 +3593,13 @@ $.tooltipster._plugin({
 				targets = self.__targetFind(helper),
 				testResults = [];
 			
-			// make sure the tooltip is detached while we make tests on a clone
-			self.__instance._$tooltip.detach();
+			// make sure the tooltip is hidden while we make tests on a clone
+			self.__instance._$tooltip.hide();
 			
 			// we could actually provide the original element to the Ruler and
 			// not a clone, but it just feels right to keep it out of the
 			// machinery.
-			var $clone = self.__instance._$tooltip.clone(),
+			var $clone = self.__instance._$tooltip.clone().show(),
 				// start position tests session
 				ruler = $.tooltipster._getRuler($clone),
 				satisfied = false,
@@ -4164,7 +4154,11 @@ $.tooltipster._plugin({
 					.css(arrowCoord.prop, arrowCoord.val);
 			
 			// append the tooltip HTML element to its parent
-			self.__instance._$tooltip.appendTo(self.__instance.option('parent'));
+			if(self.__instance.option('parent').find(self.__instance._$tooltip).length === 0) {
+				self.__instance._$tooltip.appendTo(self.__instance.option('parent'));
+			} else {
+				self.__instance._$tooltip.show();
+			}
 			
 			self.__instance._trigger({
 				type: 'repositioned',
