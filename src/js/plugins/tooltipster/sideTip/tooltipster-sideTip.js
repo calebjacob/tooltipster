@@ -260,13 +260,13 @@ $.tooltipster._plugin({
 				targets = self.__targetFind(helper),
 				testResults = [];
 			
-			// make sure the tooltip is detached while we make tests on a clone
-			self.__instance._$tooltip.detach();
+			// make sure the tooltip is hidden while we make tests on a clone
+			self.__instance._$tooltip.hide();
 			
 			// we could actually provide the original element to the Ruler and
 			// not a clone, but it just feels right to keep it out of the
 			// machinery.
-			var $clone = self.__instance._$tooltip.clone(),
+			var $clone = self.__instance._$tooltip.clone().show(),
 				// start position tests session
 				ruler = $.tooltipster._getRuler($clone),
 				satisfied = false,
@@ -821,7 +821,11 @@ $.tooltipster._plugin({
 					.css(arrowCoord.prop, arrowCoord.val);
 			
 			// append the tooltip HTML element to its parent
-			self.__instance._$tooltip.appendTo(self.__instance.option('parent'));
+			if(self.__instance.option('parent').find(self.__instance._$tooltip).length === 0) {
+				self.__instance._$tooltip.appendTo(self.__instance.option('parent'));
+			} else {
+				self.__instance._$tooltip.show();
+			}
 			
 			self.__instance._trigger({
 				type: 'repositioned',

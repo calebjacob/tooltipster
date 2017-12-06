@@ -1833,17 +1833,7 @@ $.Tooltipster.prototype = {
 							$(env.window)
 								// reposition on resize
 								.on('resize.'+ self.__namespace +'-triggerClose', function(e) {
-									
-									var $ae = $(document.activeElement);
-									
-									// reposition only if the resize event was not triggered upon the opening
-									// of a virtual keyboard due to an input field being focused within the tooltip
-									// (otherwise the repositioning would lose the focus)
-									if (	(!$ae.is('input') && !$ae.is('textarea'))
-										||	!$.contains(self._$tooltip[0], $ae[0])
-									) {
-										self.reposition(e);
-									}
+									self.reposition(e);
 								})
 								// same as below for parents
 								.on('scroll.'+ self.__namespace +'-triggerClose', function(e) {
@@ -2809,9 +2799,9 @@ $.Tooltipster.prototype = {
 				if (tooltipIsDetached || bodyContains(self._$tooltip)) {
 					
 					if (!tooltipIsDetached) {
-						// detach in case the tooltip overflows the window and adds
+						// hide tooltip in case the tooltip overflows the window and adds
 						// scrollbars to it, so __geometry can be accurate
-						self._$tooltip.detach();
+						self._$tooltip.hide();
 					}
 					
 					// refresh the geometry object before passing it as a helper
