@@ -822,6 +822,7 @@ $.tooltipster._plugin({
 			
 			// append the tooltip HTML element to its parent
 			if(self.__instance.option('parent').find(self.__instance._$tooltip).length === 0) {
+				self.__instance._$tooltip.show();
 				self.__instance._$tooltip.appendTo(self.__instance.option('parent'));
 			} else {
 				self.__instance._$tooltip.show();
