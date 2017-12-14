@@ -10,7 +10,7 @@
     // like Node.
     module.exports = factory(require("tooltipster"));
   } else {
-    factory(jQuery);
+    factory(root["jQuery"]);
   }
 }(this, function ($) {
 
@@ -26,7 +26,7 @@
     // like Node.
     module.exports = factory(require("jquery"));
   } else {
-    factory(jQuery);
+    factory(root["jQuery"]);
   }
 }(this, function ($) {
 
