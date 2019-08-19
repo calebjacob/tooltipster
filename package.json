@@ -17,7 +17,7 @@
 		"grunt-contrib-cssmin": "1.0.1",
 		"grunt-contrib-uglify": "1.0.1",
 		"grunt-string-replace": "1.2.1",
-		"grunt-umd": "2.3.6"
+		"grunt-umd": "3.0.0"
 	},
 	"homepage": "https://github.com/iamceege/tooltipster",
 	"keywords": [
