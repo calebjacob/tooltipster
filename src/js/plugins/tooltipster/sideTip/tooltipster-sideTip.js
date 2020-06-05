@@ -183,18 +183,17 @@ $.tooltipster._plugin({
 				self.__options.distance = [self.__options.distance];
 			}
 			if (self.__options.distance.length < 4) {
-				
 				if (self.__options.distance[1] === undefined) self.__options.distance[1] = self.__options.distance[0];
 				if (self.__options.distance[2] === undefined) self.__options.distance[2] = self.__options.distance[0];
 				if (self.__options.distance[3] === undefined) self.__options.distance[3] = self.__options.distance[1];
-				
-				self.__options.distance = {
-					top: self.__options.distance[0],
-					right: self.__options.distance[1],
-					bottom: self.__options.distance[2],
-					left: self.__options.distance[3]
-				};
 			}
+			
+			self.__options.distance = {
+				top: self.__options.distance[0],
+				right: self.__options.distance[1],
+				bottom: self.__options.distance[2],
+				left: self.__options.distance[3]
+			};
 			
 			// let's transform:
 			// 'top' into ['top', 'bottom', 'right', 'left']
