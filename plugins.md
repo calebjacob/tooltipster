@@ -43,7 +43,7 @@ Now let's start over with explanations.
 
 ## <a name="naming"></a>1. Find a name for your plugin
 
-The plugin name must be namespaced in order to resolve conflicts in case somebody writes another plugin of the same name. Use your initials or something random. Preventing conflicts is explained in the [Plugins](http://iamceege.github.io/tooltipster/#plugins) section of the documentation.
+The plugin name must be namespaced in order to resolve conflicts in case somebody writes another plugin of the same name. Use your initials or something random. Preventing conflicts is explained in the [Plugins](http://calebjacob.github.io/tooltipster/#plugins) section of the documentation.
 
 ## <a name="level"></a>2. Determine if you'll work at core or instance level, or both
 
@@ -69,11 +69,11 @@ The special private `__destroy` method of your plugin, if it exists, will be cal
 
 ## <a name="methods"></a>4. Create your public, protected and private methods
 
-* Methods that do not start with an underscore are public, which means that the user will be able to call them, just like any of the native methods described in the [Methods](http://iamceege.github.io/tooltipster/#methods) section of the general documentation  
+* Methods that do not start with an underscore are public, which means that the user will be able to call them, just like any of the native methods described in the [Methods](http://calebjacob.github.io/tooltipster/#methods) section of the general documentation  
 * Methods that start with a single underscore are protected, which means that the user *should not* call them, but that other plugins may. Unless you plan on creating a plugin that can interact with others, you should not use them
 * Methods that start with a double underscore are private. The user won't be able to call them, and other plugins shouldn't try to
 
-If two plugins add public/protected methods of the same name at the same level (core or instance), there will be a conflict. The way to resolve conflicts is described in the [plugins](http://iamceege.github.io/tooltipster/#plugins) section general documentation. There can be no conflicts between private methods.
+If two plugins add public/protected methods of the same name at the same level (core or instance), there will be a conflict. The way to resolve conflicts is described in the [plugins](http://calebjacob.github.io/tooltipster/#plugins) section general documentation. There can be no conflicts between private methods.
 
 ## <a name="tooltipster"></a>5. Use Tooltipster's protected methods
 
@@ -125,7 +125,7 @@ There are also two instance protected properties that you can use: `instance._$t
 
 ## <a name="events"></a>6. Use Tooltipster's events
 
-When something happens in Tooltipster, events get fired on the instance and/or core emitters. Most of the time, that's how you will add features: listening for a type of event and reacting to it. All events are listed in the [Events](http://iamceege.github.io/tooltipster/#events) section of the general documentation. And don't forget to use the protected event methods listed above.
+When something happens in Tooltipster, events get fired on the instance and/or core emitters. Most of the time, that's how you will add features: listening for a type of event and reacting to it. All events are listed in the [Events](http://calebjacob.github.io/tooltipster/#events) section of the general documentation. And don't forget to use the protected event methods listed above.
 
 For example, when a tooltip must be opened, Tooltipster's main script does nothing but send a `reposition` event. Then it's `sideTip` who listens to this event and positions the tooltip on a side of the origin, and sends a `repositioned` event when it's done. When `follower` is used instead of `sideTip`, it does more or less the same thing.
 
@@ -244,7 +244,7 @@ $('.tooltip').tooltipster({
 });
 ```
 
-Keep things simple and don't tell them to declare it as `'yourNamespace.yourPlugin'`, even if it would work. If your users run into a conflict with another plugin, tell them to read the [Plugins](http://iamceege.github.io/tooltipster/#plugins) section of the documentation.
+Keep things simple and don't tell them to declare it as `'yourNamespace.yourPlugin'`, even if it would work. If your users run into a conflict with another plugin, tell them to read the [Plugins](http://calebjacob.github.io/tooltipster/#plugins) section of the documentation.
 
 ## <a name="goodpractices"></a>10. Conventions and good practices
 
@@ -432,7 +432,7 @@ If your plugin has instance methods, it will automatically be plugged upon initi
 
 Sometimes it's fine because you want your plugin enabled only if the user explicitly asks for it. For example the `follower` plugin should not be enabled on all tooltips, in case the user wants to use `sideTip` on some of them.
 
-But sometimes there is no harm in enabling a plugin on all tooltips and save the user the trouble of having to list it in the `plugins` option. That's the case for the [`SVG`](https://github.com/iamceege/tooltipster/blob/master/src/js/plugins/tooltipster/SVG/tooltipster-SVG.js) plugin which improves Tooltipster in case the origin is an SVG element, and does nothing if it's not. To achieve it, we just listen to the core for newly created instances and manually plug ourselves on these instances.
+But sometimes there is no harm in enabling a plugin on all tooltips and save the user the trouble of having to list it in the `plugins` option. That's the case for the [`SVG`](https://github.com/calebjacob/tooltipster/blob/master/src/js/plugins/tooltipster/SVG/tooltipster-SVG.js) plugin which improves Tooltipster in case the origin is an SVG element, and does nothing if it's not. To achieve it, we just listen to the core for newly created instances and manually plug ourselves on these instances.
 
 ```javascript
 

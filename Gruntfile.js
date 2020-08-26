@@ -47,7 +47,7 @@ module.exports = function(grunt) {
 				options: {
 					banner:
 						'/**\n' +
-						' * tooltipster http://iamceege.github.io/tooltipster/\n' +
+						' * tooltipster http://calebjacob.github.io/tooltipster/\n' +
 						' * A rockin\' custom tooltip jQuery plugin\n' +
 						' * Developed by Caleb Jacob and Louis Ameline\n' +
 						' * MIT license\n' +

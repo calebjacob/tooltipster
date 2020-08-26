@@ -1389,7 +1389,7 @@ $.Tooltipster.prototype = {
 					if (!identical) {
 						
 						// close the tooltip when using the mouseleave close trigger
-						// (see https://github.com/iamceege/tooltipster/pull/253)
+						// (see https://github.com/calebjacob/tooltipster/pull/253)
 						if (self.__options.triggerClose.mouseleave) {
 							self._close();
 						}
