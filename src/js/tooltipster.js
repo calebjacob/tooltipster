@@ -2905,7 +2905,7 @@ $.fn.tooltipster = function() {
 			
 			this.each(function() {
 				
-				// retrieve the namepaces of the tooltip(s) that exist on that element.
+				// retrieve the namespaces of the tooltip(s) that exist on that element.
 				// We will interact with the first tooltip only.
 				var ns = $(this).data('tooltipster-ns'),
 					// self represents the instance of the first tooltipster plugin
